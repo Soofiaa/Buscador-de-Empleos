@@ -1,0 +1,14 @@
+services:
+  jobtracker:
+    build: .
+    container_name: jobtracker
+    restart: unless-stopped            # se vuelve a levantar solo (al reiniciar Windows, si Docker Desktop abre con la sesión)
+    ports:
+      - "127.0.0.1:8765:8765"          # SOLO tu PC: nunca se publica hacia la red
+    environment:
+      - TZ=America/Santiago
+    volumes:
+      - jt_datos:/datos                # la base de datos (ofertas y estados) vive aquí, no en el contenedor
+
+volumes:
+  jt_datos:

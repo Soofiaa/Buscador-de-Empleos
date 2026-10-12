@@ -1,0 +1,790 @@
+{
+ "paginaOfertas": {
+  "numPaginaActual": 1,
+  "numPaginasTotal": 54,
+  "mostrarMensajeNoResultados": false,
+  "numResultadosPorPagina": 10,
+  "numResultadosTotal": 532,
+  "resultados": [
+   {
+    "id": 1588540,
+    "codigo": "2026-118836",
+    "fecha": "05/10/26",
+    "titulo": "Analista Contable",
+    "descripcion": "Importante Empresa requiere contratar un Asistente Analista Contable proactivo y organizado para unirse a nuestro equipo.\n\nTus principales Funciones seran:\n- Mantener los datos maestros de proveedores y otros acreedores al d&iacute;a\n- Gestionar la aprobaci&oacute;n de facturas y el proceso de &oacute;rdenes de compra\n- Revisar, registrar y controlar facturas de proveedores nacionales e internacionales, as&iacute; como de otros acreedores \n- Analizar, conciliar y mantener actualizadas las cuentas contables asignadas de proveedores\n- Controlar el proceso de pago proveedores, de acuerdo a los protocolos internos instruidos\n- Verificar la actualizaci&oacute;n contratos de la Sociedad.\n- Otros relacionados con las tareas del &aacute;rea.\n\nRequisitos:\n\n- Titulado como Contador General  / Contador Auditor.\n- 3 a&ntilde;os de experiencia en el &aacute;rea de Contabilidad en cargos similares\n- Experiencia en ERP (idealmente SAP modulo FI y MM)\n- Excel Nivel Intermedio-Avanzado\n\nEsta oferta laboral se enmarca en la Ley N&deg; 21.015, que incentiva la inclusi&oacute;n de personas con discapacidad en el mundo laboral.",
+    "empresa": "Gestion Vial",
+    "region": "Metropolitana",
+    "comuna": "Independencia",
+    "idEmpresa": 124199,
+    "tipoOferta": null,
+    "mostrarEmpresa": true,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "Feria",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": null
+   },
+   {
+    "id": 1588642,
+    "codigo": "2026-118973",
+    "fecha": "05/10/26",
+    "titulo": "SUPERVISOR DE MANTENCION",
+    "descripcion": "Empresa del rubro de construcci&oacute;n y mantenimiento de v&iacute;as p&uacute;blicas busca incorporar Supervisor/a de Mantenci&oacute;n para coordinar y supervisar equipos de trabajo en terreno. Principales funciones: Supervisar y coordinar equipos de mantenci&oacute;n en terreno, seg&uacute;n proyecto asignado. Planificar rutas y realizar seguimiento de las tareas programadas. Verificar la correcta ejecuci&oacute;n de los trabajos y el cumplimiento de normas de seguridad. Coordinar con ITO las observaciones y mejoras detectadas en terreno. Controlar materiales, veh&iacute;culos, equipos y checklist diarios. Coordinar con Analistas de Proyecto la asignaci&oacute;n y liberaci&oacute;n diaria de tareas. Apoyar la entrega de informaci&oacute;n de terreno para estados de pago. Atender requerimientos de equipos y contratistas en jornadas diurnas y nocturnas, seg&uacute;n turnos rotativos. Informar oportunamente el estado de avance de proyectos y equipos a cargo. Requisitos: Experiencia en supervisi&oacute;n de equipos y trabajo en terreno. Deseable experiencia en mantenci&oacute;n, construcci&oacute;n o infraestructura. Licencia de conducir Clase B. Manejo de PC a nivel usuario",
+    "empresa": "SERCOM",
+    "region": "Metropolitana",
+    "comuna": "Conchalí",
+    "idEmpresa": 215460,
+    "tipoOferta": null,
+    "mostrarEmpresa": true,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "Feria",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": null
+   },
+   {
+    "id": 1588707,
+    "codigo": "2026-119183",
+    "fecha": "05/10/26",
+    "titulo": "ANALISTA DE INCENTIVOS COMERCIALES",
+    "descripcion": "&iexcl;Buscamos analista de Incentivos Comerciales!\n\nBuscamos a un/a Analista de Incentivos Comerciales apasionado/a por transformar datos en decisiones estrat&eacute;gicas y oportunidades reales de negocio.\n\n? Anal&iacute;tica comercial y segmentaci&oacute;n: Analizar&aacute;s el comportamiento de la fuerza de ventas y clientes para identificar patrones y oportunidades.\n? Modelos predictivos y miner&iacute;a de datos: Dise&ntilde;ar&aacute;s modelos para anticipar tendencias y optimizar la estructura de comisiones e incentivos.\n? Dashboards y storytelling: Construir&aacute;s indicadores claros que cuenten la historia detr&aacute;s de los n&uacute;meros para la toma de decisiones directiva.\n? ROI y performance: Evaluar&aacute;s el impacto financiero de las campa&ntilde;as de incentivos para asegurar su eficiencia.\n\n\nRequisitos\n? Ingenier&iacute;a Comercial, Ingenier&iacute;a Civil Industrial, Ingenier&iacute;a en Inform&aacute;tica\n? 2 a 3 a&ntilde;os en anal&iacute;tica comercial, business intelligence o anal&iacute;tica de datos aplicada al negocio.\n? Herramientas: Dominio avanzado de SQL, Excel y herramientas de BI",
+    "empresa": "AUTOFIN S.A.",
+    "region": "Metropolitana",
+    "comuna": "Las Condes",
+    "idEmpresa": 138068,
+    "tipoOferta": null,
+    "mostrarEmpresa": true,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "Feria",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": null
+   },
+   {
+    "id": 1588790,
+    "codigo": "2026-119320",
+    "fecha": "05/10/26",
+    "titulo": "Analista de Junior de UX",
+    "descripcion": "Responsable de apoyar en la investigaci&oacute;n, dise&ntilde;o y evaluaci&oacute;n de la experiencia de usuario de productos y servicios digitales, analizando los problemas y las oportunidades del producto para contribuir en el desarrollo de interfaces intuitivas, que satisfagan las necesidades y expectativas de los usuarios.",
+    "empresa": "SALCOBRAND S.A",
+    "region": "Metropolitana",
+    "comuna": "Santiago",
+    "idEmpresa": 135141,
+    "tipoOferta": null,
+    "mostrarEmpresa": true,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "Feria",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": null
+   },
+   {
+    "id": 1589032,
+    "codigo": "2026-119597",
+    "fecha": "05/10/26",
+    "titulo": "Product Owner",
+    "descripcion": "Tus Desaf&iacute;os Diarios:\r\nGestionar y priorizar el portafolio de casos de uso de IA industrial, traduciendo necesidades operacionales en iniciativas con hip&oacute;tesis de valor, criterios de aceptaci&oacute;n y aptitud de datos definida, administrando el backlog y roadmap en coordinaci&oacute;n con las &aacute;reas operacionales y t&eacute;cnicas.\r\nGestionar la ejecuci&oacute;n de las iniciativas y proveedores tecnol&oacute;gicos, controlando alcance, plazos, SLA y consumo de horas-hombre, apoyando procesos de licitaci&oacute;n y asegurando interoperabilidad, documentaci&oacute;n y transferencia efectiva de conocimiento.\r\nAsegurar la gobernanza y cumplimiento de las soluciones de IA, gestionando los gates definidos por la compa&ntilde;&iacute;a y coordinando las validaciones de datos, ciberseguridad, confidencialidad, Legal y Compliance seg&uacute;n el nivel de riesgo de cada iniciativa.\r\nAsegurar la adopci&oacute;n y captura de valor de las soluciones implementadas, coordinando stakeholders y referentes operacionales, gestionando el go-live y uso posterior, monitoreando indicadores y validando junto a Operaciones y Control de Gesti&oacute;n los beneficios obtenidos respecto de la l&iacute;nea base comprometida.\r\n\r\n&iquest;Eres nuestro(a) candidato(a) ideal? Descubre si cumples con estos requisitos:\r\nT&iacute;tulo profesional en Ingenier&iacute;a Civil Industrial, de Procesos, Inform&aacute;tica, Sistemas o carrera af&iacute;n.\r\n Experiencia al menos 3 a&ntilde;os en roles de Product Owner, Product Manager o analista funcional senior.\r\n Residencia en Santiago.\r\n\r\nTe proponemos:\r\n Tipo de contrato: Plazo Indefinido\r\n Jornada laboral: Lunes a Viernes.\r\nLugar de trabajo: Edificio corporativo, Las Condes.\r\nLa oportunidad de pertenecer y desarrollarte en un entorno laboral din&aacute;mico y de aprendizaje continuo",
+    "empresa": "Novandino Litio",
+    "region": "Metropolitana",
+    "comuna": "Las Condes",
+    "idEmpresa": 243362,
+    "tipoOferta": null,
+    "mostrarEmpresa": true,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "WEB",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": true
+   },
+   {
+    "id": 1588706,
+    "codigo": "2026-119182",
+    "fecha": "05/10/26",
+    "titulo": "ANALISTA DE COMPRAS",
+    "descripcion": "Responsabilidades Principales:\n\n- Gesti&oacute;n del Ciclo de Compras: responsable de procesos de alta, selecci&oacute;n y contrataci&oacute;n de los proveedores, dando cumplimiento a las pol&iacute;ticas y procesos interno.\n- Sourcing y Selecci&oacute;n: Identificar, evaluar y homologar proveedores que cumplan con los est&aacute;ndares de seguridad y solvencia exigidos por la instituci&oacute;n financiera.\n- Contratos: Negociar contratos, acuerdos de nivel de servicio (SLA) y condiciones de pago para maximizar el ahorro sin comprometer la calidad.\n- Reportes: Reportes y control de proveedores con contrato , alertas de vencimientos y renovaciones\n- Gesti&oacute;n de Categor&iacute;as IT: Manejar la compra de licencias de software, hardware y servicios de consultor&iacute;a tecnol&oacute;gica (cr&iacute;tico en el sector fintech/banca).\n- Proceso de Alta de proveedor: Asegurar que todos los proveedores pasen los filtros de prevenci&oacute;n de lavado de activos y cumplan con las normativas de protecci&oacute;n de datos.\n- Control del gasto: Monitorear el gasto frente al presupuesto asignado a cada &aacute;rea para evitar desviaciones financieras.\n\nRequisitos:\n- T&iacute;tulo profesional en Ingenier&iacute;a Comercial, Administraci&oacute;n de Empresas, Ingenier&iacute;a Industrial, Contador auditor o carrera af&iacute;n.\n- Experiencia M&iacute;nimo de 2 a 3 a&ntilde;os en cargos similares.\n- Experiencia previa en banca, seguros o empresas de servicios financieros (no excluyente)\n- Dominio avanzado de Excel (an&aacute;lisis de datos y presupuestos)",
+    "empresa": "AUTOFIN S.A.",
+    "region": "Metropolitana",
+    "comuna": "Las Condes",
+    "idEmpresa": 138068,
+    "tipoOferta": null,
+    "mostrarEmpresa": true,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "Feria",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": null
+   },
+   {
+    "id": 1588787,
+    "codigo": "2026-119317",
+    "fecha": "05/10/26",
+    "titulo": "Analista de Control de Gesti&oacute;n Transporte",
+    "descripcion": "Garantizar la correcta validaci&oacute;n y liquidaci&oacute;n de los servicios de transporte mediante el an&aacute;lisis riguroso de datos operacionales y contratos, detectando desviaciones y proponiendo oportunidades de ahorro en la operaci&oacute;n log&iacute;stica.",
+    "empresa": "SALCOBRAND S.A",
+    "region": "Metropolitana",
+    "comuna": "San Bernardo",
+    "idEmpresa": 135141,
+    "tipoOferta": null,
+    "mostrarEmpresa": true,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "Feria",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": null
+   },
+   {
+    "id": 1589227,
+    "codigo": "2026-119863",
+    "fecha": "05/10/26",
+    "titulo": "Practicante &aacute;rea RR.HH",
+    "descripcion": "Si te interesa realizar tu pr&aacute;ctica profesional en el &aacute;rea de Gesti&oacute;n de Personas, &iexcl;postula con nosotros!\r\n\r\nBuscamos alumnos(as) de las carreras de Ingenier&iacute;a en Administraci&oacute;n de Empresas, Recursos Humanos o carreras afines, para apoyar al &aacute;rea de Gesti&oacute;n de Personas en modalidad de pr&aacute;ctica profesional.\r\n\r\nRequerimientos:\r\n-Ser estudiante y encontrarse habilitado(a) para realizar su pr&aacute;ctica profesional.\r\n-Disponibilidad para realizar la pr&aacute;ctica en modalidad presencial en Casino Marina del Sol, Talcahuano.\r\n-Deseable manejo de Microsoft Office.\r\n\r\nBeneficios:\r\n-Servicio de alimentaci&oacute;n.\r\n-Asignaci&oacute;n econ&oacute;mica de pr&aacute;ctica.\r\n\r\n&iexcl;Inicia tu pr&aacute;ctica profesional en Administraci&oacute;n de Empresas, Recursos Humanos o carreras afines y postula con nosotros!",
+    "empresa": "MARINA DEL SOL S.A.",
+    "region": "Bío Bío",
+    "comuna": "Talcahuano",
+    "idEmpresa": 124462,
+    "tipoOferta": null,
+    "mostrarEmpresa": true,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "WEB",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": true
+   },
+   {
+    "id": 1588789,
+    "codigo": "2026-119319",
+    "fecha": "05/10/26",
+    "titulo": "Analista Gesti&oacute;n del Cambio (Proyecto 6 meses)",
+    "descripcion": "Asegurar la adopci&oacute;n efectiva de proyectos de transformaci&oacute;n tecnol&oacute;gica y cultural en la organizaci&oacute;n, acompa&ntilde;ando a los equipos y l&iacute;deres a trav&eacute;s de metodolog&iacute;as estructuradas de gesti&oacute;n del cambio para maximizar el compromiso y el valor del negocio.",
+    "empresa": "SALCOBRAND S.A",
+    "region": "Metropolitana",
+    "comuna": "Santiago",
+    "idEmpresa": 135141,
+    "tipoOferta": null,
+    "mostrarEmpresa": true,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "Feria",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": null
+   },
+   {
+    "id": 1589053,
+    "codigo": "2026-119633",
+    "fecha": "05/10/26",
+    "titulo": "Analista de Estrategia Comercial",
+    "descripcion": "En Penta Vida Compa&ntilde;&iacute;a de Seguros de Vida nos mueve la innovaci&oacute;n, la excelencia y el crecimiento sostenible. Estamos en la b&uacute;squeda de un(a) Analista de Estrategia Comercial apasionado(a) por los datos, la modelaci&oacute;n financiera y la creaci&oacute;n de soluciones eficientes que transformen la experiencia de nuestros clientes.\n&iquest;Cu&aacute;l ser&aacute; tu principal misi&oacute;n?\nLiderar la captaci&oacute;n de nuevos negocios y el desarrollo de estrategias comerciales innovadoras, organizando y motivando a los equipos para maximizar la rentabilidad, el crecimiento y la competitividad de la compa&ntilde;&iacute;a en el mercado.\nTus principales funciones ser&aacute;n:\nIdentificaci&oacute;n de Oportunidades:\nEvaluar y abrir nuevos nichos de mercado y alianzas estrat&eacute;gicas, dise&ntilde;ando flujos eficientes para que los cr&eacute;ditos o negocios se cursen de forma aut&oacute;noma por los clientes.\nInnovaci&oacute;n Comercial:\nDise&ntilde;ar e implementar proyectos comerciales y soluciones transaccionales que diversifiquen nuestra oferta actual y maximicen la autogesti&oacute;n del usuario.\nA",
+    "empresa": "PENTA VIDA COMPANIA DE SEGUROS VIDA S A",
+    "region": "Metropolitana",
+    "comuna": "Las Condes",
+    "idEmpresa": 154263,
+    "tipoOferta": null,
+    "mostrarEmpresa": true,
+    "lod": false,
+    "discapacidadPension": false,
+    "origen": "API",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": null
+   }
+  ],
+  "textoLibre": null
+ },
+ "clasificacionOfertas": {
+  "ofertasPorOcupacion": [
+   {
+    "id": 7543,
+    "descripcion": "Otras ocupaciones",
+    "numero": 252
+   },
+   {
+    "id": 7643,
+    "descripcion": "Desarrolladores y analistas de sistemas informáticos",
+    "numero": 24
+   },
+   {
+    "id": 7767,
+    "descripcion": "Trabajadores (as)/ Agentes area Contabilidad y Auditoria / Contadores (as)",
+    "numero": 20
+   },
+   {
+    "id": 7629,
+    "descripcion": "Analistas de gestión, organización y afines",
+    "numero": 19
+   },
+   {
+    "id": 7628,
+    "descripcion": "Analistas financieros",
+    "numero": 13
+   },
+   {
+    "id": 8036,
+    "descripcion": "Contadores",
+    "numero": 12
+   },
+   {
+    "id": 8073,
+    "descripcion": "Profesionales de nivel medio de servicios administrativos y afines",
+    "numero": 11
+   },
+   {
+    "id": 8101,
+    "descripcion": "Trabajadores (as) area RRHH / Remuneraciones y Compensaciones",
+    "numero": 10
+   },
+   {
+    "id": 8037,
+    "descripcion": "Creadores y analistas de sistemas informáticos",
+    "numero": 10
+   },
+   {
+    "id": 7770,
+    "descripcion": "Trabajadores (as) Control de abastecimiento y/o inventarios / Etiquetador",
+    "numero": 8
+   },
+   {
+    "id": 7644,
+    "descripcion": "Analistas de Redes o Administradores (as) de redes (TI)",
+    "numero": 8
+   },
+   {
+    "id": 7626,
+    "descripcion": "Contadores y contadoras",
+    "numero": 8
+   },
+   {
+    "id": 7729,
+    "descripcion": "Trabajadores (as)/ Agentes area Finanzas / Banca e inversiones",
+    "numero": 7
+   },
+   {
+    "id": 8078,
+    "descripcion": "Trabajadores (as) / Ejecutivos del area de ventas y comercialización",
+    "numero": 7
+   },
+   {
+    "id": 7607,
+    "descripcion": "Quimicos (as) farmaceuticos (as) / Quimicos (as)",
+    "numero": 6
+   },
+   {
+    "id": 7551,
+    "descripcion": "Trabajadores (as) area Control y gestion de procesos",
+    "numero": 5
+   },
+   {
+    "id": 7640,
+    "descripcion": "Programadores(as) / Desarrollares (as) informaticos (TI)",
+    "numero": 5
+   },
+   {
+    "id": 7987,
+    "descripcion": "Profesionales de tecnologia de la informacion ",
+    "numero": 5
+   },
+   {
+    "id": 7721,
+    "descripcion": "Trabajadores (as) area RRHH / Reclutamiento y Seleccion",
+    "numero": 5
+   },
+   {
+    "id": 7984,
+    "descripcion": "Profesionales de las ciencias y de la ingenieria",
+    "numero": 4
+   },
+   {
+    "id": 8082,
+    "descripcion": "Tecnicos en programacion informatica",
+    "numero": 4
+   },
+   {
+    "id": 8106,
+    "descripcion": "Analistas/ area seguridad",
+    "numero": 3
+   },
+   {
+    "id": 8043,
+    "descripcion": "Especialistas en organización y administración de empresas y afines, no clasificados bajo otros epígrafes",
+    "numero": 3
+   },
+   {
+    "id": 8003,
+    "descripcion": "Desarrolladores y analistas de software y multimedia",
+    "numero": 3
+   },
+   {
+    "id": 7799,
+    "descripcion": "Compradores de servicios y bienes mayorista o minorista",
+    "numero": 3
+   },
+   {
+    "id": 7654,
+    "descripcion": "Psicologos (as)",
+    "numero": 3
+   },
+   {
+    "id": 7550,
+    "descripcion": "Directores de recursos humanos",
+    "numero": 3
+   },
+   {
+    "id": 7637,
+    "descripcion": "Analistas de sistemas",
+    "numero": 3
+   },
+   {
+    "id": 8215,
+    "descripcion": "Laboratorista",
+    "numero": 3
+   },
+   {
+    "id": 8051,
+    "descripcion": "Inspectores (as) de seguridad y/o calidad",
+    "numero": 2
+   },
+   {
+    "id": 7638,
+    "descripcion": "Desarrolladores de software",
+    "numero": 2
+   },
+   {
+    "id": 7633,
+    "descripcion": "Profesionales de la publicidad y la comercialización",
+    "numero": 2
+   },
+   {
+    "id": 7611,
+    "descripcion": "Nutricionistas (as) y/o Nutriologos (as)",
+    "numero": 2
+   },
+   {
+    "id": 7583,
+    "descripcion": "Ingenieros industriales y de producción",
+    "numero": 2
+   },
+   {
+    "id": 7716,
+    "descripcion": "Representantes comerciales",
+    "numero": 2
+   },
+   {
+    "id": 7645,
+    "descripcion": "Especialistas en bases de datos y en redes de computadores no clasificados bajo otros epígrafes",
+    "numero": 2
+   },
+   {
+    "id": 7668,
+    "descripcion": "Tecnicos en ingenieria civil",
+    "numero": 2
+   },
+   {
+    "id": 7998,
+    "descripcion": "Ingenieros (excluyendo electrotecnólogos)",
+    "numero": 2
+   },
+   {
+    "id": 7834,
+    "descripcion": "Trabajadores agrícolas de subsistencia",
+    "numero": 2
+   },
+   {
+    "id": 7888,
+    "descripcion": "Quimicos y quimicas",
+    "numero": 2
+   },
+   {
+    "id": 8092,
+    "descripcion": "Analistas/ area salud",
+    "numero": 2
+   },
+   {
+    "id": 8099,
+    "descripcion": "Administrativos (as)",
+    "numero": 2
+   },
+   {
+    "id": 8100,
+    "descripcion": "Trabajadores (as) area RRHH / Clima organizacional",
+    "numero": 2
+   },
+   {
+    "id": 8110,
+    "descripcion": "Trabajadores (as) de Seguridad / Operadores (as) CCTV",
+    "numero": 1
+   },
+   {
+    "id": 8145,
+    "descripcion": "Encargado(a) de adquisiciones",
+    "numero": 1
+   },
+   {
+    "id": 8160,
+    "descripcion": "Maestro(a) eléctrico(a)",
+    "numero": 1
+   },
+   {
+    "id": 8007,
+    "descripcion": "Técnicos en control de procesos",
+    "numero": 1
+   },
+   {
+    "id": 8012,
+    "descripcion": "Empleados encargados del registro de materiales y de transportes",
+    "numero": 1
+   },
+   {
+    "id": 8029,
+    "descripcion": "Arquitectos, ingenieros y afines, no clasificados bajo otros epígrafes",
+    "numero": 1
+   },
+   {
+    "id": 8046,
+    "descripcion": "Gerentes de comercios mayoristas y minoristas",
+    "numero": 1
+   },
+   {
+    "id": 8041,
+    "descripcion": "Embaladores (as) y empaquetadores (as)",
+    "numero": 1
+   },
+   {
+    "id": 7973,
+    "descripcion": "Personas que realizan trabajos varios",
+    "numero": 1
+   },
+   {
+    "id": 7769,
+    "descripcion": "Empleados encargados de las nóminas",
+    "numero": 1
+   },
+   {
+    "id": 7986,
+    "descripcion": "Especialistas en organización de la administración publica y de empresas",
+    "numero": 1
+   },
+   {
+    "id": 7800,
+    "descripcion": "Trabajadores (as) de tiendas y almacenes",
+    "numero": 1
+   },
+   {
+    "id": 7816,
+    "descripcion": "Policias",
+    "numero": 1
+   },
+   {
+    "id": 7819,
+    "descripcion": "Trabajadores (as) de Seguridad / Guardia con curso OS10",
+    "numero": 1
+   },
+   {
+    "id": 7745,
+    "descripcion": "Técnicos en operaciones de tecnología de la información y las comunicaciones",
+    "numero": 1
+   },
+   {
+    "id": 7747,
+    "descripcion": "Técnicos en redes y sistemas de computadores",
+    "numero": 1
+   },
+   {
+    "id": 7766,
+    "descripcion": "Trabajadores (as) Personal / Ejecutivos (as) Servicio al Cliente y/o Informaciones",
+    "numero": 1
+   },
+   {
+    "id": 7670,
+    "descripcion": "Tecnicos electronicos",
+    "numero": 1
+   },
+   {
+    "id": 7678,
+    "descripcion": "Maestros (as) Construccion / Supervisores (as)",
+    "numero": 1
+   },
+   {
+    "id": 7683,
+    "descripcion": "Controladores (as) / Controller Procesos",
+    "numero": 1
+   },
+   {
+    "id": 7695,
+    "descripcion": "Técnicos y asistentes farmacéuticos",
+    "numero": 1
+   },
+   {
+    "id": 7702,
+    "descripcion": "Técnicos en documentación sanitaria",
+    "numero": 1
+   },
+   {
+    "id": 7707,
+    "descripcion": "Prevencionistas de Riesgo",
+    "numero": 1
+   },
+   {
+    "id": 7715,
+    "descripcion": "Trabajadores (as)/ Agentes/ Corredores (as) area Seguros",
+    "numero": 1
+   },
+   {
+    "id": 7642,
+    "descripcion": "Diseñadores y administradores de bases de datos",
+    "numero": 1
+   },
+   {
+    "id": 7655,
+    "descripcion": "Profesionales del trabajo social",
+    "numero": 1
+   },
+   {
+    "id": 7658,
+    "descripcion": "Periodistas",
+    "numero": 1
+   },
+   {
+    "id": 7586,
+    "descripcion": "Ingenieros e ingenieras mecanicas",
+    "numero": 1
+   },
+   {
+    "id": 7587,
+    "descripcion": "Ingenieros quimicos",
+    "numero": 1
+   },
+   {
+    "id": 7588,
+    "descripcion": "Ingenieros de minas, metalúrgicos y afines",
+    "numero": 1
+   },
+   {
+    "id": 7593,
+    "descripcion": "Arquitectos (as)/ Urbanistas/ ingenieros( as) de transito/ Alarifes",
+    "numero": 1
+   },
+   {
+    "id": 7598,
+    "descripcion": "Diseñadores (as) Grafico y/o Multimedia",
+    "numero": 1
+   },
+   {
+    "id": 7553,
+    "descripcion": "Directores de ventas y comercialización",
+    "numero": 1
+   },
+   {
+    "id": 7549,
+    "descripcion": "Asistentes administrativos de registros financieros, de costos y salarios",
+    "numero": 1
+   },
+   {
+    "id": 7636,
+    "descripcion": "Profesionales de ventas de tecnología de la información y las comunicaciones",
+    "numero": 1
+   },
+   {
+    "id": 8058,
+    "descripcion": "Trabajadores (as) Mecanicos de maquinarias industrial",
+    "numero": 1
+   },
+   {
+    "id": 8228,
+    "descripcion": "Topógrafo(a)",
+    "numero": 1
+   }
+  ],
+  "ofertasPorRegion": [
+   {
+    "id": 378,
+    "descripcion": "Metropolitana",
+    "numero": 414
+   },
+   {
+    "id": 375,
+    "descripcion": "Valparaíso",
+    "numero": 20
+   },
+   {
+    "id": 377,
+    "descripcion": "O'Higgins",
+    "numero": 17
+   },
+   {
+    "id": 387,
+    "descripcion": "Antofagasta",
+    "numero": 14
+   },
+   {
+    "id": 379,
+    "descripcion": "Maule",
+    "numero": 14
+   },
+   {
+    "id": 384,
+    "descripcion": "Bío Bío",
+    "numero": 13
+   },
+   {
+    "id": 388,
+    "descripcion": "Arica y Parinacota",
+    "numero": 9
+   },
+   {
+    "id": 381,
+    "descripcion": "Los Lagos",
+    "numero": 9
+   },
+   {
+    "id": 382,
+    "descripcion": "La Araucanía",
+    "numero": 6
+   },
+   {
+    "id": 389,
+    "descripcion": "Los Ríos",
+    "numero": 5
+   },
+   {
+    "id": 386,
+    "descripcion": "Atacama",
+    "numero": 5
+   },
+   {
+    "id": 376,
+    "descripcion": "Tarapacá",
+    "numero": 3
+   },
+   {
+    "id": 383,
+    "descripcion": "Coquimbo",
+    "numero": 2
+   },
+   {
+    "id": 391,
+    "descripcion": "Ñuble",
+    "numero": 1
+   }
+  ],
+  "ofertasPorJornada": [
+   {
+    "id": 9,
+    "descripcion": "Jornada Completa",
+    "numero": 419
+   },
+   {
+    "id": 11,
+    "descripcion": "Sin limitación horaria",
+    "numero": 100
+   },
+   {
+    "id": 10,
+    "descripcion": "Jornada Parcial/part time",
+    "numero": 11
+   }
+  ],
+  "ofertasPorTipoContrato": [
+   {
+    "id": 6,
+    "descripcion": "No sabe / No responde",
+    "numero": 239
+   },
+   {
+    "id": 2,
+    "descripcion": "Contrato a plazo Fijo",
+    "numero": 138
+   },
+   {
+    "id": 3,
+    "descripcion": "Contrato indefinido",
+    "numero": 129
+   },
+   {
+    "id": 1,
+    "descripcion": "Contrato por obra o faena",
+    "numero": 11
+   },
+   {
+    "id": 5,
+    "descripcion": "Honorarios",
+    "numero": 4
+   },
+   {
+    "id": 7,
+    "descripcion": "Indiferente",
+    "numero": 3
+   },
+   {
+    "id": 8,
+    "descripcion": "Acuerdo de práctica",
+    "numero": 3
+   },
+   {
+    "id": 9,
+    "descripcion": "Contrato de aprendizaje",
+    "numero": 1
+   },
+   {
+    "id": 10,
+    "descripcion": "Sin Contrato",
+    "numero": 1
+   }
+  ],
+  "ofertasPorNivelEducacional": [
+   {
+    "id": 7,
+    "descripcion": "Educación superior Completa",
+    "numero": 121
+   },
+   {
+    "id": 5,
+    "descripcion": "Educación media completa",
+    "numero": 5
+   },
+   {
+    "id": 6,
+    "descripcion": "Educación superior Incompleta",
+    "numero": 4
+   },
+   {
+    "id": 8,
+    "descripcion": "Magíster",
+    "numero": 1
+   }
+  ],
+  "ofertasPorGrupoEmpleo": [
+   {
+    "id": 5,
+    "descripcion": "Jóvenes",
+    "numero": 17
+   },
+   {
+    "id": 8,
+    "descripcion": "Mujer",
+    "numero": 17
+   },
+   {
+    "id": 2,
+    "descripcion": "Migrantes",
+    "numero": 16
+   },
+   {
+    "id": 1,
+    "descripcion": "Indígenas",
+    "numero": 15
+   },
+   {
+    "id": 7,
+    "descripcion": "Personas con pensión de invalidez",
+    "numero": 12
+   },
+   {
+    "id": 3,
+    "descripcion": "Adultos mayores",
+    "numero": 6
+   }
+  ],
+  "ofertasPorOrigenOferta": [],
+  "ofertasPorComuna": []
+ },
+ "totalOfertasActivas": 8911,
+ "textoLibre": "analista"
+}

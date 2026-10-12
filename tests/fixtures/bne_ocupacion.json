@@ -1,0 +1,610 @@
+{
+ "paginaOfertas": {
+  "numPaginaActual": 1,
+  "numPaginasTotal": 2,
+  "mostrarMensajeNoResultados": false,
+  "numResultadosPorPagina": 25,
+  "numResultadosTotal": 33,
+  "resultados": [
+   {
+    "id": 1588276,
+    "codigo": "2026-118429",
+    "fecha": "05/10/26",
+    "titulo": "Analista de Soporte TI Junior ",
+    "descripcion": "En Constructora Gardilcic busca un/a Analista de Soporte TI Junior para sumarse a nuestra Sub-Gerencia de Tecnolog&iacute;a. Su misi&oacute;n ser&aacute; que los usuarios de oficina central y obra trabajen sin interrupciones, sobre un ecosistema Microsoft moderno.\r\n&iquest;Qu&eacute; har&aacute;s? Atender y resolver incidentes y requerimientos de primer y segundo nivel, de forma presencial y remota, a trav&eacute;s de nuestra mesa de ayuda. Diagnosticar problemas de hardware, software, conectividad y accesos, buscando la causa ra&iacute;z y no solo la soluci&oacute;n r&aacute;pida. Preparar y mantener equipos con Windows 11 y apoyar su gesti&oacute;n en Microsoft Intune. Administrar cuentas, grupos, licencias y MFA en Microsoft Entra ID. Dar soporte en Microsoft 365: Exchange Online, Teams, SharePoint y OneDrive. Apoyar la operaci&oacute;n de servidores Windows Server y de recursos en Azure. Documentar las soluciones y crear gu&iacute;as de autoatenci&oacute;n para usuarios.\r\n&iquest;Qu&eacute; buscamos? T&iacute;tulo t&eacute;cnico de nivel superior o profesional en Inform&aacute;tica, Conectividad y Redes, Telecomunicaciones o carrera af&iacute;n. Al menos 1 a&ntilde;o de experiencia en soporte TI a usuarios. Conocimientos de Windows 11, Microsoft 365 y administraci&oacute;n de usuarios en Entra ID o Active Directory. Nociones de redes: TCP/IP, DNS, DHCP y VPN. Buena comunicaci&oacute;n, orientaci&oacute;n al usuario y muchas ganas de aprender.\r\nSuma puntos si tienes: Experiencia con Intune, Windows Server o Azure. Scripts b&aacute;sicos en PowerShell. Certificaciones Microsoft (nivel Fundamentals o MD-102) o ITIL 4 Foundation. Licencia de conducir clase B y disponibilidad para viajar a obras. Inf&oacute;rmanos si requieres alg&uacute;n tipo de ajuste razonable, queremos que &eacute;sta sea una gran experiencia&quot;\r\n&quot;Creemos en lugares de trabajo inclusivos, donde todos son respetados, valorados y atendidos para que todos nuestros colaboradores puedan desarrollar plenamente sus talentos&quot; &quot;Esta oferta laboral se rige bajo la Ley N&deg; 21.690 que incentiva la inclusi&oacute;n de personas con discapacidad al mundo laboral&quot;\r\n\r\n",
+    "empresa": "Constructora Gardilcic Ltda.",
+    "region": "Metropolitana",
+    "comuna": "Conchalí",
+    "idEmpresa": 122984,
+    "tipoOferta": null,
+    "mostrarEmpresa": true,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "WEB",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": true
+   },
+   {
+    "id": 1588709,
+    "codigo": "2026-119198",
+    "fecha": "02/10/26",
+    "titulo": "Soporte TI - Puerto Varas",
+    "descripcion": "Importante empresa requiere contratar un(a) Soporte TI, responsable de brindar soporte a los servicios tecnol&oacute;gicos de la organizaci&oacute;n y contribuir a la continuidad operativa de sus sistemas y equipos.\r\n\r\nEntre sus funciones se encuentran atender incidentes y requerimientos de usuarios relacionados con el uso de computadores; configurar estaciones de trabajo y equipos perif&eacute;ricos; apoyar la administraci&oacute;n de redes locales, Wi-Fi y switches; verificar y gestionar licencias; realizar actualizaciones de software seg&uacute;n los requerimientos; y efectuar mantenimiento preventivo y limpieza interna de PC y notebooks. Tambi&eacute;n deber&aacute; brindar soporte a impresoras, plotters y c&aacute;maras CCTV, adem&aacute;s de identificar y levantar proyectos de mejora que permitan asegurar la continuidad de los servicios tecnol&oacute;gicos.\r\n\r\nPara el desempe&ntilde;o del cargo se requiere formaci&oacute;n o experiencia en soporte TI y conocimientos en mantenimiento de equipos computacionales, sistemas operativos, redes y atenci&oacute;n de usuarios. Se valorar&aacute; experiencia en administraci&oacute;n de redes locales y dispositivos de conectividad, gesti&oacute;n de licencias, soporte de impresoras y plotters, y sistemas de CCTV.",
+    "empresa": "Confidencial",
+    "region": "Los Lagos",
+    "comuna": "Puerto Varas",
+    "idEmpresa": 314231,
+    "tipoOferta": null,
+    "mostrarEmpresa": false,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "WEB",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": true
+   },
+   {
+    "id": 1588078,
+    "codigo": "2026-118089",
+    "fecha": "02/10/26",
+    "titulo": "Technical Project Engineer ? IA Generativa / Azure",
+    "descripcion": "   Principales responsabilidades\r\n- Gestionar proyectos tecnol&oacute;gicos desde el levantamiento de requerimientos hasta su implementaci&oacute;n y cierre.\r\n- Utilizar herramientas y agentes de IA durante las distintas etapas del proyecto.\r\n- Dise&ntilde;ar soluciones tecnol&oacute;gicas y arquitecturas cloud.\r\n- Coordinar equipos t&eacute;cnicos, usuarios y proveedores.\r\n- Validar entregables generados mediante herramientas de IA.\r\n- Automatizar procesos y tareas utilizando IA y servicios cloud.\r\n- Gestionar backlog, roadmap y priorizaci&oacute;n de iniciativas.\r\n- Documentar soluciones, arquitecturas y procedimientos.     \r\n\r\nConocimientos valorados\r\n- Prompt Engineering e IA Generativa.\r\n- GPT, Claude, DeepSeek, Kimi u otros modelos equivalentes.\r\n- Dise&ntilde;o u orquestaci&oacute;n de agentes inteligentes.\r\n- Azure OpenAI Services.\r\n- Azure AI Document Intelligence.\r\n- Desarrollo e integraci&oacute;n mediante APIs y servicios web.\r\n- Microsoft Azure: Azure Functions, Container Apps y Azure SQL.\r\n- Power Platform.\r\n- Azure DevOps, Git/GitHub y CI/CD.\r\n- Gesti&oacute;n de backlog, sprints y ciclos de desarrollo.",
+    "empresa": "Confidencial",
+    "region": "Metropolitana",
+    "comuna": "Santiago",
+    "idEmpresa": 123885,
+    "tipoOferta": null,
+    "mostrarEmpresa": false,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "WEB",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": true
+   },
+   {
+    "id": 1587600,
+    "codigo": "2026-117423",
+    "fecha": "01/10/26",
+    "titulo": "ESPECIALISTA INFORMATICO - SERVICIOS ON CALL",
+    "descripcion": "Importante empresa internacional, busca T&eacute;cnicos Inform&aacute;ticos o Ingenieros Inform&aacute;ticos, hombres o mujeres, con probada experiencia en Soporte Infraestructura TI, Telecomunicaciones, Redes, Data Center y atenci&oacute;n de tickets, para prestar servicios de guardia pasiva remoto, en importante empresa estatal, bajo la modalidad On Call 24/7.  Experiencia m&iacute;nima de 2 a&ntilde;os.  ",
+    "empresa": "SOFTGROUP SERVICIOS COMPUTACIONALES LTDA.",
+    "region": "Metropolitana",
+    "comuna": "Santiago",
+    "idEmpresa": 122129,
+    "tipoOferta": null,
+    "mostrarEmpresa": true,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "WEB",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": false
+   },
+   {
+    "id": 1587955,
+    "codigo": "2026-117921",
+    "fecha": "01/10/26",
+    "titulo": "AI Lead Specialist",
+    "descripcion": "En EY, tendr&aacute;s la oportunidad de desarrollar una carrera tan &uacute;nica como t&uacute;, con una visi&oacute;n global, el apoyo, la cultura inclusiva y la tecnolog&iacute;a para convertirte en la mejor versi&oacute;n de ti. Contamos con tu voz y perspectiva &uacute;nicas para ayudar a que EY tambi&eacute;n sea a&uacute;n mejor. S&uacute;mate a nosotros y construye una experiencia excepcional para ti y un mejor mundo de negocio para todos.\r\n\r\nPara ser exitoso/a en el puesto es necesario:\r\n \r\n- T&iacute;tulo universitario en ingenier&iacute;a inform&aacute;tica, civil inform&aacute;tica, computaci&oacute;n o carreras af&iacute;nes.\r\n- Situaci&oacute;n laboral regular en Chile / permiso de trabajo vigente.\r\n- Experiencia comprobable en al menos dos modelos llevados a producci&oacute;n (no solo POC o proyectos acad&eacute;micos)\r\n- Ingl&eacute;s t&eacute;cnico de lectura y conversaci&oacute;n (m&iacute;nimo B2)\r\n- Disponibilidad para modalidad h&iacute;brida y eventuales visitas a faena/cliente\r\n- 5+ a&ntilde;os en roles de Machine Learning Engineer, Data Scientist o similar, con al menos 3 a&ntilde;os trabajando con modelos en producci&oacute;n.\r\n- Proveniente de consultoras de datos/tecnolog&iacute;a, empresas de producto tech, o equipos internos de anal&iacute;tica avanzada en industrias data-intensivas (miner&iacute;a, energ&iacute;a, retail, banca, telco, utilities). \r\n- Experiencia previa en consultor&iacute;a o en roles con exposici&oacute;n directa a cliente es un diferenciador fuerte.\r\n- Python avanzado (pandas, NumPy, scikit-learn, PyTorch o TensorFlow) y SQL avanzado.\r\n- Procesamiento distribuido con Spark / Databricks.\r\n- MLOps: MLflow, versionado de modelos y datos, CI/CD (Git, GitHub Actions o Azure DevOps), contenedores (Docker).\r\n- Nube: Azure ML, Databricks, GCP Vertex AI o AWS SageMaker. \r\n- Orquestaci&oacute;n (Airflow, Databricks Workflows) y modelamiento de datos (Delta Lake, lakehouse). \r\n- Deseable: GenAI y LLMs aplicados (RAG, embeddings, vector stores, frameworks tipo LangChain), series de tiempo, optimizaci&oacute;n, y visualizaci&oacute;n (Power BI / Streamlit).",
+    "empresa": "EY CONSULTORES LIMITADA",
+    "region": "Metropolitana",
+    "comuna": "Las Condes",
+    "idEmpresa": 302023,
+    "tipoOferta": null,
+    "mostrarEmpresa": true,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "WEB",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": true
+   },
+   {
+    "id": 1587959,
+    "codigo": "2026-117927",
+    "fecha": "01/10/26",
+    "titulo": "Manager - Medios de Pago",
+    "descripcion": "En EY, tendr&aacute;s la oportunidad de desarrollar una carrera tan &uacute;nica como t&uacute;, con una visi&oacute;n global, el apoyo, la cultura inclusiva y la tecnolog&iacute;a para convertirte en la mejor versi&oacute;n de ti. Contamos con tu voz y perspectiva &uacute;nicas para ayudar a que EY tambi&eacute;n sea a&uacute;n mejor. S&uacute;mate a nosotros y construye una experiencia excepcional para ti y un mejor mundo de negocio para todos.\r\n\r\nPara ser exitoso/a en el puesto es necesario:\r\n\r\n- Titulo profesional en Ingenier&iacute;a Inform&aacute;tica, Ingenier&iacute;a Civil Industrial, Ingenier&iacute;a comercial o carrera af&iacute;n.\r\n- 9 o m&aacute;s a&ntilde;os de experiencia en Consultor&iacute;a o industria financiera.\r\n- Conocimientos en medios de pagos: Esquemas de Tarjetas (D&eacute;bito/ Cr&eacute;dito/ Prepago) - Modelo de 4 partes, ISO8583, - - Mundo Emisor, Adquirente, PSP.\r\n- Conocimiento en Plataformas de Procesamiento de Tarjetas y procesamiento de Pagos\r\n- E-wallets/SuperApps.\r\n- Tokenizaci&oacute;n.\r\n- Esquemas de Pagos Bajo Valor: ISO20022, ACH (C&aacute;maras de Compensaci&oacute;n) - Pagos y transferencias internacionales.\r\n- Esquemas de Pagos Alto Valor: Swift, LBTR.\r\n- Infraestructura financiera: Comban/Comder/CCLV/DCV.\r\n\r\nOtros:\r\n- Blockchain, Criptoactivos, Stable Coins.\r\n- Arquitecturas de integraci&oacute;n.\r\n- Cloud.\r\n- AI.\r\n\r\nEY cree en la igualdad de oportunidades y no discrimina por motivos de g&eacute;nero, edad, estado civil, credo, identidad de g&eacute;nero, orientaci&oacute;n sexual, origen &eacute;tnico u origen nacional, discapacidad o caracter&iacute;sticas f&iacute;sicas. Todas nuestras oportunidades de trabajo est&aacute;n abiertas a personas con discapacidad.\r\n\r\n#TechEYChile",
+    "empresa": "EY CONSULTORES LIMITADA",
+    "region": "Metropolitana",
+    "comuna": "Las Condes",
+    "idEmpresa": 302023,
+    "tipoOferta": null,
+    "mostrarEmpresa": true,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "WEB",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": true
+   },
+   {
+    "id": 1587961,
+    "codigo": "2026-117935",
+    "fecha": "01/10/26",
+    "titulo": "AI&amp;Cloud Senior / Cybersecurity",
+    "descripcion": "En EY, tendr&aacute;s la oportunidad de desarrollar una carrera tan &uacute;nica como t&uacute;, con una visi&oacute;n global, el apoyo, la cultura inclusiva y la tecnolog&iacute;a para convertirte en la mejor versi&oacute;n de ti. Contamos con tu voz y perspectiva &uacute;nicas para ayudar a que EY tambi&eacute;n sea a&uacute;n mejor. S&uacute;mate a nosotros y construye una experiencia excepcional para ti y un mejor mundo de negocio para todos.\r\n\r\nTus responsabilidades clave\r\n\r\n- Desarrollo e Implementaci&oacute;n de Pol&iacute;ticas de Seguridad: Crear y mantener pol&iacute;ticas, procedimientos y est&aacute;ndares de seguridad cibern&eacute;tica.\r\n- Gesti&oacute;n de Riesgos: Identificar, evaluar y mitigar riesgos de seguridad cibern&eacute;tica.\r\n- Realizar evaluaciones de vulnerabilidad y pruebas de penetraci&oacute;n para identificar posibles amenazas.\r\n- Monitoreo y Respuesta a Incidentes: Supervisar continuamente los sistemas de seguridad para detectar actividades sospechosas o no autorizadas.\r\n- Formaci&oacute;n y Concienciaci&oacute;n: Desarrollar y llevar a cabo programas de formaci&oacute;n y concienciaci&oacute;n en ciberseguridad para empleados.\r\n- Promover una cultura de seguridad dentro de la organizaci&oacute;n.\r\n- Gesti&oacute;n de Herramientas y Tecnolog&iacute;as de Seguridad: Implementar y gestionar herramientas y tecnolog&iacute;as de seguridad, como firewalls, sistemas de detecci&oacute;n de intrusos, y software antivirus.\r\n- Cumplimiento y Auditor&iacute;as: Asegurar el cumplimiento de las normativas y est&aacute;ndares de seguridad cibern&eacute;tica aplicables.\r\n- Gesti&oacute;n de Proyectos de Seguridad: Planificar y gestionar proyectos de seguridad cibern&eacute;tica, asegurando que se completen a tiempo y dentro del presupuesto.\r\n- An&aacute;lisis y Reportes: Analizar datos de seguridad y generar informes para la alta direcci&oacute;n. Proporcionar recomendaciones para mejorar la postura de seguridad de la organizaci&oacute;n.\r\n- Actualizaci&oacute;n Continua: Mantenerse actualizado con las &uacute;ltimas tendencias y amenazas en ciberseguridad. \r\n- Participar en conferencias, seminarios y cursos de formaci&oacute;n continua.",
+    "empresa": "EY CONSULTORES LIMITADA",
+    "region": "Metropolitana",
+    "comuna": "Las Condes",
+    "idEmpresa": 302023,
+    "tipoOferta": null,
+    "mostrarEmpresa": true,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "WEB",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": true
+   },
+   {
+    "id": 1587968,
+    "codigo": "2026-117940",
+    "fecha": "01/10/26",
+    "titulo": "Desarrollador Full-Stack Senior",
+    "descripcion": "En EY, tendr&aacute;s la oportunidad de desarrollar una carrera tan &uacute;nica como t&uacute;, con una visi&oacute;n global, el apoyo, la cultura inclusiva y la tecnolog&iacute;a para convertirte en la mejor versi&oacute;n de ti. Contamos con tu voz y perspectiva &uacute;nicas para ayudar a que EY tambi&eacute;n sea a&uacute;n mejor. S&uacute;mate a nosotros y construye una experiencia excepcional para ti y un mejor mundo de negocio para todos.\r\n\r\nPara ser exitoso/a en el puesto es necesario\r\n\r\n- T&iacute;tulo universitario en ingenier&iacute;a inform&aacute;tica, civil inform&aacute;tica, computaci&oacute;n o carreras af&iacute;nes.\r\n- Certificaci&oacute;n en alguna nube p&uacute;blica.\r\n- Manejo de Python.\r\n- Tecnolog&iacute;as de Backend y front end.\r\n- Tecnolog&iacute;as de base de datos.\r\n- AI&amp;LLM Tooling.\r\n- Experiencia previa en consultor&iacute;a o en roles con exposici&oacute;n directa a cliente es un diferenciador fuerte.\r\n- Ingl&eacute;s avanzado (DESEABLE)\r\n- 5 a 6 a&ntilde;os de experiencia desarrollando soluciones y productos de software.\r\n\r\nNuestro prop&oacute;sito es&amp;#8239;construir un mundo mejor de negocios&amp;#8239;para nuestra gente, para nuestros clientes y para nuestras comunidades. Trabajamos continuamente para mejorar la calidad de nuestros servicios, invirtiendo en nuestra gente y en innovaci&oacute;n. Las oportunidades de crecer, tener &eacute;xito y desarrollarse en EY son ilimitadas.&amp;#8239;\r\n\r\nEY cree en la igualdad de oportunidades. Independientemente del g&eacute;nero, edad, raza, color, credo, orientaci&oacute;n sexual y discapacidad, todos los candidatos calificados ser&aacute;n considerados en nuestros procesos.",
+    "empresa": "EY CONSULTORES LIMITADA",
+    "region": "Metropolitana",
+    "comuna": "Las Condes",
+    "idEmpresa": 302023,
+    "tipoOferta": null,
+    "mostrarEmpresa": true,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "WEB",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": true
+   },
+   {
+    "id": 1587969,
+    "codigo": "2026-117944",
+    "fecha": "01/10/26",
+    "titulo": "Consultor/a en Tecnolog&iacute;a para Industria Financiera",
+    "descripcion": "En EY, tendr&aacute;s la oportunidad de desarrollar una carrera tan &uacute;nica como t&uacute;, con una visi&oacute;n global, el apoyo, la cultura inclusiva y la tecnolog&iacute;a para convertirte en la mejor versi&oacute;n de ti. Contamos con tu voz y perspectiva &uacute;nicas para ayudar a que EY tambi&eacute;n sea a&uacute;n mejor. S&uacute;mate a nosotros y construye una experiencia excepcional para ti y un mejor mundo de negocio para todos.\r\n\r\nHabilidades y atributos para lograr el &eacute;xito\r\n\r\n- Capacidad para trabajar en equipo y en entornos din&aacute;micos.\r\n- Orientaci&oacute;n al cliente\r\n- Adecuadas relaciones interpersonales\r\n- Flexibilidad para aprender y adaptarse constantemente en un entorno din&aacute;mico\r\n- Capacidad anal&iacute;tica y resoluci&oacute;n de problemas.\r\n- Excelente comunicaci&oacute;n oral y escrita. \r\n- Organizaci&oacute;n y gesti&oacute;n de m&uacute;ltiples actividades simult&aacute;neas.\r\n- Proactividad\r\n \r\nPara ser exitoso/a en el puesto es necesario\r\n\r\n- T&iacute;tulo profesional de Ingenier&iacute;a Civil Industrial, Ingenier&iacute;a en Computaci&oacute;n, Ingenier&iacute;a Inform&aacute;tica, Ingenier&iacute;a en Informaci&oacute;n y Control de Gesti&oacute;n o carrera af&iacute;n.\r\n- Nivel de ingl&eacute;s intermedio-avanzado (lectura y conversaci&oacute;n).\r\n- Entre 0 y 3 a&ntilde;os de experiencia laboral (tambi&eacute;n pueden considerarse reci&eacute;n titulados con pr&aacute;cticas relevantes)\r\n\r\nEY cree en la igualdad de oportunidades y no discrimina por motivos de g&eacute;nero, edad, estado civil, credo, identidad de g&eacute;nero, orientaci&oacute;n sexual, origen &eacute;tnico u origen nacional, discapacidad o caracter&iacute;sticas f&iacute;sicas. Todas nuestras oportunidades de trabajo est&aacute;n abiertas a personas con discapacidad.",
+    "empresa": "EY CONSULTORES LIMITADA",
+    "region": "Metropolitana",
+    "comuna": "Las Condes",
+    "idEmpresa": 302023,
+    "tipoOferta": null,
+    "mostrarEmpresa": true,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "WEB",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": true
+   },
+   {
+    "id": 1585875,
+    "codigo": "2026-114734",
+    "fecha": "28/09/26",
+    "titulo": "DevOps Engineer Senior",
+    "descripcion": "Como Ingeniero DevOps Senior en Checkr, tu funci&oacute;n principal no ser&aacute; solo administrar nuestra infraestructura, sino tambi&eacute;n actuar como un puente, consolidando relaciones s&oacute;lidas en todos los equipos de ingenier&iacute;a. Tu rol distintivo implicar&aacute; fomentar una cultura de responsabilidad compartida, promoviendo pr&aacute;cticas de Ingenier&iacute;a de Plataformas (Platform Engineering) e impulsando la adopci&oacute;n de la plataforma en todos los equipos. Permitir&aacute;s que todos los equipos asuman la propiedad colectiva de la confiabilidad, escalabilidad y rendimiento de su software. Tambi&eacute;n guiar&aacute;s a otros equipos para perfeccionar sus servicios, lo que resultar&aacute; en una mayor solidez y eficiencia, asegurando que cada equipo pueda concentrarse en crear un software superior, respaldado por una infraestructura confiable, escalable y eficiente.\r\n\r\nLo que aportar&aacute;s:\r\n&amp;#9679; Ingl&eacute;s avanzado (Reportar&aacute;s a un gerente en EE. UU. y todas las entrevistas t&eacute;cnicas ser&aacute;n realizadas por nuestro equipo de ingenier&iacute;a estadounidense).\r\n&amp;#9679; Disponibilidad para trabajar en modalidad h&iacute;brida en Santiago, Chile (3 d&iacute;as a la semana, oficinas ubicadas en la Gran Torre Costanera).\r\n&amp;#9679; 5+ a&ntilde;os de experiencia como ingeniero DevOps o experiencia relacionada.\r\n&amp;#9679; Experiencia impulsando la adopci&oacute;n de plataformas con varios equipos de ingenier&iacute;a de producto, guiado por un enfoque de autoservicio (self-service) y priorizando el producto (product-first).\r\n&amp;#9679; Experiencia en el dise&ntilde;o de arquitectura t&eacute;cnica y creaci&oacute;n de una hoja de ruta (roadmap) estrat&eacute;gica para materializar una visi&oacute;n t&eacute;cnica.\r\n&amp;#9679; Experiencia con AWS, Kubernetes, contenedores, CI, CD, IaC, Terraform, Linux y arquitectura de microservicios.\r\n&amp;#9679; Conocimientos avanzados de TCP/IP, seguridad de aplicaciones web y HTTP/HTTPS.\r\n&amp;#9679; Experiencia con Istio u otras tecnolog&iacute;as de malla de servicios (service mesh).\r\n&amp;#9679; Tus planes de reversi&oacute;n (rollback) son tan meticulosos como tus planes de despliegue (rollout).",
+    "empresa": "THEMIS CHILE SPA",
+    "region": "Metropolitana",
+    "comuna": "Providencia",
+    "idEmpresa": 348497,
+    "tipoOferta": null,
+    "mostrarEmpresa": true,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "WEB",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": true
+   },
+   {
+    "id": 1585253,
+    "codigo": "2026-113788",
+    "fecha": "24/09/26",
+    "titulo": "T&eacute;cnico de soporte Inform&aacute;tica / Antofagasta",
+    "descripcion": "Importante empresa se encuentra en b&uacute;squeda de un/a T&eacute;cnico de Soporte Inform&aacute;tica para incorporarse a nuestro equipo.\r\n&amp;#128295; Principales funciones\r\nBrindar soporte t&eacute;cnico a usuarios, de manera presencial y remota.\r\nDiagnosticar y solucionar problemas relacionados con equipos computacionales, redes y sistemas.\r\nRealizar instalaci&oacute;n y mantenci&oacute;n de sistemas operativos y aplicaciones de ofim&aacute;tica.\r\nMantener actualizado el hardware y software de la empresa.\r\nRealizar mantenci&oacute;n preventiva de equipos computacionales.\r\nVelar por la continuidad y correcto funcionamiento del servicio de Internet.\r\nCrear, habilitar y reparar puntos de red y datos.\r\nAdministrar cuentas de correo corporativo, incluyendo creaci&oacute;n y eliminaci&oacute;n de cuentas.\r\nBrindar soporte en la configuraci&oacute;n e instalaci&oacute;n de Outlook y cuentas de correo.\r\nAdministrar y controlar el espacio utilizado en discos.\r\nAtender consultas y requerimientos de los usuarios, entregando soluciones oportunas.\r\n&amp;#128203; Requisitos\r\nFormaci&oacute;n t&eacute;cnica o profesional en Inform&aacute;tica, Computaci&oacute;n, Redes o carrera af&iacute;n.\r\nExperiencia previa en cargos de soporte inform&aacute;tico.\r\nConocimientos en soporte de hardware y software.\r\nManejo de sistemas operativos y herramientas de ofim&aacute;tica.\r\nConocimientos en redes, conectividad y puntos de datos.\r\nManejo de configuraci&oacute;n y administraci&oacute;n de correos corporativos y Outlook.\r\nOrientaci&oacute;n al servicio y capacidad para resolver problemas t&eacute;cnicos.\r\n&amp;#127919; Buscamos una persona\r\nProactiva y responsable.\r\nCon orientaci&oacute;n al usuario\r\nCapaz de diagnosticar y resolver problemas.\r\nOrganizada y con capacidad para trabajar de manera aut&oacute;noma.\r\nCon disposici&oacute;n para atender requerimientos t&eacute;cnicos de distintos usuarios.\r\n&amp;#128233; Si cumples con los requisitos y te interesa esta oportunidad, postula con nosotros",
+    "empresa": "Emetel Ltda.",
+    "region": "Antofagasta",
+    "comuna": "Antofagasta",
+    "idEmpresa": 237438,
+    "tipoOferta": null,
+    "mostrarEmpresa": true,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "WEB",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": false
+   },
+   {
+    "id": 1583637,
+    "codigo": "2026-111630",
+    "fecha": "21/09/26",
+    "titulo": "SUBGERENTE DESARROLLO Y MODERNIZACI&Oacute;N DE SISTEMAS",
+    "descripcion": "Buscamos un/a profesional para liderar la gesti&oacute;n del &aacute;rea de Desarrollo y Modernizaci&oacute;n de Sistemas. Gestionar y asegurar la sostenibilidad del &aacute;rea mediante la ejecuci&oacute;n de servicios de modernizaci&oacute;n y el desarrollo de productos innovadores, administrando los recursos y conocimientos disponibles, velando por el cumplimiento de los objetivos estrat&eacute;gicos, presupuesto asignado y satisfacci&oacute;n de los clientes. Responsabilidades: Planificar, gestionar y controlar la ejecuci&oacute;n de los servicios y resultados esperados del &aacute;rea, de acuerdo con los objetivos, metas y plazos establecidos. Gestionar y controlar el presupuesto del &aacute;rea, asegurando su correcta utilizaci&oacute;n y sostenibilidad. Analizar los datos e informaci&oacute;n asociados a la operaci&oacute;n del &aacute;rea para identificar oportunidades de mejora. Planificar y coordinar el trabajo multidisciplinario para la ejecuci&oacute;n de proyectos, asegurando el cumplimiento de tiempos, costos y alcance. Proporcionar los recursos y medios necesarios para el correcto desarrollo de las actividades de Calidad y Testing. Establecer, implementar y mantener los procesos necesarios para la operaci&oacute;n del &aacute;rea de negocios. Participar en la identificaci&oacute;n de oportunidades de negocio e innovaci&oacute;n, desarrollando soluciones rentables en conjunto con otras &aacute;reas. Colaborar con el departamento de I+D+i en el desarrollo de innovaciones, proyectos y nuevos productos o servicios. Requisitos: T&iacute;tulo profesional de Ingeniero/a Civil, Tecnolog&iacute;as de la Informaci&oacute;n, Ingenier&iacute;a, Gesti&oacute;n de Proyectos y carreras afines. Magister en gesti&oacute;n de tecnolog&iacute;as de la informaci&oacute;n, Magister en Business Administraci&oacute;n, Metodolog&iacute;as &aacute;giles, entre otros afines al cargo. Experiencia en cargos de jefatura de al menos 5 a&ntilde;os. Experiencia en gesti&oacute;n de proyectos, operaciones o &aacute;reas relacionadas. Deseable experiencia en &aacute;reas de Defensa, Software, Electr&oacute;nica, Aeron&aacute;utica o afines. Deseable conocimiento de Oracle.           ",
+    "empresa": "DTS Spa",
+    "region": "Metropolitana",
+    "comuna": "Macúl",
+    "idEmpresa": 149905,
+    "tipoOferta": null,
+    "mostrarEmpresa": true,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "WEB",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": false
+   },
+   {
+    "id": 1582465,
+    "codigo": "2026-109866",
+    "fecha": "16/09/26",
+    "titulo": "Especialista SAP Business One",
+    "descripcion": "Asegurar el funcionamiento estable de SAP Business One y convertir el sistema en una herramienta efectiva para Finanzas, Comercial, Compras, Inventario, Producci&oacute;n, Supply Chain, Calidad y Direcci&oacute;n. La persona deber&aacute; resolver incidencias, mejorar procesos, desarrollar reportes, administrar configuraciones y coordinar a proveedores externos cuando corresponda.",
+    "empresa": "Confidencial",
+    "region": "Metropolitana",
+    "comuna": "Renca",
+    "idEmpresa": 281331,
+    "tipoOferta": null,
+    "mostrarEmpresa": false,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "WEB",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": false
+   },
+   {
+    "id": 1582528,
+    "codigo": "2026-109940",
+    "fecha": "16/09/26",
+    "titulo": "Pr&aacute;ctica Analista de Negocio TI, Ing Inform&aacute;tica o Af&iacute;n",
+    "descripcion": "Estamos en b&uacute;squeda de un estudiante en pr&aacute;ctica de Ingenier&iacute;a Civil Industrial o carreras af&iacute;n, que est&eacute; interesado en interiorizarse dentro del &aacute;rea de ventas. En este rol participar&aacute;s activamente y ser&aacute;s de gran apoyo en el desarrollo y soporte de plataformas utilizadas por la fuerza de ventas y medios de pago. Adem&aacute;s, apoyar&aacute;s el levantamiento, an&aacute;lisis y seguimiento de requerimientos, colaborando con equipos de negocio y tecnolog&iacute;a para contribuir a la mejora continua de los procesos y soluciones digitales.\r\n\r\nPrincipales funciones\r\n-Apoyar en el levantamiento y documentaci&oacute;n de requerimientos funcionales.\r\n-Participar en reuniones con usuarios de negocio y equipos de desarrollo para comprender necesidades y procesos.\r\n-Elaborar documentaci&oacute;n funcional, flujos de procesos y casos de uso.\r\n-Apoyar la gesti&oacute;n y seguimiento de tareas mediante herramientas &aacute;giles.\r\n-Realizar an&aacute;lisis de datos b&aacute;sicos para apoyar la toma de decisiones y seguimiento de indicadores.\r\n-Participar en pruebas funcionales (QA/UX) y validaci&oacute;n de soluciones antes de su implementaci&oacute;n.\r\n-Ejecutar pruebas funcionales b&aacute;sicas y registrar hallazgos para su an&aacute;lisis.\r\n-Generar minutas, presentaciones e informes de avances.",
+    "empresa": "Bice Vida Compania De Seguros S A",
+    "region": "Metropolitana",
+    "comuna": "Las Condes",
+    "idEmpresa": 153917,
+    "tipoOferta": null,
+    "mostrarEmpresa": true,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "WEB",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": true
+   },
+   {
+    "id": 1580461,
+    "codigo": "2026-107008",
+    "fecha": "09/09/26",
+    "titulo": "Consultor Funcional SAP (MM, EWM), Huechuraba",
+    "descripcion": "En TeamWork nos encontramos en b&uacute;squeda de Consultor SAP Supply Chain para importante cliente del rubro de miner&iacute;a.",
+    "empresa": "Confidencial",
+    "region": "Metropolitana",
+    "comuna": "Huechuraba",
+    "idEmpresa": 121565,
+    "tipoOferta": null,
+    "mostrarEmpresa": false,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "WEB",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": false
+   },
+   {
+    "id": 1580515,
+    "codigo": "2026-107071",
+    "fecha": "09/09/26",
+    "titulo": "SUBGERENTE DESARROLLO Y MODERNIZACI&Oacute;N DE SISTEMAS",
+    "descripcion": "Buscamos un/a profesional para liderar la gesti&oacute;n del &aacute;rea de Desarrollo y Modernizaci&oacute;n de Sistemas. Gestionar y asegurar la sostenibilidad del &aacute;rea mediante la ejecuci&oacute;n de servicios de modernizaci&oacute;n y el desarrollo de productos innovadores, administrando los recursos y conocimientos disponibles, velando por el cumplimiento de los objetivos estrat&eacute;gicos, presupuesto asignado y satisfacci&oacute;n de los clientes. Responsabilidades: Planificar, gestionar y controlar la ejecuci&oacute;n de los servicios y resultados esperados del &aacute;rea, de acuerdo con los objetivos, metas y plazos establecidos. Promover la colaboraci&oacute;n y el trabajo interdisciplinario dentro del &aacute;rea y con otras &aacute;reas de la organizaci&oacute;n. Gestionar y controlar el presupuesto del &aacute;rea, asegurando su correcta utilizaci&oacute;n y sostenibilidad. Analizar los datos e informaci&oacute;n asociados a la operaci&oacute;n del &aacute;rea para identificar oportunidades de mejora. Planificar y coordinar el trabajo multidisciplinario para la ejecuci&oacute;n de proyectos, asegurando el cumplimiento de tiempos, costos y alcance. Definir y gestionar el crecimiento del &aacute;rea mediante el desarrollo del personal, oportunidades de negocio, clientes y mejora de procesos. Proporcionar los recursos y medios necesarios para el correcto desarrollo de las actividades de Calidad y Testing. Establecer, implementar y mantener los procesos necesarios para la operaci&oacute;n del &aacute;rea de negocios. Participar en la identificaci&oacute;n de oportunidades de negocio e innovaci&oacute;n, desarrollando soluciones rentables en conjunto con otras &aacute;reas. Colaborar con el departamento de I+D+i en el desarrollo de innovaciones, proyectos y nuevos productos o servicios. Requisitos: T&iacute;tulo profesional de Ingeniero/a Civil (Excluyente). Experiencia en cargos de jefatura de al menos 5 a&ntilde;os (Excluyente). Experiencia en gesti&oacute;n de proyectos, operaciones o &aacute;reas relacionadas. Deseable experiencia en &aacute;reas de Defensa, Software, Electr&oacute;nica, Aeron&aacute;utica o afines. Deseable conocimiento de Oracle. ",
+    "empresa": "DTS Spa",
+    "region": "Metropolitana",
+    "comuna": "Macúl",
+    "idEmpresa": 149905,
+    "tipoOferta": null,
+    "mostrarEmpresa": true,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "WEB",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": true
+   },
+   {
+    "id": 1578668,
+    "codigo": "2026-104683",
+    "fecha": "07/09/26",
+    "titulo": "Desarrollador de Sistemas e IA aplicada",
+    "descripcion": "Responsabilidades: desarrollar y mantener aplicaciones internas en NET / C#; dise&ntilde;ar y optimizar consultas sobre bases de datos SQL Server en ambientes productivos; Analizar c&oacute;digo existente, corregir defectos y proponer mejoras; Desarrollar e integrar servicios mediante APls REST; ?\tIncorporar herramientas de IA en el desarrollo y apoyar la implementaci&oacute;n de soluciones asistidas por IA para procesos internos; ?\tTrabajar con Git en equipo, participando en revisiones de c&oacute;digo. Requisitos: Programaci&oacute;n orientada a objetos y aplicaci&oacute;n de buenas pr&aacute;cticas de desarrollo; Manejo efectivo de SQL y modelo relacional; Uso de Git; Comprensi&oacute;n de HTTP y APIs REST; Capacidad de leer c&oacute;digo ajeno, investigar y resolver con autonom&iacute;a; Experiencia comprobable con SQL Server; Experiencia comprobable en .NET / C# o en TypeScript. Deseables: NET Framework y ASP.NET MVC; jQuery; Angular; Experiencia con Claude Code u otras herramientas de IA aplicadas al desarrollo.\r\nModalidad presencial,  beneficios.\r\n&quot;Inf&oacute;rmanos si requieres alg&uacute;n tipo de ajuste razonable, queremos que &eacute;sta sea una gran experiencia&quot; &quot;Creemos en lugares de trabajo inclusivos, donde todos son respetados, valorados y atendidos para que todos nuestros colaboradores puedan desarrollar plenamente sus talentos&quot; esta oferta laboral rige bajo la Ley N&deg; 21.690 que incentiva la inclusi&oacute;n de personas con discapacidad al mundo laboral.\r\n",
+    "empresa": "Constructora Gardilcic Ltda.",
+    "region": "Metropolitana",
+    "comuna": "Conchalí",
+    "idEmpresa": 122984,
+    "tipoOferta": null,
+    "mostrarEmpresa": true,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "WEB",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": true
+   },
+   {
+    "id": 1579474,
+    "codigo": "2026-105792",
+    "fecha": "07/09/26",
+    "titulo": "Ingeniero de Plataformas Sat&eacute;lites",
+    "descripcion": "Oferta dentro de la ley de inclusi&oacute;n laboral N&deg; 21.015. Reconocida compa&ntilde;&iacute;a est&aacute; en la b&uacute;squeda de un/a Ingeniero de Desarrollo de Plataformas Sat&eacute;lites, cuya principal responsabilidad ser&aacute; Implementar las soluciones inform&aacute;ticas y tecnol&oacute;gicas asociadas a las plataformas sat&eacute;lites en sus componentes Base de Datos, Aplicaciones Java y portales. Ofrecemos: Contrato indefinido de 40 horas semanales; Modalidad de trabajo h&iacute;brida (disponibilidad de ir a la oficina dos veces por semana); Beneficios tales como: bonos, aguinaldos, seguro de salud complementario, entrenamientos y oportunidades de crecimiento profesional.",
+    "empresa": "Confidencial",
+    "region": "Metropolitana",
+    "comuna": "Las Condes",
+    "idEmpresa": 312657,
+    "tipoOferta": null,
+    "mostrarEmpresa": false,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "WEB",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": true
+   },
+   {
+    "id": 1579484,
+    "codigo": "2026-105800",
+    "fecha": "07/09/26",
+    "titulo": "T&eacute;cnico de Soporte TI Windows, Microsoft 365, Redes, Active Directory  Quilicura",
+    "descripcion": "T&eacute;cnico de Soporte TI \r\n\r\nImportante empresa se encuentra en b&uacute;squeda de un T&eacute;cnico de Soporte TI para integrarse a su equipo de trabajo. El objetivo del cargo es brindar soporte operativo diario a usuarios, asegurando la continuidad de los servicios tecnol&oacute;gicos y el correcto funcionamiento de la infraestructura inform&aacute;tica.\r\n\r\nDentro de sus principales responsabilidades:\r\n\r\nSoporte a usuarios\r\nAdministraci&oacute;n b&aacute;sica de Active Directory\r\nCorreo electr&oacute;nico\r\nMicrosoft Teams\r\nFile Server\r\nInstalaci&oacute;n, configuraci&oacute;n y mantenci&oacute;n de notebooks, monitores, impresoras y otros perif&eacute;ricos. \r\nInstalaciones de Office, \r\nVPN \r\nMicrosoft 365\r\nResolver incidencias de hardware y software.\r\n\r\nFormaci&oacute;n\r\n T&eacute;cnico de Soporte en Computaci&oacute;n\r\n T&eacute;cnico en Inform&aacute;tica o carrera af&iacute;n, \r\n\r\nConocimientos en instalaci&oacute;n y configuraci&oacute;n de:\r\nSistemas operativos Windows\r\nAdministraci&oacute;n de redes\r\nConfiguraci&oacute;n de estaciones cliente en ambientes IP\r\nMicrosoft Office\r\nHerramientas antivirus y antispyware\r\nSoporte de plataforma Microsoft Dynamics AX\r\nAdministraci&oacute;n de Firewall\r\nActive Directory y plataformas Office 365.\r\n\r\nBuscamos profesionales con al menos 2 a&ntilde;os de experiencia en cargos similares, orientaci&oacute;n al servicio, capacidad de resoluci&oacute;n de problemas y habilidades para el trabajo en equipo.\r\n\r\nCondiciones del cargo:\r\nHorario de trabajo de lunes a jueves de 08:00 a 17:30 horas y viernes de 08:00 a 14:30 horas.\r\nRenta l&iacute;quida: $1.100.000.\r\nSector Quilicura\r\nBeneficios: Bus de acercamiento y colaci&oacute;n en casino de la empresa.\r\n\r\nSi buscas nuevos desaf&iacute;os y cuentas con la experiencia requerida, te invitamos a postular.",
+    "empresa": "Medina",
+    "region": "Metropolitana",
+    "comuna": "Quilicura",
+    "idEmpresa": 300922,
+    "tipoOferta": null,
+    "mostrarEmpresa": true,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "WEB",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": false
+   },
+   {
+    "id": 1579490,
+    "codigo": "2026-105803",
+    "fecha": "07/09/26",
+    "titulo": "Jefe/a de Proyecto Implementaci&oacute;n SAP Business One",
+    "descripcion": "Jefe/a de Proyecto Implementaci&oacute;n SAP Business One\r\n\r\nImportante empresa del rubro importaci&oacute;n, distribuci&oacute;n y comercializaci&oacute;n se encuentra en b&uacute;squeda de un/a Jefe/a de Proyecto de Implementaci&oacute;n SAP Business One, profesional que tendr&aacute; la responsabilidad de liderar integralmente la implementaci&oacute;n del ERP, asegurando una correcta transici&oacute;n tecnol&oacute;gica y operacional para la organizaci&oacute;n.\r\n\r\nBuscamos un perfil con s&oacute;lida experiencia en gesti&oacute;n de proyectos ERP, capacidad para liderar equipos multidisciplinarios y habilidades para conectar las necesidades del negocio con las soluciones tecnol&oacute;gicas.\r\n\r\nPrincipales responsabilidades\r\nLiderar el proyecto de implementaci&oacute;n de SAP Business One desde su planificaci&oacute;n inicial hasta la puesta en marcha y estabilizaci&oacute;n.\r\nCoordinar &aacute;reas usuarias, consultores SAP, proveedores y equipos t&eacute;cnicos involucrados en el proyecto.\r\nGestionar alcance, cronograma, presupuesto, riesgos, cambios y cumplimiento de hitos.\r\nLevantar, analizar y optimizar procesos de negocio, promoviendo la estandarizaci&oacute;n y mejores pr&aacute;cticas.\r\nSupervisar configuraciones, parametrizaciones, desarrollos e integraciones con sistemas externos.\r\nCoordinar la estrategia de migraci&oacute;n de datos, asegurando su calidad e integridad.\r\nLiderar procesos de pruebas funcionales, pruebas integradas y pruebas de aceptaci&oacute;n de usuarios (UAT).\r\nDefinir y coordinar el plan de salida a producci&oacute;n (Cutover) y Go Live.\r\nGestionar la capacitaci&oacute;n, adopci&oacute;n y gesti&oacute;n del cambio organizacional asociadas a la implementaci&oacute;n.\r\nPreparar reportes ejecutivos y presentar avances, riesgos y decisiones clave a la alta direcci&oacute;n.\r\nRequisitos\r\nFormaci&oacute;n\r\nT&iacute;tulo profesional de Ingenier&iacute;a Civil Industrial, Ingenier&iacute;a Inform&aacute;tica, Ingenier&iacute;a en Sistemas, Ingenier&iacute;a Comercial o carrera af&iacute;n.\r\nDeseable formaci&oacute;n complementaria en Gesti&oacute;n de Proyectos, Transformaci&oacute;n Digital, Procesos o Sistemas ERP.\r\n",
+    "empresa": "Medina",
+    "region": "Metropolitana",
+    "comuna": "Las Condes",
+    "idEmpresa": 300922,
+    "tipoOferta": null,
+    "mostrarEmpresa": true,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "WEB",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": false
+   },
+   {
+    "id": 1577758,
+    "codigo": "2026-103257",
+    "fecha": "03/09/26",
+    "titulo": "Analista Programador Cobol",
+    "descripcion": "Buscamos Analista Desarrollador para an&aacute;lisis de flujos en Altair, enfocado en aplicaciones online y batch (Personas, Tablas Corporativas, Pasivos, Medios de Pago, Activos).\r\nRequisitos: Experiencia en OS 390, Proyectos previos en Altec-Isban, Conocimiento en los aplicativos mencionados,\r\nAn&aacute;lisis y optimizaci&oacute;n en Altair, Habilidad para trabajar de manera colaborativa en equipos &aacute;giles. \r\nCondiciones Laborales: Trabajo h&iacute;brido, Las Condes. Contrato plazo fijo.",
+    "empresa": "Confidencial",
+    "region": "Metropolitana",
+    "comuna": "Las Condes",
+    "idEmpresa": 293361,
+    "tipoOferta": null,
+    "mostrarEmpresa": false,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "WEB",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": false
+   },
+   {
+    "id": 1577792,
+    "codigo": "2026-103340",
+    "fecha": "02/09/26",
+    "titulo": "Artificial Intelligence Engineer",
+    "descripcion": "En este rol, ser&aacute;s responsable de desarrollar aplicaciones, apis, reportes y todo lo necesario para poder entregar sistemas de Inteligencia artificial a la compa&ntilde;&iacute;a, como por ejemplo Chatbots y otros sistemas con esta tecnolog&iacute;a.\r\n\r\n&iquest;Qu&eacute; esperamos de ti?\r\n\r\nDesarrollar aplicaciones con inteligencia artificial, enfocada en mejorar la calidad de atenci&oacute;n de los usuarios de las diferentes plataformas internas y externas de la compa&ntilde;&iacute;a.\r\nDesarrollar el conocimiento profundo de desarrollo de aplicaciones con inteligencia artificial para ayudar al negocio a utilizarla de la mejor manera.\r\nDesarrollar formas de uso de la informaci&oacute;n recopilada por las aplicaciones desarrolladas\r\nOptimizar bases de datos que almacenan la informaci&oacute;n requerida por el negocio",
+    "empresa": "AFP Cuprum",
+    "region": "Metropolitana",
+    "comuna": "Las Condes",
+    "idEmpresa": 192272,
+    "tipoOferta": null,
+    "mostrarEmpresa": true,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "WEB",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": true
+   },
+   {
+    "id": 1577608,
+    "codigo": "2026-103020",
+    "fecha": "02/09/26",
+    "titulo": "Analista de Sistemas",
+    "descripcion": "Buscamos un Analista de Sistemas&nbsp;para el &aacute;rea de producci&oacute;n que tenga como objetivo principal administrar las operaciones, soporte y mantenimiento de los servicios tecnol&oacute;gicos asegurando por medio de la observabilidad y monitoreo el correcto funcionamiento de las aplicaciones a su cargo y gestionando con equipos responsables del producto las mejoras necesarias para el cumplimiento del objetivo.\r\n\r\nIdentificar y subsanar las carencias de est&aacute;ndares deseados de calidad de los servicios tecnol&oacute;gicos\r\nCoordinar y controlar cambios en la configuraci&oacute;n de las componentes de los servicios tecnol&oacute;gicos ya existentes\r\nCoordinar las actividades de operaciones, soporte y mantenimiento de los servicios tecnol&oacute;gicos\r\nCoordinar reuniones, presentaciones, entrenamientos, etc. entre los usuarios-clientes y Tecnolog&iacute;a\r\nRepresentar e informar a sus usuarios-clientes, registrando incidentes y/o solicitudes y supervisando las soluciones o implementaciones necesarias.\r\nMantener la seguridad y continuidad de los servicios tecnol&oacute;gicos.\r\nAsegurar el cumplimiento de los requerimientos de los usuarios-cliente.\r\nCumplir con los niveles de servicio acordados entre tecnolog&iacute;a y cada Cliente.\r\nGarantizar una comunicaci&oacute;n formal, fluida y efectiva entre todas las partes involucradas.\r\nAsegurar el cumplimiento de los niveles de servicio",
+    "empresa": "AFP Cuprum",
+    "region": "Metropolitana",
+    "comuna": "Las Condes",
+    "idEmpresa": 192272,
+    "tipoOferta": null,
+    "mostrarEmpresa": true,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "WEB",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": false
+   },
+   {
+    "id": 1577735,
+    "codigo": "2026-103217",
+    "fecha": "02/09/26",
+    "titulo": "PROGRAMADOR-DESARROLLADOR",
+    "descripcion": "Desarrollar, modificar y mantener m&oacute;dulos dentro de Odoo de acuerdo con los requerimientos de la empresa. Configurar y personalizar funcionalidades del ERP seg&uacute;n las necesidades de las distintas &aacute;reas. Analizar requerimientos internos y transformarlos en soluciones t&eacute;cnicas. Realizar mejoras y optimizaciones sobre desarrollos existentes.",
+    "empresa": "METALKIT",
+    "region": "Metropolitana",
+    "comuna": "Paine",
+    "idEmpresa": 336201,
+    "tipoOferta": null,
+    "mostrarEmpresa": true,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "WEB",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": false
+   },
+   {
+    "id": 1573764,
+    "codigo": "2026-097807",
+    "fecha": "24/08/26",
+    "titulo": "Ingeniero de datos (Data Engineer)",
+    "descripcion": "buscamos un/a Ingeniero de datos (Data Engineer) para construir y escalar soluciones de datos que permitan a nuestros equipos y clientes tomar mejores decisiones.\r\n\r\n&iquest;Cu&aacute;l ser&aacute; tu desaf&iacute;o?\r\n- Desarrollar y mantener soluciones de datos en un lakehouse multi-regi&oacute;n, asegurando calidad y testing automatizado.\r\n- Construir y potenciar capas sem&aacute;nticas para facilitar el consumo aut&oacute;nomo de datos por parte del negocio, APIs y soluciones de IA.\r\n- Implementar flujos de IA para mejorar la calidad, gobernanza, clasificaci&oacute;n de datos sensibles y diagn&oacute;stico de incidentes.\r\n- Optimizar procesos para mejorar la disponibilidad de datos, reducir tiempos de resoluci&oacute;n (MTTR) y acelerar el paso de desarrollo a producci&oacute;n.\r\n\r\n&iquest;Qu&eacute; buscamos?\r\n- 1 a 2 a&ntilde;os de experiencia en Data Engineering, idealmente trabajando con Data Lake/Warehouse en producci&oacute;n.\r\n-Experiencia en modelado de datos, testing y linaje.\r\n- Conocimientos en capas sem&aacute;nticas (Cube.dev, dbt o similares).\r\n-Conocimientos de Data Governance, Data Contracts, cat&aacute;logos y gesti&oacute;n de PII.\r\n- Deseable experiencia con IA, agentes, RAG, Feature Stores o tecnolog&iacute;as Cloud.\r\n- Deseable certificaci&oacute;n Cloud en Data Engineering.\r\n\r\n&iquest;Qu&eacute; ofrecemos?\r\n15 d&iacute;as h&aacute;biles adicionales de vacaciones.\r\n4 aguinaldos al a&ntilde;o y ajuste trimestral por IPC.\r\nSeguro complementario de salud, dental, vida, catastr&oacute;fico y oncol&oacute;gico.\r\nBeneficios familiares y convenios con gimnasios, Pol&iacute;glota y bancos.\r\n&iexcl;Y muchos beneficios m&aacute;s!\r\n\r\nSi quieres trabajar en un entorno SaaS, tecnol&oacute;gico y orientado a datos, &iexcl;te invitamos a postular!",
+    "empresa": "Nubox",
+    "region": "Metropolitana",
+    "comuna": "Las Condes",
+    "idEmpresa": 119343,
+    "tipoOferta": null,
+    "mostrarEmpresa": true,
+    "lod": null,
+    "discapacidadPension": false,
+    "origen": "WEB",
+    "fechaAntofagasta": null,
+    "aceptarDiscapacidad": true
+   }
+  ],
+  "textoLibre": null
+ },
+ "clasificacionOfertas": {
+  "ofertasPorOcupacion": [
+   {
+    "id": 7643,
+    "descripcion": "Desarrolladores y analistas de sistemas informáticos",
+    "numero": 24
+   },
+   {
+    "id": 7640,
+    "descripcion": "Programadores(as) / Desarrollares (as) informaticos (TI)",
+    "numero": 3
+   },
+   {
+    "id": 8082,
+    "descripcion": "Tecnicos en programacion informatica",
+    "numero": 3
+   },
+   {
+    "id": 7747,
+    "descripcion": "Técnicos en redes y sistemas de computadores",
+    "numero": 1
+   },
+   {
+    "id": 7987,
+    "descripcion": "Profesionales de tecnologia de la informacion ",
+    "numero": 1
+   },
+   {
+    "id": 8037,
+    "descripcion": "Creadores y analistas de sistemas informáticos",
+    "numero": 1
+   }
+  ],
+  "ofertasPorRegion": [
+   {
+    "id": 378,
+    "descripcion": "Metropolitana",
+    "numero": 28
+   },
+   {
+    "id": 375,
+    "descripcion": "Valparaíso",
+    "numero": 3
+   },
+   {
+    "id": 387,
+    "descripcion": "Antofagasta",
+    "numero": 1
+   },
+   {
+    "id": 381,
+    "descripcion": "Los Lagos",
+    "numero": 1
+   }
+  ],
+  "ofertasPorJornada": [
+   {
+    "id": 9,
+    "descripcion": "Jornada Completa",
+    "numero": 31
+   },
+   {
+    "id": 10,
+    "descripcion": "Jornada Parcial/part time",
+    "numero": 1
+   },
+   {
+    "id": 11,
+    "descripcion": "Sin limitación horaria",
+    "numero": 1
+   }
+  ],
+  "ofertasPorTipoContrato": [
+   {
+    "id": 3,
+    "descripcion": "Contrato indefinido",
+    "numero": 19
+   },
+   {
+    "id": 2,
+    "descripcion": "Contrato a plazo Fijo",
+    "numero": 9
+   },
+   {
+    "id": 1,
+    "descripcion": "Contrato por obra o faena",
+    "numero": 2
+   },
+   {
+    "id": 5,
+    "descripcion": "Honorarios",
+    "numero": 2
+   },
+   {
+    "id": 10,
+    "descripcion": "Sin Contrato",
+    "numero": 1
+   }
+  ],
+  "ofertasPorNivelEducacional": [
+   {
+    "id": 7,
+    "descripcion": "Educación superior Completa",
+    "numero": 16
+   },
+   {
+    "id": 8,
+    "descripcion": "Magíster",
+    "numero": 1
+   },
+   {
+    "id": 6,
+    "descripcion": "Educación superior Incompleta",
+    "numero": 1
+   }
+  ],
+  "ofertasPorGrupoEmpleo": [
+   {
+    "id": 1,
+    "descripcion": "Indígenas",
+    "numero": 9
+   },
+   {
+    "id": 2,
+    "descripcion": "Migrantes",
+    "numero": 9
+   },
+   {
+    "id": 5,
+    "descripcion": "Jóvenes",
+    "numero": 9
+   },
+   {
+    "id": 8,
+    "descripcion": "Mujer",
+    "numero": 9
+   },
+   {
+    "id": 3,
+    "descripcion": "Adultos mayores",
+    "numero": 2
+   }
+  ],
+  "ofertasPorOrigenOferta": [],
+  "ofertasPorComuna": []
+ },
+ "totalOfertasActivas": 8913,
+ "textoLibre": null
+}

@@ -1,0 +1,13 @@
+venv/
+__pycache__/
+.pytest_cache/
+tests/
+*.db
+*.db-wal
+*.db-shm
+*.xlsx
+google_*.html
+prueba.py
+diagnostico*.py
+probar_*.py
+.git/

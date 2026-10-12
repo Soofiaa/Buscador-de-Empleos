@@ -1,0 +1,7 @@
+venv/
+__pycache__/
+*.db
+*.xlsx
+.pytest_cache/
+.env
+google_*.html
