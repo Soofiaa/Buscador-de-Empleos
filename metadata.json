@@ -1,0 +1,8 @@
+{
+  "name": "Búsqueda de empleo",
+  "description": "Buscador y gestor de ofertas laborales con seguimiento de postulaciones",
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ],
+  "permissions": []
+}

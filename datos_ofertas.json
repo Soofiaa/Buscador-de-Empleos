@@ -1,0 +1,336 @@
+{
+  "ofertas": {
+    "principal": [
+      {
+        "url": "https://linkedin.com/jobs/view/998877",
+        "titulo": "QA Lead Automatización",
+        "empresa": "Santander Tech Chile",
+        "ubicacion": "Santiago, Chile",
+        "publicada": "2026-10-12",
+        "detectada_en": "2026-10-12 15:56",
+        "fuente": "manual",
+        "categoria": "principal",
+        "razon": "",
+        "tipo": "General",
+        "prioridad": "Alta",
+        "modalidad": "Remoto",
+        "contrato": "Indefinido",
+        "sueldo": ".500.000 líquida",
+        "experiencia": "",
+        "motivo": "Postulación ingresada manualmente.",
+        "estado": "entrevista",
+        "corrida_id": null,
+        "notas": "Test de nota",
+        "fecha_postulacion": "2026-10-12",
+        "fase": "rrhh"
+      },
+      {
+        "url": "https://ejemplo.cl/empleo/analista-funcional-bci",
+        "titulo": "Analista Funcional TI",
+        "empresa": "Banco Bci",
+        "ubicacion": "Santiago, Región Metropolitana",
+        "publicada": "2026-10-12",
+        "detectada_en": "2026-10-12 10:32",
+        "fuente": "indeed",
+        "categoria": "principal",
+        "razon": "",
+        "tipo": "Analista Funcional",
+        "prioridad": "Alta",
+        "modalidad": "Híbrido",
+        "contrato": "Indefinido",
+        "sueldo": "$1.800.000 - $2.200.000",
+        "experiencia": "1 a 3 años",
+        "motivo": "Levantamiento de requerimientos, historias de usuario y BPMN en proyectos bancarios.",
+        "estado": "entrevista",
+        "corrida_id": 4,
+        "notas": "Entrevista técnica agendada con Jefe de Proyecto. Renta conversada: .1M.",
+        "fecha_postulacion": "2026-10-12"
+      },
+      {
+        "url": "https://ejemplo.cl/empleo/qa-tester-junior-falabella",
+        "titulo": "QA Tester Automatizador Junior",
+        "empresa": "Falabella Retail",
+        "ubicacion": "Santiago, Región Metropolitana",
+        "publicada": "2026-10-12",
+        "detectada_en": "2026-10-12 10:33",
+        "fuente": "getonboard",
+        "categoria": "principal",
+        "razon": "",
+        "tipo": "QA / Testing",
+        "prioridad": "Alta",
+        "modalidad": "Remoto",
+        "contrato": "Indefinido",
+        "sueldo": "$1.400.000 - $1.700.000",
+        "experiencia": "1 año",
+        "motivo": "Diseño y ejecución de pruebas funcionales y automatización con Cypress / Selenium.",
+        "estado": "postulada",
+        "corrida_id": 4,
+        "fecha_postulacion": "2026-10-12"
+      },
+      {
+        "url": "https://ejemplo.cl/empleo/analista-procesos-cencosud",
+        "titulo": "Analista de Procesos y Mejora Continua",
+        "empresa": "Cencosud",
+        "ubicacion": "Santiago, Región Metropolitana",
+        "publicada": "2026-10-12",
+        "detectada_en": "2026-10-12 10:34",
+        "fuente": "chiletrabajos",
+        "categoria": "principal",
+        "razon": "",
+        "tipo": "Analista de Procesos",
+        "prioridad": "Media",
+        "modalidad": "Híbrido",
+        "contrato": "Plazo fijo luego indefinido",
+        "sueldo": "A convenir",
+        "experiencia": "1 a 2 años",
+        "motivo": "Modelamiento de flujos de valor con BPMN y automatización de procesos operativos.",
+        "estado": "revisada",
+        "corrida_id": 4
+      },
+      {
+        "url": "https://ejemplo.cl/empleo/desarrollador-python-junior-buk",
+        "titulo": "Desarrollador Python Junior",
+        "empresa": "Buk",
+        "ubicacion": "Santiago (Remoto Chile)",
+        "publicada": "2026-10-11",
+        "detectada_en": "2026-10-11 16:17",
+        "fuente": "getonboard",
+        "categoria": "principal",
+        "razon": "",
+        "tipo": "Desarrollador",
+        "prioridad": "Alta",
+        "modalidad": "Remoto",
+        "contrato": "Indefinido",
+        "sueldo": "$1.500.000 - $1.900.000",
+        "experiencia": "Sin experiencia previa o junior",
+        "motivo": "Desarrollo backend con Python/Django y APIs REST.",
+        "estado": "entrevista",
+        "corrida_id": 3
+      },
+      {
+        "url": "https://ejemplo.cl/empleo/analista-qa-ripley",
+        "titulo": "Analista QA Funcional",
+        "empresa": "Ripley Tech",
+        "ubicacion": "Viña del Mar, Valparaíso",
+        "publicada": "2026-10-11",
+        "detectada_en": "2026-10-11 16:18",
+        "fuente": "chiletrabajos",
+        "categoria": "principal",
+        "razon": "",
+        "tipo": "QA / Testing",
+        "prioridad": "Media",
+        "modalidad": "Presencial",
+        "contrato": "Indefinido",
+        "sueldo": "$1.300.000",
+        "experiencia": "2 años",
+        "motivo": "Pruebas funcionales de integración y regresión en sistemas e-commerce.",
+        "estado": "entrevista",
+        "corrida_id": 3,
+        "fecha_postulacion": "2026-10-12",
+        "notas": "Verificación automatizada OK",
+        "fase": "tecnica"
+      },
+      {
+        "url": "https://ejemplo.cl/empleo/business-analyst-latam",
+        "titulo": "Business Analyst / Analista de Sistemas",
+        "empresa": "LATAM Airlines",
+        "ubicacion": "Santiago, Región Metropolitana",
+        "publicada": "2026-10-10",
+        "detectada_en": "2026-10-10 11:02",
+        "fuente": "indeed",
+        "categoria": "principal",
+        "razon": "",
+        "tipo": "Business Analyst",
+        "prioridad": "Alta",
+        "modalidad": "Híbrido",
+        "contrato": "Indefinido",
+        "sueldo": "$2.000.000",
+        "experiencia": "2 a 4 años",
+        "motivo": "Interlocución entre áreas de negocio y equipos técnicos de ingeniería.",
+        "estado": "postulada",
+        "corrida_id": 2
+      }
+    ],
+    "fuera_perfil": [
+      {
+        "url": "https://ejemplo.cl/empleo/soporte-tecnico-n1",
+        "titulo": "Técnico de Soporte Mesa de Ayuda N1",
+        "empresa": "Servicios Informáticos SpA",
+        "ubicacion": "Santiago, Chile",
+        "publicada": "2026-10-12",
+        "detectada_en": "2026-10-12 10:31",
+        "fuente": "trabajando",
+        "categoria": "fuera_perfil",
+        "razon": "Rol enfocado en soporte / help desk nivel 1, fuera del perfil de análisis o testing.",
+        "tipo": "Soporte",
+        "prioridad": "Baja",
+        "modalidad": "Presencial",
+        "contrato": "Plazo fijo",
+        "sueldo": "$650.000",
+        "experiencia": "6 meses",
+        "motivo": "Atención de tickets y configuración de periféricos.",
+        "estado": "nueva",
+        "corrida_id": 4
+      }
+    ],
+    "sospechosas": [
+      {
+        "url": "https://ejemplo.cl/empleo/digitador-remoto-pago-previo",
+        "titulo": "Digitador de Datos Remoto de Alta Renta",
+        "empresa": "Global Solutions Group",
+        "ubicacion": "Chile (Remoto)",
+        "publicada": "2026-10-11",
+        "detectada_en": "2026-10-11 16:16",
+        "fuente": "indeed",
+        "categoria": "sospechosa",
+        "razon": "Menciona costo de kit de inicio y transferencia previa de capacitación.",
+        "tipo": "Digitador",
+        "prioridad": "Baja",
+        "modalidad": "Remoto",
+        "contrato": "Honorarios",
+        "sueldo": "$2.500.000",
+        "experiencia": "No indicada",
+        "motivo": "Patrón sospechoso de estafa laboral.",
+        "estado": "nueva",
+        "corrida_id": 3
+      }
+    ],
+    "descartadas": [
+      {
+        "url": "https://ejemplo.cl/empleo/practica-profesional-ti",
+        "titulo": "Práctica Profesional Ingeniería en Informática",
+        "empresa": "Tech Startup Chile",
+        "ubicacion": "Santiago, Chile",
+        "publicada": "2026-10-12",
+        "detectada_en": "2026-10-12 10:30",
+        "fuente": "chiletrabajos",
+        "categoria": "descartada",
+        "razon": "Exclusión: es práctica profesional / pasantía de estudiante.",
+        "tipo": "Práctica",
+        "prioridad": "Baja",
+        "modalidad": "Híbrido",
+        "contrato": "Convenio de práctica",
+        "sueldo": "$250.000 asignación",
+        "experiencia": "Estudiante regular",
+        "motivo": "Alumno en práctica.",
+        "estado": "descartada",
+        "corrida_id": 4
+      }
+    ],
+    "total_descartadas": 24
+  },
+  "corridas": [
+    {
+      "id": 4,
+      "inicio": "2026-10-12 10:30",
+      "fin": "2026-10-12 10:35",
+      "nuevas": 4,
+      "fuentes": [
+        {
+          "fuente": "Indeed",
+          "encontradas": 28,
+          "relevantes": 2,
+          "sin_chile": 0,
+          "errores": 0,
+          "antiguas": 1
+        },
+        {
+          "fuente": "Get on Board",
+          "encontradas": 14,
+          "relevantes": 1,
+          "sin_chile": 0,
+          "errores": 0,
+          "antiguas": 0
+        },
+        {
+          "fuente": "Chiletrabajos",
+          "encontradas": 18,
+          "relevantes": 1,
+          "sin_chile": 0,
+          "errores": 0,
+          "antiguas": 2
+        },
+        {
+          "fuente": "BNE",
+          "encontradas": 8,
+          "relevantes": 0,
+          "sin_chile": 0,
+          "errores": 0,
+          "antiguas": 1
+        },
+        {
+          "fuente": "Trabajando",
+          "encontradas": 12,
+          "relevantes": 0,
+          "sin_chile": 0,
+          "errores": 0,
+          "antiguas": 0
+        },
+        {
+          "fuente": "Glassdoor",
+          "encontradas": 6,
+          "relevantes": 0,
+          "sin_chile": 0,
+          "errores": 0,
+          "antiguas": 0
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "inicio": "2026-10-11 16:15",
+      "fin": "2026-10-11 16:20",
+      "nuevas": 3,
+      "fuentes": [
+        {
+          "fuente": "Indeed",
+          "encontradas": 24,
+          "relevantes": 1,
+          "sin_chile": 0,
+          "errores": 0,
+          "antiguas": 3
+        },
+        {
+          "fuente": "Get on Board",
+          "encontradas": 10,
+          "relevantes": 1,
+          "sin_chile": 0,
+          "errores": 0,
+          "antiguas": 0
+        },
+        {
+          "fuente": "Chiletrabajos",
+          "encontradas": 15,
+          "relevantes": 1,
+          "sin_chile": 0,
+          "errores": 0,
+          "antiguas": 1
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "inicio": "2026-10-10 11:00",
+      "fin": "2026-10-10 11:06",
+      "nuevas": 5,
+      "fuentes": [
+        {
+          "fuente": "Indeed",
+          "encontradas": 30,
+          "relevantes": 3,
+          "sin_chile": 0,
+          "errores": 0,
+          "antiguas": 2
+        },
+        {
+          "fuente": "Trabajando",
+          "encontradas": 16,
+          "relevantes": 2,
+          "sin_chile": 0,
+          "errores": 0,
+          "antiguas": 1
+        }
+      ]
+    }
+  ]
+}
