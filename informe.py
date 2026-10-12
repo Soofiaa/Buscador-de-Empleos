@@ -422,9 +422,13 @@ function pintarEncabezado() {
   const filas = (u.detalle.fuentes || []).map(f => h("tr", { title: textoVentana(f) }, h("td", {}, f.fuente),
     h("td", {}, f.encontradas, f.antiguas ? h("div", { class: "sub" }, textoAntiguas(f.antiguas)) : null),
     h("td", {}, f.relevantes), h("td", {}, f.errores)));
-  $("corrida").replaceChildren(
-    h("table", { class: "fuentes" }, h("tr", {}, h("th", {}, "Fuente"), h("th", {}, "Encontradas"), h("th", {}, "Relevantes nuevas"), h("th", {}, "Errores")), filas),
-    (u.detalle.avisos || []).length ? h("ul", { class: "avisos" }, u.detalle.avisos.map(a => h("li", {}, a))) : null);
+  const partesCorrida = [
+    h("table", { class: "fuentes" }, h("tr", {}, h("th", {}, "Fuente"), h("th", {}, "Encontradas"), h("th", {}, "Relevantes nuevas"), h("th", {}, "Errores")), filas)
+  ];
+  if ((u.detalle.avisos || []).length) {
+    partesCorrida.push(h("ul", { class: "avisos" }, u.detalle.avisos.map(a => h("li", {}, a))));
+  }
+  $("corrida").replaceChildren(...partesCorrida);
 }
 
 // ---------- filtros y pestañas
@@ -531,7 +535,8 @@ function pintarLista() {
       nota = h("p", { class: "sub" }, S.sel.tipo === "todas"
         ? "Se muestran las " + S.datos.descartadas.length + " más recientes de " + S.datos.total_descartadas + "."
         : "Se buscan entre las " + S.datos.descartadas.length + " descartadas más recientes (de " + S.datos.total_descartadas + ").");
-    cont.replaceChildren(nota, ...filas.map(o => tarjeta(o, completa)));
+    const elementos = [nota, ...filas.map(o => tarjeta(o, completa))].filter(Boolean);
+    cont.replaceChildren(...elementos);
   }
 }
 

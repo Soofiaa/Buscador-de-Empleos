@@ -4,4 +4,3 @@ __pycache__/
 *.xlsx
 .pytest_cache/
 .env
-google_*.html
