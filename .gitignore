@@ -4,3 +4,6 @@ __pycache__/
 *.xlsx
 .pytest_cache/
 .env
+respaldos/
+*.db-wal
+*.db-shm
