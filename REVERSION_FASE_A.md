@@ -94,3 +94,21 @@ cambia el esquema (v7). Mismo procedimiento de arriba, con:
 | Verificación | versión 7; al desplegar había 1123 ofertas, 5 corridas, 11 postuladas |
 
 Igual que antes, lo hecho en la página después del despliegue queda solo en la base apartada.
+
+---
+
+# Reversión de la Fase B1 (postulación manual y exportar)
+
+Despliegue del 13-10-2026 (commit `3844a39`). No cambia el esquema (v7) ni reclasifica nada: al desplegar, la base quedó
+idéntica en todas sus tablas. Mismo procedimiento de arriba, con:
+
+| Pieza | Valor |
+|---|---|
+| Imagen anterior | `job-tracker:genero` (`docker tag job-tracker:genero job-tracker-jobtracker:latest`) |
+| Base anterior | `ofertas_pre_B1_20261013.db` (volumen y `respaldos\`), sha256 `c000a4696dde9dbe509a85d727b39c03f7e0466323b39bc9e865d6620bb82ade` |
+| Prefijo de la base apartada | `retirada_B1_` |
+| Verificación | versión 7; al desplegar había 1123 ofertas, 5 corridas, 14 postuladas |
+
+Como la B1 no cambia datos existentes, también se puede volver solo con la imagen (`docker tag` + `compose up --no-build`)
+y conservar la base actual: las postulaciones manuales que hayas creado siguen ahí, con tipo "M: Manual", y la imagen
+anterior las muestra como cualquier otra oferta principal (sin el botón para crear nuevas).
