@@ -51,6 +51,10 @@ def test_respaldo_es_copia_valida_con_su_sha256(base):
     sidecar = open(final + ".sha256", encoding="utf-8").read().split()
     assert sidecar == [hashlib.sha256(open(final, "rb").read()).hexdigest(), r["archivo"]] and r["sha256"] == sidecar[0]
     assert not [n for n in os.listdir(carpeta) if n.startswith(respaldo.PREFIJO_TMP)]   # nada a medias
+    assert sorted(os.listdir(carpeta)) == [r["archivo"], r["archivo"] + ".sha256"]      # ni -wal ni -shm
+    c = sqlite3.connect(f"file:{final}?mode=ro", uri=True)
+    assert c.execute("PRAGMA journal_mode").fetchone()[0] == "delete"                 # un solo archivo autosuficiente
+    c.close()
 
 
 def test_respaldo_consistente_mientras_otro_escribe(base):

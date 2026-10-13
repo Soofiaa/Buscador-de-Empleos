@@ -91,6 +91,9 @@ def respaldar(ruta_db: str, carpeta: str, tipo: str, ahora) -> dict:
         try:
             origen.backup(destino)                      # copia consistente aunque otro esté escribiendo
             integridad = destino.execute("PRAGMA integrity_check").fetchone()[0]
+            # la copia hereda el modo WAL de la base; un respaldo debe ser UN archivo autosuficiente (y WAL es frágil
+            # en una carpeta montada desde Windows)
+            destino.execute("PRAGMA journal_mode = DELETE")
         finally:
             destino.close()
             origen.close()
@@ -105,8 +108,9 @@ def respaldar(ruta_db: str, carpeta: str, tipo: str, ahora) -> dict:
             raise SinEspacio("el disco de la carpeta de respaldos se llenó durante la copia") from ex
         raise
     finally:
-        if os.path.exists(tmp):
-            os.remove(tmp)
+        for resto in (tmp, tmp + "-wal", tmp + "-shm", tmp + "-journal"):
+            if os.path.exists(resto):
+                os.remove(resto)
     if tipo == "auto":
         _retener(carpeta)
     return {"archivo": nombre, "bytes": os.path.getsize(final), "sha256": huella, "integridad": integridad,
