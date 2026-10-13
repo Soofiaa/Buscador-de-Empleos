@@ -58,6 +58,40 @@ def test_soporte_con_rol_funcional_no_es_fuera_de_perfil():
     assert clasificar(oferta("Analista Funcional Soporte SAP"))["categoria"] == "principal"
 
 
+# ------------------------------------------------------------ cargo SAP / ERP (prioridad Media)
+@pytest.mark.parametrize("titulo", ["Consultor SAP Junior", "Consultora SAP", "Administrador SAP", "Administradora SAP",
+                                    "Analista SAP para Gestión de Proveedores", "Especialista SAP MM",
+                                    "Soporte SAP B1 - Proyecto", "SAP Analista de Proveedores"])
+def test_sap_con_cargo_reconocible_es_ti_media(titulo):
+    r = clasificar(oferta(titulo))
+    assert (r["categoria"], r["tipo"], r["prioridad"], r["motivo"]) == ("principal", "A: TI", "Media", "rol: SAP / ERP")
+
+
+def test_sap_funcional_sigue_por_sus_reglas_sin_rebajarse():
+    assert (clasificar(oferta("Analista Funcional SAP"))["prioridad"], clasificar(oferta("Analista Funcional SAP"))["motivo"]) \
+        == ("Alta", "rol: analista funcional")
+    r = clasificar(oferta("Consultor Funcional SAP", SENALES_TODAS))
+    assert (r["tipo"], r["prioridad"]) == ("B: Puente", "Alta") and r["motivo"].startswith("rol: analista funcional ERP")
+    assert clasificar(oferta("Consultor Funcional SAP"))["razon"].startswith("rol puente con")   # sin señales, como antes
+
+
+@pytest.mark.parametrize("titulo, desc, razon", [
+    ("Especialista Senior en SAP", "", "nivel semi senior / senior"),
+    ("Consultor SAP Junior", "Se requieren 3 años de experiencia", "exige 3+ años de experiencia"),
+    ("Practica Consultor SAP", "", "práctica / estudiante"),
+    ("Gerente SAP", "", "sin rol objetivo"),             # "gerente" no es un cargo SAP reconocible
+    ("SAP Specialist", "", "sin rol objetivo"),          # en inglés no se reconoce (decisión documentada)
+])
+def test_sap_sigue_pasando_por_los_filtros(titulo, desc, razon):
+    r = clasificar(oferta(titulo, desc))
+    assert (r["categoria"], r["razon"]) == ("descartada", razon)
+
+
+def test_sap_sospechoso_y_fuera_de_zona_como_el_resto():
+    assert clasificar(oferta("Consultor SAP Junior", "contacto solo por whatsapp"))["categoria"] == "sospechosa"
+    assert clasificar(oferta("Consultor SAP Junior", ubic="Antofagasta, AN, Chile"))["razon"] == "fuera de zona (AN)"
+
+
 # ------------------------------------------------------------ tipo A
 def test_tester_junior_es_a_alta():
     r = clasificar(oferta("Analista de Calidad / Tester Junior"))

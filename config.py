@@ -93,7 +93,7 @@ EXCLUIR_PRACTICA_DESC = [r"practica profesional", r"practicante", r"memorista",
 # ============================================================== Fuera de tu perfil (lista aparte)
 SOPORTE_TITULO = [r"soporte", r"help ?desk", r"mesa de (ayuda|servicios?)",
                   r"service ?desk", r"\bnoc\b", r"nivel 1\b", r"\bn1\b", r"\bl1\b"]
-SOPORTE_EXCEPCION = r"funcional|\bqa\b|tester|desarrollador|developer|programador"
+SOPORTE_EXCEPCION = r"funcional|\bqa\b|tester|desarrollador|developer|programador|\bsap\b"   # "Soporte SAP": cargo SAP / ERP
 
 # ============================================================== Ofertas sospechosas
 SOSPECHOSA_DESC = {
@@ -115,6 +115,9 @@ ROLES_A_MEDIA = [
     ("frontend", r"front-?end|react"),
     ("análisis + desarrollo", r"analista (programador|desarrollador)"),
     ("datos / BI", r"analista de datos|data analyst|business intelligence|\bbi\b|reporteria|analista de reportes|power ?bi"),
+    # SAP con un cargo reconocible (en cualquier orden). Si el título dice "funcional" no aplica: sigue por
+    # "analista funcional" (A, Alta) o "analista funcional ERP" (B, Alta), sin rebajarse a Media.
+    ("SAP / ERP", r"^(?!.*funcional)(?=.*\bsap\b).*\b(analista|consultora?|soporte|especialista|administradora?)\b"),
 ]
 ROLES_A_BAJA = [
     ("ciberseguridad / devops / sistemas",
