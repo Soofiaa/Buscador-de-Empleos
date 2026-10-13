@@ -112,3 +112,83 @@ idéntica en todas sus tablas. Mismo procedimiento de arriba, con:
 Como la B1 no cambia datos existentes, también se puede volver solo con la imagen (`docker tag` + `compose up --no-build`)
 y conservar la base actual: las postulaciones manuales que hayas creado siguen ahí, con tipo "M: Manual", y la imagen
 anterior las muestra como cualquier otra oferta principal (sin el botón para crear nuevas).
+
+---
+
+# Respaldo automático (despliegue del 13-10-2026, commits `68d6ce6` y `55757e7`)
+
+Los respaldos quedan en **`C:\Users\sofia\Respaldos\job-tracker\`** (fuera de OneDrive), montada en `/respaldos`:
+`ofertas_auto_AAAAMMDD-HHMMSS.db` (uno por día, se guardan los últimos 30) y `ofertas_manual_…db` (botón
+"💾 Respaldar ahora", nunca se borran solos), cada uno con su `.sha256`.
+
+## (a) Volver a la imagen anterior (sin respaldo automático)
+
+Este despliegue no cambió la base (todas las tablas quedaron idénticas), así que basta con la imagen:
+
+| Pieza | Valor |
+|---|---|
+| Imagen anterior | `job-tracker:B1` |
+| Base anterior (por si acaso) | `ofertas_pre_respaldo_20261013.db` (volumen y `respaldos\`), sha256 `c000a4696dde9dbe509a85d727b39c03f7e0466323b39bc9e865d6620bb82ade` |
+
+```
+docker compose stop jobtracker
+docker tag job-tracker:B1 job-tracker-jobtracker:latest
+docker compose up -d --no-build
+```
+
+La imagen B1 ignora `JT_RESPALDOS` y el montaje: simplemente deja de hacer respaldos. Los que ya están en la carpeta
+no se tocan.
+
+## (b) Restaurar un respaldo, paso a paso
+
+Úsalo si la base se dañó o si quieres volver a un día anterior. Lo hecho después de ese respaldo se pierde de la base
+activa, pero queda en la base apartada (`retirada_restauracion_*`).
+
+1. **Elegir el respaldo** en `C:\Users\sofia\Respaldos\job-tracker\` y verificarlo (Git Bash):
+
+   ```
+   cd /c/Users/sofia/Respaldos/job-tracker
+   sha256sum -c ofertas_auto_AAAAMMDD-HHMMSS.db.sha256          # debe decir OK
+   ```
+
+2. **Detener** el contenedor (nunca `down -v`):
+
+   ```
+   docker compose stop jobtracker
+   ```
+
+3. **Copiar el respaldo al volumen**, apartando la base actual (no se borra) y verificando el sha256 dentro del volumen
+   (reemplaza `ARCHIVO` por el nombre elegido):
+
+   ```
+   ARCHIVO=ofertas_auto_AAAAMMDD-HHMMSS.db
+   SHA=$(cut -c1-64 /c/Users/sofia/Respaldos/job-tracker/$ARCHIVO.sha256)
+   MSYS_NO_PATHCONV=1 docker run --rm --network none -v job-tracker_jt_datos:/datos \
+     -v "C:\Users\sofia\Respaldos\job-tracker":/src:ro ubuntu:latest sh -ec "
+       cd /datos
+       sello=\$(date +%Y%m%d-%H%M%S)
+       for f in ofertas.db ofertas.db-wal ofertas.db-shm; do [ -e \"\$f\" ] && mv \"\$f\" \"retirada_restauracion_\${sello}_\$f\"; done
+       cp /src/$ARCHIVO ofertas.db
+       test \"\$(sha256sum ofertas.db | cut -c1-64)\" = $SHA
+       chown root:root ofertas.db && chmod 0644 ofertas.db
+       ls -1"
+   ```
+
+   Si el `test` del sha256 falla, el comando se detiene: no levantes el contenedor y avísame.
+
+4. **Levantar** y esperar a que quede sano:
+
+   ```
+   docker compose up -d --no-build
+   docker inspect jobtracker --format "{{.State.Health.Status}}"      # healthy (puede tardar ~1 minuto)
+   ```
+
+5. **Comprobar los conteos** (deben coincidir con los del día del respaldo):
+
+   ```
+   docker exec jobtracker python -c "import sqlite3; c=sqlite3.connect('file:/datos/ofertas.db?mode=ro',uri=True); q=lambda s: c.execute(s).fetchone()[0]; print('versión', q('pragma user_version'), '| integridad', q('pragma integrity_check'), '| ofertas', q('select count(*) from ofertas'), '| corridas', q('select count(*) from corridas'), '| postuladas', q(\"select count(*) from ofertas where estado='postulada'\"))"
+   ```
+
+   Y en la página (`http://127.0.0.1:8765/`, Ctrl+F5): el pie "SQLite Conectado · N ofertas" y Seguimiento.
+
+Probado sobre una copia (volumen temporal) con el primer respaldo automático, `ofertas_auto_20261013-182831.db`.
