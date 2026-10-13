@@ -7,7 +7,12 @@
   GET  /fuentes/<archivo> las tipografías (solo las de la lista FUENTES; la CSP permite font-src 'self')
   GET  /api/estado        {buscando, mensaje, error, corrida, total_ofertas}   (corrida = resumen de la última búsqueda)
   POST /api/buscar        inicia una búsqueda en segundo plano (409 si ya hay una en curso)
-  POST /api/marcar        {"url": str, "estado": "nueva|revisada|postulada|entrevista|descartada"}
+  POST /api/marcar        {"url", "estado"} -> {ok, anterior, actual} con estado y fecha_postulacion (la fecha se pone sola
+                          al pasar a postulada/entrevista si estaba vacía). Deshacer: {"url", "restaurar": {estado,
+                          fecha_postulacion, si_actual: {estado, fecha_postulacion}}}; 409 si la oferta cambió entre medias
+  POST /api/nota          {"url", y solo lo que cambia: notas (<=5000), fecha_postulacion (AAAA-MM-DD o ""), fase,
+                          sueldo_manual (<=100), prioridad_manual ("", Alta, Media, Baja)} -> {ok, oferta}
+  Errores: 400 pedido inválido, 404 oferta inexistente, 503 "base ocupada, reintenta" (no se escribió nada)
 
 Seguridad (heredada de la app anterior): solo atiende peticiones cuyo Host u Origin sean locales, de modo que otra
 página abierta en tu navegador no pueda mandarle órdenes ni leer tus resultados. En Docker escucha en 0.0.0.0
@@ -17,6 +22,7 @@ Uso:  python servidor.py [--puerto 8765] [--no-abrir]
 """
 import argparse
 import json
+import sqlite3
 import threading
 import urllib.parse
 import webbrowser
@@ -160,15 +166,27 @@ def crear_servidor(app: Aplicacion, puerto: int = None, host: str = None) -> Thr
                 if app.iniciar_busqueda():
                     return self._json(202, {"ok": True})
                 return self._json(409, {"error": "ya hay una búsqueda en curso"})
-            if ruta == "/api/marcar":
+            escrituras = {
+                "/api/marcar": lambda con, d: buscar.marcar(con, d.get("url"), d.get("estado"), d.get("restaurar")),
+                "/api/nota": lambda con, d: {"oferta": buscar.actualizar_seguimiento(
+                    con, d.get("url"), {k: v for k, v in d.items() if k != "url"})},
+            }
+            if ruta in escrituras:
                 if not isinstance(datos, dict):
                     return self._json(400, {"error": "formato inválido"})
-                con = app.conexion()
                 try:
-                    ok = buscar.marcar_estado(con, str(datos.get("url") or ""), str(datos.get("estado") or ""))
-                finally:
-                    con.close()
-                return self._json(200 if ok else 400, {"ok": ok} if ok else {"error": "estado u oferta no válidos"})
+                    con = app.conexion()
+                    try:
+                        resultado = escrituras[ruta](con, datos)
+                    finally:
+                        con.close()
+                except buscar.ErrorDatos as ex:
+                    return self._json(ex.codigo, {"error": str(ex)})
+                except (buscar.BaseOcupada, sqlite3.OperationalError) as ex:
+                    if isinstance(ex, buscar.BaseOcupada) or buscar.es_base_ocupada(ex):
+                        return self._json(503, {"error": "base ocupada, reintenta"})
+                    raise
+                return self._json(200, {"ok": True, **resultado})
             self._json(404, {"error": "no existe"})
 
     return ThreadingHTTPServer((host or config.HOST, puerto or config.PUERTO), Manejador)

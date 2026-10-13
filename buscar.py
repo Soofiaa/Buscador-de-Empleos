@@ -522,7 +522,7 @@ def ofertas_para_pagina(con) -> dict:
 
     # una postulación en curso se ve siempre en Seguimiento, aunque una reclasificación la saque de 'principal'
     seguimiento = "estado IN ('postulada', 'entrevista')"
-    principal = filas(f"SELECT * FROM ofertas WHERE categoria = 'principal' OR {seguimiento}")
+    principal = [_con_prioridad_mostrada(f) for f in filas(f"SELECT * FROM ofertas WHERE categoria = 'principal' OR {seguimiento}")]
     principal.sort(key=lambda f: f["publicada"] or "", reverse=True)   # más recientes primero
     principal.sort(key=lambda f: (f["estado"] in ESTADOS_CERRADOS,
                                   ORDEN_PRIORIDAD.get(f["prioridad"], 9),
@@ -573,13 +573,119 @@ def corrida_de(detectada_en, corridas: list[dict]):
     return None
 
 
-def marcar_estado(con, url: str, estado: str) -> bool:
-    """Cambia el estado de seguimiento de una oferta. False si el estado no existe o la oferta no está."""
-    if estado not in ESTADOS:
+class ErrorDatos(Exception):
+    """Pedido inválido desde la página: lleva el código HTTP que debe responder el servidor."""
+    def __init__(self, codigo: int, mensaje: str):
+        super().__init__(mensaje)
+        self.codigo = codigo
+
+
+LIMITE_NOTAS = 5000
+LIMITE_SUELDO_MANUAL = 100
+ESTADOS_CON_FECHA = {"postulada", "entrevista"}
+
+
+def _fecha_valida(valor) -> bool:
+    """'' (sin fecha) o una fecha real AAAA-MM-DD."""
+    if valor == "":
+        return True
+    if not isinstance(valor, str) or len(valor) != 10:
         return False
-    cur = con.execute("UPDATE ofertas SET estado = ? WHERE url = ?", (estado, url))
-    con.commit()
-    return cur.rowcount > 0
+    try:
+        return datetime.strptime(valor, "%Y-%m-%d").strftime("%Y-%m-%d") == valor
+    except ValueError:
+        return False
+
+
+def _seguimiento(con, url) -> dict:
+    fila = con.execute("SELECT estado, fecha_postulacion FROM ofertas WHERE url = ?", (url,)).fetchone()
+    if fila is None:
+        raise ErrorDatos(404, "la oferta no existe")
+    return {"estado": fila["estado"], "fecha_postulacion": fila["fecha_postulacion"] or ""}
+
+
+def marcar(con, url: str, estado: str = None, restaurar: dict = None) -> dict:
+    """Cambia el estado de una oferta y devuelve {anterior, actual} (estado y fecha_postulacion) para poder deshacer.
+
+    - Al entrar a postulada/entrevista sin fecha, se pone la de hoy (hora de Chile). Ningún cambio posterior la borra.
+    - Deshacer: restaurar = {estado, fecha_postulacion, si_actual: {estado, fecha_postulacion}}. Deja exactamente el
+      estado y la fecha anteriores, pero SOLO si la oferta sigue como la dejó el cambio que se deshace (si_actual):
+      si alguien la cambió entre medias, 409 y no se toca nada."""
+    if not isinstance(url, str) or not url:
+        raise ErrorDatos(400, "falta la oferta")
+    if restaurar is not None:
+        if not isinstance(restaurar, dict) or not isinstance(restaurar.get("si_actual"), dict):
+            raise ErrorDatos(400, "restaurar debe traer estado, fecha_postulacion y si_actual")
+        for d in (restaurar, restaurar["si_actual"]):
+            if d.get("estado") not in ESTADOS or not _fecha_valida(d.get("fecha_postulacion")):
+                raise ErrorDatos(400, "estado o fecha no válidos en restaurar")
+    elif estado not in ESTADOS:
+        raise ErrorDatos(400, "estado no válido")
+    with transaccion(con):
+        anterior = _seguimiento(con, url)
+        if restaurar is not None:
+            esperado = {k: restaurar["si_actual"][k] for k in ("estado", "fecha_postulacion")}
+            if anterior != esperado:
+                raise ErrorDatos(409, "la oferta cambió después; no se deshizo para no pisar ese cambio")
+            actual = {"estado": restaurar["estado"], "fecha_postulacion": restaurar["fecha_postulacion"]}
+        else:
+            fecha = anterior["fecha_postulacion"]
+            if estado in ESTADOS_CON_FECHA and not fecha:
+                fecha = ahora_chile().strftime("%Y-%m-%d")
+            actual = {"estado": estado, "fecha_postulacion": fecha}
+        con.execute("UPDATE ofertas SET estado = ?, fecha_postulacion = ? WHERE url = ?",
+                    (actual["estado"], actual["fecha_postulacion"], url))
+    return {"anterior": anterior, "actual": actual}
+
+
+def marcar_estado(con, url: str, estado: str) -> bool:
+    """Compatibilidad: True si se cambió el estado; False si el estado no existe o la oferta no está."""
+    try:
+        marcar(con, url, estado)
+        return True
+    except ErrorDatos:
+        return False
+
+
+def actualizar_seguimiento(con, url: str, cambios: dict) -> dict:
+    """Actualización PARCIAL de lo que escribe la usuaria (solo las claves presentes). Devuelve la oferta guardada."""
+    if not isinstance(url, str) or not url:
+        raise ErrorDatos(400, "falta la oferta")
+    if not isinstance(cambios, dict) or not cambios:
+        raise ErrorDatos(400, "no hay nada que guardar")
+    validos = {"notas", "fecha_postulacion", "fase", "sueldo_manual", "prioridad_manual"}
+    desconocidos = set(cambios) - validos
+    if desconocidos:
+        raise ErrorDatos(400, "campos no permitidos: " + ", ".join(sorted(desconocidos)))
+    for campo, valor in cambios.items():
+        if not isinstance(valor, str):
+            raise ErrorDatos(400, f"{campo} debe ser texto")
+    if len(cambios.get("notas", "")) > LIMITE_NOTAS:
+        raise ErrorDatos(400, f"las notas tienen más de {LIMITE_NOTAS} caracteres")
+    if len(cambios.get("sueldo_manual", "")) > LIMITE_SUELDO_MANUAL:
+        raise ErrorDatos(400, f"el sueldo tiene más de {LIMITE_SUELDO_MANUAL} caracteres")
+    if "fecha_postulacion" in cambios and not _fecha_valida(cambios["fecha_postulacion"]):
+        raise ErrorDatos(400, "la fecha debe ser AAAA-MM-DD")
+    if cambios.get("fase", "") not in FASES:
+        raise ErrorDatos(400, "fase no válida")
+    if cambios.get("prioridad_manual", "") not in [""] + PRIORIDADES:
+        raise ErrorDatos(400, "prioridad no válida")
+    columnas = sorted(cambios)                    # nombres de una lista cerrada: nunca vienen del pedido tal cual
+    with transaccion(con):
+        _seguimiento(con, url)
+        con.execute(f"UPDATE ofertas SET {', '.join(c + ' = ?' for c in columnas)} WHERE url = ?",
+                    [cambios[c] for c in columnas] + [url])
+        fila = con.execute("SELECT url, estado, notas, fecha_postulacion, fase, sueldo_manual, prioridad_manual, "
+                           "prioridad FROM ofertas WHERE url = ?", (url,)).fetchone()
+    return _con_prioridad_mostrada(dict(fila))
+
+
+def _con_prioridad_mostrada(o: dict) -> dict:
+    """'prioridad' pasa a ser la que se muestra (la manual si existe); la calculada queda en 'prioridad_calculada'."""
+    o["prioridad_calculada"] = o.get("prioridad") or ""
+    if o.get("prioridad_manual"):
+        o["prioridad"] = o["prioridad_manual"]
+    return o
 
 
 def ultima_corrida(con):
