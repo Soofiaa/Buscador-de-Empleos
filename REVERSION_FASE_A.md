@@ -78,3 +78,19 @@ Los pasos son los mismos de arriba, cambiando tres cosas:
 Probado sobre una copia: la base restaurada queda idéntica (todas las filas y columnas) a la de antes del despliegue y
 la página vuelve a ser la de la Fase A (sin el interruptor de soporte). Lo hecho después del despliegue (estados, notas,
 el ajuste del interruptor) queda en la base apartada `retirada_soporte_*`.
+
+---
+
+# Reversión de formas de género y "analista de automatización" (volver a SAP / Soporte)
+
+Despliegue del 13-10-2026 (commit `3fbaed0`, reclasificación dirigida `--regla genero-automatizacion`: 9 ofertas). No
+cambia el esquema (v7). Mismo procedimiento de arriba, con:
+
+| Pieza | Valor |
+|---|---|
+| Imagen anterior | `job-tracker:soporte` (`docker tag job-tracker:soporte job-tracker-jobtracker:latest`) |
+| Base anterior | `ofertas_pre_genero_20261013.db` (volumen y `respaldos\`), sha256 `405a0e02aeaf4fbb943d37f5ad9a16586744ba7685e033242c789c4202ec1ad2` |
+| Prefijo de la base apartada | `retirada_genero_` |
+| Verificación | versión 7; al desplegar había 1123 ofertas, 5 corridas, 11 postuladas |
+
+Igual que antes, lo hecho en la página después del despliegue queda solo en la base apartada.
