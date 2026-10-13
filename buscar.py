@@ -455,24 +455,30 @@ def ofertas_para_pagina(con) -> dict:
     def filas(sql, args=()):
         return [dict(r) for r in con.execute(sql, args)]
 
-    principal = filas("SELECT * FROM ofertas WHERE categoria = 'principal'")
+    # una postulación en curso se ve siempre en Seguimiento, aunque una reclasificación la saque de 'principal'
+    seguimiento = "estado IN ('postulada', 'entrevista')"
+    principal = filas(f"SELECT * FROM ofertas WHERE categoria = 'principal' OR {seguimiento}")
     principal.sort(key=lambda f: f["publicada"] or "", reverse=True)   # más recientes primero
     principal.sort(key=lambda f: (f["estado"] in ESTADOS_CERRADOS,
                                   ORDEN_PRIORIDAD.get(f["prioridad"], 9),
                                   ORDEN_MODALIDAD.get(f["modalidad"], 9)))
     campos = "url, titulo, empresa, ubicacion, publicada, fuente, estado, detectada_en, razon, motivo"
+    otra = f"NOT ({seguimiento})"              # las que ya están en principal no se repiten en otra lista
     datos = {
         "principal": principal,
-        "fuera_perfil": filas(f"SELECT {campos} FROM ofertas WHERE categoria = 'fuera_perfil' ORDER BY detectada_en DESC"),
-        "sospechosas": filas(f"SELECT {campos} FROM ofertas WHERE categoria = 'sospechosa' ORDER BY detectada_en DESC"),
-        "descartadas": filas(f"SELECT {campos} FROM ofertas WHERE categoria = 'descartada' "
+        "fuera_perfil": filas(f"SELECT {campos} FROM ofertas WHERE categoria = 'fuera_perfil' AND {otra} "
+                              "ORDER BY detectada_en DESC"),
+        "sospechosas": filas(f"SELECT {campos} FROM ofertas WHERE categoria = 'sospechosa' AND {otra} "
+                             "ORDER BY detectada_en DESC"),
+        "descartadas": filas(f"SELECT {campos} FROM ofertas WHERE categoria = 'descartada' AND {otra} "
                              f"ORDER BY detectada_en DESC, publicada DESC LIMIT {LIMITE_DESCARTADAS}"),
     }
     corridas = historial_corridas(con)
     for lista in datos.values():
         for o in lista:
             o["corrida_id"] = corrida_de(o.get("detectada_en"), corridas)
-    datos["total_descartadas"] = con.execute("SELECT COUNT(*) FROM ofertas WHERE categoria = 'descartada'").fetchone()[0]
+    datos["total_descartadas"] = con.execute(
+        f"SELECT COUNT(*) FROM ofertas WHERE categoria = 'descartada' AND {otra}").fetchone()[0]
     datos["corridas"] = corridas
     return datos
 

@@ -329,6 +329,31 @@ def test_datos_de_la_pagina_orden_listas_y_estado(tmp_path):
     assert buscar.ofertas_para_pagina(con)["principal"][-1]["url"] == "http://qa-remoto"
 
 
+@pytest.mark.parametrize("categoria, lista", [("descartada", "descartadas"), ("fuera_perfil", "fuera_perfil"),
+                                              ("sospechosa", "sospechosas")])
+@pytest.mark.parametrize("estado", ["postulada", "entrevista"])
+def test_postulacion_en_curso_sigue_en_principal_aunque_cambie_su_categoria(tmp_path, categoria, lista, estado):
+    """Una reclasificación (como la que hizo la app Node) no puede esconder una postulación de Seguimiento."""
+    con = buscar.conectar(str(tmp_path / "t.db"))
+    buscar.guardar(con, buscar.procesar(df_de({"job_url": "http://qa", "title": "QA Tester", "company": "A"},
+                                              {"job_url": "http://otra", "title": "QA Analyst", "company": "B"}), "t"))
+    con.execute("UPDATE ofertas SET categoria = ?", (categoria,))
+    buscar.marcar_estado(con, "http://qa", estado)
+    d = buscar.ofertas_para_pagina(con)
+    assert [f["url"] for f in d["principal"]] == ["http://qa"]
+    assert [f["url"] for f in d[lista]] == ["http://otra"]          # sin repetirla en su lista
+    if lista == "descartadas":
+        assert d["total_descartadas"] == 1
+
+
+def test_descartada_por_la_usuaria_no_se_cuela_en_principal(tmp_path):
+    con = buscar.conectar(str(tmp_path / "t.db"))
+    buscar.guardar(con, buscar.procesar(df_de({"job_url": "http://acc", "title": "QA", "company": "Accenture"}), "t"))
+    buscar.marcar_estado(con, "http://acc", "descartada")
+    d = buscar.ofertas_para_pagina(con)
+    assert d["principal"] == [] and [f["url"] for f in d["descartadas"]] == ["http://acc"]
+
+
 def test_reclasificar_conserva_estado_y_aplica_config(tmp_path, monkeypatch):
     con = buscar.conectar(str(tmp_path / "t.db"))
     buscar.guardar(con, buscar.procesar(df_de({"job_url": "http://a", "title": "Developer Front-end"}), "t"))
