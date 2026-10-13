@@ -244,6 +244,11 @@ function textoProgreso(mensaje) {                // "[3/40] indeed | qa tester |
   const m = /^\s*\[(\d+)\/(\d+)\]\s*([^|\[\]]+?)\s*\|\s*([^|:]+?)\s*(?:[|:]|$)/.exec(mensaje || "");
   return m ? "Buscando en " + nombreFuente(m[3]) + " · " + m[4] + " · " + m[1] + " de " + m[2] : (mensaje || "");
 }
+const norm = s => (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+function coincideTexto(o, texto) {             // cada palabra buscada debe estar en título, empresa, lugar, motivo o notas
+  const t = norm([o.titulo, o.empresa, o.ubicacion, o.motivo, o.notas].join(" "));
+  return (texto || "").split(/\s+/).every(w => t.includes(norm(w)));
+}
 // </puras>
 
 const ESTADOS = ["nueva", "revisada", "postulada", "entrevista", "descartada"];
@@ -267,7 +272,6 @@ function h(tag, attrs, ...hijos) {
 const textoAntiguas = n => n + (n === 1 ? " antigua omitida" : " antiguas omitidas");
 const textoVentana = f => f.ventana_dias ? "Ventana de antigüedad: " + (f.ventana_dias === 1 ? "hoy y ayer" : "hoy y los " + f.ventana_dias + " días anteriores") : null;
 const urlSegura = u => /^https?:\/\//i.test(u || "") ? u : "#";
-const norm = s => (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 const $ = id => document.getElementById(id);
 const corridas = () => (S.datos && S.datos.corridas) || [];
 const claveSel = sel => sel.tipo + ":" + (sel.dia || sel.id || "");
@@ -434,7 +438,7 @@ function pintarEncabezado() {
 // ---------- filtros y pestañas
 function pasa(o) {
   const f = S.f;
-  if (f.texto) { const t = norm([o.titulo, o.empresa, o.ubicacion, o.motivo].join(" ")); if (!f.texto.split(/\s+/).every(w => t.includes(norm(w)))) return false; }
+  if (f.texto && !coincideTexto(o, f.texto)) return false;
   if (S.pestana === "ofertas" && f.estado !== "activas" && f.estado !== "" && o.estado !== f.estado) return false;
   if (f.prioridad && o.prioridad !== f.prioridad) return false;
   if (f.modalidad && o.modalidad !== f.modalidad) return false;

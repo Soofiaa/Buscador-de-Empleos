@@ -158,6 +158,18 @@ def test_antes_del_historial_cuenta_solo_ofertas_activas():
     assert r == ["p4"]                                    # s3 (descartada por ti, sin corrida) va a Seguimiento
 
 
+def test_el_buscador_de_la_pagina_tambien_mira_las_notas():
+    r = correr_js("""
+        const ofertas = [
+          {url: "a", titulo: "Data analyst", empresa: "Falabella", notas: "[unión 2026-10-13] POR VERIFICAR: estados previos"},
+          {url: "b", titulo: "Analista QA", empresa: "Axity", notas: ""},
+          {url: "c", titulo: "Tester", empresa: "Uno", motivo: "verificación de calidad"},
+          {url: "d", titulo: "Desarrollador", empresa: "Dos"}];
+        const buscar = t => ofertas.filter(o => coincideTexto(o, t)).map(o => o.url);
+        return [buscar("verificar"), buscar("UNION falabella"), buscar("axity qa"), buscar("verificación"), buscar("")];""")
+    assert r == [["a"], ["a"], ["b"], ["c"], ["a", "b", "c", "d"]]   # sin tildes ni mayúsculas; todas las palabras
+
+
 def test_texto_de_progreso():
     r = correr_js("""return [
         "  [3/40] indeed | qa tester | Santiago: 25 encontradas, 2 nuevas relevantes",
