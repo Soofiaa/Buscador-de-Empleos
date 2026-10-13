@@ -170,6 +170,15 @@ def test_el_buscador_de_la_pagina_tambien_mira_las_notas():
     assert r == [["a"], ["a"], ["b"], ["c"], ["a", "b", "c", "d"]]   # sin tildes ni mayúsculas; todas las palabras
 
 
+def test_el_buscador_de_la_pagina_acepta_fragmentos_de_palabra():
+    """Coincidencia PARCIAL (subcadena), como siempre: "falab" encuentra Falabella y "verif" las POR VERIFICAR."""
+    r = correr_js("""
+        const o = {titulo: "Data analyst", empresa: "Falabella", ubicacion: "Las Condes", motivo: "rol de datos",
+                   notas: "[unión 2026-10-13] POR VERIFICAR: estados previos"};
+        return ["falab", "analy", "verif", "conde dat", "ion 2026", "LÁS", "falabellas"].map(t => coincideTexto(o, t));""")
+    assert r == [True, True, True, True, True, True, False]   # un texto más largo que la palabra no calza
+
+
 def test_texto_de_progreso():
     r = correr_js("""return [
         "  [3/40] indeed | qa tester | Santiago: 25 encontradas, 2 nuevas relevantes",
