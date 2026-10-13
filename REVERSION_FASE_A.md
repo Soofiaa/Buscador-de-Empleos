@@ -54,3 +54,27 @@ Piezas que deben existir antes de desplegar la Fase A:
    Debe dar versión **6**, integridad **ok** y los mismos números que había antes de desplegar la Fase A
    (al 13-10-2026: 1071 ofertas, 4 corridas, 11 postuladas). Lo que se haya hecho en la página después de desplegar la
    Fase A (estados, notas, fases) queda en la base apartada `retirada_faseA_*`, no en la restaurada.
+
+---
+
+# Reversión de SAP / ERP y Soporte TI (volver a la Fase A)
+
+Despliegue del 13-10-2026 (commits `8cb6681` y `007a772`, reclasificación dirigida de 25 ofertas). Esta vez **no
+cambia el esquema** (la base sigue en v7), así que la imagen de la Fase A puede abrir la base restaurada sin renombrarla.
+
+| Pieza | Dónde |
+|---|---|
+| Imagen de la Fase A | etiqueta `job-tracker:faseA` |
+| Base anterior al despliegue | `/datos/ofertas_pre_soporte_20261013.db` en el volumen y copia en `respaldos\`, sha256 `027a0ea92023ee9a7314a82b60f833d8ae2d97af472b80c43dedd708649c918e` |
+
+Los pasos son los mismos de arriba, cambiando tres cosas:
+
+- en el paso 2, el archivo es `ofertas_pre_soporte_20261013.db`, el sha256 es el de esta tabla y el prefijo de la base
+  apartada es `retirada_soporte_` en vez de `retirada_faseA_`;
+- en el paso 3, la imagen es `job-tracker:faseA` (`docker tag job-tracker:faseA job-tracker-jobtracker:latest`);
+- en el paso 4, la versión esperada es **7** (no 6) y los números son los del momento del despliegue: 1123 ofertas,
+  5 corridas, 11 postuladas.
+
+Probado sobre una copia: la base restaurada queda idéntica (todas las filas y columnas) a la de antes del despliegue y
+la página vuelve a ser la de la Fase A (sin el interruptor de soporte). Lo hecho después del despliegue (estados, notas,
+el ajuste del interruptor) queda en la base apartada `retirada_soporte_*`.
