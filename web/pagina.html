@@ -1,0 +1,1020 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Búsqueda de empleo</title>
+<style>
+  /* Tipografías servidas por la propia app (web/fuentes, licencia SIL OFL 1.1): la CSP solo permite font-src 'self' */
+  @font-face { font-family:"Plus Jakarta Sans"; src:url("/fuentes/plus-jakarta-sans-latin-wght-normal-5.3.0.woff2") format("woff2");
+               font-weight:200 800; font-style:normal; font-display:swap; }
+  @font-face { font-family:"Outfit"; src:url("/fuentes/outfit-latin-wght-normal-5.3.0.woff2") format("woff2");
+               font-weight:100 900; font-style:normal; font-display:swap; }
+  :root {
+    --sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --display: "Outfit", "Plus Jakarta Sans", sans-serif;
+    color-scheme: light;
+  }
+
+  /* 🌸 1. GIRLY CLARO */
+  :root[data-tema="girly-claro"], :root[data-tema="girly"], :root:not([data-tema]) {
+    --fondo: #FFF5F8;
+    --panel: #FFFFFF;
+    --panel2: #FFEBF2;
+    --borde: #F5D3E2;
+    --tinta: #381E2B;
+    --suave: #8F5972;
+    --accion: #E04D7D;
+    --accion-tinta: #FFFFFF;
+    --sel: rgba(224, 77, 125, 0.12);
+    --alta: #C73866;
+    --alta-fondo: rgba(224, 77, 125, 0.14);
+    --media: #8E44AD;
+    --media-fondo: rgba(142, 68, 173, 0.12);
+    --baja: #96697C;
+    --baja-fondo: rgba(150, 105, 124, 0.12);
+    --nueva: #D81B60;
+    --nueva-fondo: rgba(216, 27, 96, 0.14);
+    --aviso: #D97706;
+    --aviso-fondo: rgba(217, 119, 6, 0.12);
+    --rojo: #E11D48;
+    --rojo-fondo: rgba(225, 29, 72, 0.10);
+    color-scheme: light;
+  }
+
+  /* 🌺 2. GIRLY OSCURO (Aesthetic Dark Pink) */
+  :root[data-tema="girly-oscuro"] {
+    --fondo: #160D14;
+    --panel: #231420;
+    --panel2: #301D2D;
+    --borde: #462940;
+    --tinta: #FDE8F3;
+    --suave: #C492B1;
+    --accion: #F43F5E;
+    --accion-tinta: #FFFFFF;
+    --sel: rgba(244, 63, 94, 0.18);
+    --alta: #FB7185;
+    --alta-fondo: rgba(251, 113, 133, 0.16);
+    --media: #D946EF;
+    --media-fondo: rgba(217, 70, 239, 0.15);
+    --baja: #A87193;
+    --baja-fondo: rgba(168, 113, 147, 0.14);
+    --nueva: #FDA4AF;
+    --nueva-fondo: rgba(244, 63, 94, 0.20);
+    --aviso: #FBBF24;
+    --aviso-fondo: rgba(251, 191, 36, 0.14);
+    --rojo: #F43F5E;
+    --rojo-fondo: rgba(244, 63, 94, 0.15);
+    color-scheme: dark;
+  }
+
+  /* 👔 3. HOMBRE CLARO */
+  :root[data-tema="hombre-claro"] {
+    --fondo: #F1F5F9;
+    --panel: #FFFFFF;
+    --panel2: #E2E8F0;
+    --borde: #CBD5E1;
+    --tinta: #0F172A;
+    --suave: #475569;
+    --accion: #1D4ED8;
+    --accion-tinta: #FFFFFF;
+    --sel: rgba(29, 78, 216, 0.12);
+    --alta: #0284C7;
+    --alta-fondo: rgba(2, 132, 199, 0.12);
+    --media: #4F46E5;
+    --media-fondo: rgba(79, 70, 229, 0.10);
+    --baja: #64748B;
+    --baja-fondo: rgba(100, 116, 139, 0.12);
+    --nueva: #2563EB;
+    --nueva-fondo: rgba(37, 99, 235, 0.14);
+    --aviso: #D97706;
+    --aviso-fondo: rgba(217, 119, 6, 0.12);
+    --rojo: #DC2626;
+    --rojo-fondo: rgba(220, 38, 38, 0.10);
+    color-scheme: light;
+  }
+
+  /* 💼 4. HOMBRE OSCURO (Navy Slate) */
+  :root[data-tema="hombre-oscuro"], :root[data-tema="hombre"] {
+    --fondo: #0B1120;
+    --panel: #151E2E;
+    --panel2: #1E293B;
+    --borde: #2D3D54;
+    --tinta: #F1F5F9;
+    --suave: #94A3B8;
+    --accion: #3B82F6;
+    --accion-tinta: #FFFFFF;
+    --sel: rgba(59, 130, 246, 0.18);
+    --alta: #38BDF8;
+    --alta-fondo: rgba(56, 189, 248, 0.16);
+    --media: #818CF8;
+    --media-fondo: rgba(129, 140, 248, 0.14);
+    --baja: #94A3B8;
+    --baja-fondo: rgba(148, 163, 184, 0.12);
+    --nueva: #60A5FA;
+    --nueva-fondo: rgba(96, 165, 250, 0.18);
+    --aviso: #FBBF24;
+    --aviso-fondo: rgba(251, 191, 36, 0.14);
+    --rojo: #F87171;
+    --rojo-fondo: rgba(248, 113, 113, 0.14);
+    color-scheme: dark;
+  }
+
+  /* ☀️ 5. NEUTRO CLARO */
+  :root[data-tema="neutro-claro"], :root[data-tema="claro"] {
+    --fondo: #F8FAFC;
+    --panel: #FFFFFF;
+    --panel2: #F1F5F9;
+    --borde: #E2E8F0;
+    --tinta: #0F172A;
+    --suave: #64748B;
+    --accion: #0EA5E9;
+    --accion-tinta: #FFFFFF;
+    --sel: rgba(14, 165, 233, 0.12);
+    --alta: #B45309;
+    --alta-fondo: rgba(245, 158, 11, 0.12);
+    --media: #4338CA;
+    --media-fondo: rgba(99, 102, 241, 0.10);
+    --baja: #64748B;
+    --baja-fondo: rgba(100, 116, 139, 0.10);
+    --nueva: #0284C7;
+    --nueva-fondo: rgba(14, 165, 233, 0.12);
+    --aviso: #B45309;
+    --aviso-fondo: rgba(245, 158, 11, 0.12);
+    --rojo: #BE123C;
+    --rojo-fondo: rgba(225, 29, 72, 0.08);
+    color-scheme: light;
+  }
+
+  /* 🌙 6. NEUTRO OSCURO (Cyber Obsidian) */
+  :root[data-tema="neutro-oscuro"], :root[data-tema="oscuro"] {
+    --fondo: #111317;
+    --panel: #1A1D24;
+    --panel2: #242832;
+    --borde: #303644;
+    --tinta: #F3F4F6;
+    --suave: #9CA3AF;
+    --accion: #8B5CF6;
+    --accion-tinta: #FFFFFF;
+    --sel: rgba(139, 92, 246, 0.16);
+    --alta: #FBBF24;
+    --alta-fondo: rgba(251, 191, 36, 0.14);
+    --media: #A78BFA;
+    --media-fondo: rgba(167, 139, 250, 0.14);
+    --baja: #9CA3AF;
+    --baja-fondo: rgba(156, 163, 175, 0.12);
+    --nueva: #C084FC;
+    --nueva-fondo: rgba(192, 132, 252, 0.16);
+    --aviso: #F59E0B;
+    --aviso-fondo: rgba(245, 158, 11, 0.14);
+    --rojo: #F87171;
+    --rojo-fondo: rgba(248, 113, 113, 0.14);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display:none !important; }
+  body { margin:0; background:var(--fondo); color:var(--tinta); font:15px/1.6 var(--sans); -webkit-font-smoothing:antialiased; }
+  h1, h2, h3 { font-family:var(--display); font-weight:700; letter-spacing:-0.025em; }
+  button, select, input { font:inherit; color:inherit; }
+  :focus-visible { outline:2px solid var(--accion); outline-offset:2px; border-radius:6px; }
+  .sub { color:var(--suave); font-size:.86rem; }
+
+  /* ---------- dos columnas */
+  .app { display:grid; grid-template-columns:304px minmax(0,1fr); min-height:100vh; }
+  .lateral { background:var(--panel); border-right:1px solid var(--borde); padding:22px 16px 28px;
+             position:sticky; top:0; height:100vh; overflow-y:auto; }
+  .principal { padding:26px 36px 48px; width:100%; max-width:1600px; margin:0; box-sizing:border-box; min-width:0; }
+  @media (max-width:860px) {
+    .app { grid-template-columns:minmax(0,1fr); }
+    .lateral { position:static; height:auto; border-right:0; border-bottom:1px solid var(--borde); }
+    .principal { padding:20px 16px 40px; }
+  }
+
+  /* ---------- columna izquierda */
+  .marca { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .marca h1 { font-size:1.3rem; margin:0; }
+  #ultima { margin:4px 0 16px; }
+  .boton { background:var(--accion); color:var(--accion-tinta); border:0; border-radius:10px; padding:10px 16px; font-weight:600; cursor:pointer; }
+  .boton:hover { filter:brightness(1.06); }
+  .boton:disabled { opacity:.55; cursor:progress; }
+  .boton.ancho { width:100%; }
+  .boton.sec { background:transparent; color:var(--accion); border:1px solid var(--borde); font-weight:500; padding:5px 11px; font-size:.85rem; }
+  .nota { color:var(--suave); font-size:.8rem; margin:6px 2px 10px; }
+  .progreso { font-size:.84rem; color:var(--suave); min-height:1.2em; margin:0 2px 4px; overflow-wrap:anywhere; }
+  .progreso.error { color:var(--rojo); }
+  .barra { height:6px; background:var(--panel2); border-radius:99px; overflow:hidden; margin:4px 2px 12px; }
+  .barra-relleno { height:100%; width:0; background:var(--accion); border-radius:99px; transition:width .4s ease; }
+
+  .historial { margin-top:14px; border-top:1px solid var(--borde); padding-top:12px; }
+  .historial h2 { font-size:1rem; color:var(--suave); margin:4px 10px 8px; }
+  .item { display:flex; align-items:baseline; gap:8px; width:100%; text-align:left; background:none; border:0;
+          border-radius:10px; padding:7px 10px; cursor:pointer; color:var(--tinta); }
+  .item:hover { background:var(--panel2); }
+  .item[aria-pressed="true"] { background:var(--sel); box-shadow:inset 3px 0 0 var(--accion); }
+  .item:focus-visible { outline:1.5px solid var(--accion); outline-offset:-1.5px; border-radius:10px; }
+  .item[aria-pressed="true"] .etq { color:var(--nueva); font-weight:650; }   /* --accion sobre --sel no llega a 4.5:1 en claro */
+  .item .num { margin-left:auto; font-variant-numeric:tabular-nums; font-size:.84rem; color:var(--suave); }
+  .item[aria-pressed="true"] .num { color:var(--tinta); }
+  .item.todas { font-weight:600; margin-bottom:6px; }
+  .dia { margin-top:8px; }
+  .dia-btn .etq { font-weight:600; }
+  .dia-btn .fecha { color:var(--suave); font-size:.8rem; }
+  .horas { list-style:none; margin:2px 0 4px 10px; padding:0 0 0 8px; border-left:1px solid var(--borde); }
+  .hora { font-size:.9rem; padding:5px 10px; }
+  .hora .t { font-variant-numeric:tabular-nums; min-width:3.1em; }
+  .hora .franja { color:var(--suave); font-size:.8rem; }
+  .item.antes { margin-top:12px; color:var(--suave); }
+
+  /* ---------- columna principal */
+  .encabezado { margin-bottom:18px; }
+  .encabezado-fila { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; }
+  .btn-manual-header { background:var(--accion); color:var(--accion-tinta); border:0; border-radius:12px; padding:9px 18px; font-weight:700; font-size:.88rem; cursor:pointer; display:inline-flex; align-items:center; gap:8px; box-shadow:0 2px 8px rgba(0,0,0,.10); transition:transform .15s ease, filter .15s ease; flex-shrink:0; }
+  .btn-manual-header:hover { filter:brightness(1.08); transform:translateY(-1px); }
+  .titulo-sel { font-size:1.75rem; margin:0 0 2px; line-height:1.2; }
+  .fuentes-sel { display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:10px; margin-top:14px; }
+  .fuente-mini { background:var(--panel); border:1px solid var(--borde); border-radius:12px; padding:10px 12px; }
+  .fuente-mini .nombre { font-size:.82rem; color:var(--suave); }
+  .fuente-mini .cifras { font-size:.9rem; font-variant-numeric:tabular-nums; margin-top:2px; white-space:nowrap; }
+  .fuente-mini .cifras .rel { color:var(--accion); font-weight:650; }
+  .fuente-mini .cifras .err { color:var(--aviso); }
+  .fuente-mini .antiguas { font-size:.78rem; color:var(--suave); margin-top:1px; }
+  details.panel { background:var(--panel); border:1px solid var(--borde); border-radius:12px; padding:9px 14px; margin-top:14px; }
+  details.panel summary { cursor:pointer; color:var(--suave); font-size:.88rem; }
+  table.fuentes { border-collapse:collapse; width:100%; margin-top:8px; font-size:.86rem; }
+  table.fuentes th, table.fuentes td { text-align:left; padding:4px 8px; border-bottom:1px solid var(--borde); }
+  table.fuentes th { color:var(--suave); font-weight:600; }
+  .avisos li { color:var(--aviso); font-size:.86rem; }
+
+  nav.pestanas { display:flex; flex-wrap:wrap; gap:4px; border-bottom:1px solid var(--borde); margin-bottom:14px; }
+  nav.pestanas button { background:none; border:0; border-bottom:3px solid transparent; padding:8px 12px; cursor:pointer; color:var(--suave); }
+  nav.pestanas button:hover { color:var(--tinta); }
+  nav.pestanas button[aria-selected="true"] { color:var(--tinta); border-bottom-color:var(--accion); font-weight:600; }
+  .cuenta { font-size:.78rem; background:var(--panel2); color:var(--suave); border-radius:99px; padding:1px 8px; margin-left:6px; font-variant-numeric:tabular-nums; }
+  .filtros { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:8px; margin-bottom:16px; }
+  @media (min-width:1300px) { .filtros { grid-template-columns:repeat(6,minmax(0,1fr)); } }
+  .filtros input[type=search] { grid-column:1 / -1; }
+  .filtros input, .filtros select { width:100%; background:var(--panel); border:1px solid var(--borde); border-radius:10px; padding:8px 11px; }
+  .filtros select { font-size:.9rem; padding:8px 6px 8px 10px; text-overflow:ellipsis; }
+  h3.grupo { font-size:1.08rem; margin:24px 0 10px; display:flex; align-items:center; gap:4px; }
+
+  .tarjeta { background:var(--panel); border:1px solid var(--borde); border-radius:16px; padding:16px 20px; margin-bottom:12px; box-sizing:border-box; overflow:hidden; }
+  .tarjeta.cerrada { opacity:.78; }
+  .fila-titulo { display:flex; gap:14px; justify-content:space-between; align-items:flex-start; min-width:0; }
+  .selector-tema { background:var(--panel2); color:var(--tinta); border:1px solid var(--borde); border-radius:10px; padding:6px 10px; font-size:0.83rem; font-weight:600; cursor:pointer; outline:none; transition:border-color .15s ease, box-shadow .15s ease; }
+  .selector-tema:hover, .selector-tema:focus-visible { border-color:var(--accion); }
+  .titulo { flex:1 1 auto; min-width:0; font-family:var(--display); font-weight:650; font-size:1.12rem; line-height:1.35; color:var(--tinta); text-decoration:none; word-break:break-word; overflow-wrap:break-word; }
+  .titulo:hover { color:var(--accion); text-decoration:underline; text-underline-offset:3px; }
+  .meta { color:var(--suave); font-size:.86rem; margin:4px 0 8px; }
+  .chips { display:flex; flex-wrap:wrap; gap:6px; margin:6px 0 2px; }
+  .chip { font-size:.78rem; border-radius:99px; padding:2px 10px; background:var(--panel2); color:var(--tinta); }
+  .chip.Alta { background:var(--alta-fondo); color:var(--alta); font-weight:600; }
+  .chip.Media { background:var(--media-fondo); color:var(--media); font-weight:600; }
+  .chip.Baja { background:var(--baja-fondo); color:var(--baja); font-weight:600; }
+  .chip.aviso { background:var(--aviso-fondo); color:var(--aviso); }
+  .chip.nueva { background:var(--nueva-fondo); color:var(--nueva); font-weight:600; }
+  .motivo { font-size:.85rem; color:var(--suave); margin-top:8px; }
+  .razon { font-size:.85rem; color:var(--rojo); margin-top:6px; }
+  select.estado { flex-shrink:0; background:var(--panel2); color:var(--tinta); border:1px solid var(--borde); border-radius:10px; padding:6px 10px; font-size:.83rem; font-weight:600; max-width:175px; cursor:pointer; outline:none; box-sizing:border-box; transition:border-color .15s ease, box-shadow .15s ease; }
+  select.estado:hover, select.estado:focus-visible { border-color:var(--accion); }
+  .vacio { color:var(--suave); padding:28px 0; text-align:center; }
+  @media (max-width:620px) { .fila-titulo { flex-direction:column; align-items:stretch; gap:8px; } select.estado { max-width:100%; width:100%; } .tarjeta { padding:14px 16px; } }
+
+  /* ---------- panel de notas y bitácora */
+  details.panel-nota { margin-top:10px; background:var(--panel2); border:1px solid var(--borde); border-radius:12px; padding:8px 12px; }
+  details.panel-nota summary { cursor:pointer; font-weight:600; color:var(--suave); font-size:.84rem; list-style:none; display:flex; align-items:center; gap:6px; }
+  details.panel-nota summary::-webkit-details-marker { display:none; }
+  details.panel-nota summary:hover { color:var(--tinta); }
+  .form-nota { margin-top:10px; display:flex; flex-direction:column; gap:8px; }
+  .fila-fecha-nota { display:flex; align-items:center; gap:8px; font-size:.84rem; color:var(--suave); }
+  .input-fecha-nota { background:var(--panel); border:1px solid var(--borde); border-radius:8px; padding:4px 8px; font-size:.82rem; color:var(--tinta); }
+  .input-nota { width:100%; min-height:60px; background:var(--panel); border:1px solid var(--borde); border-radius:10px; padding:8px 10px; font-size:.86rem; color:var(--tinta); resize:vertical; outline:none; transition:border-color .15s ease; box-sizing:border-box; }
+  .input-nota:focus { border-color:var(--accion); }
+  .acciones-nota { display:flex; align-items:center; justify-content:space-between; }
+  .feedback-nota { font-size:.82rem; color:var(--nueva); font-weight:600; }
+
+  /* ---------- modal manual */
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.58); backdrop-filter:blur(4px); display:flex; align-items:center; justify-content:center; z-index:9999; padding:16px; }
+  .modal-tarjeta { background:var(--panel); border:1px solid var(--borde); border-radius:18px; width:100%; max-width:520px; max-height:90vh; overflow-y:auto; padding:24px; box-shadow:0 24px 48px rgba(0,0,0,.25); }
+  .modal-cabecera { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .modal-cabecera h2 { margin:0; font-size:1.25rem; font-family:var(--display); }
+  .btn-cerrar { background:none; border:0; font-size:1.15rem; color:var(--suave); cursor:pointer; padding:4px 8px; border-radius:6px; }
+  .btn-cerrar:hover { color:var(--tinta); }
+  .modal-form { display:flex; flex-direction:column; gap:12px; }
+  .form-fila { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  @media (max-width:480px) { .form-fila { grid-template-columns:1fr; } }
+  .form-grupo { display:flex; flex-direction:column; gap:4px; }
+  .form-grupo label { font-size:.82rem; font-weight:600; color:var(--suave); }
+  .form-grupo input, .form-grupo select, .form-grupo textarea { background:var(--panel2); border:1px solid var(--borde); border-radius:10px; padding:8px 11px; font-size:.88rem; color:var(--tinta); outline:none; transition:border-color .15s ease; }
+  .form-grupo input:focus, .form-grupo select:focus, .form-grupo textarea:focus { border-color:var(--accion); }
+  .form-grupo textarea { min-height:55px; resize:vertical; }
+  .modal-acciones { display:flex; justify-content:flex-end; gap:8px; margin-top:6px; }
+
+  /* ---------- métricas de embudo ---------- */
+  .embudo-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:10px; margin-bottom:18px; }
+  .embudo-card { background:var(--panel); border:1px solid var(--borde); border-radius:14px; padding:12px 14px; display:flex; flex-direction:column; gap:4px; transition:transform .15s ease, border-color .15s ease; }
+  .embudo-card:hover { transform:translateY(-2px); border-color:var(--accion); }
+  .embudo-card .etiqueta { font-size:.8rem; font-weight:600; color:var(--suave); display:flex; align-items:center; gap:6px; }
+  .embudo-card .valor { font-size:1.5rem; font-weight:700; font-family:var(--display); color:var(--tinta); }
+
+  /* ---------- vista kanban ---------- */
+  .selector-vista { display:flex; align-items:center; gap:4px; background:var(--panel2); border:1px solid var(--borde); border-radius:10px; padding:3px; width:fit-content; }
+  .btn-vista { background:none; border:0; border-radius:7px; padding:6px 11px; font-size:.82rem; font-weight:600; cursor:pointer; color:var(--suave); transition:all .15s ease; }
+  .btn-vista[aria-pressed="true"] { background:var(--panel); color:var(--tinta); box-shadow:0 1px 3px rgba(0,0,0,.08); }
+
+  .kanban-board { display:grid; grid-template-columns:repeat(4, minmax(260px, 1fr)); gap:14px; overflow-x:auto; padding-bottom:16px; align-items:start; }
+  @media (max-width:1150px) { .kanban-board { grid-template-columns:repeat(4, 280px); } }
+  .kanban-board .tarjeta { margin-bottom:0; padding:14px; border-radius:14px; box-shadow:0 1px 4px rgba(0,0,0,.05); display:flex; flex-direction:column; gap:8px; cursor:grab; transition:transform .15s ease, opacity .15s ease, box-shadow .15s ease; user-select:none; }
+  .kanban-board .tarjeta:active { cursor:grabbing; }
+  .kanban-board .tarjeta.arrastrando { opacity:.35; transform:scale(.97); border:2px dashed var(--accion); box-shadow:none; }
+  .kanban-col { background:var(--panel2); border:1px solid var(--borde); border-radius:16px; padding:14px 12px; display:flex; flex-direction:column; gap:12px; min-height:220px; transition:border-color .15s ease, background-color .15s ease, box-shadow .15s ease; }
+  .kanban-col.zona-drop-activa { border-color:var(--accion); background:var(--sel); box-shadow:0 0 0 2px var(--accion); }
+  .kanban-col-header { display:flex; align-items:center; justify-content:space-between; padding:0 4px 6px; border-bottom:1px solid var(--borde); }
+  .kanban-col-header h3 { margin:0; font-size:.94rem; font-weight:700; color:var(--tinta); display:flex; align-items:center; gap:6px; }
+  .kanban-col-header .cuenta { font-size:.78rem; background:var(--panel); color:var(--suave); padding:2px 7px; border-radius:99px; font-weight:600; }
+  .kanban-col-items { display:flex; flex-direction:column; gap:10px; }
+  .kanban-board .tarjeta .fila-titulo { display:flex; flex-direction:column; gap:6px; align-items:stretch; }
+  .kanban-board .tarjeta .titulo { font-size:1.02rem; line-height:1.35; word-break:break-word; width:100%; }
+  .kanban-board .tarjeta select.estado { width:100%; max-width:100%; background:var(--panel2); border:1px solid var(--borde); border-radius:9px; padding:7px 10px; font-size:.83rem; font-weight:600; color:var(--tinta); margin-top:4px; cursor:pointer; outline:none; transition:border-color .15s ease; box-sizing:border-box; }
+  .kanban-board .tarjeta select.estado:hover, .kanban-board .tarjeta select.estado:focus-visible { border-color:var(--accion); }
+  .kanban-vacio { font-size:.82rem; color:var(--suave); text-align:center; padding:28px 8px; font-style:italic; border:1px dashed var(--borde); border-radius:10px; }
+  .btn-exportar { font-size:.82rem; padding:6px 12px; white-space:nowrap; border-radius:10px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; height:100%; }
+  .btn-exportar:hover { border-color:var(--accion); color:var(--accion); }
+  .chip.alerta { background:var(--rojo-fondo); color:var(--rojo); font-weight:600; }
+  .chip.ok { background:var(--nueva-fondo); color:var(--nueva); font-weight:600; }
+
+  /* ---------- refinamiento UI/UX: tarjetas tipo linear ---------- */
+  .tarjeta.prio-alta { border-left:4px solid var(--alta) !important; }
+  .tarjeta.prio-media { border-left:4px solid var(--media) !important; }
+  .tarjeta.prio-baja { border-left:4px solid var(--baja) !important; }
+  .tarjeta-header { display:flex; align-items:center; gap:10px; margin-bottom:4px; }
+  .avatar-empresa { width:32px; height:32px; border-radius:9px; background:var(--panel2); border:1px solid var(--borde); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:.85rem; color:var(--accion); flex-shrink:0; }
+  .tarjeta-titulos { display:flex; flex-direction:column; flex:1; min-width:0; }
+  .meta-limpia { font-size:.82rem; color:var(--suave); display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin:4px 0; }
+  .meta-sep { color:var(--borde); font-weight:700; }
+  .btn-gestionar-oferta { font-size:.82rem; font-weight:600; padding:6px 12px; border-radius:8px; background:var(--panel2); border:1px solid var(--borde); color:var(--tinta); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:6px; transition:all .15s ease; width:100%; margin-top:6px; }
+  .btn-gestionar-oferta:hover { background:var(--sel); border-color:var(--accion); color:var(--accion); }
+
+  /* ---------- toast flotante con deshacer (undo) ---------- */
+  .toast-container { position:fixed; bottom:24px; right:24px; z-index:10000; display:flex; flex-direction:column; gap:8px; pointer-events:none; }
+  .toast { pointer-events:auto; background:var(--panel); border:1px solid var(--borde); box-shadow:0 12px 32px rgba(0,0,0,.22); border-radius:12px; padding:12px 16px; display:flex; align-items:center; gap:12px; font-size:.88rem; animation:slideUpToast .22s ease-out; max-width:400px; color:var(--tinta); }
+  @keyframes slideUpToast { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+  .toast-btn-deshacer { background:var(--accion); color:var(--accion-tinta); border:0; border-radius:6px; padding:5px 12px; font-size:.82rem; font-weight:700; cursor:pointer; }
+  .toast-btn-deshacer:hover { filter:brightness(1.1); }
+  .toast-btn-cerrar { background:none; border:0; color:var(--suave); cursor:pointer; padding:2px 6px; font-size:1rem; border-radius:4px; }
+  .toast-btn-cerrar:hover { color:var(--tinta); }
+
+  /* ---------- pipeline de fases de entrevista ---------- */
+  .pipeline-container { margin:14px 0; background:var(--panel2); border-radius:12px; padding:12px 14px; border:1px solid var(--borde); }
+  .pipeline-titulo { font-size:.8rem; font-weight:700; color:var(--suave); margin-bottom:8px; text-transform:uppercase; letter-spacing:.04em; }
+  .pipeline-pasos { display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:8px; }
+  .pipeline-paso { background:var(--panel); border:1px solid var(--borde); border-radius:8px; padding:8px 10px; font-size:.82rem; font-weight:600; color:var(--suave); cursor:pointer; text-align:center; transition:all .15s ease; display:flex; flex-direction:column; gap:2px; }
+  .pipeline-paso:hover { border-color:var(--accion); color:var(--tinta); }
+  .pipeline-paso.activo { background:var(--accion); color:var(--accion-tinta); border-color:var(--accion); box-shadow:0 2px 8px rgba(0,0,0,.15); }
+
+  /* ---------- pestaña métricas y embudo ---------- */
+  .metricas-seccion { display:flex; flex-direction:column; gap:20px; }
+  .funnel-container { background:var(--panel); border:1px solid var(--borde); border-radius:16px; padding:20px; display:flex; flex-direction:column; gap:16px; }
+  .funnel-paso { display:flex; flex-direction:column; gap:6px; }
+  .funnel-paso-cabecera { display:flex; justify-content:space-between; align-items:center; }
+  .funnel-paso-nombre { font-size:.95rem; font-weight:700; color:var(--tinta); display:flex; align-items:center; gap:8px; }
+  .funnel-paso-cifras { font-size:.86rem; font-weight:600; color:var(--suave); }
+  .funnel-barra-wrap { height:12px; background:var(--panel2); border-radius:6px; overflow:hidden; }
+  .funnel-barra { height:100%; background:var(--accion); border-radius:6px; transition:width .4s ease; }
+  .metricas-kpis { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; }
+  .metricas-kpi-card { background:var(--panel); border:1px solid var(--borde); border-radius:14px; padding:16px; display:flex; flex-direction:column; gap:4px; }
+  .metricas-kpi-card .etq { font-size:.82rem; font-weight:600; color:var(--suave); }
+  .metricas-kpi-card .num { font-size:1.8rem; font-weight:700; font-family:var(--display); color:var(--tinta); }
+  .metricas-kpi-card .det { font-size:.8rem; color:var(--suave); }
+  .breakdowns-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:14px; }
+  .breakdown-card { background:var(--panel); border:1px solid var(--borde); border-radius:14px; padding:16px; }
+  .breakdown-card h3 { margin:0 0 12px; font-size:1rem; font-weight:700; }
+  .breakdown-fila { display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:1px solid var(--borde); font-size:.86rem; }
+  .breakdown-fila:last-child { border-bottom:none; }
+
+  /* ---------- mejoras audit ui/ux ---------- */
+  .skill-pill { font-size:0.73rem; font-weight:600; padding:2px 8px; border-radius:6px; background:var(--panel2); border:1px solid var(--borde); color:var(--tinta); display:inline-flex; align-items:center; }
+  .skill-pill:hover { border-color:var(--accion); }
+  .chip.sueldo-destacado { background:rgba(16, 185, 129, 0.12); color:#047857; border:1px solid rgba(16, 185, 129, 0.3); font-weight:700; }
+  :root[data-tema="girly-oscuro"] .chip.sueldo-destacado, :root[data-tema="hombre-oscuro"] .chip.sueldo-destacado, :root[data-tema="neutro-oscuro"] .chip.sueldo-destacado { color:#34D399; background:rgba(52, 211, 153, 0.15); border-color:rgba(52, 211, 153, 0.35); }
+  .btn-enlace-externo { display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:7px; background:var(--panel2); border:1px solid var(--borde); color:var(--suave); text-decoration:none; font-size:.85rem; transition:all .15s ease; flex-shrink:0; }
+  .btn-enlace-externo:hover { color:var(--accion); border-color:var(--accion); background:var(--sel); transform:translate(1px, -1px); }
+  .btn-limpiar-filtros { background:var(--rojo-fondo); color:var(--rojo); border:1px solid rgba(225, 29, 72, 0.25); border-radius:10px; padding:7px 12px; font-size:.83rem; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:5px; transition:all .15s ease; white-space:nowrap; }
+  .btn-limpiar-filtros:hover { background:var(--rojo); color:#fff; }
+  .tabla-compacta { display:flex; flex-direction:column; gap:6px; width:100%; }
+  .fila-compacta { background:var(--panel); border:1px solid var(--borde); border-radius:12px; padding:10px 14px; display:grid; grid-template-columns:36px minmax(200px, 2fr) minmax(130px, 1fr) 110px 100px 150px 32px; gap:12px; align-items:center; transition:border-color .15s ease, transform .12s ease; }
+  .fila-compacta:hover { border-color:var(--accion); transform:translateY(-1px); }
+  .fila-compacta .cargo-box { display:flex; flex-direction:column; min-width:0; }
+  .fila-compacta .cargo-titulo { font-weight:700; font-size:.92rem; color:var(--tinta); text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .fila-compacta .cargo-titulo:hover { color:var(--accion); }
+  .fila-compacta .cargo-empresa { font-size:.8rem; color:var(--suave); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .fila-compacta select.estado { font-size:.78rem; padding:4px 6px; }
+  @media (max-width:980px) {
+    .fila-compacta { grid-template-columns:32px 1fr auto auto; }
+    .fila-compacta .ocultar-movil { display:none; }
+  }
+  .seccion-lateral { margin-bottom:12px; }
+  .seccion-lateral-titulo { font-size:.74rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--suave); margin:14px 2px 6px; }
+  .badge-db-status { margin-top:20px; padding:10px 12px; background:var(--panel2); border:1px solid var(--borde); border-radius:10px; font-size:.78rem; color:var(--suave); display:flex; align-items:center; gap:8px; }
+  .dot-online { width:8px; height:8px; border-radius:50%; background:#10B981; box-shadow:0 0 6px #10B981; flex-shrink:0; }
+  /* ---------- corrección de contraste WCAG AA (PREPARADA, SIN APLICAR): se activa con data-contraste="aa" en <html> */
+  :root[data-contraste="aa"][data-tema="girly-claro"] { --accion:#DA2A64; --alta:#BB3560; --baja:#875E70; --nueva:#C11856; --aviso:#A25904; --rojo:#CF1B42; }
+  :root[data-contraste="aa"][data-tema="girly-oscuro"] { --accion:#E80D33; --media:#DD59F1; --baja:#B2819F; --rojo:#F65C76; }
+  :root[data-contraste="aa"][data-tema="hombre-claro"] { --alta:#0270A9; --baja:#5B6A7F; --nueva:#1759EA; --aviso:#A25904; --rojo:#CD2121; }
+  :root[data-contraste="aa"][data-tema="hombre-oscuro"] { --accion:#196CF4; --media:#8690F8; }
+  :root[data-contraste="aa"][data-tema="neutro-claro"] { --accion:#0B7CAF; --alta:#AF5109; --baja:#5E6D82; --nueva:#0270A9; --aviso:#AF5109; }
+  :root[data-contraste="aa"][data-tema="neutro-oscuro"] { --accion:#8452F5; }
+  /* ---------- agregados de esta versión */
+  .chip.tenia-postulacion { background:var(--aviso-fondo); color:var(--aviso); font-weight:600; }
+  .badge-db-status.sin-conexion .dot-online { background:var(--rojo); box-shadow:0 0 6px var(--rojo); }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="lateral">
+    <div class="marca">
+      <h1>Búsqueda de empleo</h1>
+      <select class="selector-tema" id="tema" aria-label="Elegir tema visual">
+        <optgroup label="🌸 Estilo Girly">
+          <option value="girly-claro">🌸 Girly Claro</option>
+          <option value="girly-oscuro">🌺 Girly Oscuro</option>
+        </optgroup>
+        <optgroup label="👔 Estilo Hombre">
+          <option value="hombre-claro">👔 Hombre Claro</option>
+          <option value="hombre-oscuro">💼 Hombre Oscuro</option>
+        </optgroup>
+        <optgroup label="☀️ Neutro">
+          <option value="neutro-claro">☀️ Neutro Claro</option>
+          <option value="neutro-oscuro">🌙 Neutro Oscuro</option>
+        </optgroup>
+      </select>
+    </div>
+    <div class="sub" id="ultima">Cargando…</div>
+
+    <div class="seccion-lateral">
+      <button class="boton ancho" id="buscar" type="button">Buscar empleos</button>
+      <p class="nota">Búsqueda completa (~5 min) en Indeed, Chiletrabajos, BNE, etc.</p>
+      <div class="progreso" id="progreso" role="status" aria-live="polite"></div>
+      <div class="barra" id="barra" role="progressbar" aria-label="Avance de la búsqueda" aria-valuemin="0" hidden><div class="barra-relleno" id="barra-relleno"></div></div>
+    </div>
+
+    <nav class="historial" id="historial" aria-label="Historial de búsquedas"></nav>
+    <div class="badge-db-status" id="estado-db" role="status"><span class="dot-online"></span> <span id="texto-db">Conectando…</span></div>
+  </aside>
+  <main class="principal">
+    <header class="encabezado">
+      <div class="encabezado-fila">
+        <div>
+          <h2 class="titulo-sel" id="titulo-sel">Todas las ofertas</h2>
+          <div class="sub" id="sub-sel"></div>
+        </div>
+      </div>
+      <div class="fuentes-sel" id="fuentes-sel" hidden></div>
+      <details class="panel" id="panel-corrida" hidden><summary>Resultado de la última búsqueda por fuente</summary><div id="corrida"></div></details>
+    </header>
+    <nav class="pestanas" id="pestanas" role="tablist" aria-label="Categorías de ofertas"></nav>
+    <div class="filtros" id="filtros"></div>
+    <div id="lista"></div>
+  </main>
+</div>
+
+<script>
+"use strict";
+// <puras> — sin DOM ni estado global; tests/test_historial.py las ejecuta con Node
+const CERRADOS = new Set(["postulada", "entrevista", "descartada"]);
+const DIAS = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+const mayus = s => s.charAt(0).toUpperCase() + s.slice(1);
+const dosDig = n => String(n).padStart(2, "0");
+const diaISO = f => f.getFullYear() + "-" + dosDig(f.getMonth() + 1) + "-" + dosDig(f.getDate());
+const horaDe = t => (t || "").slice(11, 16);
+
+function fechaLarga(dia) {                       // "2026-10-10" -> "Sábado 10 de octubre"
+  const [a, m, d] = dia.split("-").map(Number);
+  return mayus(DIAS[new Date(a, m - 1, d).getDay()]) + " " + d + " de " + MESES[m - 1];
+}
+function etiquetaDia(dia, hoy) {                 // hoy = "AAAA-MM-DD" según el reloj del navegador
+  if (dia === hoy) return "Hoy";
+  const [a, m, d] = hoy.split("-").map(Number);
+  if (dia === diaISO(new Date(a, m - 1, d - 1))) return "Ayer";
+  return fechaLarga(dia);
+}
+function franja(hhmm) {                         // 06:00–12:00 mañana, hasta 19:59 tarde, resto noche
+  return hhmm >= "06:00" && hhmm <= "12:00" ? "mañana" : hhmm > "12:00" && hhmm <= "19:59" ? "tarde" : "noche";
+}
+function terminoRelativo(fin, hoy) {             // "2026-10-11 11:06" -> "hoy, terminó a las 11:06" / "ayer, terminó …"
+  const dia = (fin || "").slice(0, 10), t = horaDe(fin), etq = etiquetaDia(dia, hoy);
+  const cuando = etq === "Hoy" ? "hoy" : etq === "Ayer" ? "ayer" : "el " + etq.charAt(0).toLowerCase() + etq.slice(1);
+  return cuando + ", terminó a las " + t;     // el historial muestra la hora de INICIO; aquí es la de término
+}
+
+function agruparPorDia(corridas) {               // [{dia, total, corridas}], el día más reciente primero
+  const dias = new Map();
+  for (const c of corridas || []) {
+    const dia = (c.inicio || "").slice(0, 10);
+    if (!dias.has(dia)) dias.set(dia, { dia, total: 0, corridas: [] });
+    const g = dias.get(dia);
+    g.total += c.nuevas || 0;
+    g.corridas.push(c);
+  }
+  return [...dias.values()].sort((x, y) => x.dia < y.dia ? 1 : x.dia > y.dia ? -1 : 0);
+}
+
+// sel = {tipo:"todas"} | {tipo:"dia", dia} | {tipo:"hora", id} | {tipo:"antes"}
+function idsSeleccion(sel, corridas) {           // null = no filtrar
+  if (!sel || sel.tipo === "todas") return null;
+  if (sel.tipo === "hora") return new Set([sel.id]);
+  if (sel.tipo === "dia") return new Set((corridas || []).filter(c => (c.inicio || "").slice(0, 10) === sel.dia).map(c => c.id));
+  if (sel.tipo === "antes") return new Set([null]);
+  return null;
+}
+// Seguimiento y Descartadas son decisiones tuyas: muestran todo, sin importar qué búsqueda del historial está elegida
+const SIN_FILTRO_HISTORIAL = new Set(["seguimiento", "descartadas_usuario"]);
+function filtrarSeleccion(lista, pestana, sel, corridas) {
+  if (SIN_FILTRO_HISTORIAL.has(pestana)) return lista;
+  const ids = idsSeleccion(sel, corridas);
+  return ids ? lista.filter(o => ids.has(o.corrida_id === undefined ? null : o.corrida_id)) : lista;
+}
+function listaDe(datos, pestana, sel) {
+  if (!datos) return [];
+  const base = pestana === "ofertas" ? datos.principal.filter(o => !CERRADOS.has(o.estado))
+    : pestana === "seguimiento" ? datos.principal.filter(o => o.estado === "revisada" || o.estado === "postulada" || o.estado === "entrevista")
+    : pestana === "descartadas_usuario" ? datos.principal.filter(o => o.estado === "descartada")
+    : (datos[pestana] || []);
+  return filtrarSeleccion(base, pestana, sel, datos.corridas);
+}
+function progresoDe(mensaje) {                   // "[12/40] ..." o "[bne 2/5] ..." -> {n, total, pct}
+  const m = /\[(?:[^\[\]]*\s)?(\d+)\/(\d+)\]/.exec(mensaje || "");
+  if (!m || !+m[2]) return null;
+  const n = +m[1], total = +m[2];
+  return { n, total, pct: Math.max(0, Math.min(100, Math.round(100 * n / total))) };
+}
+function tituloSeleccion(sel, corridas) {
+  if (sel.tipo === "dia") return fechaLarga(sel.dia);
+  if (sel.tipo === "hora") { const c = (corridas || []).find(x => x.id === sel.id); return "Búsqueda de las " + (c ? horaDe(c.inicio) : "?"); }
+  if (sel.tipo === "antes") return "Antes del historial";
+  return "Todas las ofertas";
+}
+const NOMBRE_FUENTE = { indeed: "Indeed", google: "Google", glassdoor: "Glassdoor", getonboard: "Get on Board",
+  bne: "BNE", trabajando: "Trabajando", chiletrabajos: "Chiletrabajos", manual: "✍️ Manual" };
+const nombreFuente = f => NOMBRE_FUENTE[f] || f || "sin fuente";
+function textoProgreso(mensaje) {                // "[3/40] indeed | qa tester | …" -> "Buscando en Indeed · qa tester · 3 de 40"
+  const m = /^\s*\[(\d+)\/(\d+)\]\s*([^|\[\]]+?)\s*\|\s*([^|:]+?)\s*(?:[|:]|$)/.exec(mensaje || "");
+  return m ? "Buscando en " + nombreFuente(m[3]) + " · " + m[4] + " · " + m[1] + " de " + m[2] : (mensaje || "");
+}
+const norm = s => (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+function coincideTexto(o, texto) {             // cada palabra buscada debe estar en título, empresa, lugar, motivo o notas
+  const t = norm([o.titulo, o.empresa, o.ubicacion, o.motivo, o.notas].join(" "));
+  return (texto || "").split(/\s+/).every(w => t.includes(norm(w)));
+}
+function fechaCL(f) {                            // "2026-10-12" -> "12/10/2026"
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(f || ""));
+  return m ? m[3] + "/" + m[2] + "/" + m[1] : (f || "");
+}
+function diasDesde(fecha, hoy) {                 // días enteros entre dos "AAAA-MM-DD" (null si falta la fecha)
+  const a = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(fecha || "")), b = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(hoy || ""));
+  if (!a || !b) return null;
+  const dias = Math.round((Date.UTC(+b[1], b[2] - 1, +b[3]) - Date.UTC(+a[1], a[2] - 1, +a[3])) / 86400000);
+  return Math.max(0, dias);
+}
+function textoSeguimiento(d) {                   // aviso de días desde la postulación: {texto, clase} o null
+  if (d === null || d === undefined) return null;
+  if (d === 0) return { texto: "⚡ Postulada hoy", clase: "ok" };
+  if (d <= 3) return { texto: "🌱 Hace " + d + " d", clase: "ok" };
+  if (d <= 5) return { texto: "⏱️ Hace " + d + " d (Revisar)", clase: "aviso" };
+  return { texto: "⚠️ Hace " + d + " d · Toca follow-up", clase: "alerta" };
+}
+function esSueldoDestacado(sueldo) {
+  if (!sueldo) return false;
+  const s = String(sueldo).toLowerCase();
+  return s !== "no indicado" && s !== "a convenir" && s !== "no especificado" && !s.includes("asignacion");
+}
+const SKILLS_CONOCIDAS = [
+  "Python", "SQL", "APIs", "REST", "Jira", "Cypress", "Selenium", "QA", "Testing",
+  "BPMN", "Postman", "Docker", "Git", "Java", "JavaScript", "TypeScript", "React",
+  "Node.js", "Django", "FastAPI", "AWS", "Azure", "Power BI", "DevOps", "Linux",
+  "Excel", "Scrum", "Agile", "UML", "CI/CD", "PostgreSQL"
+];
+function extraerSkills(o) {                      // hasta 5 tecnologías mencionadas en motivo, título o tipo
+  const texto = ((o.motivo || "") + " " + (o.titulo || "") + " " + (o.tipo || "")).toLowerCase();
+  const encontradas = [];
+  for (const skill of SKILLS_CONOCIDAS) {
+    const rx = new RegExp("(?:^|[^a-z0-9])" + skill.toLowerCase().replace(/[.+/]/g, "\\$&") + "(?:$|[^a-z0-9])", "i");
+    if (rx.test(texto)) { encontradas.push(skill); if (encontradas.length >= 5) break; }
+  }
+  return encontradas;
+}
+const TEMAS = ["girly-claro", "girly-oscuro", "hombre-claro", "hombre-oscuro", "neutro-claro", "neutro-oscuro"];
+function normalizarTema(t) {                     // acepta los nombres antiguos guardados en el navegador
+  const antiguos = { girly: "girly-claro", hombre: "hombre-oscuro", oscuro: "neutro-oscuro", claro: "neutro-claro" };
+  return antiguos[t] || (TEMAS.includes(t) ? t : "girly-claro");
+}
+function textoTotalOfertas(n) {                  // pie de la columna izquierda
+  return n === 1 ? "SQLite Conectado · 1 oferta" : "SQLite Conectado · " + n + " ofertas";
+}
+// </puras>
+
+const ESTADOS = ["nueva", "revisada", "postulada", "entrevista", "descartada"];
+const ETIQUETAS_ESTADO = { nueva: "🌱 Nueva", revisada: "🔍 Revisada", postulada: "✉️ Postulada", entrevista: "🎯 En Entrevista", descartada: "❌ Descartada" };
+const PESTANAS = [
+  ["ofertas", "Ofertas"], ["seguimiento", "Seguimiento"], ["fuera_perfil", "Fuera de perfil"],
+  ["sospechosas", "Sospechosas"], ["descartadas_usuario", "Descartadas"], ["descartadas", "Descartadas por filtros"]
+];
+const FILTROS_VACIOS = () => ({ texto: "", estado: "activas", prioridad: "", modalidad: "", fuente: "", tipo: "" });
+const S = { datos: null, pestana: "ofertas", sel: { tipo: "todas" }, ultima: null, f: FILTROS_VACIOS(), agrupar: "prioridad", densidad: "detallada" };
+try { if (localStorage.getItem("densidad") === "compacta") S.densidad = "compacta"; } catch (e) {}
+
+function h(tag, attrs, ...hijos) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (v === null || v === undefined || v === false) continue;
+    if (k === "class") e.className = v; else if (k.startsWith("on")) e.addEventListener(k.slice(2), v); else e.setAttribute(k, v);
+  }
+  for (const c of hijos.flat()) if (c !== null && c !== undefined && c !== false) e.append(c.nodeType ? c : document.createTextNode(String(c)));
+  return e;
+}
+// "encontradas" cuenta solo las ofertas dentro de la ventana de antigüedad; las más antiguas se informan aparte
+const textoAntiguas = n => n + (n === 1 ? " antigua omitida" : " antiguas omitidas");
+const textoVentana = f => f.ventana_dias ? "Ventana de antigüedad: " + (f.ventana_dias === 1 ? "hoy y ayer" : "hoy y los " + f.ventana_dias + " días anteriores") : null;
+const urlSegura = u => /^https?:\/\//i.test(u || "") ? u : "#";
+const $ = id => document.getElementById(id);
+const corridas = () => (S.datos && S.datos.corridas) || [];
+const claveSel = sel => sel.tipo + ":" + (sel.dia || sel.id || "");
+const hoy = () => diaISO(new Date());
+
+// al repintar una zona se conserva el foco del teclado en el botón equivalente
+function conFoco(cont, pintarZona) {
+  const activo = document.activeElement, clave = cont.contains(activo) ? activo.dataset.clave : null;
+  pintarZona();
+  if (clave) { const b = [...cont.querySelectorAll("[data-clave]")].find(x => x.dataset.clave === clave); if (b) b.focus(); }
+}
+
+async function api(ruta, cuerpo) {               // un fallo de red se devuelve como status 0, no como excepción
+  try {
+    const r = await fetch(ruta, cuerpo === undefined ? {} : { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(cuerpo) });
+    return { ok: r.ok, status: r.status, json: await r.json().catch(() => ({})) };
+  } catch (e) {
+    return { ok: false, status: 0, json: {} };
+  }
+}
+
+// ---------- pie "SQLite Conectado · N" (datos reales de /api/estado)
+function pintarEstadoDb(e) {
+  const conectado = !!e && typeof e.total_ofertas === "number";
+  $("estado-db").classList.toggle("sin-conexion", !conectado);
+  $("texto-db").textContent = conectado ? textoTotalOfertas(e.total_ofertas) : "Sin conexión con el servidor";
+}
+
+// ---------- datos
+async function cargar() {
+  const r = await api("/api/ofertas");
+  if (r.ok) {
+    S.datos = r.json;
+    if (S.sel.tipo === "hora" && !corridas().some(c => c.id === S.sel.id)) S.sel = { tipo: "todas" };
+    pintar();
+  } else {
+    pintarEstadoDb(null);
+    $("lista").replaceChildren(h("div", { class: "vacio" }, "No se pudieron cargar las ofertas (¿está corriendo el servidor?)."));
+  }
+  await estado();
+}
+
+let sondeo = null;
+function mostrarProgreso(e) {
+  const p = $("progreso"), barra = $("barra");
+  p.className = "progreso" + (e.error ? " error" : "");
+  p.textContent = e.error ? "Error en la búsqueda: " + e.error : e.buscando ? textoProgreso(e.mensaje) : (e.mensaje || "");
+  const pr = e.buscando && !e.error ? progresoDe(e.mensaje) : null;
+  barra.hidden = !pr;
+  if (pr) {
+    $("barra-relleno").style.width = pr.pct + "%";
+    barra.setAttribute("aria-valuemax", pr.total); barra.setAttribute("aria-valuenow", pr.n);
+  }
+  $("buscar").disabled = !!e.buscando;
+}
+async function estado() {
+  const r = await api("/api/estado");
+  if (!r.ok) { pintarEstadoDb(null); return; }
+  const e = r.json;
+  pintarEstadoDb(e);
+  mostrarProgreso(e);
+  S.ultima = e.corrida || null;
+  pintarUltima();
+  pintarEncabezado();
+  if (e.buscando && !sondeo) {
+    sondeo = setInterval(async () => {
+      const x = await api("/api/estado");
+      if (!x.ok) { pintarEstadoDb(null); return; }
+      pintarEstadoDb(x.json);
+      mostrarProgreso(x.json);
+      if (!x.json.buscando) { clearInterval(sondeo); sondeo = null; cargar(); }
+    }, 2500);
+  }
+}
+
+$("buscar").addEventListener("click", async () => {
+  const r = await api("/api/buscar", {});
+  if (r.status === 409) { alert("Ya hay una búsqueda en curso."); }
+  await estado();
+});
+
+// ---------- tema (seis temas; se recuerda en este navegador)
+function aplicarTema(t) {
+  const tema = normalizarTema(t);
+  document.documentElement.setAttribute("data-tema", tema);
+  $("tema").value = tema;
+  try { localStorage.setItem("tema", tema); } catch (e) {}
+}
+$("tema").addEventListener("change", e => aplicarTema(e.target.value));
+try { aplicarTema(localStorage.getItem("tema")); } catch (e) { aplicarTema(null); }
+
+// ---------- columna izquierda: historial
+function elegir(sel) { S.sel = sel; pintar(); }
+
+function botonSel(sel, clase, etiqueta, hijos) {
+  const activo = claveSel(S.sel) === claveSel(sel);
+  return h("button", { type: "button", class: "item " + clase, "aria-pressed": String(activo), "aria-label": etiqueta,
+    "data-clave": claveSel(sel), onclick: () => elegir(sel) }, hijos);
+}
+
+function pintarHistorial() {
+  const cont = $("historial");
+  conFoco(cont, () => {
+    const d0 = hoy(), activas = listaDe(S.datos, "ofertas", { tipo: "todas" }).length;
+    const partes = [
+      h("h2", {}, "Historial"),
+      botonSel({ tipo: "todas" }, "todas", "Todas las ofertas: " + activas + " activas",
+        [h("span", { class: "etq" }, "Todas las ofertas"), h("span", { class: "num" }, activas)]),
+    ];
+    for (const g of agruparPorDia(corridas())) {
+      const etq = etiquetaDia(g.dia, d0), relativo = etq === "Hoy" || etq === "Ayer";
+      partes.push(h("section", { class: "dia" },
+        botonSel({ tipo: "dia", dia: g.dia }, "dia-btn",
+          (relativo ? etq + ", " + fechaLarga(g.dia) : etq) + ": " + g.total + " ofertas relevantes nuevas",
+          [h("span", { class: "etq" }, etq), relativo ? h("span", { class: "fecha" }, fechaLarga(g.dia)) : null, h("span", { class: "num" }, g.total)]),
+        h("ul", { class: "horas" }, g.corridas.map(c => {
+          const t = horaDe(c.inicio);
+          return h("li", {}, botonSel({ tipo: "hora", id: c.id }, "hora",
+            "Búsqueda de las " + t + " (" + franja(t) + "): " + c.nuevas + " ofertas relevantes nuevas",
+            [h("span", { class: "t etq" }, t), h("span", { class: "franja" }, franja(t)), h("span", { class: "num" }, c.nuevas)]));
+        }))));
+    }
+    if (!corridas().length) partes.push(h("p", { class: "sub", style: "margin:8px 10px" }, "Aún no hay búsquedas registradas."));
+    const d = S.datos;
+    const sinCorrida = d ? ["principal", "fuera_perfil", "sospechosas", "descartadas"].some(k => (d[k] || []).some(o => o.corrida_id === null)) : false;
+    if (sinCorrida) {
+      const n = listaDe(d, "ofertas", { tipo: "antes" }).length;
+      partes.push(botonSel({ tipo: "antes" }, "antes", "Antes del historial: " + n + " activas",
+        [h("span", { class: "etq" }, "Antes del historial"), h("span", { class: "num" }, n)]));
+    }
+    cont.replaceChildren(...partes);
+  });
+}
+
+function pintarUltima() {
+  const c = S.ultima;
+  $("ultima").textContent = c ? "Última búsqueda: " + terminoRelativo(c.fin, hoy()) + " · " + c.nuevas + " relevantes nuevas"
+    : "Todavía no hay búsquedas. Pulsa «Buscar empleos».";
+}
+
+// ---------- encabezado de la columna principal
+function pintarEncabezado() {
+  const sel = S.sel, cs = corridas();
+  $("titulo-sel").textContent = tituloSeleccion(sel, cs);
+  let sub = "";
+  if (sel.tipo === "todas") sub = cs.length ? cs.length + (cs.length === 1 ? " búsqueda registrada" : " búsquedas registradas") : "";
+  else if (sel.tipo === "dia") {
+    const g = agruparPorDia(cs).find(x => x.dia === sel.dia);
+    if (g) sub = g.corridas.length + (g.corridas.length === 1 ? " búsqueda · " : " búsquedas · ") + g.total + " ofertas relevantes nuevas";
+  } else if (sel.tipo === "hora") {
+    const c = cs.find(x => x.id === sel.id);
+    if (c) sub = "De " + horaDe(c.inicio) + " a " + horaDe(c.fin) + " · " + fechaLarga(c.inicio.slice(0, 10)) + " · " + c.nuevas + " ofertas relevantes nuevas";
+  } else if (sel.tipo === "antes") sub = "Ofertas detectadas fuera de toda búsqueda registrada (por ejemplo, antes de que existiera el historial).";
+  $("sub-sel").textContent = sub;
+
+  const mini = $("fuentes-sel"), panel = $("panel-corrida");
+  const c = sel.tipo === "hora" ? cs.find(x => x.id === sel.id) : null;
+  if (c) {
+    mini.hidden = false; panel.hidden = true;
+    const fuentes = c.fuentes || [];
+    mini.replaceChildren(...(fuentes.length ? fuentes.map(f => h("div", { class: "fuente-mini", title: textoVentana(f) },
+      h("div", { class: "nombre" }, f.fuente),
+      h("div", { class: "cifras" }, (f.encontradas ?? 0) + " encontradas · ",
+        h("span", { class: f.relevantes ? "rel" : null }, (f.relevantes ?? 0) + " nuevas relevantes"),
+        f.errores ? h("span", { class: "err" }, " · " + f.errores + (f.errores === 1 ? " error" : " errores")) : null),
+      f.antiguas ? h("div", { class: "antiguas" }, textoAntiguas(f.antiguas)) : null))
+      : [h("div", { class: "sub" }, "Esta búsqueda no guardó el detalle por fuente.")]));
+    return;
+  }
+  mini.hidden = true;
+  const u = S.ultima;
+  panel.hidden = !u;
+  if (!u) return;
+  const filas = (u.detalle.fuentes || []).map(f => h("tr", { title: textoVentana(f) }, h("td", {}, f.fuente),
+    h("td", {}, f.encontradas, f.antiguas ? h("div", { class: "sub" }, textoAntiguas(f.antiguas)) : null),
+    h("td", {}, f.relevantes), h("td", {}, f.errores)));
+  const partesCorrida = [
+    h("table", { class: "fuentes" }, h("tr", {}, h("th", {}, "Fuente"), h("th", {}, "Encontradas"), h("th", {}, "Relevantes nuevas"), h("th", {}, "Errores")), filas)
+  ];
+  if ((u.detalle.avisos || []).length) partesCorrida.push(h("ul", { class: "avisos" }, u.detalle.avisos.map(a => h("li", {}, a))));
+  $("corrida").replaceChildren(...partesCorrida);
+}
+
+// ---------- filtros y pestañas
+function pasa(o) {
+  const f = S.f;
+  if (f.texto && !coincideTexto(o, f.texto)) return false;
+  if (S.pestana === "ofertas" && f.estado !== "activas" && f.estado !== "" && o.estado !== f.estado) return false;
+  if (f.prioridad && o.prioridad !== f.prioridad) return false;
+  if (f.modalidad && o.modalidad !== f.modalidad) return false;
+  if (f.fuente && o.fuente !== f.fuente) return false;
+  if (f.tipo && o.tipo !== f.tipo) return false;
+  return true;
+}
+
+function pintarPestanas() {
+  const nav = $("pestanas");
+  conFoco(nav, () => nav.replaceChildren(...PESTANAS.map(([id, nombre]) => {
+    const total = id === "descartadas" && S.datos && S.sel.tipo === "todas" ? S.datos.total_descartadas : listaDe(S.datos, id, S.sel).length;
+    return h("button", { type: "button", role: "tab", "aria-selected": String(S.pestana === id), "data-clave": id,
+      onclick: () => { S.pestana = id; pintar(); } }, nombre, h("span", { class: "cuenta" }, total));
+  })));
+}
+
+function selector(clave, etiqueta, opciones, extra, nombre) {
+  const s = h("select", { "aria-label": etiqueta, onchange: e => { S.f[clave] = e.target.value; pintarLista(); pintarFiltros(); } },
+    ...(extra || [h("option", { value: "" }, etiqueta + ": todas")]),
+    ...opciones.map(v => h("option", { value: v }, nombre ? nombre(v) : v)));
+  s.value = S.f[clave];
+  return s;
+}
+
+const PESTANAS_PRINCIPAL = new Set(["ofertas", "seguimiento", "descartadas_usuario"]);
+function pintarFiltros() {
+  const base = PESTANAS_PRINCIPAL.has(S.pestana) ? S.datos.principal : (S.datos[S.pestana] || []);
+  const unicos = campo => [...new Set(base.map(o => o[campo]).filter(Boolean))].sort();
+  const txt = h("input", { type: "search", placeholder: "Buscar por cargo, empresa, stack o notas… (Pulsa / para buscar)", "aria-label": "Buscar", value: S.f.texto,
+    oninput: e => { S.f.texto = e.target.value; pintarLista(); } });
+  const partes = [txt];
+  if (S.pestana === "ofertas") partes.push(selector("estado", "Estado", ["nueva", "revisada"], [h("option", { value: "activas" }, "Estado: activas"), h("option", { value: "" }, "Estado: todas")]));
+  if (PESTANAS_PRINCIPAL.has(S.pestana)) {
+    partes.push(selector("prioridad", "Prioridad", ["Alta", "Media", "Baja"]), selector("modalidad", "Modalidad", unicos("modalidad")), selector("tipo", "Tipo", unicos("tipo")));
+  }
+  partes.push(selector("fuente", "Fuente", unicos("fuente"), null, nombreFuente));
+  if (S.pestana === "ofertas") {
+    const g = h("select", { "aria-label": "Agrupar", onchange: e => { S.agrupar = e.target.value; pintarLista(); } },
+      h("option", { value: "prioridad" }, "Agrupar: prioridad"), h("option", { value: "fuente" }, "Agrupar: fuente"));
+    g.value = S.agrupar; partes.push(g);
+  }
+  const densidad = (valor, texto, titulo) => h("button", { type: "button", class: "btn-vista", "aria-pressed": String(S.densidad === valor), title: titulo,
+    onclick: () => { S.densidad = valor; try { localStorage.setItem("densidad", valor); } catch (e) {} pintarLista(); pintarFiltros(); } }, texto);
+  partes.push(h("div", { class: "selector-vista", role: "group", "aria-label": "Densidad de vista" },
+    densidad("detallada", "🗂️ Tarjetas", "Vista de tarjetas detalladas"), densidad("compacta", "📋 Compacta", "Vista compacta de alta densidad tipo tabla")));
+  const vacios = FILTROS_VACIOS();
+  if (Object.keys(vacios).some(k => S.f[k] !== vacios[k])) {
+    partes.push(h("button", { type: "button", class: "btn-limpiar-filtros", title: "Restablecer todos los filtros",
+      onclick: () => { S.f = FILTROS_VACIOS(); pintarLista(); pintarFiltros(); } }, "🧹 Limpiar filtros"));
+  }
+  $("filtros").replaceChildren(...partes);
+}
+
+// ---------- cambio de estado (el aviso para revertir el cambio, con su fecha, llega en la Fase A)
+async function cambiarEstado(o, nuevo, select) {
+  const antes = o.estado;
+  if (antes === nuevo) return;
+  const r = await api("/api/marcar", { url: o.url, estado: nuevo });
+  if (r.ok) { o.estado = nuevo; pintar(); } else { if (select) select.value = antes; alert("No se pudo guardar el estado."); }
+}
+function selectorEstado(o, etiqueta) {
+  const s = h("select", { class: "estado", "aria-label": etiqueta, onchange: e => cambiarEstado(o, e.target.value, e.target) },
+    ESTADOS.map(v => h("option", { value: v }, ETIQUETAS_ESTADO[v])));
+  s.value = o.estado;
+  return s;
+}
+
+// ---------- tarjetas
+const inicialDe = o => ((o.empresa || "?").trim().charAt(0) || "?").toUpperCase();
+const clasePrio = o => "prio-" + (o.prioridad || "Media").toLowerCase();
+
+function tarjeta(o, completa) {
+  const url = urlSegura(o.url);
+  const metaPartes = [o.empresa, o.ubicacion, o.modalidad, o.publicada ? "publicada " + fechaCL(o.publicada) : "", nombreFuente(o.fuente)].filter(Boolean);
+  const meta = h("div", { class: "meta-limpia" }, ...metaPartes.flatMap((m, i) => i === 0 ? [h("span", {}, m)]
+    : [h("span", { class: "meta-sep", "aria-hidden": "true" }, "·"), h("span", {}, m)]));
+
+  const chips = [];
+  if (completa) {
+    if (o.estado === "nueva") chips.push(h("span", { class: "chip nueva" }, "nueva"));
+    if (o.prioridad) chips.push(h("span", { class: "chip " + o.prioridad }, o.prioridad));
+    for (const v of [o.tipo, o.modalidad, o.contrato, o.sueldo && o.sueldo !== "No indicado" ? o.sueldo : "", o.experiencia && o.experiencia !== "No indicada" ? o.experiencia : ""]) {
+      if (!v) continue;
+      const esSueldo = v === o.sueldo && esSueldoDestacado(o.sueldo);
+      chips.push(h("span", { class: "chip" + (/plazo/i.test(v) ? " aviso" : "") + (esSueldo ? " sueldo-destacado" : "") }, esSueldo ? "💵 " + v : v));
+    }
+    if (o.estado === "descartada" && o.fecha_postulacion) {
+      chips.push(h("span", { class: "chip tenia-postulacion", title: "Esta oferta estuvo postulada antes de descartarla" }, "📌 Tenía postulación (" + fechaCL(o.fecha_postulacion) + ")"));
+    }
+    for (const sk of extraerSkills(o)) chips.push(h("span", { class: "skill-pill" }, sk));
+  }
+  const seg = completa && (o.estado === "postulada" || o.estado === "entrevista") ? textoSeguimiento(diasDesde(o.fecha_postulacion, hoy())) : null;
+
+  return h("article", { class: "tarjeta " + clasePrio(o) + (CERRADOS.has(o.estado) ? " cerrada" : "") },
+    h("div", { class: "tarjeta-header" },
+      h("div", { class: "avatar-empresa", "aria-hidden": "true" }, inicialDe(o)),
+      h("div", { class: "tarjeta-titulos" },
+        h("div", { style: "display:flex; align-items:center; gap:8px;" },
+          h("a", { class: "titulo", href: url, target: "_blank", rel: "noopener noreferrer" }, o.titulo || "(sin título)"),
+          h("a", { class: "btn-enlace-externo", href: url, target: "_blank", rel: "noopener noreferrer",
+            title: "Abrir publicación original en " + nombreFuente(o.fuente), "aria-label": "Abrir publicación original" }, "↗")),
+        meta)),
+    chips.length ? h("div", { class: "chips" }, chips) : null,
+    seg ? h("div", { style: "display:flex; gap:6px; align-items:center; margin-top:4px;" }, h("span", { class: "chip " + seg.clase, style: "font-size:.76rem;" }, seg.texto)) : null,
+    completa && o.motivo ? h("div", { class: "motivo" }, o.motivo) : null,
+    !completa && o.razon ? h("div", { class: "razon" }, "Motivo: " + o.razon) : null,
+    h("div", { style: "display:flex; flex-direction:column; gap:6px; margin-top:6px;" },
+      selectorEstado(o, "Estado de seguimiento de " + (o.titulo || "la oferta"))));
+}
+
+function filaCompacta(o) {
+  const url = urlSegura(o.url);
+  return h("div", { class: "fila-compacta " + clasePrio(o) },
+    h("div", { class: "avatar-empresa", style: "width:28px; height:28px; font-size:.78rem;", "aria-hidden": "true" }, inicialDe(o)),
+    h("div", { class: "cargo-box" },
+      h("a", { class: "cargo-titulo", href: url, target: "_blank", rel: "noopener noreferrer" }, o.titulo || "(sin título)"),
+      h("div", { class: "cargo-empresa" }, (o.empresa || "") + (o.ubicacion ? " · " + o.ubicacion : ""))),
+    esSueldoDestacado(o.sueldo) ? h("span", { class: "chip sueldo-destacado ocultar-movil", style: "font-size:.74rem;" }, "💵 " + o.sueldo)
+      : h("span", { class: "sub ocultar-movil", style: "font-size:.75rem;" }, "—"),
+    h("span", { class: "chip " + (o.prioridad || "Media") + " ocultar-movil", style: "font-size:.75rem;" }, o.prioridad || "Media"),
+    h("span", { class: "sub ocultar-movil", style: "font-size:.78rem;" }, o.modalidad || "—"),
+    selectorEstado(o, "Estado de seguimiento de " + (o.titulo || "la oferta")),
+    h("a", { class: "btn-enlace-externo", href: url, target: "_blank", rel: "noopener noreferrer", title: "Abrir aviso", "aria-label": "Abrir aviso" }, "↗"));
+}
+
+function kpisSeguimiento() {                     // cifras reales del embudo de Seguimiento
+  const p = (S.datos && S.datos.principal) || [];
+  const final = o => o.fase === "oferta" || o.fase === "final";
+  const tarjetaKpi = (etq, valor, estilo) => h("div", { class: "embudo-card", style: estilo || null },
+    h("span", { class: "etiqueta" }, etq), h("span", { class: "valor", style: estilo ? estilo.replace("border-", "") : null }, valor));
+  return h("div", { class: "embudo-grid" },
+    tarjetaKpi("📌 Por Postular", p.filter(o => o.estado === "revisada").length),
+    tarjetaKpi("✉️ CV Enviado", p.filter(o => o.estado === "postulada").length),
+    tarjetaKpi("🎯 En Entrevista", p.filter(o => o.estado === "entrevista" && !final(o)).length, "border-color:var(--alta);"),
+    tarjetaKpi("🏆 Oferta / Cierre", p.filter(o => o.estado === "entrevista" && final(o)).length, "border-color:var(--nueva);"));
+}
+
+function pintarLista() {
+  const cont = $("lista");
+  if (!S.datos) { cont.replaceChildren(h("div", { class: "vacio" }, "Cargando…")); return; }
+  const filas = listaDe(S.datos, S.pestana, S.sel).filter(pasa);
+  const completa = PESTANAS_PRINCIPAL.has(S.pestana);
+  const pintarItems = lista => S.densidad === "compacta"
+    ? [h("div", { class: "tabla-compacta" }, ...lista.map(filaCompacta))] : lista.map(o => tarjeta(o, completa));
+  const cabecera = S.pestana === "seguimiento" ? [kpisSeguimiento()] : [];
+  if (!filas.length) {
+    const msj = S.sel.tipo !== "todas" && !SIN_FILTRO_HISTORIAL.has(S.pestana) ? "No hay ofertas de esta selección en esta pestaña."
+      : S.pestana === "ofertas" ? "No hay ofertas con estos filtros. Prueba «Buscar empleos» o relaja los filtros."
+      : S.pestana === "descartadas_usuario" ? "No tienes ofertas descartadas manualmente."
+      : "Nada que mostrar aquí.";
+    cont.replaceChildren(...cabecera, h("div", { class: "vacio" }, msj)); return;
+  }
+  if (S.pestana === "ofertas") {
+    const porFuente = S.agrupar === "fuente", grupos = new Map();
+    for (const o of filas) {
+      const clave = porFuente ? nombreFuente(o.fuente) : (o.prioridad || "sin prioridad");
+      if (!grupos.has(clave)) grupos.set(clave, []);
+      grupos.get(clave).push(o);
+    }
+    const orden = ["Alta", "Media", "Baja"];
+    const claves = [...grupos.keys()].sort(porFuente
+      ? (a, b) => grupos.get(b).length - grupos.get(a).length || a.localeCompare(b)
+      : (a, b) => (orden.indexOf(a) + 1 || 9) - (orden.indexOf(b) + 1 || 9));
+    cont.replaceChildren(...claves.flatMap(k => [
+      h("h3", { class: "grupo" }, porFuente ? k : "Prioridad " + k, h("span", { class: "cuenta" }, grupos.get(k).length)),
+      ...pintarItems(grupos.get(k))]));
+    return;
+  }
+  let nota = null;
+  if (S.pestana === "descartadas" && S.datos.total_descartadas > S.datos.descartadas.length)
+    nota = h("p", { class: "sub" }, S.sel.tipo === "todas"
+      ? "Se muestran las " + S.datos.descartadas.length + " más recientes de " + S.datos.total_descartadas + "."
+      : "Se buscan entre las " + S.datos.descartadas.length + " descartadas más recientes (de " + S.datos.total_descartadas + ").");
+  cont.replaceChildren(...cabecera, ...[nota].filter(Boolean), ...pintarItems(filas));
+}
+
+function pintar() { pintarHistorial(); pintarEncabezado(); pintarPestanas(); pintarFiltros(); pintarLista(); }
+
+// atajo global: "/" o Ctrl+K llevan al buscador
+window.addEventListener("keydown", e => {
+  const activo = document.activeElement;
+  const escribiendo = activo && ["INPUT", "TEXTAREA", "SELECT"].includes(activo.tagName);
+  if ((e.key === "/" && !escribiendo) || ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k")) {
+    e.preventDefault();
+    const buscador = document.querySelector(".filtros input[type=search]");
+    if (buscador) { buscador.focus(); buscador.select(); }
+  }
+});
+
+cargar();
+</script>
+</body>
+</html>

@@ -15,6 +15,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY *.py ./
+COPY web/ ./web/
 RUN mkdir -p /datos
 VOLUME ["/datos"]
 EXPOSE 8765

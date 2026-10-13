@@ -80,8 +80,69 @@ def test_api_ofertas_trae_historial(srv):
 
 def test_la_pagina_no_carga_nada_de_afuera():
     assert not re.search(r"""(src|href)\s*=\s*["']?(https?:)?//""", PAGINA)
-    assert "@import" not in PAGINA and "url(" not in PAGINA and "<link" not in PAGINA
+    assert "@import" not in PAGINA and "<link" not in PAGINA and "googleapis" not in PAGINA
+    # el único url() permitido es el de las tipografías propias, servidas por /fuentes/ desde la lista blanca
+    urls = re.findall(r"""url\(\s*["']?([^"')]+)""", PAGINA)
+    assert urls and all(u.startswith("/fuentes/") and u[len("/fuentes/"):] in servidor.FUENTES for u in urls)
     assert 'aria-pressed' in PAGINA and "Agrupar: fuente" in PAGINA and "Agrupar: prioridad" in PAGINA and "por día detectado" not in PAGINA
+
+
+def cabeceras(puerto, ruta):
+    c = http.client.HTTPConnection("127.0.0.1", puerto, timeout=5)
+    c.request("GET", ruta)
+    r = c.getresponse()
+    return r.status, dict(r.getheaders()), r.read()
+
+
+def test_sirve_solo_las_tipografias_de_la_lista(srv):
+    _, puerto, _ = srv
+    for nombre, archivo in servidor.FUENTES.items():
+        st, cab, cuerpo = cabeceras(puerto, "/fuentes/" + nombre)
+        assert st == 200 and cab["Content-Type"] == "font/woff2" and cuerpo == archivo.read_bytes() and cuerpo[:4] == b"wOF2"
+        assert "immutable" in cab["Cache-Control"] and cab["X-Content-Type-Options"] == "nosniff"
+    for malo in ("/fuentes/OFL-outfit.txt", "/fuentes/SHA256SUMS.txt", "/fuentes/../servidor.py", "/fuentes/%2e%2e/servidor.py",
+                 "/fuentes/", "/web/fuentes/outfit-latin-wght-normal-5.3.0.woff2"):
+        assert cabeceras(puerto, malo)[0] == 404, malo
+
+
+def test_csp_permite_solo_fuentes_propias_y_nada_externo(srv):
+    _, puerto, _ = srv
+    for ruta in ("/", "/api/estado", "/fuentes/outfit-latin-wght-normal-5.3.0.woff2"):
+        csp = cabeceras(puerto, ruta)[1]["Content-Security-Policy"]
+        directivas = dict(d.strip().split(" ", 1) for d in csp.split(";"))
+        assert directivas == {"default-src": "'none'", "style-src": "'unsafe-inline'", "script-src": "'unsafe-inline'",
+                              "font-src": "'self'", "connect-src": "'self'", "form-action": "'none'", "base-uri": "'none'"}
+
+
+def test_estado_informa_el_total_de_ofertas(srv):
+    _, puerto, _ = srv
+    e = json.loads(pedir(puerto, "GET", "/api/estado")[2])
+    assert e["total_ofertas"] == 1
+
+
+def test_la_pagina_viene_de_web_y_el_dockerfile_la_copia():
+    raiz = Path(__file__).resolve().parent.parent
+    assert PAGINA == (raiz / "web" / "pagina.html").read_text(encoding="utf-8")
+    docker = (raiz / "Dockerfile").read_text(encoding="utf-8")
+    assert re.search(r"^COPY web/ \./web/$", docker, re.M), "la imagen debe incluir web/ (página y tipografías)"
+    ignorados = (raiz / ".dockerignore").read_text(encoding="utf-8").split()
+    assert not any(p.startswith("web") for p in ignorados)
+
+
+def test_la_pagina_no_tiene_manejadores_en_el_html_ni_botones_de_fases_futuras():
+    html = PAGINA.split("<script>")[0]
+    assert not re.search(r"<[a-z]+[^>]*\son[a-z]+\s*=", html, re.I)          # eventos solo con addEventListener / h()
+    cuerpo = PAGINA.split("</style>")[1]           # el CSS original ya trae estilos para las fases siguientes; eso no es UI
+    for futuro in ("modal-", "Agregar postulación manual", "Exportar", "Importar", "Redactor", "Automatización", "Kanban", "Métricas",
+                   "Gestionar proceso", "Deshacer", "badge-alertas"):
+        assert futuro not in cuerpo, futuro
+    assert '"descartadas_usuario", "Descartadas"' in PAGINA and '"descartadas", "Descartadas por filtros"' in PAGINA
+
+
+def test_la_correccion_de_contraste_esta_preparada_pero_no_aplicada():
+    assert PAGINA.count(':root[data-contraste="aa"][data-tema="') == 6
+    assert "data-contraste" not in PAGINA.split("</style>")[1]                 # nada en el HTML ni en el JS la activa
+    assert "--accion: #E04D7D;" in PAGINA                                      # colores originales del tema Girly Claro
 
 
 def test_cambiar_estado_se_guarda(srv):

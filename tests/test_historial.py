@@ -124,10 +124,20 @@ def test_todas_y_antes_del_historial():
     assert antes["ofertas"] == ["p4"] and antes["sospechosas"] == ["x0"] and antes["descartadas"] == []
 
 
-def test_seguimiento_no_se_filtra():
-    r = correr_js(DATOS + 'return [{tipo: "todas"}, {tipo: "hora", id: 2}, {tipo: "dia", dia: "2026-10-11"}, {tipo: "antes"}]'
-                          '.map(s => listaDe(datos, "seguimiento", s).map(o => o.url));')
-    assert r == [["s1", "s2", "s3"]] * 4
+def test_seguimiento_y_descartadas_no_se_filtran_ni_pierden_decisiones():
+    """Reemplaza a test_seguimiento_no_se_filtra. Antes Seguimiento mostraba postuladas, entrevistas y descartadas; ahora
+    las descartadas tienen su propia pestaña (como en el diseño original) y "revisada" pasa a Seguimiento como "Por
+    postular". La garantía es la misma: ninguna de las dos pestañas depende de la búsqueda elegida en el historial, y
+    toda oferta con una decisión tuya (revisada, postulada, entrevista o descartada) aparece en una de ellas."""
+    r = correr_js(DATOS + """
+      const sels = [{tipo: "todas"}, {tipo: "hora", id: 2}, {tipo: "dia", dia: "2026-10-11"}, {tipo: "antes"}];
+      const urls = (p, s) => listaDe(datos, p, s).map(o => o.url);
+      const decididas = datos.principal.filter(o => o.estado !== "nueva").map(o => o.url).sort();
+      return sels.map(s => {
+        const seg = urls("seguimiento", s), desc = urls("descartadas_usuario", s);
+        return {seg, desc, cubre: [...seg, ...desc].sort().join() === decididas.join(), comunes: seg.filter(u => desc.includes(u))};
+      });""")
+    assert r == [{"seg": ["p2", "s1", "s2"], "desc": ["s3"], "cubre": True, "comunes": []}] * 4
 
 
 def test_dias_franjas_titulos_y_progreso():
@@ -155,7 +165,7 @@ def test_ultima_busqueda_relativa():
 
 def test_antes_del_historial_cuenta_solo_ofertas_activas():
     r = correr_js(DATOS + 'return listaDe(datos, "ofertas", {tipo: "antes"}).map(o => o.url);')
-    assert r == ["p4"]                                    # s3 (descartada por ti, sin corrida) va a Seguimiento
+    assert r == ["p4"]                                    # s3 (descartada por ti, sin corrida) va a Descartadas
 
 
 def test_el_buscador_de_la_pagina_tambien_mira_las_notas():
@@ -191,3 +201,39 @@ def test_texto_de_progreso():
                  "  [bne 2/5] tester: 3 encontradas",              # no calza: texto original
                  "  ! [indeed] qa | Santiago: HTTPError: 429",
                  "Iniciando la búsqueda...", ""]
+
+
+# ------------------------------------------------------------------ funciones de la interfaz (Fase 0)
+def test_fechas_y_dias_desde_la_postulacion():
+    r = correr_js("""return {
+        cl: ["2026-10-12", "2026-10-12 09:30", "", "sin fecha"].map(fechaCL),
+        dias: [["2026-10-13", "2026-10-13"], ["2026-10-12", "2026-10-13"], ["2026-09-30", "2026-10-13"],
+               ["2026-12-31", "2027-01-01"], ["", "2026-10-13"], ["2026-10-20", "2026-10-13"]].map(([f, h]) => diasDesde(f, h)),
+        seg: [null, 0, 1, 3, 4, 5, 6, 30].map(d => { const s = textoSeguimiento(d); return s && [s.texto, s.clase]; })};""")
+    assert r["cl"] == ["12/10/2026", "12/10/2026", "", "sin fecha"]
+    assert r["dias"] == [0, 1, 13, 1, None, 0]                         # una fecha futura no da días negativos
+    assert r["seg"] == [None, ["⚡ Postulada hoy", "ok"], ["🌱 Hace 1 d", "ok"], ["🌱 Hace 3 d", "ok"],
+                        ["⏱️ Hace 4 d (Revisar)", "aviso"], ["⏱️ Hace 5 d (Revisar)", "aviso"],
+                        ["⚠️ Hace 6 d · Toca follow-up", "alerta"], ["⚠️ Hace 30 d · Toca follow-up", "alerta"]]
+
+
+def test_sueldo_destacado_y_tecnologias():
+    r = correr_js("""return {
+        sueldo: ["$1.200.000", "No indicado", "A convenir", "no especificado", "Asignacion de colación", "", null].map(esSueldoDestacado),
+        skills: [{titulo: "Analista QA", motivo: "Cypress, Postman y API REST; SQL"},
+                 {titulo: "JavaScript Developer", motivo: "React y Node.js, CI/CD"},
+                 {titulo: "Desarrollador", motivo: "javascript"},
+                 {titulo: "Analista", tipo: "Power BI", motivo: "python sql jira docker git excel"}].map(extraerSkills)};""")
+    assert r["sueldo"] == [True, False, False, False, False, False, False]
+    assert r["skills"] == [["SQL", "REST", "Cypress", "QA", "Postman"], ["JavaScript", "React", "Node.js", "CI/CD"],
+                           ["JavaScript"], ["Python", "SQL", "Jira", "Docker", "Git"]]   # "Java" no calza dentro de "JavaScript"; tope 5
+
+
+def test_temas_y_pie_de_la_base():
+    r = correr_js("""return {
+        temas: ["girly-claro", "girly-oscuro", "hombre-claro", "hombre-oscuro", "neutro-claro", "neutro-oscuro",
+                "girly", "hombre", "claro", "oscuro", null, "inventado"].map(normalizarTema),
+        pie: [0, 1, 1017].map(textoTotalOfertas)};""")
+    assert r["temas"] == ["girly-claro", "girly-oscuro", "hombre-claro", "hombre-oscuro", "neutro-claro", "neutro-oscuro",
+                          "girly-claro", "hombre-oscuro", "neutro-claro", "neutro-oscuro", "girly-claro", "girly-claro"]
+    assert r["pie"] == ["SQLite Conectado · 0 ofertas", "SQLite Conectado · 1 oferta", "SQLite Conectado · 1017 ofertas"]

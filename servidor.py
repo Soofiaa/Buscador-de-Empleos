@@ -4,7 +4,8 @@
   GET  /api/ofertas       {principal, fuera_perfil, sospechosas, descartadas, total_descartadas, corridas}
                           corridas = [{id, inicio, fin, nuevas, fuentes}], la más reciente primero; cada oferta
                           lleva corrida_id (la corrida cuyo inicio <= detectada_en <= fin, o null)
-  GET  /api/estado        {buscando, mensaje, error, corrida}   (corrida = resumen de la última búsqueda)
+  GET  /fuentes/<archivo> las tipografías (solo las de la lista FUENTES; la CSP permite font-src 'self')
+  GET  /api/estado        {buscando, mensaje, error, corrida, total_ofertas}   (corrida = resumen de la última búsqueda)
   POST /api/buscar        inicia una búsqueda en segundo plano (409 si ya hay una en curso)
   POST /api/marcar        {"url": str, "estado": "nueva|revisada|postulada|entrevista|descartada"}
 
@@ -20,6 +21,7 @@ import threading
 import urllib.parse
 import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
 
 import buscar
 import config
@@ -27,6 +29,12 @@ from informe import PAGINA
 
 LOCALES = ("127.0.0.1", "localhost", "[::1]")
 LIMITE_CUERPO = 10_000
+CSP = ("default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; font-src 'self'; "
+       "connect-src 'self'; form-action 'none'; base-uri 'none'")
+# Solo estos archivos se sirven bajo /fuentes/ (nada de rutas armadas con lo que pida el navegador)
+DIR_FUENTES = Path(__file__).resolve().parent / "web" / "fuentes"
+FUENTES = {n: DIR_FUENTES / n for n in ("outfit-latin-wght-normal-5.3.0.woff2",
+                                        "plus-jakarta-sans-latin-wght-normal-5.3.0.woff2")}
 
 
 def _host_local(valor: str) -> bool:
@@ -55,6 +63,7 @@ class Aplicacion:
         con = self.conexion()
         try:
             est["corrida"] = buscar.ultima_corrida(con)
+            est["total_ofertas"] = con.execute("SELECT COUNT(*) FROM ofertas").fetchone()[0]
         finally:
             con.close()
         return est
@@ -93,14 +102,13 @@ def crear_servidor(app: Aplicacion, puerto: int = None, host: str = None) -> Thr
         def log_message(self, *a):
             pass
 
-        def _enviar(self, codigo, cuerpo: bytes, tipo="application/json; charset=utf-8"):
+        def _enviar(self, codigo, cuerpo: bytes, tipo="application/json; charset=utf-8", cache="no-store"):
             self.send_response(codigo)
             self.send_header("Content-Type", tipo)
             self.send_header("Content-Length", str(len(cuerpo)))
-            self.send_header("Cache-Control", "no-store")
+            self.send_header("Cache-Control", cache)
             self.send_header("X-Content-Type-Options", "nosniff")
-            self.send_header("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; "
-                             "script-src 'unsafe-inline'; connect-src 'self'; form-action 'none'; base-uri 'none'")
+            self.send_header("Content-Security-Policy", CSP)
             self.end_headers()
             self.wfile.write(cuerpo)
 
@@ -117,6 +125,12 @@ def crear_servidor(app: Aplicacion, puerto: int = None, host: str = None) -> Thr
             ruta = urllib.parse.urlsplit(self.path).path
             if ruta == "/":
                 return self._enviar(200, PAGINA.encode("utf-8"), "text/html; charset=utf-8")
+            if ruta.startswith("/fuentes/"):
+                archivo = FUENTES.get(ruta[len("/fuentes/"):])
+                if archivo is None or not archivo.is_file():
+                    return self._json(404, {"error": "no existe"})
+                # el nombre lleva la versión: si cambia la fuente, cambia la URL, así que se puede guardar un año
+                return self._enviar(200, archivo.read_bytes(), "font/woff2", "public, max-age=31536000, immutable")
             if ruta == "/api/estado":
                 return self._json(200, app.snapshot())
             if ruta == "/api/ofertas":
