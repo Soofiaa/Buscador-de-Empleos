@@ -47,11 +47,31 @@ def test_trainee_solo_si_es_para_titulados():
     assert clasificar(oferta("Trainee QA", "dirigido a egresados y titulados"))["categoria"] == "principal"
 
 
-# ------------------------------------------------------------ soporte -> lista aparte
+# ------------------------------------------------------------ soporte: categoría propia, prioridad Baja
+# Reemplaza a test_soporte_va_a_fuera_de_perfil: el soporte ya no sale antes de los filtros a "Fuera de perfil";
+# es un cargo más (tipo S, prioridad Baja). Ocultarlo es un ajuste de la página, no de la clasificación.
 @pytest.mark.parametrize("titulo", ["Analista de Soporte Cloud", "Mesa de Ayuda Nivel 1",
                                     "Técnico Help Desk", "Service Desk Analyst"])
-def test_soporte_va_a_fuera_de_perfil(titulo):
-    assert clasificar(oferta(titulo))["categoria"] == "fuera_perfil"
+def test_soporte_es_principal_tipo_s_prioridad_baja(titulo):
+    r = clasificar(oferta(titulo))
+    assert (r["categoria"], r["tipo"], r["prioridad"], r["motivo"]) ==         ("principal", "S: Soporte TI", "Baja", "rol: soporte / helpdesk")
+
+
+@pytest.mark.parametrize("titulo, desc, ubic, categoria, razon", [
+    ("Coordinador de Soporte TI", "", None, "descartada", "nivel semi senior / senior"),
+    ("Analista de Soporte TI", "Experiencia de 2 años en soporte", None, "descartada", "exige 2+ años de experiencia"),
+    ("Mesa de Ayuda TI", "", "Antofagasta, AN, Chile", "descartada", "fuera de zona (AN)"),
+    ("Práctica Soporte TI", "", None, "descartada", "práctica / estudiante"),
+    ("Soporte TI", "contacto solo por whatsapp", None, "sospechosa", "contacto solo por WhatsApp"),
+])
+def test_soporte_pasa_por_los_mismos_filtros(titulo, desc, ubic, categoria, razon):
+    r = clasificar(oferta(titulo, desc, **({"ubic": ubic} if ubic else {})))
+    assert (r["categoria"], r["razon"]) == (categoria, razon)
+
+
+def test_tecnico_help_desk_no_se_excluye_por_tecnico():
+    # "técnico" excluye roles puente (B), pero el soporte no es un rol puente
+    assert clasificar(oferta("Técnico Help Desk", "Contrato a plazo fijo"))["categoria"] == "principal"
 
 
 def test_soporte_con_rol_funcional_no_es_fuera_de_perfil():
@@ -351,8 +371,9 @@ def test_datos_de_la_pagina_orden_listas_y_estado(tmp_path):
         {"job_url": "http://acc", "title": "QA", "company": "Accenture"})
     buscar.guardar(con, buscar.procesar(df, "t"))
     d = buscar.ofertas_para_pagina(con)
-    assert [f["url"] for f in d["principal"]] == ["http://qa-remoto", "http://qa-presencial", "http://front"]
-    assert [f["url"] for f in d["fuera_perfil"]] == ["http://soporte"]
+    # el soporte ("Mesa de Ayuda") ya no va a Fuera de perfil: es principal, prioridad Baja, al final de la lista
+    assert [f["url"] for f in d["principal"]] == ["http://qa-remoto", "http://qa-presencial", "http://front", "http://soporte"]
+    assert d["fuera_perfil"] == [] and d["soporte_incluido"] is True
     assert [f["url"] for f in d["sospechosas"]] == ["http://estafa"]
     assert [f["url"] for f in d["descartadas"]] == ["http://acc"] and d["total_descartadas"] == 1
     assert d["descartadas"][0]["razon"] == "empresa excluida"

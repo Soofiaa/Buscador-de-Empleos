@@ -90,7 +90,11 @@ EXCLUIR_PRACTICA_DESC = [r"practica profesional", r"practicante", r"memorista",
                          r"alumno regular", r"estudiante en practica"]
 # "Trainee" solo entra si la descripción habla de egresados/titulados.
 
-# ============================================================== Fuera de tu perfil (lista aparte)
+# ============================================================== Soporte TI / helpdesk (categoría propia)
+# Es un cargo más ("S: Soporte TI", prioridad Baja) que pasa por los mismos filtros que el resto. Se puede ocultar
+# desde la página (ajuste "soporte"): entonces se ve en "Fuera de perfil", como antes, sin reclasificar nada.
+SOPORTE_TIPO = "S: Soporte TI"
+SOPORTE_PRIORIDAD = "Baja"
 SOPORTE_TITULO = [r"soporte", r"help ?desk", r"mesa de (ayuda|servicios?)",
                   r"service ?desk", r"\bnoc\b", r"nivel 1\b", r"\bn1\b", r"\bl1\b"]
 SOPORTE_EXCEPCION = r"funcional|\bqa\b|tester|desarrollador|developer|programador|\bsap\b"   # "Soporte SAP": cargo SAP / ERP

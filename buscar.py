@@ -7,6 +7,7 @@ Uso:
 import argparse
 import json
 import os
+import re
 import sqlite3
 import time
 from collections import Counter
@@ -22,7 +23,7 @@ import trabajando
 from red import Bloqueo, ClienteHTTP, ErrorFuente, NoEncontrada, USER_AGENT_HTTP
 from robots import GestorRobots
 from filtros import (ORDEN_MODALIDAD, ORDEN_PRIORIDAD, ZONA, ahora_chile, antiguedad, base_oferta, ciudad_de,
-                     clasificar, clave_oferta, numero, plural, texto)
+                     clasificar, clave_oferta, normalizar, numero, plural, texto)
 
 VERSION_DB = 7
 salida = print   # la página la reemplaza para mostrar el avance de la búsqueda en vivo
@@ -102,7 +103,24 @@ AJUSTES_POR_DEFECTO = {          # se insertan solo si faltan; la Automatizació
     "programacion": {"activa": False, "horas": ["09:00"], "ultimas": {}},
     "fuentes_activas": {s: True for s in config.SITIOS},
     "alertas": {"notificar_navegador": False, "sueldo_minimo": None},
+    "soporte": {"incluir": True},   # mostrar la categoría Soporte TI en Ofertas (si no, va a "Fuera de perfil")
 }
+
+
+def leer_ajuste(con, clave: str) -> dict:
+    """El ajuste guardado, completado con los valores por defecto (una base v7 anterior puede no tenerlo)."""
+    fila = con.execute("SELECT valor FROM ajustes WHERE clave = ?", (clave,)).fetchone()
+    guardado = json.loads(fila[0]) if fila else {}
+    return {**AJUSTES_POR_DEFECTO.get(clave, {}), **(guardado if isinstance(guardado, dict) else {})}
+
+
+def guardar_soporte(con, datos) -> dict:
+    """POST /api/ajustes/soporte: solo {"incluir": true|false}."""
+    if not isinstance(datos, dict) or set(datos) != {"incluir"} or not isinstance(datos["incluir"], bool):
+        raise ErrorDatos(400, 'se espera {"incluir": true} o {"incluir": false}')
+    with transaccion(con):
+        con.execute("INSERT OR REPLACE INTO ajustes (clave, valor) VALUES ('soporte', ?)", (json.dumps({"incluir": datos["incluir"]}),))
+    return {"incluir": datos["incluir"]}
 
 
 class BaseOcupada(Exception):
@@ -251,6 +269,35 @@ def reclasificar(con) -> Counter:
             + " WHERE url = :url", {**cl, "url": fila["url"]})
     con.commit()
     return Counter(r[0] for r in con.execute("SELECT categoria FROM ofertas"))
+
+
+def _afectada_por_soporte_o_sap(fila) -> bool:
+    """La regla (no una lista de URLs) de las ofertas que tocan las reglas de soporte y de SAP / ERP."""
+    return fila["razon"] == "soporte / helpdesk" or re.search(r"\bsap\b", normalizar(fila["titulo"] or "")) is not None
+
+
+def reclasificar_dirigida(con, escribir: bool = True, seleccion=_afectada_por_soporte_o_sap) -> list[dict]:
+    """Re-aplica la clasificación SOLO a las ofertas de la selección, y solo escribe las que cambian. A diferencia de
+    reclasificar(), no toca el resto (aunque el código actual las clasificara distinto). Nunca toca el estado ni las
+    columnas de seguimiento. Devuelve los cambios [{url, titulo, antes, despues}]; con escribir=False solo simula."""
+    def calcular():
+        cambios = []
+        for fila in con.execute("SELECT * FROM ofertas").fetchall():
+            if not seleccion(fila):
+                continue
+            nueva = clasificar(json.loads(fila["raw"]))
+            antes = {c: fila[c] for c in CAMPOS_CLASIF}
+            despues = {c: nueva[c] for c in CAMPOS_CLASIF}
+            if antes != despues:
+                cambios.append({"url": fila["url"], "titulo": fila["titulo"], "antes": antes, "despues": despues})
+                if escribir:
+                    con.execute("UPDATE ofertas SET " + ", ".join(f"{c} = ?" for c in CAMPOS_CLASIF) + " WHERE url = ?",
+                                [despues[c] for c in CAMPOS_CLASIF] + [fila["url"]])
+        return cambios
+    if not escribir:
+        return calcular()
+    with transaccion(con):              # todo o nada
+        return calcular()
 
 
 # ------------------------------------------------------------------ scraping
@@ -538,6 +585,12 @@ def ofertas_para_pagina(con) -> dict:
         "descartadas": filas(f"SELECT {campos} FROM ofertas WHERE categoria = 'descartada' AND {otra} "
                              f"ORDER BY detectada_en DESC, publicada DESC LIMIT {LIMITE_DESCARTADAS}"),
     }
+    incluir_soporte = leer_ajuste(con, "soporte")["incluir"]
+    if not incluir_soporte:     # oculto: el soporte sin decisión tuya se ve en "Fuera de perfil", como antes
+        ocultas = [o for o in principal if o.get("tipo") == config.SOPORTE_TIPO and o["estado"] in ("nueva", "revisada")]
+        datos["principal"] = [o for o in principal if o not in ocultas]
+        datos["fuera_perfil"] = [{**{c.strip(): o.get(c.strip()) for c in campos.split(",")}, "razon": "soporte / helpdesk (oculto)"}
+                                 for o in ocultas] + datos["fuera_perfil"]
     corridas = historial_corridas(con)
     for lista in datos.values():
         for o in lista:
@@ -545,6 +598,7 @@ def ofertas_para_pagina(con) -> dict:
     datos["total_descartadas"] = con.execute(
         f"SELECT COUNT(*) FROM ofertas WHERE categoria = 'descartada' AND {otra}").fetchone()[0]
     datos["corridas"] = corridas
+    datos["soporte_incluido"] = incluir_soporte
     return datos
 
 
@@ -709,9 +763,21 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     ap.add_argument("--reclasificar", action="store_true",
                     help="re-aplica config.py a las ofertas guardadas, sin buscar de nuevo")
+    ap.add_argument("--reclasificar-dirigida", action="store_true",
+                    help="re-aplica la clasificación solo a las ofertas de soporte o con SAP en el título")
+    ap.add_argument("--simular", action="store_true", help="con --reclasificar-dirigida: muestra los cambios sin guardarlos")
     args = ap.parse_args()
 
     con = conectar()
+    if args.reclasificar_dirigida:
+        cambios = reclasificar_dirigida(con, escribir=not args.simular)
+        print(("SIMULACIÓN (no se guardó nada): " if args.simular else "Guardado: ")
+              + plural(len(cambios), "oferta cambia", "ofertas cambian"))
+        for c in cambios:
+            a, d = c["antes"], c["despues"]
+            print(f"  {c['titulo'][:60]} | {a['categoria']}/{a['razon'] or a['tipo'] + ' ' + a['prioridad']} -> "
+                  f"{d['categoria']}/{d['razon'] or d['tipo'] + ' ' + d['prioridad']}")
+        return
     if args.reclasificar:
         print("Reclasificando lo guardado con la configuración actual...")
         print("  " + ", ".join(f"{k}: {v}" for k, v in reclasificar(con).items()))

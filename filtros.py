@@ -205,6 +205,9 @@ def es_senior(t: str, d: str = "") -> bool:
 
 # ------------------------------------------------------------------ detección de rol
 def _detectar_rol(t: str, d: str):
+    # soporte primero (como cuando salía antes de todo): un "Analista de Soporte TI" es soporte, no "analista TI"
+    if _hay(config.SOPORTE_TITULO, t) and not re.search(config.SOPORTE_EXCEPCION, t):
+        return {"tipo": "S", "prioridad": config.SOPORTE_PRIORIDAD, "etiqueta": "soporte / helpdesk", "contexto": []}
     if re.search(config.NO_TI_TITULO, t) and not re.search(config.TI_EN_TITULO, t):
         return None
     candidatos = []
@@ -251,11 +254,7 @@ def clasificar(o: dict) -> dict:
     if re.search(r"\btrainee\b", t) and not re.search(r"egresad|titulad", d):
         return fin("descartada", "trainee sin mención de titulados")
 
-    # soporte -> lista aparte
-    if _hay(config.SOPORTE_TITULO, t) and not re.search(config.SOPORTE_EXCEPCION, t):
-        return fin("fuera_perfil", "soporte / helpdesk")
-
-    rol = _detectar_rol(t, d)
+    rol = _detectar_rol(t, d)               # el soporte es un cargo más (tipo S): sigue por los filtros de abajo
     if rol is None:
         return fin("descartada", "sin rol objetivo")
 
@@ -318,7 +317,8 @@ def clasificar(o: dict) -> dict:
     if ev_contrato:
         partes.append(f"contrato: plazo fijo por {ev_contrato}")
 
-    res.update(categoria="principal", tipo="A: TI" if rol["tipo"] == "A" else "B: Puente",
+    tipos = {"A": "A: TI", "B": "B: Puente", "S": config.SOPORTE_TIPO}
+    res.update(categoria="principal", tipo=tipos[rol["tipo"]],
                prioridad=prioridad, modalidad=modalidad, contrato=contrato, sueldo=sueldo,
                experiencia=exp_txt, motivo=" | ".join(partes))
     return res

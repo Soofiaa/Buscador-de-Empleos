@@ -224,3 +224,9 @@ def test_mensaje_de_fin_de_busqueda_en_singular_y_plural(tmp_path, n, texto):
     assert app.iniciar_busqueda()
     app.hilo.join(5)
     assert app.estado["mensaje"] == "Búsqueda terminada: " + texto + "."
+
+
+def test_la_pagina_tiene_el_interruptor_de_soporte():
+    script = PAGINA.split("<script>")[1]
+    assert '"/api/ajustes/soporte", { incluir: e.target.checked }' in script and "🛟 Incluir soporte TI / helpdesk" in script
+    assert 'S.pestana === "ofertas" || S.pestana === "fuera_perfil"' in script        # solo donde tiene efecto

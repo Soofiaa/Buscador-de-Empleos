@@ -12,6 +12,8 @@
                           fecha_postulacion, si_actual: {estado, fecha_postulacion}}}; 409 si la oferta cambió entre medias
   POST /api/nota          {"url", y solo lo que cambia: notas (<=5000), fecha_postulacion (AAAA-MM-DD o ""), fase,
                           sueldo_manual (<=100), prioridad_manual ("", Alta, Media, Baja)} -> {ok, oferta}
+  GET  /api/ajustes/soporte  {incluir}: si la categoría Soporte TI se muestra en Ofertas
+  POST /api/ajustes/soporte  {"incluir": true|false} (nada más) -> {ok, incluir}
   Errores: 400 pedido inválido, 404 oferta inexistente, 503 "base ocupada, reintenta" (no se escribió nada)
 
 Seguridad (heredada de la app anterior): solo atiende peticiones cuyo Host u Origin sean locales, de modo que otra
@@ -146,6 +148,12 @@ def crear_servidor(app: Aplicacion, puerto: int = None, host: str = None) -> Thr
                     return self._json(200, buscar.ofertas_para_pagina(con))
                 finally:
                     con.close()
+            if ruta == "/api/ajustes/soporte":
+                con = app.conexion()
+                try:
+                    return self._json(200, {"incluir": buscar.leer_ajuste(con, "soporte")["incluir"]})
+                finally:
+                    con.close()
             self._json(404, {"error": "no existe"})
 
         def do_POST(self):
@@ -170,6 +178,7 @@ def crear_servidor(app: Aplicacion, puerto: int = None, host: str = None) -> Thr
                 "/api/marcar": lambda con, d: buscar.marcar(con, d.get("url"), d.get("estado"), d.get("restaurar")),
                 "/api/nota": lambda con, d: {"oferta": buscar.actualizar_seguimiento(
                     con, d.get("url"), {k: v for k, v in d.items() if k != "url"})},
+                "/api/ajustes/soporte": lambda con, d: buscar.guardar_soporte(con, d),
             }
             if ruta in escrituras:
                 if not isinstance(datos, dict):
