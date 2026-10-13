@@ -1,3 +1,5 @@
+name: job-tracker                      # fijo: si cambia, Docker crea otro volumen vacío y la base "desaparece"
+
 services:
   jobtracker:
     build: .
