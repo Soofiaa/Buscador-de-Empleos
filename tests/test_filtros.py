@@ -294,7 +294,7 @@ def test_migracion_v5_a_v6_agrega_columnas_sin_respaldar_ni_perder(tmp_path, col
         assert (f["estado"], f["sueldo"], f["notas"], f["fecha_postulacion"], f["fase"], f["sueldo_manual"]) == \
             ("postulada", "$1", "", "", "", "")
         assert con.execute("SELECT COUNT(*) FROM corridas").fetchone()[0] == 1
-        assert con.execute("PRAGMA user_version").fetchone()[0] == buscar.VERSION_DB == 6
+        assert con.execute("PRAGMA user_version").fetchone()[0] == buscar.VERSION_DB == 7
         con.close()
     assert list(tmp_path.glob("v5_antigua_*.db")) == []    # migración, no respaldo
 

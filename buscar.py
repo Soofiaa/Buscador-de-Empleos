@@ -24,7 +24,7 @@ from robots import GestorRobots
 from filtros import (ORDEN_MODALIDAD, ORDEN_PRIORIDAD, ZONA, ahora_chile, antiguedad, base_oferta, ciudad_de,
                      clasificar, clave_oferta, numero, plural, texto)
 
-VERSION_DB = 6
+VERSION_DB = 7
 salida = print   # la página la reemplaza para mostrar el avance de la búsqueda en vivo
 
 
@@ -93,24 +93,86 @@ def _migrar_v4(con) -> int:
     return len(borrar)
 
 
-COLUMNAS_SEGUIMIENTO = ["notas", "fecha_postulacion", "fase", "sueldo_manual"]   # las escribe la usuaria, no la búsqueda
+# las escribe la usuaria, no la búsqueda: reclasificar() y guardar() nunca las tocan
+COLUMNAS_SEGUIMIENTO = ["notas", "fecha_postulacion", "fase", "sueldo_manual", "prioridad_manual"]
+FASES = ["", "postulacion", "rrhh", "tecnica", "final", "oferta"]      # "" = sin fase
+PRIORIDADES = ["Alta", "Media", "Baja"]
+BUSY_TIMEOUT_MS = 15_000         # cuánto espera una escritura a que otra termine antes de rendirse ("base ocupada")
+AJUSTES_POR_DEFECTO = {          # se insertan solo si faltan; la Automatización (fase D) los usará
+    "programacion": {"activa": False, "horas": ["09:00"], "ultimas": {}},
+    "fuentes_activas": {s: True for s in config.SITIOS},
+    "alertas": {"notificar_navegador": False, "sueldo_minimo": None},
+}
 
 
-def _asegurar_columnas(con) -> None:
-    """v5 -> v6: columnas de seguimiento. Idempotente: solo agrega las que falten (una base de la app Node ya trae
-    notas, fecha_postulacion y fase)."""
-    existentes = {r[1] for r in con.execute("PRAGMA table_info(ofertas)")}
-    for col in COLUMNAS_SEGUIMIENTO:
-        if col not in existentes:
-            con.execute(f"ALTER TABLE ofertas ADD COLUMN {col} TEXT DEFAULT ''")
-    con.commit()
+class BaseOcupada(Exception):
+    """Otra escritura tuvo la base tomada más de BUSY_TIMEOUT_MS: no se escribió nada."""
+
+
+def es_base_ocupada(ex: Exception) -> bool:
+    return isinstance(ex, sqlite3.OperationalError) and ("locked" in str(ex) or "busy" in str(ex))
+
+
+def _abrir(path) -> sqlite3.Connection:
+    con = sqlite3.connect(path, timeout=BUSY_TIMEOUT_MS / 1000)
+    con.row_factory = sqlite3.Row
+    con.execute(f"PRAGMA busy_timeout = {int(BUSY_TIMEOUT_MS)}")
+    con.execute("PRAGMA journal_mode = WAL")       # la página lee mientras una búsqueda escribe
+    return con
+
+
+class transaccion:
+    """BEGIN IMMEDIATE ... COMMIT: toma el turno de escritura al EMPEZAR (no a mitad de camino, que es lo que provoca
+    "database is locked"). Si algo falla, ROLLBACK: nunca queda nada escrito a medias."""
+    def __init__(self, con):
+        self.con = con
+
+    def __enter__(self):
+        if self.con.in_transaction:
+            self.con.commit()
+        try:
+            self.con.execute("BEGIN IMMEDIATE")
+        except sqlite3.OperationalError as ex:
+            if es_base_ocupada(ex):
+                raise BaseOcupada(str(ex)) from ex
+            raise
+        return self.con
+
+    def __exit__(self, tipo, ex, tb):
+        self.con.execute("COMMIT" if tipo is None else "ROLLBACK")
+        if ex is not None and es_base_ocupada(ex):
+            raise BaseOcupada(str(ex)) from ex
+        return False
+
+
+def _migrar_v7(con) -> None:
+    """-> v7, en UNA transacción (si algo falla, la base queda como estaba): columnas de seguimiento (incluida
+    prioridad_manual), corridas.origen y las tablas ajustes, alertas y pruebas_fuentes. Idempotente."""
+    with transaccion(con):
+        existentes = {r[1] for r in con.execute("PRAGMA table_info(ofertas)")}
+        for col in COLUMNAS_SEGUIMIENTO:          # una base de la app Node ya trae notas, fecha_postulacion y fase
+            if col not in existentes:
+                con.execute(f"ALTER TABLE ofertas ADD COLUMN {col} TEXT DEFAULT ''")
+        if "origen" not in {r[1] for r in con.execute("PRAGMA table_info(corridas)")}:
+            con.execute("ALTER TABLE corridas ADD COLUMN origen TEXT DEFAULT 'manual'")
+        con.execute("CREATE TABLE IF NOT EXISTS ajustes (clave TEXT PRIMARY KEY, valor TEXT NOT NULL)")
+        con.executemany("INSERT OR IGNORE INTO ajustes (clave, valor) VALUES (?, ?)",
+                        [(k, json.dumps(v)) for k, v in AJUSTES_POR_DEFECTO.items()])
+        con.execute("""CREATE TABLE IF NOT EXISTS alertas (url TEXT PRIMARY KEY REFERENCES ofertas(url),
+                       corrida_id INTEGER, creada_en TEXT, leida INTEGER NOT NULL DEFAULT 0)""")
+        con.execute("""CREATE TABLE IF NOT EXISTS pruebas_fuentes (fuente TEXT PRIMARY KEY, probada_en TEXT,
+                       ok INTEGER, ms INTEGER, resultados INTEGER, detalle TEXT)""")
+        malas = con.execute(f"SELECT COUNT(*) FROM ofertas WHERE COALESCE(fase, '') NOT IN "
+                            f"({', '.join('?' * len(FASES))})", FASES).fetchone()[0]
+        if malas:
+            raise ValueError(f"{plural(malas, 'oferta tiene', 'ofertas tienen')} una fase no válida: "
+                             "no se migró nada (la base quedó como estaba)")
+        con.execute(f"PRAGMA user_version = {VERSION_DB}")
 
 
 def conectar(path=None) -> sqlite3.Connection:
     path = path or config.DB_PATH
-    con = sqlite3.connect(path, timeout=15)
-    con.row_factory = sqlite3.Row
-    con.execute("PRAGMA journal_mode = WAL")       # la página lee mientras una búsqueda escribe
+    con = _abrir(path)
     existe = con.execute(
         "SELECT 1 FROM sqlite_master WHERE type='table' AND name='ofertas'").fetchone()
     version = con.execute("PRAGMA user_version").fetchone()[0]
@@ -123,15 +185,14 @@ def conectar(path=None) -> sqlite3.Connection:
         repetidas += _migrar_v4(con)
         if repetidas:
             print(f"Base de datos actualizada: {plural(repetidas, 'duplicada', 'duplicadas')} entre fuentes eliminadas")
-    elif existe and version not in (5, VERSION_DB):  # base de una versión desconocida: se respalda
+    elif existe and version not in (5, 6, VERSION_DB):  # base de una versión desconocida: se respalda
         con.close()
         base, ext = os.path.splitext(path)
         respaldo = f"{base}_antigua_{datetime.now():%Y%m%d%H%M%S}{ext}"
         os.replace(path, respaldo)
         print(f"Base de datos anterior respaldada como {respaldo}")
-        con = sqlite3.connect(path, timeout=15)
-        con.row_factory = sqlite3.Row
-        con.execute("PRAGMA journal_mode = WAL")
+        con = _abrir(path)
+        version = 0
     con.execute("""
         CREATE TABLE IF NOT EXISTS ofertas (
             url TEXT PRIMARY KEY, clave TEXT UNIQUE,
@@ -144,8 +205,9 @@ def conectar(path=None) -> sqlite3.Connection:
         id INTEGER PRIMARY KEY AUTOINCREMENT, inicio TEXT, fin TEXT, nuevas INTEGER, detalle TEXT)""")
     con.execute("""CREATE TABLE IF NOT EXISTS terminos_no_disponibles (
         sitio TEXT, termino TEXT, hasta TEXT, PRIMARY KEY (sitio, termino))""")
-    _asegurar_columnas(con)
-    con.execute(f"PRAGMA user_version = {VERSION_DB}")
+    con.commit()
+    if version < VERSION_DB:          # solo cuando hace falta: así cada petición no toma el turno de escritura
+        _migrar_v7(con)
     return con
 
 
