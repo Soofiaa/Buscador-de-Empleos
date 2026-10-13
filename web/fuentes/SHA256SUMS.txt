@@ -1,0 +1,9 @@
+# Tipografías servidas localmente por la app (font-src 'self'). Licencia: SIL OFL 1.1 (ver OFL-*.txt).
+# Origen: tarballs de @fontsource-variable/{outfit,plus-jakarta-sans}@5.3.0 en registry.npmjs.org
+#   outfit-5.3.0.tgz            sha512-fPb5XnYK0k7SbR++HEmm4+ZqDszmLKQ+sPRUr8oQ/KNC0vy6r6hazJFe8iYozv4cqlHbvJ/JECkJWrfDodUMVQ==
+#   plus-jakarta-sans-5.3.0.tgz sha512-/l/4r0yyWK9JzAlmA0LiYgGgmJe/Gswt4jTJEzr5QhJfwMbvJZDmYWyW0M4X7yCK69BajMVlV/Lx8g7WDc1+sw==
+# Extraídos solo package/files/*-latin-wght-normal.woff2 y package/LICENSE (sin instalar ni ejecutar el paquete). 2026-10-13.
+6c18d579fd87c3776be068b762cbc83fde3acb543d49eabd3ade842eb987e887 *outfit-latin-wght-normal-5.3.0.woff2
+153fc85b70298beeb1d61a5f723331649e7f23bb77302a66e61cb3e2fbdb5e79 *plus-jakarta-sans-latin-wght-normal-5.3.0.woff2
+0e5fcef5d93bfcae273c11c00f0bb453d3b5491860e1ac8b658767b7577c938f *OFL-outfit.txt
+e07fd1167c2aaaa6fb965dd66e1e73b13c9c95b76b2d648b6e938780f30b37af *OFL-plus-jakarta-sans.txt
