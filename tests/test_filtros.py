@@ -263,6 +263,47 @@ def test_base_antigua_se_respalda(tmp_path):
     assert len(list(tmp_path.glob("v1_antigua_*.db"))) == 1
 
 
+def _base_v5(ruta, columnas_node=False):
+    """Una base v5 real (como la del volumen), opcionalmente con las columnas que agregaba la app Node."""
+    con = buscar.conectar(ruta)
+    con.execute("PRAGMA user_version = 5")
+    con.commit(); con.close()
+    v5 = sqlite3.connect(ruta)
+    v5.execute("DROP TABLE ofertas")      # tabla v5 tal cual, sin las columnas de seguimiento
+    v5.execute("""CREATE TABLE ofertas (url TEXT PRIMARY KEY, clave TEXT UNIQUE, titulo TEXT, empresa TEXT,
+        ubicacion TEXT, publicada TEXT, raw TEXT, categoria TEXT, razon TEXT, tipo TEXT, prioridad TEXT,
+        modalidad TEXT, contrato TEXT, sueldo TEXT, experiencia TEXT, motivo TEXT,
+        estado TEXT DEFAULT 'nueva', busqueda TEXT, detectada_en TEXT, fuente TEXT DEFAULT 'indeed',
+        clave_base TEXT, ciudad TEXT DEFAULT ''""" + (", notas TEXT DEFAULT '', fecha_postulacion TEXT DEFAULT '',"
+                                                     " fase TEXT DEFAULT ''" if columnas_node else "") + ")")
+    v5.execute("INSERT INTO ofertas (url, clave, titulo, estado, sueldo) VALUES ('a', 'k1', 'QA', 'postulada', '$1')")
+    v5.execute("INSERT INTO corridas (inicio, fin, nuevas, detalle) VALUES ('2026-10-11 10:58', '2026-10-11 11:06', 7, '{}')")
+    v5.commit(); v5.close()
+
+
+@pytest.mark.parametrize("columnas_node", [False, True])
+def test_migracion_v5_a_v6_agrega_columnas_sin_respaldar_ni_perder(tmp_path, columnas_node):
+    ruta = str(tmp_path / "v5.db")
+    _base_v5(ruta, columnas_node)
+    for _ in range(2):                    # idempotente: una segunda conexión no cambia nada
+        con = buscar.conectar(ruta)
+        cols = [r[1] for r in con.execute("PRAGMA table_info(ofertas)")]
+        assert all(cols.count(c) == 1 for c in buscar.COLUMNAS_SEGUIMIENTO)
+        f = con.execute("SELECT * FROM ofertas").fetchone()
+        assert (f["estado"], f["sueldo"], f["notas"], f["fecha_postulacion"], f["fase"], f["sueldo_manual"]) == \
+            ("postulada", "$1", "", "", "", "")
+        assert con.execute("SELECT COUNT(*) FROM corridas").fetchone()[0] == 1
+        assert con.execute("PRAGMA user_version").fetchone()[0] == buscar.VERSION_DB == 6
+        con.close()
+    assert list(tmp_path.glob("v5_antigua_*.db")) == []    # migración, no respaldo
+
+
+def test_base_nueva_trae_columnas_de_seguimiento(tmp_path):
+    con = buscar.conectar(str(tmp_path / "t.db"))
+    cols = {r[1] for r in con.execute("PRAGMA table_info(ofertas)")}
+    assert set(buscar.COLUMNAS_SEGUIMIENTO) <= cols
+
+
 def test_datos_de_la_pagina_orden_listas_y_estado(tmp_path):
     con = buscar.conectar(str(tmp_path / "t.db"))
     df = df_de(

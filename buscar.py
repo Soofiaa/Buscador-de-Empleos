@@ -24,7 +24,7 @@ from robots import GestorRobots
 from filtros import (ORDEN_MODALIDAD, ORDEN_PRIORIDAD, ZONA, ahora_chile, antiguedad, base_oferta, ciudad_de,
                      clasificar, clave_oferta, numero, texto)
 
-VERSION_DB = 5
+VERSION_DB = 6
 salida = print   # la página la reemplaza para mostrar el avance de la búsqueda en vivo
 
 
@@ -93,6 +93,19 @@ def _migrar_v4(con) -> int:
     return len(borrar)
 
 
+COLUMNAS_SEGUIMIENTO = ["notas", "fecha_postulacion", "fase", "sueldo_manual"]   # las escribe la usuaria, no la búsqueda
+
+
+def _asegurar_columnas(con) -> None:
+    """v5 -> v6: columnas de seguimiento. Idempotente: solo agrega las que falten (una base de la app Node ya trae
+    notas, fecha_postulacion y fase)."""
+    existentes = {r[1] for r in con.execute("PRAGMA table_info(ofertas)")}
+    for col in COLUMNAS_SEGUIMIENTO:
+        if col not in existentes:
+            con.execute(f"ALTER TABLE ofertas ADD COLUMN {col} TEXT DEFAULT ''")
+    con.commit()
+
+
 def conectar(path=None) -> sqlite3.Connection:
     path = path or config.DB_PATH
     con = sqlite3.connect(path, timeout=15)
@@ -110,7 +123,7 @@ def conectar(path=None) -> sqlite3.Connection:
         repetidas += _migrar_v4(con)
         if repetidas:
             print(f"Base de datos actualizada: {repetidas} duplicadas entre fuentes eliminadas")
-    elif existe and version != VERSION_DB:  # base de una versión desconocida: se respalda
+    elif existe and version not in (5, VERSION_DB):  # base de una versión desconocida: se respalda
         con.close()
         base, ext = os.path.splitext(path)
         respaldo = f"{base}_antigua_{datetime.now():%Y%m%d%H%M%S}{ext}"
@@ -131,6 +144,7 @@ def conectar(path=None) -> sqlite3.Connection:
         id INTEGER PRIMARY KEY AUTOINCREMENT, inicio TEXT, fin TEXT, nuevas INTEGER, detalle TEXT)""")
     con.execute("""CREATE TABLE IF NOT EXISTS terminos_no_disponibles (
         sitio TEXT, termino TEXT, hasta TEXT, PRIMARY KEY (sitio, termino))""")
+    _asegurar_columnas(con)
     con.execute(f"PRAGMA user_version = {VERSION_DB}")
     return con
 
