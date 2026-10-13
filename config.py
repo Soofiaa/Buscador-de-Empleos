@@ -79,6 +79,8 @@ MARGEN_HORAS_SIN_ZONA = {"trabajando": 4}
 
 import os
 DB_PATH = os.environ.get("JT_DB", "ofertas.db")      # en Docker: /datos/ofertas.db (volumen)
+# carpeta de respaldos (en Docker: /respaldos, montada desde el equipo; "" = respaldo desactivado)
+RESPALDOS_DIR = os.environ.get("JT_RESPALDOS", "")
 PUERTO = int(os.environ.get("JT_PUERTO", "8765"))
 HOST = os.environ.get("JT_HOST", "127.0.0.1")        # en Docker: 0.0.0.0 dentro del contenedor (el puerto se publica solo en 127.0.0.1)
 

@@ -20,6 +20,9 @@
   GET  /api/exportar?formato=csv|json&alcance=seguimiento|principal|todas  descarga (attachment); el CSV protege
                           las celdas que empiezan con = + - @ tab CR; columnas de una lista cerrada (sin raw)
   Límite de cuerpo: 10 KB, 64 KB en /api/nota y /api/oferta/manual; más grande -> 413
+  GET  /api/respaldo       estado del respaldo (configurado, disponible, último, error)
+  POST /api/respaldo       {} -> 201 {ok, respaldo}; 429 si hubo otro hace < 1 min; 503 carpeta no disponible;
+                          507 sin espacio en disco
   Errores: 400 pedido inválido, 404 oferta inexistente, 503 "base ocupada, reintenta" (no se escribió nada)
 
 Seguridad (heredada de la app anterior): solo atiende peticiones cuyo Host u Origin sean locales, de modo que otra
@@ -32,6 +35,7 @@ import argparse
 import json
 import sqlite3
 import threading
+import time
 import urllib.parse
 import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -39,6 +43,7 @@ from pathlib import Path
 
 import buscar
 import config
+import respaldo
 from informe import PAGINA
 
 LOCALES = ("127.0.0.1", "localhost", "[::1]")
@@ -64,12 +69,17 @@ def _host_local(valor: str) -> bool:
 
 
 class Aplicacion:
-    def __init__(self, ruta_db=None, buscar_fn=None):
+    def __init__(self, ruta_db=None, buscar_fn=None, carpeta_respaldos=None, reloj=None):
         self.ruta_db = ruta_db or config.DB_PATH
         self.buscar_fn = buscar_fn or buscar.buscar_ofertas
         self._lock = threading.Lock()
         self.estado = {"buscando": False, "mensaje": "", "error": ""}
         self.hilo = None
+        self.carpeta_respaldos = config.RESPALDOS_DIR if carpeta_respaldos is None else carpeta_respaldos
+        self.reloj = reloj or buscar.ahora_chile         # inyectable: las pruebas usan un reloj simulado
+        self._lock_respaldo = threading.Lock()
+        self._ultimo_manual = 0.0                          # time.monotonic() del último "Respaldar ahora"
+        self.error_respaldo_auto = ""
 
     def conexion(self):                       # una conexión por petición/hilo
         return buscar.conectar(self.ruta_db)
@@ -83,7 +93,44 @@ class Aplicacion:
             est["total_ofertas"] = con.execute("SELECT COUNT(*) FROM ofertas").fetchone()[0]
         finally:
             con.close()
+        est["respaldo"] = {**respaldo.estado(self.carpeta_respaldos), "error_auto": self.error_respaldo_auto}
         return est
+
+    def respaldar_ahora(self) -> dict:
+        """Botón "Respaldar ahora": como mucho uno por minuto."""
+        with self._lock_respaldo:
+            if time.monotonic() - self._ultimo_manual < 60:
+                raise buscar.ErrorDatos(429, "ya hiciste un respaldo hace menos de un minuto")
+            hecho = respaldo.respaldar(self.ruta_db, self.carpeta_respaldos, "manual", self.reloj())
+            self._ultimo_manual = time.monotonic()
+            return hecho
+
+    def revisar_respaldo_diario(self):
+        """Una pasada del respaldo automático: si hoy no hay uno, lo hace. Nunca lanza: anota el error para la página."""
+        if not self.carpeta_respaldos:
+            return None
+        try:
+            with self._lock_respaldo:
+                ahora = self.reloj()
+                respaldo._carpeta_lista(self.carpeta_respaldos)
+                if respaldo.hay_auto_de_hoy(self.carpeta_respaldos, ahora):
+                    self.error_respaldo_auto = ""
+                    return None
+                hecho = respaldo.respaldar(self.ruta_db, self.carpeta_respaldos, "auto", ahora)
+            self.error_respaldo_auto = ""
+            return hecho
+        except Exception as ex:                             # el servidor sigue atendiendo pase lo que pase
+            self.error_respaldo_auto = f"{type(ex).__name__}: {ex}"
+            return None
+
+    def iniciar_respaldo_diario(self, cada_s: int = 3600):
+        parar = threading.Event()
+        def bucle():
+            while not parar.is_set():
+                self.revisar_respaldo_diario()
+                parar.wait(cada_s)
+        threading.Thread(target=bucle, daemon=True, name="respaldo-diario").start()
+        return parar
 
     def _set(self, **kw):
         with self._lock:
@@ -170,6 +217,8 @@ def crear_servidor(app: Aplicacion, puerto: int = None, host: str = None) -> Thr
                 finally:
                     con.close()
                 return self._enviar(200, cuerpo, tipo, extra={"Content-Disposition": f'attachment; filename="{nombre}"'})
+            if ruta == "/api/respaldo":
+                return self._json(200, app.snapshot()["respaldo"])
             if ruta == "/api/ajustes/soporte":
                 con = app.conexion()
                 try:
@@ -198,6 +247,19 @@ def crear_servidor(app: Aplicacion, puerto: int = None, host: str = None) -> Thr
                 datos = json.loads(crudo or b"{}")
             except json.JSONDecodeError:
                 return self._json(400, {"error": "JSON inválido"})
+            if ruta == "/api/respaldo":
+                if datos != {}:
+                    return self._json(400, {"error": "este pedido no lleva datos"})
+                try:
+                    return self._json(201, {"ok": True, "respaldo": app.respaldar_ahora()})
+                except buscar.ErrorDatos as ex:
+                    return self._json(ex.codigo, {"error": str(ex)})
+                except respaldo.RespaldoNoDisponible as ex:
+                    return self._json(503, {"error": str(ex)})
+                except respaldo.SinEspacio as ex:
+                    return self._json(507, {"error": str(ex)})
+                except Exception as ex:                     # el servidor sigue; la página muestra el motivo
+                    return self._json(500, {"error": f"el respaldo falló: {type(ex).__name__}: {ex}"})
             if ruta == "/api/buscar":
                 if app.iniciar_busqueda():
                     return self._json(202, {"ok": True})
@@ -238,6 +300,7 @@ def main():
     args = ap.parse_args()
     app = Aplicacion()
     app.conexion().close()                    # crea/migra la base antes de atender
+    app.iniciar_respaldo_diario()             # si JT_RESPALDOS está configurado: un respaldo automático por día
     srv = crear_servidor(app, args.puerto)
     url = f"http://127.0.0.1:{args.puerto}/"
     print(f"Página de ofertas en {url}  (Ctrl+C para cerrar)")

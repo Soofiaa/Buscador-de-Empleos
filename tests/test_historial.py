@@ -313,3 +313,19 @@ def test_textos_de_la_postulacion_manual_y_alcance_del_csv():
                         "La base está ocupada; reintenta en unos segundos.", "No se pudo guardar: falta titulo"]
     assert r["alcance"] == ["seguimiento", "principal", "principal", "principal"]
     assert r["sinUrl"] == ["#", "#", "https://x.cl"]
+
+
+def test_linea_de_estado_del_respaldo():
+    r = correr_js("""
+      const ult = f => ({configurado: true, disponible: true, error_auto: "", ultimo: {fecha: f}});
+      return [null, {configurado: false}, {configurado: true, disponible: false, error: "no montada"},
+              {configurado: true, disponible: true, error_auto: "SinEspacio: disco lleno"}, {configurado: true, disponible: true, ultimo: null},
+              ult("2026-10-13 09:30"), ult("2026-10-12 23:05"), ult("2026-10-01 08:00")].map(x => textoRespaldo(x, "2026-10-13"));""")
+    assert r == [{"texto": "Respaldo automático no configurado", "clase": "apagado"},
+                 {"texto": "Respaldo automático no configurado", "clase": "apagado"},
+                 {"texto": "⚠️ Carpeta de respaldos no disponible", "clase": "error"},
+                 {"texto": "⚠️ Falló el respaldo automático: SinEspacio: disco lleno", "clase": "error"},
+                 {"texto": "Aún no hay respaldos", "clase": ""},
+                 {"texto": "Último respaldo: hoy 09:30 ✓", "clase": "ok"},
+                 {"texto": "Último respaldo: ayer 23:05 ✓", "clase": "ok"},
+                 {"texto": "Último respaldo: 01/10/2026 08:00 ✓", "clase": "ok"}]

@@ -242,3 +242,13 @@ def test_la_pagina_tiene_postulacion_manual_y_exportar_sin_enlace_falso():
     # sin URL real (clave "manual:..."), ni el título es enlace ni aparece el botón ↗, en tarjeta y en vista compacta
     assert script.count('url !== "#" ? h("a", { class: "btn-enlace-externo"') == 2
     assert 'url !== "#" ? h("a", { class: "titulo"' in script and 'url !== "#" ? h("a", { class: "cargo-titulo"' in script
+
+
+def test_la_pagina_tiene_el_boton_de_respaldo_y_el_compose_monta_la_carpeta():
+    html = PAGINA.split("</style>")[1].split("<script>")[0]
+    assert 'id="btn-respaldo"' in html and 'id="estado-respaldo"' in html
+    assert '"/api/respaldo", {}' in PAGINA.split("<script>")[1]
+    compose = (Path(__file__).resolve().parent.parent / "docker-compose.yml").read_text(encoding="utf-8")
+    assert "JT_RESPALDOS=/respaldos" in compose
+    montaje = [l for l in compose.splitlines() if l.strip().startswith("- ") and l.rstrip().endswith(":/respaldos")]
+    assert len(montaje) == 1 and "C:/Users/sofia/Respaldos/job-tracker" in montaje[0] and "OneDrive" not in montaje[0]

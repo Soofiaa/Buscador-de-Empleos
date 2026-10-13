@@ -9,8 +9,11 @@ services:
       - "127.0.0.1:8765:8765"          # SOLO tu PC: nunca se publica hacia la red
     environment:
       - TZ=America/Santiago
+      - JT_RESPALDOS=/respaldos
     volumes:
       - jt_datos:/datos                # la base de datos (ofertas y estados) vive aquí, no en el contenedor
+      # respaldos de la base en tu equipo, FUERA de OneDrive (OneDrive sincroniza C:/Users/sofia/OneDrive)
+      - ${JT_RESPALDOS_HOST:-C:/Users/sofia/Respaldos/job-tracker}:/respaldos
 
 volumes:
   jt_datos:
