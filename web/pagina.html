@@ -460,6 +460,14 @@
       <div class="barra" id="barra" role="progressbar" aria-label="Avance de la búsqueda" aria-valuemin="0" hidden><div class="barra-relleno" id="barra-relleno"></div></div>
     </div>
 
+    <div class="seccion-lateral-titulo">Gestión de Datos</div>
+    <div class="seccion-lateral">
+      <div class="acciones-datos" style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+        <button class="boton sec" id="btn-exportar-csv" type="button" title="Descargar la pestaña actual (Seguimiento u Ofertas) para Excel" style="font-size:.78rem; padding:7px 4px; justify-content:center;">📥 CSV / Excel</button>
+        <button class="boton sec" id="btn-exportar-json" type="button" title="Descargar todas las ofertas en JSON (respaldo legible)" style="font-size:.78rem; padding:7px 4px; justify-content:center;">📦 Respaldo JSON</button>
+      </div>
+    </div>
+
     <nav class="historial" id="historial" aria-label="Historial de búsquedas"></nav>
     <div class="badge-db-status" id="estado-db" role="status"><span class="dot-online"></span> <span id="texto-db">Conectando…</span></div>
   </aside>
@@ -470,6 +478,7 @@
           <h2 class="titulo-sel" id="titulo-sel">Todas las ofertas</h2>
           <div class="sub" id="sub-sel"></div>
         </div>
+        <button class="btn-manual-header" id="btn-manual" type="button" aria-haspopup="dialog">➕ Agregar postulación manual</button>
       </div>
       <div class="fuentes-sel" id="fuentes-sel" hidden></div>
       <details class="panel" id="panel-corrida" hidden><summary>Resultado de la última búsqueda por fuente</summary><div id="corrida"></div></details>
@@ -591,6 +600,8 @@ const TXT = {
 // "encontradas" cuenta solo las ofertas dentro de la ventana de antigüedad; las más antiguas se informan aparte
 const textoAntiguas = n => TXT.antiguasOmitidas(n);
 const textoVentana = f => f.ventana_dias ? "Ventana de antigüedad: " + (f.ventana_dias === 1 ? "hoy y ayer" : "hoy y los " + TXT.diasAnteriores(f.ventana_dias)) : null;
+// solo http/https; cualquier otra cosa ("manual:...", "javascript:...") no es un enlace
+const urlSegura = u => /^https?:\/\//i.test(u || "") ? u : "#";
 function fechaCL(f) {                            // "2026-10-12" -> "12/10/2026"
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(f || ""));
   return m ? m[3] + "/" + m[2] + "/" + m[1] : (f || "");
@@ -659,6 +670,12 @@ function mensajeError(status, json) {            // texto para el usuario según
   if (status === 409) return "La oferta cambió mientras tanto; no se aplicó para no pisar ese cambio.";
   return (json && json.error) ? "No se pudo guardar: " + json.error : "No se pudo guardar.";
 }
+function mensajeManual(status, json) {            // respuesta de /api/oferta/manual en palabras
+  if (status === 409) return "Ya la tienes registrada (" + ((json && json.error) || "duplicada") + ").";
+  if (status === 413) return "El texto es demasiado largo.";
+  return mensajeError(status, json);
+}
+const alcanceExportar = pestana => pestana === "seguimiento" ? "seguimiento" : "principal";   // CSV de la pestaña que miras
 function textoTotalOfertas(n) {                  // pie de la columna izquierda
   return "SQLite Conectado · " + TXT.ofertas(n);
 }
@@ -683,7 +700,6 @@ function h(tag, attrs, ...hijos) {
   for (const c of hijos.flat()) if (c !== null && c !== undefined && c !== false) e.append(c.nodeType ? c : document.createTextNode(String(c)));
   return e;
 }
-const urlSegura = u => /^https?:\/\//i.test(u || "") ? u : "#";
 const $ = id => document.getElementById(id);
 const corridas = () => (S.datos && S.datos.corridas) || [];
 const claveSel = sel => sel.tipo + ":" + (sel.dia || sel.id || "");
@@ -1074,12 +1090,75 @@ function abrirDetalle(o, origen) {
       url !== "#" ? h("a", { class: "chip", href: url, target: "_blank", rel: "noopener noreferrer" }, "↗ Ver aviso original") : null),
     h("div", { class: "pipeline-container" }, h("div", { class: "pipeline-titulo" }, "Fase del proceso"), pasos),
     form);
+  montarDialogo(tarjeta, origen, estadoSel, o);
+}
+function montarDialogo(tarjeta, origen, foco, oferta) {   // overlay + Esc + foco atrapado, para cualquier diálogo
+  if (detalle) cerrarDetalle();
   const raiz = h("div", { class: "modal-overlay", onclick: e => { if (e.target === raiz) cerrarDetalle(); } }, tarjeta);
   document.body.append(raiz);
-  detalle = { oferta: o, raiz, origen };
+  detalle = { oferta: oferta || null, raiz, origen };
   document.addEventListener("keydown", tecladoDetalle, true);
-  estadoSel.focus();
+  foco.focus();
 }
+
+// ---------- postulación manual (una oferta que no vino de la búsqueda)
+function abrirManual(origen) {
+  const error = h("div", { class: "razon", role: "alert", hidden: true });
+  const titulo = h("input", { type: "text", id: "manual-titulo", maxlength: "200", autocomplete: "off", placeholder: "Ej: Analista QA" });
+  const empresa = h("input", { type: "text", id: "manual-empresa", maxlength: "200", autocomplete: "off" });
+  const url = h("input", { type: "url", id: "manual-url", maxlength: "2000", placeholder: "https://… (opcional)" });
+  const ubicacion = h("input", { type: "text", id: "manual-ubicacion", maxlength: "200", placeholder: "Ej: Santiago" });
+  const modalidad = h("select", { id: "manual-modalidad" }, ["", "Remoto", "Híbrido", "Presencial"].map(v => h("option", { value: v }, v || "Sin indicar")));
+  const estado = h("select", { id: "manual-estado" }, ESTADOS.map(v => h("option", { value: v }, ETIQUETAS_ESTADO[v])));
+  estado.value = "postulada";
+  const fecha = h("input", { type: "date", id: "manual-fecha", title: "Si la dejas vacía y está postulada, se usa la de hoy" });
+  const prioridad = h("select", { id: "manual-prioridad" }, h("option", { value: "" }, "Sin prioridad"), ["Alta", "Media", "Baja"].map(p => h("option", { value: p }, p)));
+  const sueldo = h("input", { type: "text", id: "manual-sueldo", maxlength: "100", placeholder: "Ej: $1.200.000 líquido" });
+  const fase = h("select", { id: "manual-fase" }, h("option", { value: "" }, "Sin fase"), FASES_PIPELINE.map(f => h("option", { value: f.id }, f.nombre)));
+  const notas = h("textarea", { id: "manual-notas", maxlength: "5000", rows: "4", placeholder: "Contacto, cómo postulaste, próximos pasos…" });
+  const grupo = (etq, campo) => h("div", { class: "form-grupo" }, h("label", { for: campo.id }, etq), campo);
+  const form = h("form", { class: "modal-form", novalidate: true, onsubmit: async e => {
+      e.preventDefault();
+      error.hidden = true;
+      if (!titulo.value.trim() || !empresa.value.trim()) { error.replaceChildren("El cargo y la empresa son obligatorios."); error.hidden = false; return; }
+      const r = await api("/api/oferta/manual", { titulo: titulo.value, empresa: empresa.value, url: url.value.trim(), ubicacion: ubicacion.value,
+        modalidad: modalidad.value, estado: estado.value, fecha_postulacion: fecha.value, prioridad_manual: prioridad.value,
+        sueldo_manual: sueldo.value, fase: fase.value, notas: notas.value });
+      if (r.status === 201) { cerrarDetalle(); await cargar(); mostrarAviso("Postulación agregada ✓"); return; }
+      const existente = r.status === 409 && S.datos ? S.datos.principal.find(x => x.url === r.json.url_existente) : null;
+      error.replaceChildren(mensajeManual(r.status, r.json),
+        existente ? h("button", { type: "button", class: "boton sec", style: "margin-left:8px;", onclick: () => abrirDetalle(existente, $("btn-manual")) }, "Ver la existente") : null);
+      error.hidden = false;
+    } },
+    h("div", { class: "form-fila" }, grupo("Cargo *", titulo), grupo("Empresa *", empresa)),
+    h("div", { class: "form-fila" }, grupo("Enlace del aviso", url), grupo("Ubicación", ubicacion)),
+    h("div", { class: "form-fila" }, grupo("Estado", estado), grupo("Fecha de postulación", fecha)),
+    h("div", { class: "form-fila" }, grupo("Modalidad", modalidad), grupo("Prioridad", prioridad)),
+    h("div", { class: "form-fila" }, grupo("Sueldo", sueldo), grupo("Fase", fase)),
+    grupo("Notas", notas),
+    error,
+    h("div", { class: "modal-acciones" },
+      h("button", { type: "button", class: "boton sec", onclick: cerrarDetalle }, "Cancelar"),
+      h("button", { type: "submit", class: "boton" }, "Guardar postulación")));
+  const tarjeta = h("div", { class: "modal-tarjeta", role: "dialog", "aria-modal": "true", "aria-labelledby": "manual-titulo-dialogo" },
+    h("div", { class: "modal-cabecera" },
+      h("h2", { id: "manual-titulo-dialogo" }, "Agregar postulación manual"),
+      h("button", { type: "button", class: "btn-cerrar", "aria-label": "Cerrar", onclick: cerrarDetalle }, "✕")),
+    h("p", { class: "sub", style: "margin:0 0 12px;" }, "Para una oferta que no trajo la búsqueda. Si ya la tienes (mismo cargo, empresa y ciudad, o el mismo enlace), te avisa en vez de duplicarla."),
+    form);
+  montarDialogo(tarjeta, origen, titulo);
+}
+$("btn-manual").addEventListener("click", e => abrirManual(e.currentTarget));
+
+// ---------- exportar (descarga: el servidor responde con Content-Disposition: attachment)
+function descargar(formato, alcance) {
+  const enlace = h("a", { href: "/api/exportar?formato=" + formato + "&alcance=" + alcance, download: "" });
+  document.body.append(enlace);
+  enlace.click();
+  enlace.remove();
+}
+$("btn-exportar-csv").addEventListener("click", () => descargar("csv", alcanceExportar(S.pestana)));
+$("btn-exportar-json").addEventListener("click", () => descargar("json", "todas"));
 function selectorEstado(o, etiqueta) {
   const s = h("select", { class: "estado", "aria-label": etiqueta, onchange: e => cambiarEstado(o, e.target.value, e.target) },
     ESTADOS.map(v => h("option", { value: v }, ETIQUETAS_ESTADO[v])));
@@ -1118,9 +1197,10 @@ function tarjeta(o, completa) {
       h("div", { class: "avatar-empresa", "aria-hidden": "true" }, inicialDe(o)),
       h("div", { class: "tarjeta-titulos" },
         h("div", { style: "display:flex; align-items:center; gap:8px;" },
-          h("a", { class: "titulo", href: url, target: "_blank", rel: "noopener noreferrer" }, o.titulo || "(sin título)"),
-          h("a", { class: "btn-enlace-externo", href: url, target: "_blank", rel: "noopener noreferrer",
-            title: "Abrir publicación original en " + nombreFuente(o.fuente), "aria-label": "Abrir publicación original" }, "↗")),
+          url !== "#" ? h("a", { class: "titulo", href: url, target: "_blank", rel: "noopener noreferrer" }, o.titulo || "(sin título)")
+            : h("span", { class: "titulo" }, o.titulo || "(sin título)"),      // ingresada a mano sin URL
+          url !== "#" ? h("a", { class: "btn-enlace-externo", href: url, target: "_blank", rel: "noopener noreferrer",
+            title: "Abrir publicación original en " + nombreFuente(o.fuente), "aria-label": "Abrir publicación original" }, "↗") : null),
         meta)),
     chips.length ? h("div", { class: "chips" }, chips) : null,
     seg ? h("div", { style: "display:flex; gap:6px; align-items:center; margin-top:4px;" }, h("span", { class: "chip " + seg.clase, style: "font-size:.76rem;" }, seg.texto)) : null,
@@ -1137,7 +1217,8 @@ function filaCompacta(o) {
   return h("div", { class: "fila-compacta " + clasePrio(o) },
     h("div", { class: "avatar-empresa", style: "width:28px; height:28px; font-size:.78rem;", "aria-hidden": "true" }, inicialDe(o)),
     h("div", { class: "cargo-box" },
-      h("a", { class: "cargo-titulo", href: url, target: "_blank", rel: "noopener noreferrer" }, o.titulo || "(sin título)"),
+      url !== "#" ? h("a", { class: "cargo-titulo", href: url, target: "_blank", rel: "noopener noreferrer" }, o.titulo || "(sin título)")
+        : h("span", { class: "cargo-titulo" }, o.titulo || "(sin título)"),
       h("div", { class: "cargo-empresa" }, (o.empresa || "") + (o.ubicacion ? " · " + o.ubicacion : ""))),
     esSueldoDestacado(o.sueldo) ? h("span", { class: "chip sueldo-destacado ocultar-movil", style: "font-size:.74rem;" }, "💵 " + o.sueldo)
       : h("span", { class: "sub ocultar-movil", style: "font-size:.75rem;" }, "—"),
@@ -1145,7 +1226,8 @@ function filaCompacta(o) {
       o.prioridad ? etiquetaPrioridad(o).texto : "Media"),
     h("span", { class: "sub ocultar-movil", style: "font-size:.78rem;" }, o.modalidad || "—"),
     selectorEstado(o, "Estado de seguimiento de " + (o.titulo || "la oferta")),
-    h("a", { class: "btn-enlace-externo", href: url, target: "_blank", rel: "noopener noreferrer", title: "Abrir aviso", "aria-label": "Abrir aviso" }, "↗"));
+    url !== "#" ? h("a", { class: "btn-enlace-externo", href: url, target: "_blank", rel: "noopener noreferrer", title: "Abrir aviso", "aria-label": "Abrir aviso" }, "↗")
+      : h("span", { "aria-hidden": "true" }));
 }
 
 function kpisSeguimiento() {                     // cifras reales del embudo de Seguimiento

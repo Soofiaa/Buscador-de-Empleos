@@ -133,9 +133,10 @@ def test_la_pagina_no_tiene_manejadores_en_el_html_ni_botones_de_fases_futuras()
     html = PAGINA.split("<script>")[0]
     assert not re.search(r"<[a-z]+[^>]*\son[a-z]+\s*=", html, re.I)          # eventos solo con addEventListener / h()
     cuerpo = PAGINA.split("</style>")[1]           # el CSS original ya trae estilos para las fases siguientes; eso no es UI
-    # Fase A ya trae el detalle (modal), "Gestionar proceso" y "Deshacer"; lo demás llega en fases posteriores
-    for futuro in ("Agregar postulación manual", "Exportar", "Importar", "Redactor", "Automatización", "Kanban", "Métricas",
-                   "badge-alertas", "Probar fuentes", "Notification", "/api/oferta/manual", "/api/importar", "/api/exportar"):
+    # Fase A trajo el detalle, "Gestionar proceso" y "Deshacer"; la B1, la postulación manual y exportar.
+    # Importar (B2) no se hace; lo demás llega en fases posteriores.
+    for futuro in ("Importar", "/api/importar", "Redactor", "Automatización", "Kanban", "Métricas",
+                   "badge-alertas", "Probar fuentes", "Notification"):
         assert futuro not in cuerpo, futuro
 
 
@@ -230,3 +231,14 @@ def test_la_pagina_tiene_el_interruptor_de_soporte():
     script = PAGINA.split("<script>")[1]
     assert '"/api/ajustes/soporte", { incluir: e.target.checked }' in script and "🛟 Incluir soporte TI / helpdesk" in script
     assert 'S.pestana === "ofertas" || S.pestana === "fuera_perfil"' in script        # solo donde tiene efecto
+
+
+def test_la_pagina_tiene_postulacion_manual_y_exportar_sin_enlace_falso():
+    script = PAGINA.split("<script>")[1]
+    html = PAGINA.split("</style>")[1].split("<script>")[0]
+    assert 'id="btn-manual"' in html and 'id="btn-exportar-csv"' in html and 'id="btn-exportar-json"' in html
+    assert '"/api/oferta/manual"' in script and '"/api/exportar?formato="' in script
+    assert '"aria-labelledby": "manual-titulo-dialogo"' in script and "montarDialogo(tarjeta, origen, titulo)" in script
+    # sin URL real (clave "manual:..."), ni el título es enlace ni aparece el botón ↗, en tarjeta y en vista compacta
+    assert script.count('url !== "#" ? h("a", { class: "btn-enlace-externo"') == 2
+    assert 'url !== "#" ? h("a", { class: "titulo"' in script and 'url !== "#" ? h("a", { class: "cargo-titulo"' in script

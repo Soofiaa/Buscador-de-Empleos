@@ -5,13 +5,17 @@ Uso:
     python buscar.py --reclasificar   # re-aplica config.py a lo ya guardado (sin buscar)
 """
 import argparse
+import csv
+import io
 import json
 import os
 import re
 import sqlite3
 import time
+import uuid
 from collections import Counter
 from datetime import datetime, timedelta
+from urllib.parse import urlsplit
 
 import pandas as pd
 
@@ -229,15 +233,19 @@ def conectar(path=None) -> sqlite3.Connection:
     return con
 
 
-def _duplicada(con, f: dict) -> bool:
-    """¿Ya tenemos esta oferta (aunque venga de otra fuente o con otra URL)?
-    Misma ciudad, o una de las dos sin ciudad (Glassdoor entrega solo 'Chile')."""
+def _url_duplicada(con, f: dict):
+    """La URL de la oferta que ya tenemos con el mismo título+empresa (aunque venga de otra fuente o con otra URL),
+    o None. Misma ciudad, o una de las dos sin ciudad (Glassdoor entrega solo 'Chile')."""
     if f["ciudad"]:
-        fila = con.execute("SELECT 1 FROM ofertas WHERE clave_base = ? AND (ciudad = ? OR ciudad = '' "
+        fila = con.execute("SELECT url FROM ofertas WHERE clave_base = ? AND (ciudad = ? OR ciudad = '' "
                            "OR ciudad IS NULL)", (f["clave_base"], f["ciudad"])).fetchone()
     else:
-        fila = con.execute("SELECT 1 FROM ofertas WHERE clave_base = ?", (f["clave_base"],)).fetchone()
-    return fila is not None
+        fila = con.execute("SELECT url FROM ofertas WHERE clave_base = ?", (f["clave_base"],)).fetchone()
+    return fila[0] if fila else None
+
+
+def _duplicada(con, f: dict) -> bool:
+    return _url_duplicada(con, f) is not None
 
 
 def guardar(con, filas: list[dict]) -> int:
@@ -261,8 +269,9 @@ def guardar(con, filas: list[dict]) -> int:
 
 
 def reclasificar(con) -> Counter:
-    """Re-aplica la configuración actual a todo lo guardado (conserva el estado)."""
-    for fila in con.execute("SELECT url, raw FROM ofertas").fetchall():
+    """Re-aplica la configuración actual a todo lo guardado (conserva el estado). Las ofertas ingresadas a mano no
+    se tocan: su clasificación la decidiste tú."""
+    for fila in con.execute("SELECT url, raw FROM ofertas WHERE COALESCE(fuente, '') != 'manual'").fetchall():
         cl = clasificar(json.loads(fila["raw"]))
         con.execute(
             "UPDATE ofertas SET " + ", ".join(f"{c} = :{c}" for c in CAMPOS_CLASIF)
@@ -292,7 +301,7 @@ def reclasificar_dirigida(con, escribir: bool = True, seleccion=_afectada_por_so
     def calcular():
         cambios = []
         for fila in con.execute("SELECT * FROM ofertas").fetchall():
-            if not seleccion(fila):
+            if fila["fuente"] == "manual" or not seleccion(fila):     # lo ingresado a mano no se reclasifica
                 continue
             nueva = clasificar(json.loads(fila["raw"]))
             antes = {c: fila[c] for c in CAMPOS_CLASIF}
@@ -638,9 +647,10 @@ def corrida_de(detectada_en, corridas: list[dict]):
 
 class ErrorDatos(Exception):
     """Pedido inválido desde la página: lleva el código HTTP que debe responder el servidor."""
-    def __init__(self, codigo: int, mensaje: str):
+    def __init__(self, codigo: int, mensaje: str, **extra):
         super().__init__(mensaje)
         self.codigo = codigo
+        self.extra = extra          # datos para la respuesta, p. ej. url_existente en un 409
 
 
 LIMITE_NOTAS = 5000
@@ -741,6 +751,128 @@ def actualizar_seguimiento(con, url: str, cambios: dict) -> dict:
         fila = con.execute("SELECT url, estado, notas, fecha_postulacion, fase, sueldo_manual, prioridad_manual, "
                            "prioridad FROM ofertas WHERE url = ?", (url,)).fetchone()
     return _con_prioridad_mostrada(dict(fila))
+
+
+TIPO_MANUAL = "M: Manual"
+MODALIDADES = ["", "Remoto", "Híbrido", "Presencial"]
+LIMITE_TEXTO_CORTO = 200
+LIMITE_URL = 2000
+
+
+def _url_valida(url: str) -> bool:
+    """Solo http/https con dominio: nada de javascript:, data:, file:, etc."""
+    if len(url) > LIMITE_URL or any(c in url for c in " \t\r\n<>\"'"):
+        return False
+    partes = urlsplit(url)
+    return partes.scheme in ("http", "https") and bool(partes.netloc)
+
+
+def crear_oferta_manual(con, datos) -> dict:
+    """POST /api/oferta/manual: una postulación que no vino de la búsqueda. Nunca reemplaza una fila: si la URL ya existe
+    o la misma oferta (título + empresa + ciudad) ya está con otra URL, 409 con la URL existente. Sin URL, la clave es
+    sintética ('manual:...'). La fuente es 'manual': ni la búsqueda ni las reclasificaciones la modifican."""
+    if not isinstance(datos, dict):
+        raise ErrorDatos(400, "formato inválido")
+    permitidos = {"titulo", "empresa", "url", "ubicacion", "modalidad", "estado", "fecha_postulacion", "notas",
+                  "fase", "sueldo_manual", "prioridad_manual"}
+    extra = set(datos) - permitidos
+    if extra:
+        raise ErrorDatos(400, "campos no permitidos: " + ", ".join(sorted(extra)))
+    if any(not isinstance(v, str) for v in datos.values()):
+        raise ErrorDatos(400, "todos los campos deben ser texto")
+    d = {k: v.strip() if k != "notas" else v for k, v in datos.items()}
+    for campo in ("titulo", "empresa"):
+        if not d.get(campo):
+            raise ErrorDatos(400, f"falta {campo}")
+    for campo in ("titulo", "empresa", "ubicacion"):
+        if len(d.get(campo, "")) > LIMITE_TEXTO_CORTO:
+            raise ErrorDatos(400, f"{campo} tiene más de {LIMITE_TEXTO_CORTO} caracteres")
+    if d.get("url") and not _url_valida(d["url"]):
+        raise ErrorDatos(400, "la URL debe empezar con http:// o https://")
+    estado = d.get("estado") or "postulada"
+    if estado not in ESTADOS:
+        raise ErrorDatos(400, "estado no válido")
+    if d.get("modalidad", "") not in MODALIDADES:
+        raise ErrorDatos(400, "modalidad no válida")
+    if d.get("fase", "") not in FASES:
+        raise ErrorDatos(400, "fase no válida")
+    if d.get("prioridad_manual", "") not in [""] + PRIORIDADES:
+        raise ErrorDatos(400, "prioridad no válida")
+    if not _fecha_valida(d.get("fecha_postulacion", "")):
+        raise ErrorDatos(400, "la fecha debe ser AAAA-MM-DD")
+    if len(d.get("notas", "")) > LIMITE_NOTAS:
+        raise ErrorDatos(400, f"las notas tienen más de {LIMITE_NOTAS} caracteres")
+    if len(d.get("sueldo_manual", "")) > LIMITE_SUELDO_MANUAL:
+        raise ErrorDatos(400, f"el sueldo tiene más de {LIMITE_SUELDO_MANUAL} caracteres")
+    ahora = ahora_chile()
+    fecha = d.get("fecha_postulacion", "")
+    if estado in ESTADOS_CON_FECHA and not fecha:
+        fecha = ahora.strftime("%Y-%m-%d")
+    fila = {
+        "url": d.get("url") or f"manual:{uuid.uuid4().hex}",
+        "clave": clave_oferta(d["titulo"], d["empresa"], d.get("ubicacion", "")),
+        "clave_base": base_oferta(d["titulo"], d["empresa"]), "ciudad": ciudad_de(d.get("ubicacion", "")),
+        "titulo": d["titulo"], "empresa": d["empresa"], "ubicacion": d.get("ubicacion", ""),
+        "publicada": "", "raw": json.dumps({"manual": True, **{k: d.get(k, "") for k in ("titulo", "empresa", "url", "ubicacion")}},
+                                           ensure_ascii=False),
+        "categoria": "principal", "razon": "", "tipo": TIPO_MANUAL, "prioridad": "", "modalidad": d.get("modalidad", ""),
+        "contrato": "", "sueldo": "", "experiencia": "", "motivo": "Ingresada a mano", "estado": estado,
+        "busqueda": "manual", "detectada_en": ahora.strftime("%Y-%m-%d %H:%M"), "fuente": "manual",
+        "notas": d.get("notas", ""), "fecha_postulacion": fecha, "fase": d.get("fase", ""),
+        "sueldo_manual": d.get("sueldo_manual", ""), "prioridad_manual": d.get("prioridad_manual", ""),
+    }
+    with transaccion(con):
+        if con.execute("SELECT 1 FROM ofertas WHERE url = ?", (fila["url"],)).fetchone():
+            raise ErrorDatos(409, "ya tienes esa URL", url_existente=fila["url"])
+        existente = _url_duplicada(con, fila) or con.execute("SELECT url FROM ofertas WHERE clave = ?", (fila["clave"],)).fetchone()
+        if existente:
+            raise ErrorDatos(409, "ya tienes esa oferta (mismo cargo y empresa)",
+                             url_existente=existente if isinstance(existente, str) else existente[0])
+        cols = list(fila)
+        con.execute(f"INSERT INTO ofertas ({', '.join(cols)}) VALUES ({', '.join('?' * len(cols))})", [fila[c] for c in cols])
+        guardada = dict(con.execute("SELECT * FROM ofertas WHERE url = ?", (fila["url"],)).fetchone())
+    guardada.pop("raw", None)
+    return _con_prioridad_mostrada(guardada)
+
+
+# columnas que se exportan (lista cerrada: nunca raw, clave, clave_base ni busqueda)
+COLUMNAS_EXPORTAR = ["titulo", "empresa", "ubicacion", "estado", "fecha_postulacion", "fase", "prioridad",
+                     "prioridad_calculada", "prioridad_manual", "tipo", "modalidad", "contrato", "sueldo", "sueldo_manual",
+                     "experiencia", "notas", "categoria", "razon", "fuente", "publicada", "detectada_en", "motivo", "url"]
+ALCANCES_EXPORTAR = {
+    "seguimiento": "estado IN ('revisada', 'postulada', 'entrevista')",
+    "principal": "categoria = 'principal' OR estado IN ('postulada', 'entrevista')",
+    "todas": "1 = 1",
+}
+
+
+def _sin_formula(valor) -> str:
+    """Una celda que Excel/Sheets leería como fórmula (=, +, -, @, tab, CR al inicio) va con un apóstrofo delante."""
+    s = "" if valor is None else str(valor)
+    return "'" + s if s[:1] in ("=", "+", "-", "@", "\t", "\r") else s
+
+
+def exportar(con, formato: str, alcance: str):
+    """(contenido en bytes, tipo, nombre de archivo) para GET /api/exportar."""
+    if formato not in ("csv", "json"):
+        raise ErrorDatos(400, "formato debe ser csv o json")
+    if alcance not in ALCANCES_EXPORTAR:
+        raise ErrorDatos(400, "alcance debe ser " + ", ".join(ALCANCES_EXPORTAR))
+    filas = [_con_prioridad_mostrada(dict(r)) for r in con.execute(
+        f"SELECT * FROM ofertas WHERE {ALCANCES_EXPORTAR[alcance]} ORDER BY detectada_en DESC, url")]
+    filas = [{c: f.get(c) if f.get(c) is not None else "" for c in COLUMNAS_EXPORTAR} for f in filas]
+    sello = ahora_chile().strftime("%Y%m%d-%H%M")
+    if formato == "json":
+        cuerpo = json.dumps({"formato": "job-tracker", "version": 1, "exportado_en": ahora_chile().strftime("%Y-%m-%d %H:%M"),
+                             "alcance": alcance, "total": len(filas), "ofertas": filas}, ensure_ascii=False, indent=1)
+        return cuerpo.encode("utf-8"), "application/json; charset=utf-8", f"ofertas_{alcance}_{sello}.json"
+    salida = io.StringIO()
+    escritor = csv.writer(salida, delimiter=";", quoting=csv.QUOTE_ALL, lineterminator="\r\n")
+    escritor.writerow(COLUMNAS_EXPORTAR)
+    for f in filas:
+        escritor.writerow([_sin_formula(f[c]) for c in COLUMNAS_EXPORTAR])
+    # BOM: Excel en español abre bien las tildes; ";" es el separador que espera con coma decimal
+    return ("﻿" + salida.getvalue()).encode("utf-8"), "text/csv; charset=utf-8", f"ofertas_{alcance}_{sello}.csv"
 
 
 def _con_prioridad_mostrada(o: dict) -> dict:

@@ -14,6 +14,12 @@
                           sueldo_manual (<=100), prioridad_manual ("", Alta, Media, Baja)} -> {ok, oferta}
   GET  /api/ajustes/soporte  {incluir}: si la categoría Soporte TI se muestra en Ofertas
   POST /api/ajustes/soporte  {"incluir": true|false} (nada más) -> {ok, incluir}
+  POST /api/oferta/manual  {titulo, empresa (obligatorios), url (http/https), ubicacion, modalidad, estado,
+                          fecha_postulacion, notas, fase, sueldo_manual, prioridad_manual} -> 201 {ok, oferta};
+                          409 {error, url_existente} si la URL o la misma oferta (cargo+empresa+ciudad) ya existe
+  GET  /api/exportar?formato=csv|json&alcance=seguimiento|principal|todas  descarga (attachment); el CSV protege
+                          las celdas que empiezan con = + - @ tab CR; columnas de una lista cerrada (sin raw)
+  Límite de cuerpo: 10 KB, 64 KB en /api/nota y /api/oferta/manual; más grande -> 413
   Errores: 400 pedido inválido, 404 oferta inexistente, 503 "base ocupada, reintenta" (no se escribió nada)
 
 Seguridad (heredada de la app anterior): solo atiende peticiones cuyo Host u Origin sean locales, de modo que otra
@@ -37,6 +43,9 @@ from informe import PAGINA
 
 LOCALES = ("127.0.0.1", "localhost", "[::1]")
 LIMITE_CUERPO = 10_000
+# rutas con textos largos: 5000 caracteres con tildes o emojis ocupan más de 10 KB en UTF-8
+LIMITES_POR_RUTA = {"/api/nota": 64_000, "/api/oferta/manual": 64_000}   # 5000 caracteres x 12 bytes si el cliente los escapa como \uXXXX
+MAXIMO_A_DESCARTAR = 1_000_000      # un cuerpo demasiado grande se lee (hasta aquí) y se descarta antes del 413
 CSP = ("default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; font-src 'self'; "
        "connect-src 'self'; form-action 'none'; base-uri 'none'")
 # Solo estos archivos se sirven bajo /fuentes/ (nada de rutas armadas con lo que pida el navegador)
@@ -111,9 +120,11 @@ def crear_servidor(app: Aplicacion, puerto: int = None, host: str = None) -> Thr
         def log_message(self, *a):
             pass
 
-        def _enviar(self, codigo, cuerpo: bytes, tipo="application/json; charset=utf-8", cache="no-store"):
+        def _enviar(self, codigo, cuerpo: bytes, tipo="application/json; charset=utf-8", cache="no-store", extra=None):
             self.send_response(codigo)
             self.send_header("Content-Type", tipo)
+            for k, v in (extra or {}).items():
+                self.send_header(k, v)
             self.send_header("Content-Length", str(len(cuerpo)))
             self.send_header("Cache-Control", cache)
             self.send_header("X-Content-Type-Options", "nosniff")
@@ -148,6 +159,17 @@ def crear_servidor(app: Aplicacion, puerto: int = None, host: str = None) -> Thr
                     return self._json(200, buscar.ofertas_para_pagina(con))
                 finally:
                     con.close()
+            if ruta == "/api/exportar":
+                consulta = urllib.parse.parse_qs(urllib.parse.urlsplit(self.path).query)
+                con = app.conexion()
+                try:
+                    cuerpo, tipo, nombre = buscar.exportar(con, (consulta.get("formato") or ["csv"])[0],
+                                                           (consulta.get("alcance") or ["principal"])[0])
+                except buscar.ErrorDatos as ex:
+                    return self._json(ex.codigo, {"error": str(ex)})
+                finally:
+                    con.close()
+                return self._enviar(200, cuerpo, tipo, extra={"Content-Disposition": f'attachment; filename="{nombre}"'})
             if ruta == "/api/ajustes/soporte":
                 con = app.conexion()
                 try:
@@ -158,14 +180,20 @@ def crear_servidor(app: Aplicacion, puerto: int = None, host: str = None) -> Thr
 
         def do_POST(self):
             # el cuerpo se lee ANTES de rechazar: responder sin leerlo hace que Windows a veces corte la conexión
+            ruta = urllib.parse.urlsplit(self.path).path
+            limite = LIMITES_POR_RUTA.get(ruta, LIMITE_CUERPO)
             try:
-                largo = int(self.headers.get("Content-Length") or 0)
-                crudo = self.rfile.read(min(max(largo, 0), LIMITE_CUERPO))
+                largo = max(int(self.headers.get("Content-Length") or 0), 0)
             except ValueError:
-                crudo = b""
+                largo = 0
+            if largo > limite:
+                self.rfile.read(min(largo, MAXIMO_A_DESCARTAR))
+                if not self._permitido():
+                    return self._json(403, {"error": "origen no permitido"})
+                return self._json(413, {"error": f"pedido demasiado grande (máximo {limite} bytes)"})
+            crudo = self.rfile.read(largo)
             if not self._permitido():
                 return self._json(403, {"error": "origen no permitido"})
-            ruta = urllib.parse.urlsplit(self.path).path
             try:
                 datos = json.loads(crudo or b"{}")
             except json.JSONDecodeError:
@@ -179,7 +207,9 @@ def crear_servidor(app: Aplicacion, puerto: int = None, host: str = None) -> Thr
                 "/api/nota": lambda con, d: {"oferta": buscar.actualizar_seguimiento(
                     con, d.get("url"), {k: v for k, v in d.items() if k != "url"})},
                 "/api/ajustes/soporte": lambda con, d: buscar.guardar_soporte(con, d),
+                "/api/oferta/manual": lambda con, d: {"oferta": buscar.crear_oferta_manual(con, d)},
             }
+            codigo_ok = {"/api/oferta/manual": 201}
             if ruta in escrituras:
                 if not isinstance(datos, dict):
                     return self._json(400, {"error": "formato inválido"})
@@ -190,12 +220,12 @@ def crear_servidor(app: Aplicacion, puerto: int = None, host: str = None) -> Thr
                     finally:
                         con.close()
                 except buscar.ErrorDatos as ex:
-                    return self._json(ex.codigo, {"error": str(ex)})
+                    return self._json(ex.codigo, {"error": str(ex), **ex.extra})
                 except (buscar.BaseOcupada, sqlite3.OperationalError) as ex:
                     if isinstance(ex, buscar.BaseOcupada) or buscar.es_base_ocupada(ex):
                         return self._json(503, {"error": "base ocupada, reintenta"})
                     raise
-                return self._json(200, {"ok": True, **resultado})
+                return self._json(codigo_ok.get(ruta, 200), {"ok": True, **resultado})
             self._json(404, {"error": "no existe"})
 
     return ThreadingHTTPServer((host or config.HOST, puerto or config.PUERTO), Manejador)

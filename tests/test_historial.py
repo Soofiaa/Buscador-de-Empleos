@@ -301,3 +301,15 @@ def test_prioridad_manual_se_nota_y_cambios_son_parciales():
     assert r["errores"] == ["Sin conexión con el servidor.", "La base está ocupada; reintenta en unos segundos.",
                             "La oferta cambió mientras tanto; no se aplicó para no pisar ese cambio.",
                             "No se pudo guardar: fase no válida", "No se pudo guardar."]
+
+
+# ------------------------------------------------------------------ Fase B1
+def test_textos_de_la_postulacion_manual_y_alcance_del_csv():
+    r = correr_js("""return {
+        msj: [[409, {error: "ya tienes esa URL"}], [413, {}], [503, {}], [400, {error: "falta titulo"}]].map(([s, j]) => mensajeManual(s, j)),
+        alcance: ["seguimiento", "ofertas", "descartadas_usuario", "fuera_perfil"].map(alcanceExportar),
+        sinUrl: [urlSegura("manual:abc"), urlSegura("javascript:alert(1)"), urlSegura("https://x.cl")]};""")
+    assert r["msj"] == ["Ya la tienes registrada (ya tienes esa URL).", "El texto es demasiado largo.",
+                        "La base está ocupada; reintenta en unos segundos.", "No se pudo guardar: falta titulo"]
+    assert r["alcance"] == ["seguimiento", "principal", "principal", "principal"]
+    assert r["sinUrl"] == ["#", "#", "https://x.cl"]
