@@ -477,6 +477,7 @@
     <div id="lista"></div>
   </main>
 </div>
+<div class="toast-container" id="toast-container" aria-live="polite"></div>
 
 <script>
 "use strict";
@@ -629,6 +630,32 @@ const TEMAS = ["girly-claro", "girly-oscuro", "hombre-claro", "hombre-oscuro", "
 function normalizarTema(t) {                     // acepta los nombres antiguos guardados en el navegador
   const antiguos = { girly: "girly-claro", hombre: "hombre-oscuro", oscuro: "neutro-oscuro", claro: "neutro-claro" };
   return antiguos[t] || (TEMAS.includes(t) ? t : "girly-claro");
+}
+// fases del proceso (mismos ids que buscar.FASES; "" = sin fase) y el estado que implica cada una
+const FASES_PIPELINE = [
+  { id: "postulacion", nombre: "1. Postulación", desc: "CV enviado", estado: "postulada" },
+  { id: "rrhh", nombre: "2. Contacto RRHH", desc: "Screening inicial", estado: "entrevista" },
+  { id: "tecnica", nombre: "3. Prueba Técnica", desc: "Test / Live coding", estado: "entrevista" },
+  { id: "final", nombre: "4. Entrevista Final", desc: "Jefatura / Cultural", estado: "entrevista" },
+  { id: "oferta", nombre: "5. Oferta / Cierre", desc: "Propuesta formal", estado: "entrevista" }
+];
+const estadoDeFase = id => (FASES_PIPELINE.find(f => f.id === id) || {}).estado || null;
+function etiquetaPrioridad(o) {                  // {texto, titulo}: marca cuando la prioridad la puso la usuaria
+  if (!o.prioridad_manual) return { texto: o.prioridad || "", titulo: null };
+  return { texto: "✍️ " + o.prioridad_manual,
+           titulo: "Prioridad puesta a mano" + (o.prioridad_calculada ? " (la calculada es " + o.prioridad_calculada + ")" : "") };
+}
+const CAMPOS_NOTA = ["notas", "fecha_postulacion", "fase", "sueldo_manual", "prioridad_manual"];
+function cambiosSeguimiento(o, valores) {        // solo lo que cambió: /api/nota es una actualización parcial
+  const cambios = {};
+  for (const k of CAMPOS_NOTA) if (k in valores && (valores[k] ?? "") !== (o[k] ?? "")) cambios[k] = valores[k] ?? "";
+  return cambios;
+}
+function mensajeError(status, json) {            // texto para el usuario según la respuesta del servidor
+  if (status === 0) return "Sin conexión con el servidor.";
+  if (status === 503) return "La base está ocupada; reintenta en unos segundos.";
+  if (status === 409) return "La oferta cambió mientras tanto; no se aplicó para no pisar ese cambio.";
+  return (json && json.error) ? "No se pudo guardar: " + json.error : "No se pudo guardar.";
 }
 function textoTotalOfertas(n) {                  // pie de la columna izquierda
   return "SQLite Conectado · " + TXT.ofertas(n);
@@ -896,12 +923,148 @@ function pintarFiltros() {
   $("filtros").replaceChildren(...partes);
 }
 
-// ---------- cambio de estado (el aviso para revertir el cambio, con su fecha, llega en la Fase A)
+// ---------- aviso flotante (con "Deshacer" cuando corresponde)
+let timerAviso = null;
+function mostrarAviso(mensaje, deshacer) {
+  const cont = $("toast-container");
+  clearTimeout(timerAviso);
+  const cerrar = () => cont.replaceChildren();
+  cont.replaceChildren(h("div", { class: "toast", role: "status" },
+    h("span", {}, mensaje),
+    deshacer ? h("button", { type: "button", class: "toast-btn-deshacer", onclick: () => { cerrar(); deshacer(); } }, "Deshacer") : null,
+    h("button", { type: "button", class: "toast-btn-cerrar", "aria-label": "Cerrar aviso", onclick: cerrar }, "✕")));
+  timerAviso = setTimeout(cerrar, 8000);
+}
+
+// ---------- cambio de estado, con deshacer exacto (estado y fecha anteriores)
+const aplicarSeguimiento = (o, s) => { o.estado = s.estado; o.fecha_postulacion = s.fecha_postulacion; };
 async function cambiarEstado(o, nuevo, select) {
   const antes = o.estado;
-  if (antes === nuevo) return;
+  if (antes === nuevo) return true;
   const r = await api("/api/marcar", { url: o.url, estado: nuevo });
-  if (r.ok) { o.estado = nuevo; pintar(); } else { if (select) select.value = antes; alert("No se pudo guardar el estado."); }
+  if (!r.ok) {
+    if (select) select.value = antes;
+    mostrarAviso(mensajeError(r.status, r.json));
+    return false;
+  }
+  aplicarSeguimiento(o, r.json.actual);
+  pintar();
+  const cambio = r.json;
+  mostrarAviso("Movida a «" + ETIQUETAS_ESTADO[nuevo] + "»", async () => {
+    const u = await api("/api/marcar", { url: o.url, restaurar: { ...cambio.anterior, si_actual: cambio.actual } });
+    if (u.ok) { aplicarSeguimiento(o, u.json.actual); pintar(); mostrarAviso("Cambio deshecho (vuelve a «" + ETIQUETAS_ESTADO[u.json.actual.estado] + "»)"); }
+    else mostrarAviso("No se deshizo. " + mensajeError(u.status, u.json));
+  });
+  return true;
+}
+
+// ---------- detalle de una oferta: fases, estado, fecha, sueldo y prioridad manual, notas
+let detalle = null;                               // {oferta, raiz, origen}
+function cerrarDetalle() {
+  if (!detalle) return;
+  const origen = detalle.origen;
+  detalle.raiz.remove();
+  detalle = null;
+  document.removeEventListener("keydown", tecladoDetalle, true);
+  if (origen && document.contains(origen)) origen.focus();
+}
+function tecladoDetalle(e) {                      // Esc cierra; Tab no sale del diálogo
+  if (!detalle) return;
+  if (e.key === "Escape") { e.preventDefault(); cerrarDetalle(); return; }
+  if (e.key !== "Tab") return;
+  const foco = [...detalle.raiz.querySelectorAll("button, select, input, textarea, a[href]")].filter(x => !x.disabled && x.offsetParent !== null);
+  if (!foco.length) return;
+  const primero = foco[0], ultimo = foco[foco.length - 1];
+  if (e.shiftKey && document.activeElement === primero) { e.preventDefault(); ultimo.focus(); }
+  else if (!e.shiftKey && document.activeElement === ultimo) { e.preventDefault(); primero.focus(); }
+  else if (!detalle.raiz.contains(document.activeElement)) { e.preventDefault(); primero.focus(); }
+}
+async function guardarNota(o, cambios) {          // devuelve true si quedó guardado (o no había nada que guardar)
+  if (!Object.keys(cambios).length) return true;
+  const r = await api("/api/nota", { url: o.url, ...cambios });
+  if (!r.ok) { mostrarAviso(mensajeError(r.status, r.json)); return false; }
+  Object.assign(o, r.json.oferta);
+  return true;
+}
+function abrirDetalle(o, origen) {
+  if (detalle) cerrarDetalle();
+  const url = urlSegura(o.url);
+  const error = h("div", { class: "razon", role: "alert", hidden: true });
+  const estadoSel = h("select", { id: "detalle-estado" }, ESTADOS.map(v => h("option", { value: v }, ETIQUETAS_ESTADO[v])));
+  estadoSel.value = o.estado;
+  const fecha = h("input", { type: "date", id: "detalle-fecha" });
+  let fechaMostrada = "";                        // la que puso el programa; si el campo sigue igual, no lo tocaste tú
+  const ponerFecha = v => { fecha.value = v || ""; fechaMostrada = fecha.value; };
+  ponerFecha(o.fecha_postulacion);
+  const sueldo = h("input", { type: "text", id: "detalle-sueldo", maxlength: "100", placeholder: o.sueldo && o.sueldo !== "No indicado" ? "Calculado: " + o.sueldo : "Ej: $1.200.000 líquido" });
+  sueldo.value = o.sueldo_manual || "";
+  const prioridad = h("select", { id: "detalle-prioridad" },
+    h("option", { value: "" }, "Automática (" + (o.prioridad_calculada || "sin prioridad") + ")"),
+    ["Alta", "Media", "Baja"].map(p => h("option", { value: p }, p + " (manual)")));
+  prioridad.value = o.prioridad_manual || "";
+  const notas = h("textarea", { id: "detalle-notas", maxlength: "5000", rows: "6", placeholder: "Contactos, fechas de entrevistas, impresiones…" });
+  notas.value = o.notas || "";                    // value: el texto se muestra tal cual, nunca se interpreta como HTML
+  const contador = h("div", { class: "sub", "aria-live": "polite" });
+  const contar = () => { contador.textContent = notas.value.length + " / 5000"; };
+  notas.addEventListener("input", contar); contar();
+
+  const pasos = h("div", { class: "pipeline-pasos", role: "group", "aria-label": "Fase del proceso" });
+  const pintarPasos = () => pasos.replaceChildren(...FASES_PIPELINE.map(f => h("button", {
+      type: "button", class: "pipeline-paso" + (o.fase === f.id ? " activo" : ""), "aria-pressed": String(o.fase === f.id),
+      onclick: async () => {
+        const nueva = o.fase === f.id ? "" : f.id;              // pulsar la fase activa la quita
+        if (nueva && o.estado !== f.estado) {
+          if (!await cambiarEstado(o, f.estado)) return;
+          estadoSel.value = o.estado; ponerFecha(o.fecha_postulacion);
+        }
+        if (await guardarNota(o, { fase: nueva })) { pintarPasos(); pintar(); if (!nueva) mostrarAviso("Fase quitada"); }
+      } }, h("div", {}, f.nombre), h("div", { style: "font-size:.74rem; font-weight:normal; opacity:.85;" }, f.desc))));
+  pintarPasos();
+
+  const grupo = (etq, campo) => h("div", { class: "form-grupo" }, h("label", { for: campo.id }, etq), campo);
+  const form = h("form", { class: "modal-form", novalidate: true, onsubmit: async e => {
+      e.preventDefault();
+      error.hidden = true;
+      const fechaTocada = fecha.value !== fechaMostrada;
+      if (estadoSel.value !== o.estado) {
+        if (!await cambiarEstado(o, estadoSel.value)) return;
+        if (!fechaTocada) ponerFecha(o.fecha_postulacion);   // respeta la fecha que acaba de poner el servidor
+      }
+      const cambios = cambiosSeguimiento(o, { notas: notas.value, fecha_postulacion: fecha.value, sueldo_manual: sueldo.value.trim(), prioridad_manual: prioridad.value });
+      const r = Object.keys(cambios).length ? await api("/api/nota", { url: o.url, ...cambios }) : { ok: true, json: {} };
+      if (!r.ok) { error.textContent = mensajeError(r.status, r.json); error.hidden = false; return; }
+      if (r.json.oferta) Object.assign(o, r.json.oferta);
+      cerrarDetalle(); pintar();
+      if (Object.keys(cambios).length) mostrarAviso("Proceso y notas actualizados ✓");
+    } },
+    h("div", { class: "form-fila" }, grupo("Estado", estadoSel), grupo("Fecha de postulación", fecha)),
+    h("div", { class: "form-fila" }, grupo("Sueldo (anotado por ti)", sueldo), grupo("Prioridad", prioridad)),
+    h("div", { class: "form-grupo" }, h("label", { for: "detalle-notas" }, "Notas y bitácora"), notas, contador),
+    error,
+    h("div", { class: "modal-acciones" },
+      h("button", { type: "button", class: "boton sec", style: "margin-right:auto; color:var(--rojo);",
+        onclick: async () => { cerrarDetalle(); await cambiarEstado(o, "descartada"); } }, "❌ Descartar oferta"),
+      h("button", { type: "button", class: "boton sec", onclick: cerrarDetalle }, "Cancelar"),
+      h("button", { type: "submit", class: "boton" }, "Guardar cambios")));
+
+  const meta = [o.empresa, o.ubicacion, o.modalidad, nombreFuente(o.fuente)].filter(Boolean).join(" · ");
+  const sueldoTexto = o.sueldo && o.sueldo !== "No indicado" ? "💰 " + o.sueldo : "💰 Renta a convenir";
+  const tarjeta = h("div", { class: "modal-tarjeta", role: "dialog", "aria-modal": "true", "aria-labelledby": "detalle-titulo" },
+    h("div", { class: "modal-cabecera" },
+      h("div", { style: "display:flex; align-items:center; gap:10px; min-width:0;" },
+        h("div", { class: "avatar-empresa", "aria-hidden": "true" }, inicialDe(o)),
+        h("div", { style: "min-width:0;" }, h("h2", { id: "detalle-titulo" }, o.titulo || "(sin título)"), h("div", { class: "sub" }, meta))),
+      h("button", { type: "button", class: "btn-cerrar", "aria-label": "Cerrar", onclick: cerrarDetalle }, "✕")),
+    h("div", { class: "chips" },
+      h("span", { class: "chip" + (esSueldoDestacado(o.sueldo) ? " sueldo-destacado" : ""), title: "Sueldo calculado del aviso" }, sueldoTexto),
+      url !== "#" ? h("a", { class: "chip", href: url, target: "_blank", rel: "noopener noreferrer" }, "↗ Ver aviso original") : null),
+    h("div", { class: "pipeline-container" }, h("div", { class: "pipeline-titulo" }, "Fase del proceso"), pasos),
+    form);
+  const raiz = h("div", { class: "modal-overlay", onclick: e => { if (e.target === raiz) cerrarDetalle(); } }, tarjeta);
+  document.body.append(raiz);
+  detalle = { oferta: o, raiz, origen };
+  document.addEventListener("keydown", tecladoDetalle, true);
+  estadoSel.focus();
 }
 function selectorEstado(o, etiqueta) {
   const s = h("select", { class: "estado", "aria-label": etiqueta, onchange: e => cambiarEstado(o, e.target.value, e.target) },
@@ -923,7 +1086,7 @@ function tarjeta(o, completa) {
   const chips = [];
   if (completa) {
     if (o.estado === "nueva") chips.push(h("span", { class: "chip nueva" }, "nueva"));
-    if (o.prioridad) chips.push(h("span", { class: "chip " + o.prioridad }, o.prioridad));
+    if (o.prioridad) { const p = etiquetaPrioridad(o); chips.push(h("span", { class: "chip " + o.prioridad, title: p.titulo }, p.texto)); }
     for (const v of [o.tipo, o.modalidad, o.contrato, o.sueldo && o.sueldo !== "No indicado" ? o.sueldo : "", o.experiencia && o.experiencia !== "No indicada" ? o.experiencia : ""]) {
       if (!v) continue;
       const esSueldo = v === o.sueldo && esSueldoDestacado(o.sueldo);
@@ -950,7 +1113,9 @@ function tarjeta(o, completa) {
     completa && o.motivo ? h("div", { class: "motivo" }, o.motivo) : null,
     !completa && o.razon ? h("div", { class: "razon" }, "Motivo: " + o.razon) : null,
     h("div", { style: "display:flex; flex-direction:column; gap:6px; margin-top:6px;" },
-      selectorEstado(o, "Estado de seguimiento de " + (o.titulo || "la oferta"))));
+      selectorEstado(o, "Estado de seguimiento de " + (o.titulo || "la oferta")),
+      completa ? h("button", { type: "button", class: "btn-gestionar-oferta", "aria-haspopup": "dialog",
+        onclick: e => abrirDetalle(o, e.currentTarget) }, "⚡ Gestionar proceso & Fases" + (o.notas ? " (con notas)" : "")) : null));
 }
 
 function filaCompacta(o) {
@@ -962,7 +1127,8 @@ function filaCompacta(o) {
       h("div", { class: "cargo-empresa" }, (o.empresa || "") + (o.ubicacion ? " · " + o.ubicacion : ""))),
     esSueldoDestacado(o.sueldo) ? h("span", { class: "chip sueldo-destacado ocultar-movil", style: "font-size:.74rem;" }, "💵 " + o.sueldo)
       : h("span", { class: "sub ocultar-movil", style: "font-size:.75rem;" }, "—"),
-    h("span", { class: "chip " + (o.prioridad || "Media") + " ocultar-movil", style: "font-size:.75rem;" }, o.prioridad || "Media"),
+    h("span", { class: "chip " + (o.prioridad || "Media") + " ocultar-movil", style: "font-size:.75rem;", title: etiquetaPrioridad(o).titulo },
+      o.prioridad ? etiquetaPrioridad(o).texto : "Media"),
     h("span", { class: "sub ocultar-movil", style: "font-size:.78rem;" }, o.modalidad || "—"),
     selectorEstado(o, "Estado de seguimiento de " + (o.titulo || "la oferta")),
     h("a", { class: "btn-enlace-externo", href: url, target: "_blank", rel: "noopener noreferrer", title: "Abrir aviso", "aria-label": "Abrir aviso" }, "↗"));
@@ -1023,6 +1189,7 @@ function pintar() { pintarHistorial(); pintarEncabezado(); pintarPestanas(); pin
 
 // atajo global: "/" o Ctrl+K llevan al buscador
 window.addEventListener("keydown", e => {
+  if (detalle) return;                            // con el detalle abierto, el teclado es del diálogo
   const activo = document.activeElement;
   const escribiendo = activo && ["INPUT", "TEXTAREA", "SELECT"].includes(activo.tagName);
   if ((e.key === "/" && !escribiendo) || ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k")) {

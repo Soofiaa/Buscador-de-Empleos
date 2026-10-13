@@ -275,3 +275,29 @@ def test_la_pagina_no_arma_plurales_a_mano():
     palabras = r"(activas?|relevantes?|ofertas?|encontradas?|nuevas?|errore?s?|antiguas?|días?|búsquedas?|descartadas?|más recientes?)"
     assert not re.search(r'\+\s*"\s' + palabras + r"\b", script)             # n + " ofertas…"
     assert not re.search(r'===\s*1\s*\?\s*"\s?' + palabras + r"\b", script)  # n === 1 ? " oferta" : …
+
+
+# ------------------------------------------------------------------ detalle y deshacer (Fase A)
+def test_fases_de_la_pagina_son_las_del_servidor():
+    import buscar
+    r = correr_js('return {ids: FASES_PIPELINE.map(f => f.id), estados: ["postulacion", "rrhh", "oferta", "", "cv"].map(estadoDeFase)};')
+    assert r["ids"] == [f for f in buscar.FASES if f]
+    assert r["estados"] == ["postulada", "entrevista", "entrevista", None, None]
+
+
+def test_prioridad_manual_se_nota_y_cambios_son_parciales():
+    r = correr_js("""
+      const o = {prioridad: "Media", prioridad_calculada: "Media", prioridad_manual: "", notas: "a", fecha_postulacion: "", fase: "", sueldo_manual: ""};
+      const m = {prioridad: "Alta", prioridad_calculada: "Media", prioridad_manual: "Alta"};
+      return {
+        auto: etiquetaPrioridad(o), manual: etiquetaPrioridad(m),
+        nada: cambiosSeguimiento(o, {notas: "a", fecha_postulacion: "", sueldo_manual: "", prioridad_manual: ""}),
+        algo: cambiosSeguimiento(o, {notas: "a" + String.fromCharCode(10) + "b", fecha_postulacion: "2026-10-13", sueldo_manual: "", prioridad_manual: "Baja"}),
+        errores: [[0, {}], [503, {}], [409, {}], [400, {error: "fase no válida"}], [500, null]].map(([s, j]) => mensajeError(s, j))};""")
+    assert r["auto"] == {"texto": "Media", "titulo": None}
+    assert r["manual"] == {"texto": "✍️ Alta", "titulo": "Prioridad puesta a mano (la calculada es Media)"}
+    assert r["nada"] == {}
+    assert r["algo"] == {"notas": "a\nb", "fecha_postulacion": "2026-10-13", "prioridad_manual": "Baja"}
+    assert r["errores"] == ["Sin conexión con el servidor.", "La base está ocupada; reintenta en unos segundos.",
+                            "La oferta cambió mientras tanto; no se aplicó para no pisar ese cambio.",
+                            "No se pudo guardar: fase no válida", "No se pudo guardar."]

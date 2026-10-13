@@ -133,9 +133,18 @@ def test_la_pagina_no_tiene_manejadores_en_el_html_ni_botones_de_fases_futuras()
     html = PAGINA.split("<script>")[0]
     assert not re.search(r"<[a-z]+[^>]*\son[a-z]+\s*=", html, re.I)          # eventos solo con addEventListener / h()
     cuerpo = PAGINA.split("</style>")[1]           # el CSS original ya trae estilos para las fases siguientes; eso no es UI
-    for futuro in ("modal-", "Agregar postulación manual", "Exportar", "Importar", "Redactor", "Automatización", "Kanban", "Métricas",
-                   "Gestionar proceso", "Deshacer", "badge-alertas"):
+    # Fase A ya trae el detalle (modal), "Gestionar proceso" y "Deshacer"; lo demás llega en fases posteriores
+    for futuro in ("Agregar postulación manual", "Exportar", "Importar", "Redactor", "Automatización", "Kanban", "Métricas",
+                   "badge-alertas", "Probar fuentes", "Notification", "/api/oferta/manual", "/api/importar", "/api/exportar"):
         assert futuro not in cuerpo, futuro
+
+
+def test_el_detalle_es_un_dialogo_accesible_y_las_notas_son_texto():
+    script = PAGINA.split("<script>")[1]
+    for necesario in ('role: "dialog"', '"aria-modal": "true"', '"aria-labelledby": "detalle-titulo"', 'e.key === "Escape"',
+                      'e.key !== "Tab"', "notas.value = o.notas", '"aria-haspopup": "dialog"', "restaurar: { ...cambio.anterior, si_actual: cambio.actual }"):
+        assert necesario in script, necesario
+    assert not re.search(r"\.(inner|outer)HTML|insertAdjacentHTML|document\.write", script)
     assert '"descartadas_usuario", "Descartadas"' in PAGINA and '"descartadas", "Descartadas por filtros"' in PAGINA
 
 
