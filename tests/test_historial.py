@@ -212,9 +212,9 @@ def test_fechas_y_dias_desde_la_postulacion():
         seg: [null, 0, 1, 3, 4, 5, 6, 30].map(d => { const s = textoSeguimiento(d); return s && [s.texto, s.clase]; })};""")
     assert r["cl"] == ["12/10/2026", "12/10/2026", "", "sin fecha"]
     assert r["dias"] == [0, 1, 13, 1, None, 0]                         # una fecha futura no da días negativos
-    assert r["seg"] == [None, ["⚡ Postulada hoy", "ok"], ["🌱 Hace 1 d", "ok"], ["🌱 Hace 3 d", "ok"],
-                        ["⏱️ Hace 4 d (Revisar)", "aviso"], ["⏱️ Hace 5 d (Revisar)", "aviso"],
-                        ["⚠️ Hace 6 d · Toca follow-up", "alerta"], ["⚠️ Hace 30 d · Toca follow-up", "alerta"]]
+    assert r["seg"] == [None, ["⚡ Postulada hoy", "ok"], ["🌱 Hace 1 día", "ok"], ["🌱 Hace 3 días", "ok"],
+                        ["⏱️ Hace 4 días (Revisar)", "aviso"], ["⏱️ Hace 5 días (Revisar)", "aviso"],
+                        ["⚠️ Hace 6 días · Toca follow-up", "alerta"], ["⚠️ Hace 30 días · Toca follow-up", "alerta"]]
 
 
 def test_sueldo_destacado_y_tecnologias():
@@ -237,3 +237,41 @@ def test_temas_y_pie_de_la_base():
     assert r["temas"] == ["girly-claro", "girly-oscuro", "hombre-claro", "hombre-oscuro", "neutro-claro", "neutro-oscuro",
                           "girly-claro", "hombre-oscuro", "neutro-claro", "neutro-oscuro", "girly-claro", "girly-claro"]
     assert r["pie"] == ["SQLite Conectado · 0 ofertas", "SQLite Conectado · 1 oferta", "SQLite Conectado · 1017 ofertas"]
+
+
+def test_todos_los_textos_con_contador_concuerdan_en_singular_y_plural():
+    r = correr_js("""
+      const textos = Object.fromEntries(Object.entries(TXT).map(([k, f]) => [k, [0, 1, 2].map(f)]));
+      textos.antiguas = [0, 1, 2].map(textoAntiguas);
+      textos.ventana = [1, 2].map(n => textoVentana({ventana_dias: n}));
+      textos.pie = [0, 1, 2].map(textoTotalOfertas);
+      textos.seguimiento = [1, 2].map(d => textoSeguimiento(d).texto);
+      return textos;""")
+    assert r == {
+        "activas": ["0 activas", "1 activa", "2 activas"],
+        "relevantesNuevas": ["0 relevantes nuevas", "1 relevante nueva", "2 relevantes nuevas"],
+        "ofertasRelevantesNuevas": ["0 ofertas relevantes nuevas", "1 oferta relevante nueva", "2 ofertas relevantes nuevas"],
+        "busquedas": ["0 búsquedas", "1 búsqueda", "2 búsquedas"],
+        "busquedasRegistradas": ["0 búsquedas registradas", "1 búsqueda registrada", "2 búsquedas registradas"],
+        "encontradas": ["0 encontradas", "1 encontrada", "2 encontradas"],
+        "nuevasRelevantes": ["0 nuevas relevantes", "1 nueva relevante", "2 nuevas relevantes"],
+        "errores": ["0 errores", "1 error", "2 errores"],
+        "antiguasOmitidas": ["0 antiguas omitidas", "1 antigua omitida", "2 antiguas omitidas"],
+        "dias": ["0 días", "1 día", "2 días"],
+        "diasAnteriores": ["0 días anteriores", "1 día anterior", "2 días anteriores"],
+        "ofertas": ["0 ofertas", "1 oferta", "2 ofertas"],
+        "masRecientes": ["0 más recientes", "1 más reciente", "2 más recientes"],
+        "descartadasMasRecientes": ["0 descartadas más recientes", "1 descartada más reciente", "2 descartadas más recientes"],
+        "antiguas": ["0 antiguas omitidas", "1 antigua omitida", "2 antiguas omitidas"],
+        "ventana": ["Ventana de antigüedad: hoy y ayer", "Ventana de antigüedad: hoy y los 2 días anteriores"],
+        "pie": ["SQLite Conectado · 0 ofertas", "SQLite Conectado · 1 oferta", "SQLite Conectado · 2 ofertas"],
+        "seguimiento": ["🌱 Hace 1 día", "🌱 Hace 2 días"],
+    }
+
+
+def test_la_pagina_no_arma_plurales_a_mano():
+    """Todo contador pasa por plural()/TXT: no puede quedar un número pegado a una palabra en plural fija."""
+    script = PAGINA.split("<script>")[1]
+    palabras = r"(activas?|relevantes?|ofertas?|encontradas?|nuevas?|errore?s?|antiguas?|días?|búsquedas?|descartadas?|más recientes?)"
+    assert not re.search(r'\+\s*"\s' + palabras + r"\b", script)             # n + " ofertas…"
+    assert not re.search(r'===\s*1\s*\?\s*"\s?' + palabras + r"\b", script)  # n === 1 ? " oferta" : …

@@ -22,7 +22,7 @@ import trabajando
 from red import Bloqueo, ClienteHTTP, ErrorFuente, NoEncontrada, USER_AGENT_HTTP
 from robots import GestorRobots
 from filtros import (ORDEN_MODALIDAD, ORDEN_PRIORIDAD, ZONA, ahora_chile, antiguedad, base_oferta, ciudad_de,
-                     clasificar, clave_oferta, numero, texto)
+                     clasificar, clave_oferta, numero, plural, texto)
 
 VERSION_DB = 6
 salida = print   # la página la reemplaza para mostrar el avance de la búsqueda en vivo
@@ -122,7 +122,7 @@ def conectar(path=None) -> sqlite3.Connection:
             _migrar_v3(con)
         repetidas += _migrar_v4(con)
         if repetidas:
-            print(f"Base de datos actualizada: {repetidas} duplicadas entre fuentes eliminadas")
+            print(f"Base de datos actualizada: {plural(repetidas, 'duplicada', 'duplicadas')} entre fuentes eliminadas")
     elif existe and version not in (5, VERSION_DB):  # base de una versión desconocida: se respalda
         con.close()
         base, ext = os.path.splitext(path)
@@ -313,7 +313,8 @@ def _buscar_portal(con, sitio, st, avisos, cliente, robots, ahora: datetime | No
         except NoEncontrada:
             _recordar_404(con, sitio, termino)
             sin_pagina.append(termino)
-            _say(f"  [{sitio} {i}/{len(terminos)}] {termino}: sin página en el sitio (se recuerda {config.DIAS_RECORDAR_404} días)")
+            _say(f"  [{sitio} {i}/{len(terminos)}] {termino}: sin página en el sitio "
+                 f"(se recuerda {plural(config.DIAS_RECORDAR_404, 'día', 'días')})")
             continue
         except ErrorFuente as e:
             st["errores"] += 1
@@ -327,8 +328,8 @@ def _buscar_portal(con, sitio, st, avisos, cliente, robots, ahora: datetime | No
         df, antiguas = recientes(df, sitio, ahora, dias)   # antes de clasificar y de abrir detalles
         st["encontradas"] += len(df)
         st["antiguas"] = st.get("antiguas", 0) + antiguas
-        _say(f"  [{sitio} {i}/{len(terminos)}] {termino}: {len(df)} encontradas"
-             + (f" ({antiguas} antiguas omitidas)" if antiguas else ""))
+        _say(f"  [{sitio} {i}/{len(terminos)}] {termino}: {plural(len(df), 'encontrada', 'encontradas')}"
+             + (f" ({plural(antiguas, 'antigua omitida', 'antiguas omitidas')})" if antiguas else ""))
         frames.append(df)
     if sin_pagina:
         avisos.append(f"{nombre}: sin página para {', '.join(sin_pagina)}")
@@ -370,7 +371,8 @@ def _buscar_portal(con, sitio, st, avisos, cliente, robots, ahora: datetime | No
             excluir.add(r["job_url"])
             cerradas += 1
     if pendientes:
-        avisos.append(f"{nombre}: {pendientes} candidatas esperan a la próxima corrida (tope de detalles por corrida)")
+        avisos.append(f"{nombre}: {plural(pendientes, 'candidata espera', 'candidatas esperan')} a la próxima corrida "
+                      "(tope de detalles por corrida)")
     if cerradas:
         avisos.append(f"{nombre}: {cerradas} avisos ya vencidos o finalizados, omitidos")
 
@@ -397,7 +399,7 @@ def buscar_ofertas(con) -> int:
     ventanas = ventanas_efectivas(con, ahora)
     ampliadas = [config.NOMBRE_FUENTE[s] for s in config.SITIOS if ventanas[s] > config.MAX_ANTIGUEDAD_DIAS.get(s, 1)]
     if ampliadas:
-        avisos.append(f"Pasaron días sin buscar: ventana ampliada a {max(ventanas.values())} días "
+        avisos.append(f"Pasaron días sin buscar: ventana ampliada a {plural(max(ventanas.values()), 'día', 'días')} "
                       f"({', '.join(ampliadas)}) para no perder ofertas de ese hueco.")
     for n, (sitio, termino, lugar) in enumerate(plan, start=1):
         etiqueta = f"{termino} | {lugar}"
@@ -419,8 +421,9 @@ def buscar_ofertas(con) -> int:
         st["antiguas"] += antiguas
         st["relevantes"] += nuevas
         st["sin_chile"] += sum(f["razon"].startswith("ubicación no reconocida") for f in filas)
-        _say(f"  [{n}/{len(plan)}] {sitio} | {etiqueta}: {len(df)} encontradas, {nuevas} nuevas relevantes"
-             + (f", {antiguas} antiguas omitidas" if antiguas else ""))
+        _say(f"  [{n}/{len(plan)}] {sitio} | {etiqueta}: {plural(len(df), 'encontrada', 'encontradas')}, "
+             f"{plural(nuevas, 'nueva relevante', 'nuevas relevantes')}"
+             + (f", {plural(antiguas, 'antigua omitida', 'antiguas omitidas')}" if antiguas else ""))
         time.sleep(config.PAUSA_ENTRE_BUSQUEDAS)
 
     activos = [s for s in config.SITIOS if s in PORTALES]
@@ -548,7 +551,8 @@ def main():
     print("Buscando ofertas (varios minutos; se muestra el avance de cada búsqueda)...")
     nuevas = buscar_ofertas(con)
     principal = ofertas_para_pagina(con)["principal"]
-    print(f"\nListo: {nuevas} nuevas relevantes. {len(principal)} ofertas en total.\n{resumen(principal)}\n"
+    print(f"\nListo: {plural(nuevas, 'nueva relevante', 'nuevas relevantes')}. "
+          f"{plural(len(principal), 'oferta', 'ofertas')} en total.\n{resumen(principal)}\n"
           "Míralas en la página: python servidor.py  (o docker compose up -d)")
 
 

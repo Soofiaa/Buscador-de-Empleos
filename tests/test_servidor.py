@@ -207,3 +207,11 @@ def test_una_busqueda_real_vacia_queda_registrada_en_corridas(tmp_path, monkeypa
     assert buscar.buscar_ofertas(con) == 0
     c = buscar.ultima_corrida(con)
     assert c and c["nuevas"] == 0 and c["detalle"]["fuentes"] == []
+
+
+@pytest.mark.parametrize("n, texto", [(0, "0 ofertas relevantes nuevas"), (1, "1 oferta relevante nueva"), (2, "2 ofertas relevantes nuevas")])
+def test_mensaje_de_fin_de_busqueda_en_singular_y_plural(tmp_path, n, texto):
+    app = servidor.Aplicacion(str(tmp_path / "t.db"), lambda con: n)
+    assert app.iniciar_busqueda()
+    app.hilo.join(5)
+    assert app.estado["mensaje"] == "Búsqueda terminada: " + texto + "."

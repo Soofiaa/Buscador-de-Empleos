@@ -567,6 +567,27 @@ function coincideTexto(o, texto) {             // cada palabra buscada debe esta
   const t = norm([o.titulo, o.empresa, o.ubicacion, o.motivo, o.notas].join(" "));
   return (texto || "").split(/\s+/).every(w => t.includes(norm(w)));
 }
+// el ÚNICO lugar donde se decide singular/plural: todos los textos con contador pasan por aquí
+const plural = (n, uno, varios) => n + " " + (n === 1 ? uno : varios);
+const TXT = {
+  activas: n => plural(n, "activa", "activas"),
+  relevantesNuevas: n => plural(n, "relevante nueva", "relevantes nuevas"),
+  ofertasRelevantesNuevas: n => plural(n, "oferta relevante nueva", "ofertas relevantes nuevas"),
+  busquedas: n => plural(n, "búsqueda", "búsquedas"),
+  busquedasRegistradas: n => plural(n, "búsqueda registrada", "búsquedas registradas"),
+  encontradas: n => plural(n, "encontrada", "encontradas"),
+  nuevasRelevantes: n => plural(n, "nueva relevante", "nuevas relevantes"),
+  errores: n => plural(n, "error", "errores"),
+  antiguasOmitidas: n => plural(n, "antigua omitida", "antiguas omitidas"),
+  dias: n => plural(n, "día", "días"),
+  diasAnteriores: n => plural(n, "día anterior", "días anteriores"),
+  ofertas: n => plural(n, "oferta", "ofertas"),
+  masRecientes: n => plural(n, "más reciente", "más recientes"),
+  descartadasMasRecientes: n => plural(n, "descartada más reciente", "descartadas más recientes"),
+};
+// "encontradas" cuenta solo las ofertas dentro de la ventana de antigüedad; las más antiguas se informan aparte
+const textoAntiguas = n => TXT.antiguasOmitidas(n);
+const textoVentana = f => f.ventana_dias ? "Ventana de antigüedad: " + (f.ventana_dias === 1 ? "hoy y ayer" : "hoy y los " + TXT.diasAnteriores(f.ventana_dias)) : null;
 function fechaCL(f) {                            // "2026-10-12" -> "12/10/2026"
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(f || ""));
   return m ? m[3] + "/" + m[2] + "/" + m[1] : (f || "");
@@ -580,9 +601,9 @@ function diasDesde(fecha, hoy) {                 // días enteros entre dos "AAA
 function textoSeguimiento(d) {                   // aviso de días desde la postulación: {texto, clase} o null
   if (d === null || d === undefined) return null;
   if (d === 0) return { texto: "⚡ Postulada hoy", clase: "ok" };
-  if (d <= 3) return { texto: "🌱 Hace " + d + " d", clase: "ok" };
-  if (d <= 5) return { texto: "⏱️ Hace " + d + " d (Revisar)", clase: "aviso" };
-  return { texto: "⚠️ Hace " + d + " d · Toca follow-up", clase: "alerta" };
+  if (d <= 3) return { texto: "🌱 Hace " + TXT.dias(d), clase: "ok" };
+  if (d <= 5) return { texto: "⏱️ Hace " + TXT.dias(d) + " (Revisar)", clase: "aviso" };
+  return { texto: "⚠️ Hace " + TXT.dias(d) + " · Toca follow-up", clase: "alerta" };
 }
 function esSueldoDestacado(sueldo) {
   if (!sueldo) return false;
@@ -610,7 +631,7 @@ function normalizarTema(t) {                     // acepta los nombres antiguos 
   return antiguos[t] || (TEMAS.includes(t) ? t : "girly-claro");
 }
 function textoTotalOfertas(n) {                  // pie de la columna izquierda
-  return n === 1 ? "SQLite Conectado · 1 oferta" : "SQLite Conectado · " + n + " ofertas";
+  return "SQLite Conectado · " + TXT.ofertas(n);
 }
 // </puras>
 
@@ -633,9 +654,6 @@ function h(tag, attrs, ...hijos) {
   for (const c of hijos.flat()) if (c !== null && c !== undefined && c !== false) e.append(c.nodeType ? c : document.createTextNode(String(c)));
   return e;
 }
-// "encontradas" cuenta solo las ofertas dentro de la ventana de antigüedad; las más antiguas se informan aparte
-const textoAntiguas = n => n + (n === 1 ? " antigua omitida" : " antiguas omitidas");
-const textoVentana = f => f.ventana_dias ? "Ventana de antigüedad: " + (f.ventana_dias === 1 ? "hoy y ayer" : "hoy y los " + f.ventana_dias + " días anteriores") : null;
 const urlSegura = u => /^https?:\/\//i.test(u || "") ? u : "#";
 const $ = id => document.getElementById(id);
 const corridas = () => (S.datos && S.datos.corridas) || [];
@@ -743,19 +761,19 @@ function pintarHistorial() {
     const d0 = hoy(), activas = listaDe(S.datos, "ofertas", { tipo: "todas" }).length;
     const partes = [
       h("h2", {}, "Historial"),
-      botonSel({ tipo: "todas" }, "todas", "Todas las ofertas: " + activas + " activas",
+      botonSel({ tipo: "todas" }, "todas", "Todas las ofertas: " + TXT.activas(activas),
         [h("span", { class: "etq" }, "Todas las ofertas"), h("span", { class: "num" }, activas)]),
     ];
     for (const g of agruparPorDia(corridas())) {
       const etq = etiquetaDia(g.dia, d0), relativo = etq === "Hoy" || etq === "Ayer";
       partes.push(h("section", { class: "dia" },
         botonSel({ tipo: "dia", dia: g.dia }, "dia-btn",
-          (relativo ? etq + ", " + fechaLarga(g.dia) : etq) + ": " + g.total + " ofertas relevantes nuevas",
+          (relativo ? etq + ", " + fechaLarga(g.dia) : etq) + ": " + TXT.ofertasRelevantesNuevas(g.total),
           [h("span", { class: "etq" }, etq), relativo ? h("span", { class: "fecha" }, fechaLarga(g.dia)) : null, h("span", { class: "num" }, g.total)]),
         h("ul", { class: "horas" }, g.corridas.map(c => {
           const t = horaDe(c.inicio);
           return h("li", {}, botonSel({ tipo: "hora", id: c.id }, "hora",
-            "Búsqueda de las " + t + " (" + franja(t) + "): " + c.nuevas + " ofertas relevantes nuevas",
+            "Búsqueda de las " + t + " (" + franja(t) + "): " + TXT.ofertasRelevantesNuevas(c.nuevas),
             [h("span", { class: "t etq" }, t), h("span", { class: "franja" }, franja(t)), h("span", { class: "num" }, c.nuevas)]));
         }))));
     }
@@ -764,7 +782,7 @@ function pintarHistorial() {
     const sinCorrida = d ? ["principal", "fuera_perfil", "sospechosas", "descartadas"].some(k => (d[k] || []).some(o => o.corrida_id === null)) : false;
     if (sinCorrida) {
       const n = listaDe(d, "ofertas", { tipo: "antes" }).length;
-      partes.push(botonSel({ tipo: "antes" }, "antes", "Antes del historial: " + n + " activas",
+      partes.push(botonSel({ tipo: "antes" }, "antes", "Antes del historial: " + TXT.activas(n),
         [h("span", { class: "etq" }, "Antes del historial"), h("span", { class: "num" }, n)]));
     }
     cont.replaceChildren(...partes);
@@ -773,7 +791,7 @@ function pintarHistorial() {
 
 function pintarUltima() {
   const c = S.ultima;
-  $("ultima").textContent = c ? "Última búsqueda: " + terminoRelativo(c.fin, hoy()) + " · " + c.nuevas + " relevantes nuevas"
+  $("ultima").textContent = c ? "Última búsqueda: " + terminoRelativo(c.fin, hoy()) + " · " + TXT.relevantesNuevas(c.nuevas)
     : "Todavía no hay búsquedas. Pulsa «Buscar empleos».";
 }
 
@@ -782,13 +800,13 @@ function pintarEncabezado() {
   const sel = S.sel, cs = corridas();
   $("titulo-sel").textContent = tituloSeleccion(sel, cs);
   let sub = "";
-  if (sel.tipo === "todas") sub = cs.length ? cs.length + (cs.length === 1 ? " búsqueda registrada" : " búsquedas registradas") : "";
+  if (sel.tipo === "todas") sub = cs.length ? TXT.busquedasRegistradas(cs.length) : "";
   else if (sel.tipo === "dia") {
     const g = agruparPorDia(cs).find(x => x.dia === sel.dia);
-    if (g) sub = g.corridas.length + (g.corridas.length === 1 ? " búsqueda · " : " búsquedas · ") + g.total + " ofertas relevantes nuevas";
+    if (g) sub = TXT.busquedas(g.corridas.length) + " · " + TXT.ofertasRelevantesNuevas(g.total);
   } else if (sel.tipo === "hora") {
     const c = cs.find(x => x.id === sel.id);
-    if (c) sub = "De " + horaDe(c.inicio) + " a " + horaDe(c.fin) + " · " + fechaLarga(c.inicio.slice(0, 10)) + " · " + c.nuevas + " ofertas relevantes nuevas";
+    if (c) sub = "De " + horaDe(c.inicio) + " a " + horaDe(c.fin) + " · " + fechaLarga(c.inicio.slice(0, 10)) + " · " + TXT.ofertasRelevantesNuevas(c.nuevas);
   } else if (sel.tipo === "antes") sub = "Ofertas detectadas fuera de toda búsqueda registrada (por ejemplo, antes de que existiera el historial).";
   $("sub-sel").textContent = sub;
 
@@ -799,9 +817,9 @@ function pintarEncabezado() {
     const fuentes = c.fuentes || [];
     mini.replaceChildren(...(fuentes.length ? fuentes.map(f => h("div", { class: "fuente-mini", title: textoVentana(f) },
       h("div", { class: "nombre" }, f.fuente),
-      h("div", { class: "cifras" }, (f.encontradas ?? 0) + " encontradas · ",
-        h("span", { class: f.relevantes ? "rel" : null }, (f.relevantes ?? 0) + " nuevas relevantes"),
-        f.errores ? h("span", { class: "err" }, " · " + f.errores + (f.errores === 1 ? " error" : " errores")) : null),
+      h("div", { class: "cifras" }, TXT.encontradas(f.encontradas ?? 0) + " · ",
+        h("span", { class: f.relevantes ? "rel" : null }, TXT.nuevasRelevantes(f.relevantes ?? 0)),
+        f.errores ? h("span", { class: "err" }, " · " + TXT.errores(f.errores)) : null),
       f.antiguas ? h("div", { class: "antiguas" }, textoAntiguas(f.antiguas)) : null))
       : [h("div", { class: "sub" }, "Esta búsqueda no guardó el detalle por fuente.")]));
     return;
@@ -996,8 +1014,8 @@ function pintarLista() {
   let nota = null;
   if (S.pestana === "descartadas" && S.datos.total_descartadas > S.datos.descartadas.length)
     nota = h("p", { class: "sub" }, S.sel.tipo === "todas"
-      ? "Se muestran las " + S.datos.descartadas.length + " más recientes de " + S.datos.total_descartadas + "."
-      : "Se buscan entre las " + S.datos.descartadas.length + " descartadas más recientes (de " + S.datos.total_descartadas + ").");
+      ? "Mostrando " + TXT.masRecientes(S.datos.descartadas.length) + " de " + S.datos.total_descartadas + "."
+      : "Se busca solo entre " + TXT.descartadasMasRecientes(S.datos.descartadas.length) + " (de " + S.datos.total_descartadas + ").");
   cont.replaceChildren(...cabecera, ...[nota].filter(Boolean), ...pintarItems(filas));
 }
 

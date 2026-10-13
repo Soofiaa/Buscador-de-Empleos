@@ -1,4 +1,5 @@
 import json
+import re
 import sqlite3
 import sys
 from pathlib import Path
@@ -862,3 +863,18 @@ def test_gob_entrega_la_hora_y_corta_en_24_horas():
                       columns=getonboard.COLUMNAS)
     recientes, antiguas = buscar.recientes(df, "getonboard", ahora, 1)
     assert list(recientes["job_url"]) == ["http://23h"] and antiguas == 1
+
+
+def test_plural_unico_helper_en_python():
+    assert [filtros.plural(n, "oferta", "ofertas") for n in (0, 1, 2)] == ["0 ofertas", "1 oferta", "2 ofertas"]
+    assert [filtros.texto_anios(e) for e in ("0 anos", "1 anos", "2 ano", "1 a 2 anos", "1+ anos", "2 a 1 anos")] == \
+        ["0 años", "1 año", "2 años", "1 a 2 años", "1+ años", "2 a 1 año"]   # la unidad la decide el último número
+
+
+def test_los_textos_de_python_no_arman_plurales_a_mano():
+    """Avisos y mensajes que llegan a la página (candidatas, ventana ampliada, avance, fin de búsqueda) usan plural()."""
+    raiz = Path(__file__).resolve().parent.parent
+    palabras = r"(encontradas|candidatas|nuevas relevantes|relevantes nuevas|antiguas omitidas|ofertas relevantes|ofertas en total|días|duplicadas)"
+    for archivo in ("buscar.py", "servidor.py", "filtros.py", "bne.py", "trabajando.py", "chiletrabajos.py", "getonboard.py"):
+        codigo = (raiz / archivo).read_text(encoding="utf-8")
+        assert not re.search(r"\{[^{}]+\} " + palabras + r"\b", codigo), archivo

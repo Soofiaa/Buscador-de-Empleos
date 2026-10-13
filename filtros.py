@@ -10,6 +10,11 @@ import config
 
 ZONA = ZoneInfo(config.ZONA_HORARIA)
 
+
+def plural(n, uno: str, varios: str) -> str:
+    """El ÚNICO lugar (del lado Python) donde se decide singular/plural: plural(1, "oferta", "ofertas") -> "1 oferta"."""
+    return f"{n} {uno if n == 1 else varios}"
+
 ORDEN_PRIORIDAD = {"Alta": 0, "Media": 1, "Baja": 2}
 EVIDENCIA_INDEED = "marcada remota por Indeed"
 ORDEN_MODALIDAD = {"Remoto": 0, "Híbrido": 1, "Presencial": 2, "No indicada": 2}
@@ -147,8 +152,9 @@ def texto_anios(expr: str) -> str:
     """'1 anos' -> '1 año', '2 ano' -> '2 años', '1 a 2 anos' -> '1 a 2 años', '1+ anos' -> '1+ años'.
     La unidad sale del número (el último del rango), no de cómo lo escribió el aviso."""
     base = re.sub(r"\s*a[nñ]os?\s*$", "", expr.strip())
-    singular = re.findall(r"\d+", base)[-1] == "1" and "+" not in base
-    return f"{base} {'año' if singular else 'años'}"
+    ultimo = int(re.findall(r"\d+", base)[-1])
+    unidad = plural(2 if "+" in base else ultimo, "año", "años").split(" ", 1)[1]   # "1+" ya es plural
+    return f"{base} {unidad}"
 
 
 def extraer_experiencia(d: str):
@@ -276,7 +282,7 @@ def clasificar(o: dict) -> dict:
     if es_senior(t, d):
         return fin("descartada", "nivel semi senior / senior")
     if exp_min is not None and exp_min >= config.EXPERIENCIA_DESCARTA_DESDE:
-        return fin("descartada", f"exige {exp_min}+ años de experiencia")
+        return fin("descartada", f"exige {exp_min}+ años de experiencia")   # "N+" siempre es plural
 
     # condiciones del tipo B
     senales = []

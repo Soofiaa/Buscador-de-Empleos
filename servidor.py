@@ -87,7 +87,8 @@ class Aplicacion:
         buscar.salida = lambda m: self._set(mensaje=str(m).strip().splitlines()[-1] if str(m).strip() else "")
         try:
             nuevas = self.buscar_fn(con)
-            self._set(buscando=False, mensaje=f"Búsqueda terminada: {nuevas} ofertas relevantes nuevas.", error="")
+            self._set(buscando=False, error="", mensaje="Búsqueda terminada: "
+                      + buscar.plural(nuevas, "oferta relevante nueva", "ofertas relevantes nuevas") + ".")
         except Exception as ex:               # un fallo no deja el botón bloqueado
             self._set(buscando=False, error="%s: %s" % (type(ex).__name__, ex))
         finally:
