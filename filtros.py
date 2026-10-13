@@ -47,6 +47,15 @@ def normalizar(t) -> str:
     return "".join(c for c in t if unicodedata.category(c) != "Mn")
 
 
+_GENERO = re.compile(r"(\w)(?:/(?:a|as|o|os)|\((?:a|as|o|os)\))(?=[\s,.;:)\-–—]|$)")   # "/a&b" no es género
+
+
+def sin_genero(t: str) -> str:
+    """'ingeniero/a de procesos' -> 'ingeniero de procesos', 'supervisor(a)' -> 'supervisor': así los patrones de
+    cargo calzan aunque el aviso escriba las dos formas. Se aplica al título ya normalizado."""
+    return _GENERO.sub(r"\1", t)
+
+
 # ------------------------------------------------------------------ antigüedad
 def ahora_chile() -> datetime:
     return datetime.now(ZONA)
@@ -238,7 +247,7 @@ def clasificar(o: dict) -> dict:
     categoria: principal | fuera_perfil | sospechosa | descartada (con 'razon').
     """
     titulo, empresa, ubic = texto(o.get("title")), texto(o.get("company")), texto(o.get("location"))
-    t, e, d = normalizar(titulo), normalizar(empresa), normalizar(o.get("description"))
+    t, e, d = sin_genero(normalizar(titulo)), normalizar(empresa), normalizar(o.get("description"))
     res = {"categoria": "descartada", "razon": "", "tipo": "", "prioridad": "", "modalidad": "",
            "contrato": "", "sueldo": "", "experiencia": "", "motivo": ""}
 

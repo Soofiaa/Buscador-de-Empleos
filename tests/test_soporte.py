@@ -152,3 +152,18 @@ def test_reclasificacion_dirigida_es_todo_o_nada(base_con_historia, monkeypatch)
     with pytest.raises(RuntimeError):
         buscar.reclasificar_dirigida(con)
     assert foto(con) == antes
+
+
+def test_regla_dirigida_de_genero_y_automatizacion_no_toca_la_deriva(tmp_path):
+    con = buscar.conectar(str(tmp_path / "t.db"))
+    viejo = {**ANTIGUA_SAP}                                           # como quedaron guardadas: "sin rol objetivo"
+    insertar(con, "http://ing", "Ingeniero/a de Procesos", guardada=viejo, desc="Se requieren 3 años de experiencia")
+    insertar(con, "http://auto", "Analista de Automatización y Datos", guardada=viejo)
+    deriva = {**buscar.clasificar(raw("Analista de Calidad, Gerencia SAC")), "categoria": "principal", "tipo": "A: TI", "prioridad": "Alta"}
+    insertar(con, "http://sac", "Analista de Calidad, Gerencia SAC", guardada=deriva, estado="postulada")
+    antes = foto(con)
+    cambios = buscar.reclasificar_dirigida(con, seleccion=buscar.SELECCIONES_DIRIGIDAS["genero-automatizacion"])
+    assert sorted(c["url"] for c in cambios) == ["http://auto", "http://ing"]
+    despues = foto(con)
+    assert despues["http://sac"] == antes["http://sac"]               # la deriva conocida no se toca
+    assert (despues["http://ing"]["razon"], despues["http://auto"]["tipo"]) == ("exige 3+ años de experiencia", "A: TI")

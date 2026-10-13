@@ -453,6 +453,46 @@ def test_automatizacion_industrial_no_es_ti_pero_rpa_si():
     assert clasificar(oferta("Analista de Automatización de Procesos", desc))["categoria"] == "principal"
 
 
+@pytest.mark.parametrize("titulo, desc", [
+    ("Analista de Automatización y Datos", ""),                       # el título ya dice que es TI
+    ("Analista de Automatización TI", ""),
+    ("Analista de Automatización Digital", ""),
+    ("Analista Automatización", "Python, SQL y APIs para automatizar reportes"),   # a secas: entra por señales TI
+])
+def test_analista_de_automatizacion_ti_es_principal_media(titulo, desc):
+    r = clasificar(oferta(titulo, desc))
+    assert (r["categoria"], r["tipo"], r["prioridad"]) == ("principal", "A: TI", "Media")
+
+
+@pytest.mark.parametrize("titulo, desc", [
+    ("Analista de Automatización", "Programación de PLC, SCADA y variadores en planta"),
+    ("Analista de Automatización Industrial", "Control de procesos de planta, instrumentación y PLC"),
+    ("Analista de Automatización de Planta", ""),
+    ("Analista de Automatización de Sistemas Eléctricos", "Tableros eléctricos, PLC"),
+])
+def test_analista_de_automatizacion_industrial_sigue_excluido(titulo, desc):
+    r = clasificar(oferta(titulo, desc))
+    assert (r["categoria"], r["razon"]) == ("descartada", "sin rol objetivo")
+
+
+# ------------------------------------------------------------ formas de género en el título
+@pytest.mark.parametrize("titulo, base", [
+    ("ingeniero/a de procesos", "ingeniero de procesos"), ("supervisor(a) de procesos", "supervisor de procesos"),
+    ("jefe/a de calidad", "jefe de calidad"), ("desarrolladores/as junior", "desarrolladores junior"),
+    ("analista qa/qc", "analista qa/qc"), ("ti/a&b", "ti/a&b"),                  # solo el sufijo de género, no otras barras
+])
+def test_sin_genero(titulo, base):
+    assert filtros.sin_genero(titulo) == base
+
+
+def test_formas_de_genero_no_esconden_el_cargo():
+    r = clasificar(oferta("Ingeniero/a de Procesos", SENALES_TODAS))       # antes: "sin rol objetivo"
+    assert r["categoria"] == "principal" and r["motivo"].startswith("rol: ingeniero de procesos")
+    assert clasificar(oferta("Ingeniero/a de Procesos", "Se requieren 3 años de experiencia"))["razon"] == "exige 3+ años de experiencia"
+    assert clasificar(oferta("Desarrollador/a Junior Python"))["prioridad"] == "Alta"
+    assert clasificar(oferta("Supervisor(a) de Soporte TI"))["razon"] == "nivel semi senior / senior"
+
+
 def test_tecnico_de_mantenimiento_no_es_rol_puente():
     desc = "Excel avanzado, KPI, ERP SAP, mapeo de procesos, areas usuarias"
     assert clasificar(oferta("Técnico(a) Implementación y Mantenimiento", desc))["categoria"] == "descartada"

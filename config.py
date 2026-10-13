@@ -122,6 +122,9 @@ ROLES_A_MEDIA = [
     # SAP con un cargo reconocible (en cualquier orden). Si el título dice "funcional" no aplica: sigue por
     # "analista funcional" (A, Alta) o "analista funcional ERP" (B, Alta), sin rebajarse a Media.
     ("SAP / ERP", r"^(?!.*funcional)(?=.*\bsap\b).*\b(analista|consultora?|soporte|especialista|administradora?)\b"),
+    # analista de automatización que el propio título declara TI ("... y datos", "... TI", "digital", "software").
+    # Sin esa palabra, "analista de automatización" es ambiguo (ver ROLES_AMBIGUOS): puede ser industrial o de planta.
+    ("automatización TI / datos", r"analista (de )?automatizacion\b.*\b(datos|ti|digital|software)\b"),
 ]
 ROLES_A_BAJA = [
     ("ciberseguridad / devops / sistemas",
@@ -135,7 +138,9 @@ ROLES_AMBIGUOS = [
     ("procesos / business analyst", r"analista de procesos|business analyst|analista de negocio", "Alta"),
     ("infraestructura / redes", r"infraestructura|\bredes?\b", "Baja"),
     # "automatización" a secas puede ser industrial o logística: solo se acepta la forma TI
-    ("automatización TI", r"\brpa\b|automatizacion de (procesos|pruebas)|test automation|automation (engineer|tester)|automatizador", "Media"),
+    # "analista (de) automatización" a secas también: solo es TI si la descripción trae señales TI (la de planta, no)
+    ("automatización TI", r"\brpa\b|automatizacion de (procesos|pruebas)|test automation|automation (engineer|tester)|automatizador"
+                          r"|analista (de )?automatizacion\b", "Media"),
 ]
 CONTEXTO_MIN = 2
 # Si el TÍTULO habla de atención al cliente o personas/RR.HH., el cargo no es TI aunque

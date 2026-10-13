@@ -23,7 +23,7 @@ import trabajando
 from red import Bloqueo, ClienteHTTP, ErrorFuente, NoEncontrada, USER_AGENT_HTTP
 from robots import GestorRobots
 from filtros import (ORDEN_MODALIDAD, ORDEN_PRIORIDAD, ZONA, ahora_chile, antiguedad, base_oferta, ciudad_de,
-                     clasificar, clave_oferta, normalizar, numero, plural, texto)
+                     clasificar, clave_oferta, normalizar, numero, plural, sin_genero, texto)
 
 VERSION_DB = 7
 salida = print   # la página la reemplaza para mostrar el avance de la búsqueda en vivo
@@ -274,6 +274,15 @@ def reclasificar(con) -> Counter:
 def _afectada_por_soporte_o_sap(fila) -> bool:
     """La regla (no una lista de URLs) de las ofertas que tocan las reglas de soporte y de SAP / ERP."""
     return fila["razon"] == "soporte / helpdesk" or re.search(r"\bsap\b", normalizar(fila["titulo"] or "")) is not None
+
+
+def _afectada_por_genero_o_automatizacion(fila) -> bool:
+    """Commit (c): títulos con formas de género ("ingeniero/a", "supervisor(a)") o con "automatización"."""
+    t = normalizar(fila["titulo"] or "")
+    return sin_genero(t) != t or "automatizacion" in t
+
+
+SELECCIONES_DIRIGIDAS = {"soporte-sap": _afectada_por_soporte_o_sap, "genero-automatizacion": _afectada_por_genero_o_automatizacion}
 
 
 def reclasificar_dirigida(con, escribir: bool = True, seleccion=_afectada_por_soporte_o_sap) -> list[dict]:
@@ -764,13 +773,15 @@ def main():
     ap.add_argument("--reclasificar", action="store_true",
                     help="re-aplica config.py a las ofertas guardadas, sin buscar de nuevo")
     ap.add_argument("--reclasificar-dirigida", action="store_true",
-                    help="re-aplica la clasificación solo a las ofertas de soporte o con SAP en el título")
+                    help="re-aplica la clasificación solo a las ofertas de la regla elegida (--regla)")
     ap.add_argument("--simular", action="store_true", help="con --reclasificar-dirigida: muestra los cambios sin guardarlos")
+    ap.add_argument("--regla", choices=sorted(SELECCIONES_DIRIGIDAS), default="soporte-sap",
+                    help="con --reclasificar-dirigida: qué ofertas se revisan (por defecto soporte-sap)")
     args = ap.parse_args()
 
     con = conectar()
     if args.reclasificar_dirigida:
-        cambios = reclasificar_dirigida(con, escribir=not args.simular)
+        cambios = reclasificar_dirigida(con, escribir=not args.simular, seleccion=SELECCIONES_DIRIGIDAS[args.regla])
         print(("SIMULACIÓN (no se guardó nada): " if args.simular else "Guardado: ")
               + plural(len(cambios), "oferta cambia", "ofertas cambian"))
         for c in cambios:
