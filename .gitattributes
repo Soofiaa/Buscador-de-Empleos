@@ -1,0 +1,2 @@
+# Las fuentes y sus licencias se verifican por sha256 (web/fuentes/SHA256SUMS.txt): sin conversión de fin de línea
+web/fuentes/** -text
