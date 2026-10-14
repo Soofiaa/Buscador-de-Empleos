@@ -337,6 +337,16 @@
   .kanban-board .tarjeta .titulo { font-size:1.02rem; line-height:1.35; word-break:break-word; width:100%; }
   .kanban-board .tarjeta select.estado { width:100%; max-width:100%; background:var(--panel2); border:1px solid var(--borde); border-radius:9px; padding:7px 10px; font-size:.83rem; font-weight:600; color:var(--tinta); margin-top:4px; cursor:pointer; outline:none; transition:border-color .15s ease; box-sizing:border-box; }
   .kanban-board .tarjeta select.estado:hover, .kanban-board .tarjeta select.estado:focus-visible { border-color:var(--accion); }
+  .kanban-board .tarjeta .tarjeta-header { display:flex; gap:10px; align-items:flex-start; }
+  .kanban-board .tarjeta .tarjeta-titulos { min-width:0; display:flex; flex-direction:column; gap:3px; }
+  .kanban-board .chips:empty { display:none; }
+  .acciones-tablero { display:flex; flex-direction:column; gap:6px; }
+  .acciones-tablero .btn-descartar { font-size:.8rem; padding:6px 10px; }
+  .selector-vista { margin-bottom:12px; }
+  @media (max-width:620px) {                     /* angosto: el tablero se desliza de lado, la página no se desborda */
+    .kanban-board { grid-template-columns:repeat(4, min(82vw, 300px)); scroll-snap-type:x mandatory; }
+    .kanban-col { scroll-snap-align:start; }
+  }
   .kanban-vacio { font-size:.82rem; color:var(--suave); text-align:center; padding:28px 8px; font-style:italic; border:1px dashed var(--borde); border-radius:10px; }
   .btn-exportar { font-size:.82rem; padding:6px 12px; white-space:nowrap; border-radius:10px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; height:100%; }
   .btn-exportar:hover { border-color:var(--accion); color:var(--accion); }
@@ -702,6 +712,63 @@ function textoRespaldo(r, hoy) {                 // línea de estado del respald
 function textoTotalOfertas(n) {                  // pie de la columna izquierda
   return "SQLite Conectado · " + TXT.ofertas(n);
 }
+// ---------- tablero (C2): cada oferta de Seguimiento cae en exactamente una columna; nueva y descartada no están en él
+const COLUMNAS_TABLERO = [
+  { id: "P", nombre: "📌 Por postular" }, { id: "C", nombre: "✉️ CV enviado" },
+  { id: "E", nombre: "🎯 Entrevistas" }, { id: "O", nombre: "🏆 Oferta / Cierre" }];
+const FASES_CIERRE = new Set(["final", "oferta"]);
+function columnaDe(o) {                          // "P" | "C" | "E" | "O", o null si no va en el tablero
+  if (o.estado === "revisada") return "P";
+  if (o.estado === "postulada") return "C";
+  if (o.estado === "entrevista") return FASES_CIERRE.has(o.fase || "") ? "O" : "E";
+  return null;
+}
+const nombreColumna = id => (COLUMNAS_TABLERO.find(c => c.id === id) || {}).nombre || id;
+const nombreFase = id => ((FASES_PIPELINE.find(f => f.id === id) || {}).nombre || "").replace(/^\d+\.\s*/, "");
+function avisoFaseNoRetrocede(o) {               // por qué no se puede entrar a Entrevistas con fase final u oferta
+  return "No se puede mover a Entrevistas: tiene la fase «" + nombreFase(o.fase) + "» y desde el tablero la fase no " +
+    "retrocede. Si de verdad quieres bajarla, cámbiala en «Gestionar proceso».";
+}
+// qué se envía al soltar (o elegir en "Mover a…") en una columna; "descartar" cambia solo el estado.
+// null = misma columna, sin pedido; {bloqueado: aviso} = no se envía nada. La fase nunca baja; la fecha la pone el servidor.
+function movimientoTablero(o, destino) {
+  const f = o.fase || "";
+  if (destino === "descartar") return o.estado === "descartada" ? null : { estado: "descartada", fase: undefined };
+  if (destino === columnaDe(o)) return null;
+  if (destino === "P") return { estado: "revisada", fase: f };
+  if (destino === "C") return { estado: "postulada", fase: f === "" ? "postulacion" : f };
+  if (destino === "E") {
+    if (FASES_CIERRE.has(f)) return { bloqueado: avisoFaseNoRetrocede(o) };
+    return { estado: "entrevista", fase: f === "" || f === "postulacion" ? "rrhh" : f };
+  }
+  if (destino === "O") return { estado: "entrevista", fase: FASES_CIERRE.has(f) ? f : "final" };
+  throw new Error("columna no válida: " + destino);
+}
+function opcionesMoverA(o) {                     // las del selector "Mover a…": la actual y las bloqueadas no se eligen
+  const actual = columnaDe(o);
+  return [...COLUMNAS_TABLERO.map(c => {
+    const m = movimientoTablero(o, c.id);
+    return { valor: c.id, texto: c.nombre + (c.id === actual ? " (aquí)" : m && m.bloqueado ? " (la fase no retrocede)" : ""),
+             deshabilitada: !m || !!m.bloqueado };
+  }), { valor: "descartar", texto: "❌ Descartar", deshabilitada: o.estado === "descartada" }];
+}
+const FORMATO_DIA_CHILE = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago", year: "numeric", month: "2-digit", day: "2-digit" });
+function diaChile(instante) {                    // "2026-10-14T02:30:00+00:00" -> "2026-10-13" (día en Chile), o null
+  const t = new Date(instante || "");
+  return isNaN(t) ? null : FORMATO_DIA_CHILE.format(t);
+}
+// días en la tarjeta: 1) desde el último cambio de estado/fase (en_fase_desde, UTC); 2) si no, desde la postulación; 3) nada
+function diasEnTarjeta(o, hoy) {
+  const dia = o.en_fase_desde ? diaChile(o.en_fase_desde) : null;
+  if (dia) return { dias: diasDesde(dia, hoy), desde: "etapa" };
+  const d = diasDesde(o.fecha_postulacion, hoy);
+  return d === null ? null : { dias: d, desde: "postulacion" };
+}
+function textoDiasTarjeta(r) {                   // {texto, clase} o null
+  if (!r) return null;
+  if (r.desde === "postulacion") return textoSeguimiento(r.dias);
+  return { texto: r.dias === 0 ? "🕒 En esta etapa desde hoy" : "🕒 " + TXT.dias(r.dias) + " en esta etapa", clase: "" };
+}
 // </puras>
 
 const ESTADOS = ["nueva", "revisada", "postulada", "entrevista", "descartada"];
@@ -713,6 +780,8 @@ const PESTANAS = [
 const FILTROS_VACIOS = () => ({ texto: "", estado: "activas", prioridad: "", modalidad: "", fuente: "", tipo: "" });
 const S = { datos: null, pestana: "ofertas", sel: { tipo: "todas" }, ultima: null, f: FILTROS_VACIOS(), agrupar: "prioridad", densidad: "detallada" };
 try { if (localStorage.getItem("densidad") === "compacta") S.densidad = "compacta"; } catch (e) {}
+S.vistaSeg = "tablero";                           // la primera vez, Tablero; después, lo que se guardó
+try { if (localStorage.getItem("vistaSeguimiento") === "lista") S.vistaSeg = "lista"; } catch (e) {}
 
 function h(tag, attrs, ...hijos) {
   const e = document.createElement(tag);
@@ -997,7 +1066,12 @@ function mostrarAviso(mensaje, deshacer) {
 }
 
 // ---------- cambio de estado y fase (una sola escritura), con deshacer exacto (estado, fase y fecha anteriores)
-const aplicarSeguimiento = (o, s) => { o.estado = s.estado; o.fase = s.fase; o.fecha_postulacion = s.fecha_postulacion; };
+// en_fase_desde se reinicia en memoria igual que en el servidor: solo si cambia estado o fase; deshacer lo devuelve
+function aplicarSeguimiento(o, s, enFaseDesde) {
+  if (enFaseDesde !== undefined) o.en_fase_desde = enFaseDesde;
+  else if (s.estado !== o.estado || (s.fase || "") !== (o.fase || "")) o.en_fase_desde = new Date().toISOString();
+  o.estado = s.estado; o.fase = s.fase; o.fecha_postulacion = s.fecha_postulacion;
+}
 async function cambiarSeguimiento(o, estado, fase, origen, aviso, { select, despues } = {}) {   // true si quedó guardado
   const r = await api("/api/marcar", pedidoMarcar(o, estado, fase, origen));
   if (!r.ok) {
@@ -1005,6 +1079,7 @@ async function cambiarSeguimiento(o, estado, fase, origen, aviso, { select, desp
     mostrarAviso(mensajeError(r.status, r.json));
     return false;
   }
+  const enFasePrevio = o.en_fase_desde;
   aplicarSeguimiento(o, r.json.actual);
   pintar();
   if (despues) despues();
@@ -1012,7 +1087,7 @@ async function cambiarSeguimiento(o, estado, fase, origen, aviso, { select, desp
   mostrarAviso(aviso, async () => {
     const u = await api("/api/marcar", pedidoDeshacer(o, cambio));
     if (u.ok) {
-      aplicarSeguimiento(o, u.json.actual); pintar(); if (despues) despues();
+      aplicarSeguimiento(o, u.json.actual, enFasePrevio); pintar(); if (despues) despues();
       mostrarAviso("Cambio deshecho (vuelve a «" + ETIQUETAS_ESTADO[u.json.actual.estado] + "»)");
     } else mostrarAviso("No se deshizo. " + mensajeError(u.status, u.json));
   });
@@ -1021,6 +1096,15 @@ async function cambiarSeguimiento(o, estado, fase, origen, aviso, { select, desp
 async function cambiarEstado(o, nuevo, origen, select) {
   if (o.estado === nuevo) return true;
   return cambiarSeguimiento(o, nuevo, undefined, origen, "Movida a «" + ETIQUETAS_ESTADO[nuevo] + "»", { select });
+}
+// tablero: arrastrar, "Mover a…" y "Descartar" pasan por las mismas reglas (movimientoTablero) y el mismo deshacer
+async function moverEnTablero(o, destino, select) {
+  if (select) select.value = "";
+  const m = movimientoTablero(o, destino);
+  if (!m) return;                                 // misma columna: ningún pedido
+  if (m.bloqueado) { mostrarAviso(m.bloqueado); return; }
+  const aviso = destino === "descartar" ? "Descartada: sale del tablero y queda en «Descartadas»" : "Movida a «" + nombreColumna(destino) + "»";
+  if (!await cambiarSeguimiento(o, m.estado, m.fase, "tablero", aviso)) pintarLista();   // falló: la tarjeta queda en su columna
 }
 
 // ---------- detalle de una oferta: fases, estado, fecha, sueldo y prioridad manual, notas
@@ -1274,16 +1358,87 @@ function filaCompacta(o) {
       : h("span", { "aria-hidden": "true" }));
 }
 
-function kpisSeguimiento() {                     // cifras reales del embudo de Seguimiento
+function kpisSeguimiento() {                     // cifras reales del embudo de Seguimiento: las mismas columnas del tablero
   const p = (S.datos && S.datos.principal) || [];
-  const final = o => o.fase === "oferta" || o.fase === "final";
+  const en = col => p.filter(o => columnaDe(o) === col).length;
   const tarjetaKpi = (etq, valor, estilo) => h("div", { class: "embudo-card", style: estilo || null },
     h("span", { class: "etiqueta" }, etq), h("span", { class: "valor", style: estilo ? estilo.replace("border-", "") : null }, valor));
   return h("div", { class: "embudo-grid" },
-    tarjetaKpi("📌 Por Postular", p.filter(o => o.estado === "revisada").length),
-    tarjetaKpi("✉️ CV Enviado", p.filter(o => o.estado === "postulada").length),
-    tarjetaKpi("🎯 En Entrevista", p.filter(o => o.estado === "entrevista" && !final(o)).length, "border-color:var(--alta);"),
-    tarjetaKpi("🏆 Oferta / Cierre", p.filter(o => o.estado === "entrevista" && final(o)).length, "border-color:var(--nueva);"));
+    tarjetaKpi("📌 Por Postular", en("P")),
+    tarjetaKpi("✉️ CV Enviado", en("C")),
+    tarjetaKpi("🎯 En Entrevista", en("E"), "border-color:var(--alta);"),
+    tarjetaKpi("🏆 Oferta / Cierre", en("O"), "border-color:var(--nueva);"));
+}
+
+// ---------- tablero de Seguimiento (C2)
+function selectorVista() {                       // "📊 Tablero / 📋 Lista", se recuerda en el navegador
+  const boton = (valor, texto) => h("button", { type: "button", class: "btn-vista", "aria-pressed": String(S.vistaSeg === valor),
+    "data-clave": "vista-" + valor, onclick: () => {
+      S.vistaSeg = valor;
+      try { localStorage.setItem("vistaSeguimiento", valor); } catch (e) {}
+      conFoco($("lista"), pintarLista);
+    } }, texto);
+  return h("div", { class: "selector-vista", role: "group", "aria-label": "Vista de Seguimiento" },
+    boton("tablero", "📊 Tablero"), boton("lista", "📋 Lista"));
+}
+
+let arrastrada = null;                            // la oferta en arrastre (el dataTransfer no se puede leer en dragover)
+function tarjetaTablero(o) {
+  const url = urlSegura(o.url), titulo = o.titulo || "(sin título)";
+  const dias = textoDiasTarjeta(diasEnTarjeta(o, hoy()));
+  const mover = h("select", { class: "estado", "aria-label": "Mover a… (" + titulo + ")", onchange: e => moverEnTablero(o, e.target.value, e.target) },
+    h("option", { value: "" }, "Mover a…"),
+    opcionesMoverA(o).map(op => h("option", { value: op.valor, disabled: op.deshabilitada }, op.texto)));
+  mover.value = "";
+  const t = h("article", { class: "tarjeta " + clasePrio(o),
+    // se arrastra solo desde la tarjeta misma: sobre el selector, un botón o un enlace no es arrastrable, así esos
+    // controles funcionan normal (en Firefox un <select> dentro de un elemento draggable no se deja abrir)
+    onmousedown: e => { t.draggable = !e.target.closest("select, option, button, a, input, textarea"); },
+    ondragstart: e => {
+      if (e.target !== t) return;
+      arrastrada = o;
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", titulo);  // Firefox no inicia el arrastre sin datos
+      t.classList.add("arrastrando");
+    },
+    ondragend: () => {
+      arrastrada = null; t.draggable = false; t.classList.remove("arrastrando");
+      for (const c of document.querySelectorAll(".zona-drop-activa")) c.classList.remove("zona-drop-activa");
+    } },
+    h("div", { class: "tarjeta-header" },
+      h("div", { class: "avatar-empresa", "aria-hidden": "true" }, inicialDe(o)),
+      h("div", { class: "tarjeta-titulos" },
+        url !== "#" ? h("a", { class: "titulo", href: url, target: "_blank", rel: "noopener noreferrer" }, titulo) : h("span", { class: "titulo" }, titulo),
+        h("div", { class: "meta-limpia" }, [o.empresa, o.ubicacion, o.modalidad].filter(Boolean).join(" · ")))),
+    h("div", { class: "chips" },
+      o.prioridad ? h("span", { class: "chip " + o.prioridad, title: etiquetaPrioridad(o).titulo }, etiquetaPrioridad(o).texto) : null,
+      o.fase ? h("span", { class: "chip" }, "Fase: " + nombreFase(o.fase)) : null,
+      dias ? h("span", { class: "chip " + dias.clase }, dias.texto) : null),
+    h("div", { class: "acciones-tablero" },
+      mover,
+      h("button", { type: "button", class: "btn-gestionar-oferta", "aria-haspopup": "dialog", onclick: e => abrirDetalle(o, e.currentTarget) },
+        "⚡ Gestionar proceso" + (o.notas ? " (con notas)" : "")),
+      h("button", { type: "button", class: "boton sec btn-descartar", title: "Cambia solo el estado; se puede deshacer",
+        onclick: () => moverEnTablero(o, "descartar") }, "❌ Descartar")));
+  return t;
+}
+function columnaTablero(c, items) {
+  const col = h("section", { class: "kanban-col", "aria-label": c.nombre + ": " + TXT.ofertas(items.length),
+    ondragover: e => { if (!arrastrada) return; e.preventDefault(); e.dataTransfer.dropEffect = "move"; col.classList.add("zona-drop-activa"); },
+    ondragleave: e => { if (!col.contains(e.relatedTarget)) col.classList.remove("zona-drop-activa"); },
+    ondrop: e => {
+      e.preventDefault(); col.classList.remove("zona-drop-activa");
+      const o = arrastrada; arrastrada = null;
+      if (o) moverEnTablero(o, c.id);
+    } },
+    h("div", { class: "kanban-col-header" }, h("h3", {}, c.nombre), h("span", { class: "cuenta" }, items.length)),
+    h("div", { class: "kanban-col-items" }, items.length ? items.map(tarjetaTablero) : h("div", { class: "kanban-vacio" }, "Sin ofertas aquí")));
+  return col;
+}
+function tableroSeguimiento(filas) {
+  const por = Object.fromEntries(COLUMNAS_TABLERO.map(c => [c.id, []]));
+  for (const o of filas) { const c = columnaDe(o); if (c) por[c].push(o); }
+  return h("div", { class: "kanban-board" }, COLUMNAS_TABLERO.map(c => columnaTablero(c, por[c.id])));
 }
 
 function pintarLista() {
@@ -1293,7 +1448,8 @@ function pintarLista() {
   const completa = PESTANAS_PRINCIPAL.has(S.pestana);
   const pintarItems = lista => S.densidad === "compacta"
     ? [h("div", { class: "tabla-compacta" }, ...lista.map(filaCompacta))] : lista.map(o => tarjeta(o, completa));
-  const cabecera = S.pestana === "seguimiento" ? [kpisSeguimiento()] : [];
+  const cabecera = S.pestana === "seguimiento" ? [selectorVista(), kpisSeguimiento()] : [];
+  if (S.pestana === "seguimiento" && S.vistaSeg === "tablero") { cont.replaceChildren(...cabecera, tableroSeguimiento(filas)); return; }
   if (!filas.length) {
     const msj = S.sel.tipo !== "todas" && !SIN_FILTRO_HISTORIAL.has(S.pestana) ? "No hay ofertas de esta selección en esta pestaña."
       : S.pestana === "ofertas" ? "No hay ofertas con estos filtros. Prueba «Buscar empleos» o relaja los filtros."
