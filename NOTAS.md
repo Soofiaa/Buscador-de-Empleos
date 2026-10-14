@@ -1,5 +1,30 @@
 # Notas del proyecto: decisiones y hallazgos
 
+## Estado actual (se actualiza en cada despliegue)
+
+**Línea base de la base real** (13-10-2026 21:50, después del despliegue de C1):
+- v7, integrity_check ok;
+- 1143 ofertas, 6 corridas, 14 postuladas, 6 POR VERIFICAR;
+- historial_estados vacía, con sus 6 objetos.
+
+**Última referencia:** `ofertas_pre_historial_20261013.db`, sha256
+`e1f849f6932b2caa477f9b40f9e97984e1f80f89f6c6f127c98a869c02f38da5`.
+
+**En producción:**
+- commit `b2a4c07` (Fase C1 + historial + fecha editable), imagen `sha256:c461ada1…`;
+- imagen anterior: `job-tracker:respaldo`.
+
+**Fase C:**
+- C1 + historial + ajuste (6): desplegado.
+- C2 (Kanban): espera aprobación para empezar.
+- Después, C3 (Métricas).
+- B2 (importar) no se hará.
+
+**Pendiente de aprobar aparte:**
+- Cierre limpio del contenedor: al detenerse sale con 137 porque Python, como PID 1, no atiende SIGTERM.
+
+**Sin push:** los commits son locales desde el último push.
+
 ## Graphify (probado el 13-10-2026 en una copia; NO se usa en job-tracker)
 
 Probado con graphifyy 0.9.53 (`graphify update`, solo AST, sin LLM ni red), sobre una copia fuera de OneDrive. Decisión: no activarlo aquí.
