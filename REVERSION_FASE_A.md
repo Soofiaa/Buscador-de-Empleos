@@ -193,7 +193,7 @@ activa, pero queda en la base apartada (`retirada_restauracion_*`).
 
 Probado sobre una copia (volumen temporal) con el primer respaldo automático, `ofertas_auto_20261013-182831.db`.
 
-# Fase C1 + historial de estados + fecha editable (pendiente de despliegue)
+# Fase C1 + historial de estados + fecha editable (despliegue del 13-10-2026, commit `b2a4c07`)
 
 Qué cambia:
 - `/api/marcar` escribe estado y fase juntos y exige `origen` (tablero, lista o modal).
@@ -207,8 +207,12 @@ Basta con la imagen: **la base no se restaura** y no se pierde nada de lo hecho 
 
 | Pieza | Valor |
 |---|---|
-| Imagen anterior | `job-tracker:respaldo` (se etiqueta al desplegar) |
-| Base anterior (por si acaso) | `ofertas_pre_historial_<fecha>.db` (volumen y `respaldos\`), con su sha256 |
+| Imagen anterior | `job-tracker:respaldo` (`sha256:ac00ce130d5460e89713e5e0021786691d48d6685d41ba2f6b7d34bacc27c610`) |
+| Imagen desplegada | `job-tracker-jobtracker:latest` (`sha256:c461ada148c73309630793675c8b4c7b5e46777a99c4570df57f9b8e8fc6935f`) |
+| Base anterior (por si acaso) | `ofertas_pre_historial_20261013.db` (volumen y `respaldos\`), sha256 `e1f849f6932b2caa477f9b40f9e97984e1f80f89f6c6f127c98a869c02f38da5` |
+
+Probado sobre una copia de la base ya desplegada: la imagen `job-tracker:respaldo` la abrió sin renombrarla (v7,
+integridad ok, los 6 objetos del historial intactos) y sus escrituras funcionaron, sin quedar en el historial.
 
 ```
 docker compose stop jobtracker
