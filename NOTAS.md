@@ -46,12 +46,19 @@
 - **Copias de solo lectura de la base real:** con el volumen en `:ro`, `mode=ro` falla si no hay -shm; si no hay
   -wal/-shm se usa `mode=ro&immutable=1` comprobando tamaño, mtime y sha256 antes y después. Si hay -wal: volumen
   en rw con `mode=ro` (como el respaldo del servidor), nunca `immutable`.
+- **Decisión (14-10-2026): datos de postulaciones en el historial de git.** NOTAS solo lleva conteos y estados
+  agregados, sin títulos, empresas ni fechas de las postulaciones. Un título con su fecha quedó en el historial ya
+  empujado (desde `812ccf3`); Sofia lo acepta porque el repositorio es privado y no se usa `--force`. Si el repositorio
+  se hace público, se publica una copia limpia (sin ese historial).
 
 ### Pendientes
-- **Commit 3: orden de `listar()`** (aprobado para después del despliegue, con prueba; espera la orden). `listar()`
-  ordena por nombre y deja todos los manuales antes que los auto, así que «Último respaldo» muestra el manual del
-  13-10 23:35 aunque el auto del 14-10 00:04 es más nuevo. `_retener` no tiene el defecto: filtra solo los auto
-  válidos y su nombre ordena por fecha; los manuales e incompletos no cuentan ni se borran.
+- **Commit 3: orden de `listar()`** — **en `main` (`09409f3`) pero NO desplegado**; la imagen en producción
+  (`ff5a2615…`) sigue con el orden anterior. Se despliega solo con aprobación de Sofia, después de verificar el
+  respaldo automático del 15-10. `listar()` ordenaba por nombre y dejaba todos los manuales antes que los auto, así que
+  «Último respaldo» muestra el manual del 13-10 23:35 aunque el auto del 14-10 00:04 es más nuevo; ahora ordena por la
+  fecha del nombre. Los nombres siempre son `ofertas_{auto|manual}_AAAAMMDD-HHMMSS.db` (un solo lugar los genera,
+  `respaldo.respaldar`, sin sufijo por colisión). `_retener` no cambia: filtra solo los auto válidos; los manuales e
+  incompletos no cuentan ni se borran.
 - **«informático junior» ACTIVO** desde el 14-10-2026: término en Indeed, Glassdoor/Get on Board y Chiletrabajos
   (8 solicitudes más por corrida) y regla de último recurso A: TI, Baja. **Criterio de salida:** contar las ofertas
   que lleguen con el motivo «rol: informático junior»; si en unas 10 corridas no llega ninguna útil, se quita el
