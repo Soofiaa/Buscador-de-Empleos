@@ -5,34 +5,42 @@
 ### Producción y base
 - **Base real:** v7, integrity_check ok, 1143 ofertas, 6 corridas, 14 postuladas, 6 POR VERIFICAR (notas con
   "POR VERIFICAR").
-  - `historial_estados` está vacía, con sus 6 objetos.
+  - `historial_estados` tiene 1 fila (id 1, 13-10-2026 22:50, origen `modal`: Sofia puso fase `postulacion` y fecha
+    2026-10-13 en "Analista de Sistemas Junior (Odoo)"), con sus 6 objetos.
   - Estados: descartada/nueva 1081 · principal/descartada 48 · principal/postulada 14.
-  - Medido el 13-10-2026 a las 21:50, después del despliegue de C1.
-- **Última referencia:** `ofertas_pre_historial_20261013.db` (volumen y `respaldos\`), sha256
-  `e1f849f6932b2caa477f9b40f9e97984e1f80f89f6c6f127c98a869c02f38da5`.
-- **En producción:** commit `b2a4c07` (C1 + historial + fecha editable), imagen
-  `sha256:c461ada148c73309630793675c8b4c7b5e46777a99c4570df57f9b8e8fc6935f`.
-- **Imágenes para volver atrás:** `job-tracker:respaldo` (la anterior a C1, `ac00ce13…`), `:B1`, `:genero`, `:soporte`,
-  `:faseA`, `:fase0`.
+  - sha256 por tabla: ofertas `bf4f46f55ad6fff401a14c6ebbc18a3b1179a82d3ee179f6009c378f2211a453` · historial_estados
+    `9508c9fac38f09fd220ff89c3f12548be306444cbeb212ee95d32614aef5a9c2` · corridas
+    `0f9522379daa29318a415041e7ec1453e9e370fb168f427239048ac00465bf57`.
+  - Medido el 13-10-2026 a las 23:05, después del despliegue de C2 (idéntico a la referencia).
+- **Última referencia:** `ofertas_pre_c2_20261013.db` (volumen y `C:\Users\sofia\Respaldos\job-tracker\`, fuera de
+  OneDrive), sha256 `309228dd26ea1610e7160065e5fe624b9e578d0dc2bcd9ae32461a95be05a16d`.
+- **En producción:** commit `7a16eef` (C2: tablero de Seguimiento + follow-up), imagen `job-tracker:c2-candidata`
+  `sha256:f1943914dee8b150c76e69973d65124cc7f0d7c76fa3f6df3c53c010e7203180`, desplegada sin reconstruir
+  (`docker tag` + `docker compose up -d --no-build`).
+- **Imágenes para volver atrás:** `job-tracker:c1` (C1, `c461ada1…`), `:respaldo` (la anterior a C1, `ac00ce13…`),
+  `:B1`, `:genero`, `:soporte`, `:faseA`, `:fase0`.
   - Siguen las candidatas viejas `:historial-candidata`, `:respaldo-candidata`, `:faseB1-candidata` y
-    `:faseA-candidata`, que se pueden borrar si Sofia lo aprueba.
-- **Commits locales sin push:** `b2a4c07` C1 · `65325fe` reversión de C1 · `3c7da28` CLAUDE.md y notas ·
-  `c7772ea` skill `/desplegar`, más el de esta sección. Antes de esos, los de las fases anteriores. `main` va adelante
-  de `origin`.
+    `:faseA-candidata`, y la imagen sin etiqueta `34574e21…` (primera candidata de C2); se borran si Sofia lo aprueba.
+  - Sigue corriendo la candidata `jt_revision_c2` (127.0.0.1:8766, su volumen y su copia); se borra con la limpieza.
+- **Commits sin push:** se cuentan con `git rev-list --count origin/main..HEAD`. El 13-10-2026 se empujaron los 35
+  pendientes hasta `a2db142`; después de este commit quedan 0.
 
 ### Pendientes
-- **Comprobar el respaldo automático** `ofertas_auto_20261014-…`, el primero con el código de C1, en
-  `C:\Users\sofia\Respaldos\job-tracker\`: sha256 OK (`sha256sum -c`), integrity_check ok, un solo archivo (journal
-  `delete`, sin -wal/-shm) y `historial_estados` incluida con sus 6 objetos.
-- **Código 137 al detener el contenedor** (diagnosticado, sin cambiar nada, espera aprobación):
+- **Comprobar el respaldo automático** `ofertas_auto_20261014-…`, el primero con `historial_estados` (código de C1;
+  `respaldo.py` no cambió con C2), en `C:\Users\sofia\Respaldos\job-tracker\`: sha256 OK (`sha256sum -c`),
+  integrity_check ok, un solo archivo (journal `delete`, sin -wal/-shm) y `historial_estados` incluida con sus 6
+  objetos. El de `20261013-182831` es anterior a C1 (sin `historial_estados`) y está OK.
+- **Código 137 al detener el contenedor** (diagnosticado, sin cambiar nada, espera aprobación). Volvió a pasar al
+  desplegar C2 (dos veces, en ~3,7 s; el integrity_check posterior dio ok):
   - Causa: el PID 1 es `python servidor.py`, sin init y sin manejador de SIGTERM (SigCgt = 2 y 33). Linux descarta
-    ese SIGTERM y Docker mata el proceso a los 10 s.
+    ese SIGTERM y Docker mata el proceso.
   - Arreglo propuesto: `signal.signal(SIGTERM, signal.default_int_handler)` en `servidor.main`, y en el `finally` un
     `PRAGMA wal_checkpoint(TRUNCATE)`.
   - Prueba: un subproceso con `signal.raise_signal(SIGTERM)` debe salir con código 0 en menos de 3 s, con el -wal
     vacío. Al desplegar, `docker compose stop` debe dar 0 en 1–2 s.
-- **C2 implementada** (commits `ba9f21c` tablero y `7a16eef` follow-up, 424 pruebas): candidata en 127.0.0.1:8766
-  (`jt_revision_c2`, sobre copia), en revisión visual de Sofia. Sin desplegar. Luego C3. B2 (importar) no se hará.
+- **Limpieza de C2** (espera aprobación): contenedor y volumen `jt_revision_c2`, imagen `34574e21…`, las 4 candidatas
+  viejas y las copias del scratchpad.
+- **C2 desplegada** el 13-10-2026. Sigue C3. B2 (importar) no se hará.
 
 ### Reglas comunes de la Fase C
 - **Un solo camino de escritura.** Estado y fase van siempre por `/api/marcar` (`pedidoMarcar` en la página), con
