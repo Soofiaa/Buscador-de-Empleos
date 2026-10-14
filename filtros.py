@@ -237,6 +237,9 @@ def _detectar_rol(t: str, d: str):
         for et, p in lista:
             if re.search(p, t):
                 return {"tipo": "B", "prioridad": prio, "etiqueta": et, "contexto": []}
+    et, p = config.INFORMATICO_JUNIOR                 # al final: nunca cambia lo que otra regla ya reconoce
+    if re.search(p, t):
+        return {"tipo": "A", "prioridad": "Baja", "etiqueta": et, "contexto": []}
     return None
 
 

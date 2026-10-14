@@ -9,7 +9,7 @@ TERMINOS_A = [  # roles TI
     "business analyst", "análisis de requerimientos", "BPMN",
     "automatización de procesos", "desarrollador python",
     "desarrollador backend", "desarrollador junior", "desarrollador frontend",
-    "analista de sistemas", "analista de datos junior", "reportería BI",
+    "analista de sistemas", "analista de datos junior", "reportería BI", "informático junior",
 ]
 # Nota: "BPMN UML" (0 resultados en todas las zonas) se reemplazó por "BPMN";
 # los términos con "junior" + varias palabras técnicas no devuelven nada en Indeed.
@@ -32,7 +32,7 @@ SITIOS = ["indeed", "glassdoor", "getonboard", "bne", "trabajando", "chiletrabaj
 TERMINOS_SECUNDARIOS = [
     "analista funcional", "QA", "tester", "business analyst", "analista de sistemas",
     "desarrollador python", "desarrollador backend", "analista de procesos",
-    "datos maestros", "analista de datos junior",
+    "datos maestros", "analista de datos junior", "informático junior",
 ]
 NOMBRE_FUENTE = {"indeed": "Indeed", "google": "Google", "glassdoor": "Glassdoor", "getonboard": "Get on Board",
                  "bne": "BNE", "trabajando": "Trabajando", "chiletrabajos": "Chiletrabajos"}
@@ -47,7 +47,8 @@ TERMINOS_TRABAJANDO = ["analista-funcional", "analista-de-procesos", "analista-q
                        "desarrollador-backend", "programador", "desarrollador-python"]   # los 3 últimos, sin verificar
 TERMINOS_CHILETRABAJOS = ["analista funcional", "analista de procesos", "analista qa", "tester",
                           "analista programador", "desarrollador junior", "analista de datos",
-                          "analista de reporteria", "control de gestion", "analista de operaciones", "datos maestros"]
+                          "analista de reporteria", "control de gestion", "analista de operaciones", "datos maestros",
+                          "informatico junior"]
 # Los listados de estos portales vienen recortados: el detalle de cada aviso se abre SOLO para ofertas nuevas que
 # podrían servir (las más recientes primero), con este tope por corrida. Las que no alcanzan no se guardan: quedan
 # para la próxima corrida.
@@ -132,6 +133,9 @@ ROLES_A_BAJA = [
     ("ciberseguridad / devops / sistemas",
      r"ciberseguridad|seguridad (informatica|de la informacion)|(ingeniero|analista|administrador|especialista|arquitecto)a? de redes|devops|\bsre\b|sysadmin|administrador de (sistemas|redes|servidores)|cloud"),
 ]
+# Último recurso (solo si NINGUNA otra regla coincide): "informático/a junior" a secas -> A: TI, Baja. El tallo es
+# "informatic" (sin tildes), así "información" no coincide. El nivel senior lo descarta el filtro de siempre (es_senior).
+INFORMATICO_JUNIOR = ("informático junior", r"\binformatic\w*\b.*\b(junior|jr)\b|\b(junior|jr)\b.*\binformatic")
 
 # Roles ambiguos: pueden ser TI o no. Son tipo A solo si la DESCRIPCIÓN tiene
 # al menos CONTEXTO_MIN señales de TI; si no, se evalúan como tipo B.
