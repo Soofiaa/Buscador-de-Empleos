@@ -324,10 +324,10 @@
 
   .kanban-board { display:grid; grid-template-columns:repeat(4, minmax(260px, 1fr)); gap:14px; overflow-x:auto; padding-bottom:16px; align-items:start; }
   @media (max-width:1150px) { .kanban-board { grid-template-columns:repeat(4, 280px); } }
-  .kanban-board .tarjeta { margin-bottom:0; padding:14px; border-radius:14px; box-shadow:0 1px 4px rgba(0,0,0,.05); display:flex; flex-direction:column; gap:8px; cursor:grab; transition:transform .15s ease, opacity .15s ease, box-shadow .15s ease; user-select:none; }
+  .kanban-board .tarjeta { margin-bottom:0; padding:14px 12px; border-radius:14px; box-shadow:0 1px 4px rgba(0,0,0,.05); display:flex; flex-direction:column; gap:8px; cursor:grab; transition:transform .15s ease, opacity .15s ease, box-shadow .15s ease; user-select:none; }
   .kanban-board .tarjeta:active { cursor:grabbing; }
   .kanban-board .tarjeta.arrastrando { opacity:.35; transform:scale(.97); border:2px dashed var(--accion); box-shadow:none; }
-  .kanban-col { background:var(--panel2); border:1px solid var(--borde); border-radius:16px; padding:14px 12px; display:flex; flex-direction:column; gap:12px; min-height:220px; transition:border-color .15s ease, background-color .15s ease, box-shadow .15s ease; }
+  .kanban-col { background:var(--panel2); border:1px solid var(--borde); border-radius:16px; padding:14px 10px; display:flex; flex-direction:column; gap:12px; min-height:220px; transition:border-color .15s ease, background-color .15s ease, box-shadow .15s ease; }
   .kanban-col.zona-drop-activa { border-color:var(--accion); background:var(--sel); box-shadow:0 0 0 2px var(--accion); }
   .kanban-col-header { display:flex; align-items:center; justify-content:space-between; padding:0 4px 6px; border-bottom:1px solid var(--borde); }
   .kanban-col-header h3 { margin:0; font-size:.94rem; font-weight:700; color:var(--tinta); display:flex; align-items:center; gap:6px; }
@@ -340,6 +340,8 @@
   .kanban-board .tarjeta .tarjeta-header { display:flex; gap:10px; align-items:flex-start; }
   .kanban-board .tarjeta .tarjeta-titulos { min-width:0; display:flex; flex-direction:column; gap:3px; }
   .kanban-board .chips:empty { display:none; }
+  .kanban-board .senal-seguimiento { display:flex; min-width:0; }
+  .kanban-board .senal-seguimiento .chip { font-size:.72rem; padding:2px 8px; white-space:normal; max-width:100%; }
   .acciones-tablero { display:flex; flex-direction:column; gap:6px; }
   .acciones-tablero .btn-descartar { font-size:.8rem; padding:6px 10px; }
   .selector-vista { margin-bottom:12px; }
@@ -764,10 +766,18 @@ function diasEnTarjeta(o, hoy) {
   const d = diasDesde(o.fecha_postulacion, hoy);
   return d === null ? null : { dias: d, desde: "postulacion" };
 }
-function textoDiasTarjeta(r) {                   // {texto, clase} o null
-  if (!r) return null;
-  if (r.desde === "postulacion") return textoSeguimiento(r.dias);
-  return { texto: r.dias === 0 ? "🕒 En esta etapa desde hoy" : "🕒 " + TXT.dias(r.dias) + " en esta etapa", clase: "" };
+// aviso de follow-up: la MISMA regla en la Lista y en el tablero (postulada o entrevista, con la fecha de postulación)
+function avisoSeguimiento(o, hoy) {
+  return o.estado === "postulada" || o.estado === "entrevista" ? textoSeguimiento(diasDesde(o.fecha_postulacion, hoy)) : null;
+}
+// señales del tablero: {etapa, seguimiento}, cada una {texto, clase} o null. El follow-up no desaparece al haber
+// historial; los días desde la postulación sin historial no se repiten si ya los dice el follow-up (en P, sin aviso).
+function senalesTablero(o, hoy) {
+  const r = diasEnTarjeta(o, hoy), seguimiento = avisoSeguimiento(o, hoy);
+  let etapa = null;
+  if (r && r.desde === "etapa") etapa = { texto: r.dias === 0 ? "🕒 En esta etapa desde hoy" : "🕒 " + TXT.dias(r.dias) + " en esta etapa", clase: "" };
+  else if (r && !seguimiento) etapa = { texto: r.dias === 0 ? "🕒 Postulada hoy" : "🕒 Postulada hace " + TXT.dias(r.dias), clase: "" };
+  return { etapa, seguimiento };
 }
 // </puras>
 
@@ -1318,7 +1328,7 @@ function tarjeta(o, completa) {
     }
     for (const sk of extraerSkills(o)) chips.push(h("span", { class: "skill-pill" }, sk));
   }
-  const seg = completa && (o.estado === "postulada" || o.estado === "entrevista") ? textoSeguimiento(diasDesde(o.fecha_postulacion, hoy())) : null;
+  const seg = completa ? avisoSeguimiento(o, hoy()) : null;
 
   return h("article", { class: "tarjeta " + clasePrio(o) + (CERRADOS.has(o.estado) ? " cerrada" : "") },
     h("div", { class: "tarjeta-header" },
@@ -1385,7 +1395,7 @@ function selectorVista() {                       // "📊 Tablero / 📋 Lista",
 let arrastrada = null;                            // la oferta en arrastre (el dataTransfer no se puede leer en dragover)
 function tarjetaTablero(o) {
   const url = urlSegura(o.url), titulo = o.titulo || "(sin título)";
-  const dias = textoDiasTarjeta(diasEnTarjeta(o, hoy()));
+  const senales = senalesTablero(o, hoy());
   const mover = h("select", { class: "estado", "aria-label": "Mover a… (" + titulo + ")", onchange: e => moverEnTablero(o, e.target.value, e.target) },
     h("option", { value: "" }, "Mover a…"),
     opcionesMoverA(o).map(op => h("option", { value: op.valor, disabled: op.deshabilitada }, op.texto)));
@@ -1413,7 +1423,9 @@ function tarjetaTablero(o) {
     h("div", { class: "chips" },
       o.prioridad ? h("span", { class: "chip " + o.prioridad, title: etiquetaPrioridad(o).titulo }, etiquetaPrioridad(o).texto) : null,
       o.fase ? h("span", { class: "chip" }, "Fase: " + nombreFase(o.fase)) : null,
-      dias ? h("span", { class: "chip " + dias.clase }, dias.texto) : null),
+      senales.etapa ? h("span", { class: "chip" }, senales.etapa.texto) : null),
+    senales.seguimiento ? h("div", { class: "senal-seguimiento" },            // en línea propia
+      h("span", { class: "chip " + senales.seguimiento.clase }, senales.seguimiento.texto)) : null,
     h("div", { class: "acciones-tablero" },
       mover,
       h("button", { type: "button", class: "btn-gestionar-oferta", "aria-haspopup": "dialog", onclick: e => abrirDetalle(o, e.currentTarget) },

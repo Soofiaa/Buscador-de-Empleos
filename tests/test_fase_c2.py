@@ -135,12 +135,57 @@ def test_dias_en_la_tarjeta_cerca_de_medianoche_en_santiago():
     assert r[4:] == ["2026-10-13", "2026-10-14"]
 
 
-def test_textos_de_dias_en_la_tarjeta_con_singular_y_plural():
-    r = correr_js("""return [textoDiasTarjeta({dias: 0, desde: "etapa"}), textoDiasTarjeta({dias: 1, desde: "etapa"}),
-      textoDiasTarjeta({dias: 4, desde: "etapa"}), textoDiasTarjeta({dias: 1, desde: "postulacion"}), textoDiasTarjeta(null)];""")
-    assert [x["texto"] for x in r[:4]] == ["🕒 En esta etapa desde hoy", "🕒 1 día en esta etapa", "🕒 4 días en esta etapa",
-                                           "🌱 Hace 1 día"]
-    assert r[4] is None
+HOY = "2026-10-20"
+HISTORIAL = "2026-10-19T15:00:00+00:00"           # hace 1 día en Chile
+
+
+def test_con_historial_c_y_e_muestran_dias_en_la_etapa_y_el_follow_up():
+    r = correr_js("""return [
+      senalesTablero({estado: "postulada", fase: "postulacion", fecha_postulacion: "2026-10-08", en_fase_desde: "%s"}, "%s"),
+      senalesTablero({estado: "entrevista", fase: "rrhh", fecha_postulacion: "2026-10-16", en_fase_desde: "%s"}, "%s")];"""
+                  % (HISTORIAL, HOY, HISTORIAL, HOY))
+    assert r[0] == {"etapa": {"texto": "🕒 1 día en esta etapa", "clase": ""},
+                    "seguimiento": {"texto": "⚠️ Hace 12 días · Toca follow-up", "clase": "alerta"}}
+    assert r[1] == {"etapa": {"texto": "🕒 1 día en esta etapa", "clase": ""},
+                    "seguimiento": {"texto": "⏱️ Hace 4 días (Revisar)", "clase": "aviso"}}
+
+
+def test_el_follow_up_no_desaparece_al_crearse_el_historial():
+    r = correr_js("""const o = {estado: "postulada", fase: "", fecha_postulacion: "2026-10-08", en_fase_desde: null};
+      return [senalesTablero(o, "%s"), senalesTablero({...o, fase: "postulacion", en_fase_desde: "%s"}, "%s")];"""
+                  % (HOY, HISTORIAL, HOY))
+    sin, con = r
+    assert sin["seguimiento"] == con["seguimiento"] == {"texto": "⚠️ Hace 12 días · Toca follow-up", "clase": "alerta"}
+    assert sin["etapa"] is None                                       # sin historial, los días ya los dice el follow-up
+    assert con["etapa"]["texto"] == "🕒 1 día en esta etapa"
+
+
+def test_p_no_muestra_follow_up_y_o_se_comporta_como_la_lista():
+    r = correr_js("""return [
+      senalesTablero({estado: "revisada", fase: "final", fecha_postulacion: "2026-10-01", en_fase_desde: "%s"}, "%s"),
+      senalesTablero({estado: "revisada", fase: "", fecha_postulacion: "2026-10-19", en_fase_desde: null}, "%s"),
+      senalesTablero({estado: "revisada", fase: "", fecha_postulacion: "", en_fase_desde: null}, "%s"),
+      senalesTablero({estado: "entrevista", fase: "final", fecha_postulacion: "2026-10-01", en_fase_desde: "%s"}, "%s")];"""
+                  % (HISTORIAL, HOY, HOY, HOY, HISTORIAL, HOY))
+    assert [x["seguimiento"] for x in r[:3]] == [None, None, None]
+    assert [x["etapa"] and x["etapa"]["texto"] for x in r[:3]] == ["🕒 1 día en esta etapa", "🕒 Postulada hace 1 día", None]
+    assert r[3]["seguimiento"]["texto"] == "⚠️ Hace 19 días · Toca follow-up"
+
+
+def test_el_follow_up_del_tablero_coincide_con_el_de_la_lista():
+    r = correr_js(COMBOS + """
+      const fechas = ["", "2026-10-20", "2026-10-18", "2026-10-15", "2026-10-01"], hist = [null, "%s"];
+      return COMBOS.filter(o => columnaDe(o)).flatMap(o => fechas.flatMap(f => hist.map(h => {
+        const t = {...o, fecha_postulacion: f, en_fase_desde: h};
+        return [senalesTablero(t, "%s").seguimiento,
+                (t.estado === "postulada" || t.estado === "entrevista") ? textoSeguimiento(diasDesde(f, "%s")) : null]; })));"""
+                  % (HISTORIAL, HOY, HOY))
+    assert len(r) > 100 and all(tablero == lista for tablero, lista in r)
+    assert any(t for t, _ in r)
+    # la Lista y el tablero usan la misma función
+    assert "const seg = completa ? avisoSeguimiento(o, hoy()) : null;" in PAGINA
+    tarjeta = re.search(r"function tarjetaTablero.*?\n}\n", PAGINA, re.S).group(0)
+    assert "senalesTablero(o, hoy())" in tarjeta and 'h("div", { class: "senal-seguimiento" }' in tarjeta
 
 
 def test_tablero_en_el_dom_accesible_sin_innerhtml_y_vista_recordada():
