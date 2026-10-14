@@ -70,10 +70,12 @@
   Las bases Node (v5, 866 ofertas: volumen_buscador-de-empleos, node_docker-data = padre, final_node) no se copian:
   Sofia no las necesita y sus 2/6/6 ofertas con postulación (y las 5 excepciones de la unión) ya están en la base
   real con su estado y fecha.
-- **OneDrive: borrar los originales** (espera aprobación; no se ha borrado nada): `job-tracker\respaldos\`,
-  `OneDrive\OneDrive\Documentos\GitHub\Buscador-de-empleos\` (su compose usa el 8765) y el volumen
-  `buscador-de-empleos_jt_datos` (sin contenedores). **La papelera de OneDrive la vacía Sofia a mano;** mientras no
-  lo haga, lo borrado sigue en la nube (y en la papelera de reciclaje local).
+- **OneDrive: originales borrados el 14-10-2026** (aprobado por Sofia), después de copiar y verificar las
+  referencias: el contenido de `job-tracker\respaldos\` (21 archivos y la subcarpeta `final_node_20261013-113513\`;
+  la carpeta queda vacía y ningún código depende de ella, solo la nombra la skill `/desplegar`),
+  `C:\Users\sofia\OneDrive\OneDrive\` (solo tenía `Documentos\GitHub\Buscador-de-empleos\docker-compose.yml` y sus 4
+  carpetas) y el volumen `buscador-de-empleos_jt_datos` (0 contenedores; solo una base Node v5). **La papelera de
+  OneDrive la vacía Sofia a mano;** mientras no lo haga, lo borrado sigue en la nube.
 - **C2 desplegada** el 13-10-2026. Sigue C3. B2 (importar) no se hará. Resiliencia/LinkedIn sin aprobar.
 
 ### Reglas comunes de la Fase C
