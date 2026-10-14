@@ -31,7 +31,8 @@
     `PRAGMA wal_checkpoint(TRUNCATE)`.
   - Prueba: un subproceso con `signal.raise_signal(SIGTERM)` debe salir con código 0 en menos de 3 s, con el -wal
     vacío. Al desplegar, `docker compose stop` debe dar 0 en 1–2 s.
-- **C2 aprobada; se empieza en una sesión nueva.** Luego C3. B2 (importar) no se hará.
+- **C2 implementada** (commits `ba9f21c` tablero y `7a16eef` follow-up, 424 pruebas): candidata en 127.0.0.1:8766
+  (`jt_revision_c2`, sobre copia), en revisión visual de Sofia. Sin desplegar. Luego C3. B2 (importar) no se hará.
 
 ### Reglas comunes de la Fase C
 - **Un solo camino de escritura.** Estado y fase van siempre por `/api/marcar` (`pedidoMarcar` en la página), con
@@ -83,15 +84,31 @@ No hay columna de descartadas.
 | O → C | postulada | f (final u oferta) | sin cambio |
 | O → E | **bloqueado** | — | — |
 
-O → E muestra el aviso "Para volver a Entrevistas, cambia la fase en Gestionar proceso". Soltar en la misma
-columna no envía ningún pedido.
+Soltar en la misma columna no envía ningún pedido.
 
-**Punto abierto, para decidir al empezar C2:** una tarjeta en P o C que conserva la fase `final` u `oferta` (porque
-volvió desde O) no puede entrar a E sin bajar la fase: con esa fase caería en O. Propuesta: bloquear también P → E y
-C → E en ese caso, con el mismo aviso que O → E.
+**Decisiones de C2 (aprobadas por Sofia el 13-10-2026):**
+- **Bloqueo con motivo.** O → E, y también P → E y C → E cuando la tarjeta conserva la fase `final` u `oferta` (volvió
+  desde O), se bloquean sin enviar nada. El aviso explica el motivo: "No se puede mover a Entrevistas: tiene la fase
+  «…» y desde el tablero la fase no retrocede. Si de verdad quieres bajarla, cámbiala en «Gestionar proceso»". En
+  "Mover a…" esa opción aparece deshabilitada con "(la fase no retrocede)". Al decidirlo había 0 tarjetas reales en
+  ese caso.
+- **Descartar es una acción, no una zona.** Está como opción en "Mover a…" y como botón "❌ Descartar" en la tarjeta;
+  no hay zona de soltado. Cambia solo el estado (la fase se mantiene), va por `/api/marcar` con `origen: "tablero"`,
+  y el "Deshacer" del aviso lo revierte exacto.
+- **Las descartadas quedan fuera del tablero.** `columnaDe` devuelve null para `descartada` y `nueva`; una tarjeta
+  descartada sale del tablero y aparece en la pestaña «Descartadas».
+- **Follow-up también con historial.** `avisoSeguimiento` es la MISMA regla en la Lista y en el tablero (postulada
+  o entrevista, días desde `fecha_postulacion`). Con historial, las tarjetas de C y E muestran "🕒 N días en esta
+  etapa" y además el aviso de follow-up en línea propia; O se comporta como la Lista (también lo muestra); P no
+  muestra follow-up. Sin historial no se repiten los días: los dice el follow-up (o, en P, "🕒 Postulada hace N días").
+- **Vista inicial:** Tablero la primera vez; después, lo guardado en el navegador (`vistaSeguimiento`).
+- **Si `/api/marcar` falla** tras un arrastre, la tarjeta queda en su columna y se muestra el error. El tablero no
+  mueve nada antes de la respuesta del servidor.
+- **Arrastre y selector:** la tarjeta solo es arrastrable al presionar fuera del selector, los botones y los enlaces
+  (en Firefox un `<select>` dentro de un elemento draggable no se abre). Verificado en Chrome; Firefox lo revisa Sofia.
 
 **Accesibilidad y teclado:**
-- Cada tarjeta mantiene el selector **"Mover a…"**, que aplica las mismas reglas (O → E bloqueado), y el botón
+- Cada tarjeta mantiene el selector **"Mover a…"**, que aplica las mismas reglas (bloqueos incluidos), y el botón
   "Gestionar proceso".
 - Arrastrar no es accesible con teclado ni funciona bien en pantallas táctiles: el selector es la alternativa.
 - Las columnas son `section` con `aria-label`.
