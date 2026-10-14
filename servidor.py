@@ -37,7 +37,9 @@ Uso:  python servidor.py [--puerto 8765] [--no-abrir]
 """
 import argparse
 import json
+import signal
 import sqlite3
+import sys
 import threading
 import time
 import urllib.parse
@@ -57,6 +59,41 @@ LIMITES_POR_RUTA = {"/api/nota": 64_000, "/api/oferta/manual": 64_000}   # 5000 
 MAXIMO_A_DESCARTAR = 1_000_000      # un cuerpo demasiado grande se lee (hasta aquí) y se descarta antes del 413
 CSP = ("default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; font-src 'self'; "
        "connect-src 'self'; form-action 'none'; base-uri 'none'")
+# Al apagar (docker stop / compose stop manda SIGTERM; stop_grace_period: 15s en docker-compose.yml): se espera un
+# respaldo en curso y se consolida el -wal, cada cosa con su límite (5 + 3 s, con margen antes del SIGKILL).
+ESPERA_RESPALDO_S = 5
+LIMITE_CHECKPOINT_S = 3
+
+
+def _log(mensaje: str) -> None:              # a stderr: queda en `docker logs`
+    print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {mensaje}", file=sys.stderr, flush=True)
+
+
+def cerrar_base(ruta_db: str, limite_s: float = LIMITE_CHECKPOINT_S) -> bool:
+    """Consolida el -wal en la base (PRAGMA wal_checkpoint(TRUNCATE)) con límite de tiempo. Si falla, la base está
+    ocupada o se agota el tiempo, no insiste: deja el motivo en stderr y sigue (SQLite recupera el -wal al abrir).
+    True si quedó consolidado."""
+    try:
+        con = sqlite3.connect(ruta_db, timeout=min(2.0, limite_s))   # espera máxima por un bloqueo
+    except sqlite3.Error as ex:
+        _log(f"cierre: no se pudo abrir la base para consolidar el -wal ({type(ex).__name__}: {ex})")
+        return False
+    corte = threading.Timer(limite_s, con.interrupt)                   # tope duro, pase lo que pase
+    corte.start()
+    try:
+        ocupada, paginas, copiadas = con.execute("PRAGMA wal_checkpoint(TRUNCATE)").fetchone()
+        if ocupada:
+            _log(f"cierre: el -wal no se consolidó del todo: base ocupada ({copiadas} de {paginas} páginas)")
+            return False
+        return True
+    except sqlite3.Error as ex:
+        _log(f"cierre: el -wal no se consolidó ({type(ex).__name__}: {ex})")
+        return False
+    finally:
+        corte.cancel()
+        con.close()
+
+
 # Solo estos archivos se sirven bajo /fuentes/ (nada de rutas armadas con lo que pida el navegador)
 DIR_FUENTES = Path(__file__).resolve().parent / "web" / "fuentes"
 FUENTES = {n: DIR_FUENTES / n for n in ("outfit-latin-wght-normal-5.3.0.woff2",
@@ -135,6 +172,15 @@ class Aplicacion:
                 parar.wait(cada_s)
         threading.Thread(target=bucle, daemon=True, name="respaldo-diario").start()
         return parar
+
+    def apagar(self, espera_respaldo_s: float = ESPERA_RESPALDO_S, limite_checkpoint_s: float = LIMITE_CHECKPOINT_S):
+        """Cierre ordenado: espera (con límite) el respaldo en curso y se queda con su turno, para que no empiece otro;
+        después consolida el -wal. Un respaldo que no alcanza a terminar queda como temporal (.tmp-), nunca válido.
+        La búsqueda no se espera (puede durar minutos): su hilo es daemon y lo no confirmado lo deshace SQLite."""
+        if not self._lock_respaldo.acquire(timeout=espera_respaldo_s):
+            _log(f"cierre: el respaldo en curso no terminó en {espera_respaldo_s:g} s; se cierra igual "
+                 "(queda como temporal, nunca como respaldo válido)")
+        return cerrar_base(self.ruta_db, limite_checkpoint_s)
 
     def _set(self, **kw):
         with self._lock:
@@ -311,12 +357,19 @@ def main():
     print(f"Página de ofertas en {url}  (Ctrl+C para cerrar)")
     if not args.no_abrir and config.HOST == "127.0.0.1":
         threading.Timer(0.8, lambda: webbrowser.open(url)).start()
+    # docker stop manda SIGTERM al PID 1, que sin manejador lo ignora (y Docker lo mata: código 137). Con esto, SIGTERM
+    # interrumpe serve_forever igual que Ctrl+C: en el hilo principal, que es el que atiende.
+    signal.signal(signal.SIGTERM, signal.default_int_handler)
     try:
         srv.serve_forever()
     except KeyboardInterrupt:
         pass
     finally:
-        srv.server_close()
+        for s in (signal.SIGTERM, signal.SIGINT):   # una segunda señal no corta el cierre a la mitad
+            signal.signal(s, signal.SIG_IGN)
+        srv.server_close()                           # los hilos de pedidos son daemon: no se esperan
+        app.apagar()
+        print("Servidor detenido.", flush=True)
 
 
 if __name__ == "__main__":

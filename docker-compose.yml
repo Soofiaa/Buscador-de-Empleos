@@ -5,6 +5,7 @@ services:
     build: .
     container_name: jobtracker
     restart: unless-stopped            # se vuelve a levantar solo (al reiniciar Windows, si Docker Desktop abre con la sesión)
+    stop_grace_period: 15s             # SIGTERM -> cierre ordenado (respaldo en curso + -wal, ~8 s máx.) antes del SIGKILL
     ports:
       - "127.0.0.1:8765:8765"          # SOLO tu PC: nunca se publica hacia la red
     environment:
