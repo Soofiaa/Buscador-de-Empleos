@@ -660,7 +660,19 @@ function etiquetaPrioridad(o) {                  // {texto, titulo}: marca cuand
   return { texto: "✍️ " + o.prioridad_manual,
            titulo: "Prioridad puesta a mano" + (o.prioridad_calculada ? " (la calculada es " + o.prioridad_calculada + ")" : "") };
 }
-const CAMPOS_NOTA = ["notas", "fecha_postulacion", "fase", "sueldo_manual", "prioridad_manual"];
+// estado y fase van SIEMPRE por /api/marcar (un solo camino de escritura, queda en el historial); /api/nota no los acepta
+const ORIGENES_PAGINA = ["tablero", "lista", "modal"];      // 'manual' y 'deshacer' los pone el servidor
+function pedidoMarcar(o, estado, fase, origen) {  // cuerpo de /api/marcar; sin fase, el servidor no la cambia
+  if (!ORIGENES_PAGINA.includes(origen)) throw new Error("origen no válido: " + origen);
+  const p = { url: o.url, estado, origen };
+  if (fase !== undefined) p.fase = fase;
+  return p;
+}
+function pedidoDeshacer(o, cambio) {              // vuelve exactamente a {estado, fase, fecha} si nadie la tocó entre medias
+  return { url: o.url, restaurar: { ...cambio.anterior, si_actual: cambio.actual } };
+}
+const fechaNoFutura = (v, hoy) => !v || v <= hoy;  // "AAAA-MM-DD" se compara bien como texto
+const CAMPOS_NOTA = ["notas", "fecha_postulacion", "sueldo_manual", "prioridad_manual"];
 function cambiosSeguimiento(o, valores) {        // solo lo que cambió: /api/nota es una actualización parcial
   const cambios = {};
   for (const k of CAMPOS_NOTA) if (k in valores && (valores[k] ?? "") !== (o[k] ?? "")) cambios[k] = valores[k] ?? "";
@@ -984,26 +996,31 @@ function mostrarAviso(mensaje, deshacer) {
   timerAviso = setTimeout(cerrar, 8000);
 }
 
-// ---------- cambio de estado, con deshacer exacto (estado y fecha anteriores)
-const aplicarSeguimiento = (o, s) => { o.estado = s.estado; o.fecha_postulacion = s.fecha_postulacion; };
-async function cambiarEstado(o, nuevo, select) {
-  const antes = o.estado;
-  if (antes === nuevo) return true;
-  const r = await api("/api/marcar", { url: o.url, estado: nuevo });
+// ---------- cambio de estado y fase (una sola escritura), con deshacer exacto (estado, fase y fecha anteriores)
+const aplicarSeguimiento = (o, s) => { o.estado = s.estado; o.fase = s.fase; o.fecha_postulacion = s.fecha_postulacion; };
+async function cambiarSeguimiento(o, estado, fase, origen, aviso, { select, despues } = {}) {   // true si quedó guardado
+  const r = await api("/api/marcar", pedidoMarcar(o, estado, fase, origen));
   if (!r.ok) {
-    if (select) select.value = antes;
+    if (select) select.value = o.estado;
     mostrarAviso(mensajeError(r.status, r.json));
     return false;
   }
   aplicarSeguimiento(o, r.json.actual);
   pintar();
+  if (despues) despues();
   const cambio = r.json;
-  mostrarAviso("Movida a «" + ETIQUETAS_ESTADO[nuevo] + "»", async () => {
-    const u = await api("/api/marcar", { url: o.url, restaurar: { ...cambio.anterior, si_actual: cambio.actual } });
-    if (u.ok) { aplicarSeguimiento(o, u.json.actual); pintar(); mostrarAviso("Cambio deshecho (vuelve a «" + ETIQUETAS_ESTADO[u.json.actual.estado] + "»)"); }
-    else mostrarAviso("No se deshizo. " + mensajeError(u.status, u.json));
+  mostrarAviso(aviso, async () => {
+    const u = await api("/api/marcar", pedidoDeshacer(o, cambio));
+    if (u.ok) {
+      aplicarSeguimiento(o, u.json.actual); pintar(); if (despues) despues();
+      mostrarAviso("Cambio deshecho (vuelve a «" + ETIQUETAS_ESTADO[u.json.actual.estado] + "»)");
+    } else mostrarAviso("No se deshizo. " + mensajeError(u.status, u.json));
   });
   return true;
+}
+async function cambiarEstado(o, nuevo, origen, select) {
+  if (o.estado === nuevo) return true;
+  return cambiarSeguimiento(o, nuevo, undefined, origen, "Movida a «" + ETIQUETAS_ESTADO[nuevo] + "»", { select });
 }
 
 // ---------- detalle de una oferta: fases, estado, fecha, sueldo y prioridad manual, notas
@@ -1027,20 +1044,13 @@ function tecladoDetalle(e) {                      // Esc cierra; Tab no sale del
   else if (!e.shiftKey && document.activeElement === ultimo) { e.preventDefault(); primero.focus(); }
   else if (!detalle.raiz.contains(document.activeElement)) { e.preventDefault(); primero.focus(); }
 }
-async function guardarNota(o, cambios) {          // devuelve true si quedó guardado (o no había nada que guardar)
-  if (!Object.keys(cambios).length) return true;
-  const r = await api("/api/nota", { url: o.url, ...cambios });
-  if (!r.ok) { mostrarAviso(mensajeError(r.status, r.json)); return false; }
-  Object.assign(o, r.json.oferta);
-  return true;
-}
 function abrirDetalle(o, origen) {
   if (detalle) cerrarDetalle();
   const url = urlSegura(o.url);
   const error = h("div", { class: "razon", role: "alert", hidden: true });
   const estadoSel = h("select", { id: "detalle-estado" }, ESTADOS.map(v => h("option", { value: v }, ETIQUETAS_ESTADO[v])));
   estadoSel.value = o.estado;
-  const fecha = h("input", { type: "date", id: "detalle-fecha" });
+  const fecha = h("input", { type: "date", id: "detalle-fecha", max: hoy() });   // no futura (el servidor también lo exige)
   let fechaMostrada = "";                        // la que puso el programa; si el campo sigue igual, no lo tocaste tú
   const ponerFecha = v => { fecha.value = v || ""; fechaMostrada = fecha.value; };
   ponerFecha(o.fecha_postulacion);
@@ -1061,12 +1071,16 @@ function abrirDetalle(o, origen) {
       type: "button", class: "pipeline-paso" + (o.fase === f.id ? " activo" : ""), "aria-pressed": String(o.fase === f.id),
       onclick: async () => {
         const nueva = o.fase === f.id ? "" : f.id;              // pulsar la fase activa la quita
-        if (nueva && o.estado !== f.estado) {
-          if (!await cambiarEstado(o, f.estado)) return;
-          estadoSel.value = o.estado; ponerFecha(o.fecha_postulacion);
-        }
-        if (await guardarNota(o, { fase: nueva })) { pintarPasos(); pintar(); if (!nueva) mostrarAviso("Fase quitada"); }
+        const estado = nueva ? f.estado : o.estado;             // estado y fase en UN pedido (y un solo Deshacer)
+        await cambiarSeguimiento(o, estado, nueva, "modal", nueva ? "Fase: " + f.nombre.replace(/^\d+\.\s*/, "") : "Fase quitada",
+                                 { despues: refrescarProceso });
       } }, h("div", {}, f.nombre), h("div", { style: "font-size:.74rem; font-weight:normal; opacity:.85;" }, f.desc))));
+  const refrescarProceso = () => {                          // tras guardar o deshacer: el diálogo muestra lo guardado
+    if (!detalle || detalle.oferta !== o) return;
+    estadoSel.value = o.estado;
+    if (fecha.value === fechaMostrada) ponerFecha(o.fecha_postulacion);   // respeta una fecha que estés escribiendo
+    pintarPasos();
+  };
   pintarPasos();
 
   const grupo = (etq, campo) => h("div", { class: "form-grupo" }, h("label", { for: campo.id }, etq), campo);
@@ -1074,8 +1088,11 @@ function abrirDetalle(o, origen) {
       e.preventDefault();
       error.hidden = true;
       const fechaTocada = fecha.value !== fechaMostrada;
+      if (fechaTocada && !fechaNoFutura(fecha.value, hoy())) {
+        error.textContent = "La fecha de postulación no puede ser futura."; error.hidden = false; fecha.focus(); return;
+      }
       if (estadoSel.value !== o.estado) {
-        if (!await cambiarEstado(o, estadoSel.value)) return;
+        if (!await cambiarEstado(o, estadoSel.value, "modal")) return;
         if (!fechaTocada) ponerFecha(o.fecha_postulacion);   // respeta la fecha que acaba de poner el servidor
       }
       const cambios = cambiosSeguimiento(o, { notas: notas.value, fecha_postulacion: fecha.value, sueldo_manual: sueldo.value.trim(), prioridad_manual: prioridad.value });
@@ -1091,7 +1108,7 @@ function abrirDetalle(o, origen) {
     error,
     h("div", { class: "modal-acciones" },
       h("button", { type: "button", class: "boton sec", style: "margin-right:auto; color:var(--rojo);",
-        onclick: async () => { cerrarDetalle(); await cambiarEstado(o, "descartada"); } }, "❌ Descartar oferta"),
+        onclick: async () => { cerrarDetalle(); await cambiarEstado(o, "descartada", "modal"); } }, "❌ Descartar oferta"),
       h("button", { type: "button", class: "boton sec", onclick: cerrarDetalle }, "Cancelar"),
       h("button", { type: "submit", class: "boton" }, "Guardar cambios")));
 
@@ -1129,7 +1146,7 @@ function abrirManual(origen) {
   const modalidad = h("select", { id: "manual-modalidad" }, ["", "Remoto", "Híbrido", "Presencial"].map(v => h("option", { value: v }, v || "Sin indicar")));
   const estado = h("select", { id: "manual-estado" }, ESTADOS.map(v => h("option", { value: v }, ETIQUETAS_ESTADO[v])));
   estado.value = "postulada";
-  const fecha = h("input", { type: "date", id: "manual-fecha", title: "Si la dejas vacía y está postulada, se usa la de hoy" });
+  const fecha = h("input", { type: "date", id: "manual-fecha", max: hoy(), title: "Si la dejas vacía y está postulada, se usa la de hoy" });
   const prioridad = h("select", { id: "manual-prioridad" }, h("option", { value: "" }, "Sin prioridad"), ["Alta", "Media", "Baja"].map(p => h("option", { value: p }, p)));
   const sueldo = h("input", { type: "text", id: "manual-sueldo", maxlength: "100", placeholder: "Ej: $1.200.000 líquido" });
   const fase = h("select", { id: "manual-fase" }, h("option", { value: "" }, "Sin fase"), FASES_PIPELINE.map(f => h("option", { value: f.id }, f.nombre)));
@@ -1187,7 +1204,7 @@ $("btn-respaldo").addEventListener("click", async e => {
   await estado();
 });
 function selectorEstado(o, etiqueta) {
-  const s = h("select", { class: "estado", "aria-label": etiqueta, onchange: e => cambiarEstado(o, e.target.value, e.target) },
+  const s = h("select", { class: "estado", "aria-label": etiqueta, onchange: e => cambiarEstado(o, e.target.value, "lista", e.target) },
     ESTADOS.map(v => h("option", { value: v }, ETIQUETAS_ESTADO[v])));
   s.value = o.estado;
   return s;

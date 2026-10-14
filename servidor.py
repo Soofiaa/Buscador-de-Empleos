@@ -7,11 +7,15 @@
   GET  /fuentes/<archivo> las tipografías (solo las de la lista FUENTES; la CSP permite font-src 'self')
   GET  /api/estado        {buscando, mensaje, error, corrida, total_ofertas}   (corrida = resumen de la última búsqueda)
   POST /api/buscar        inicia una búsqueda en segundo plano (409 si ya hay una en curso)
-  POST /api/marcar        {"url", "estado"} -> {ok, anterior, actual} con estado y fecha_postulacion (la fecha se pone sola
-                          al pasar a postulada/entrevista si estaba vacía). Deshacer: {"url", "restaurar": {estado,
-                          fecha_postulacion, si_actual: {estado, fecha_postulacion}}}; 409 si la oferta cambió entre medias
-  POST /api/nota          {"url", y solo lo que cambia: notas (<=5000), fecha_postulacion (AAAA-MM-DD o ""), fase,
-                          sueldo_manual (<=100), prioridad_manual ("", Alta, Media, Baja)} -> {ok, oferta}
+  POST /api/marcar        {"url", "estado", "fase" (opcional), "origen": tablero|lista|modal} -> {ok, anterior, actual}
+                          con estado, fase y fecha_postulacion, escritos en UNA transacción y registrados en
+                          historial_estados (la fecha se pone sola al pasar a postulada/entrevista si estaba vacía).
+                          Deshacer: {"url", "restaurar": {estado, fecha_postulacion, fase, si_actual: {...}}}; el
+                          origen lo fija el servidor ('deshacer'); 409 si la oferta cambió entre medias
+  POST /api/nota          {"url", y solo lo que cambia: notas (<=5000), fecha_postulacion (AAAA-MM-DD o "", no futura;
+                          queda en el historial), sueldo_manual (<=100), prioridad_manual ("", Alta, Media, Baja)}
+                          -> {ok, oferta}. estado o fase aquí -> 400 (se cambian con /api/marcar)
+  GET  /api/ofertas       ... y cada oferta principal trae en_fase_desde (UTC) según su historial, o null
   GET  /api/ajustes/soporte  {incluir}: si la categoría Soporte TI se muestra en Ofertas
   POST /api/ajustes/soporte  {"incluir": true|false} (nada más) -> {ok, incluir}
   POST /api/oferta/manual  {titulo, empresa (obligatorios), url (http/https), ubicacion, modalidad, estado,
@@ -265,7 +269,8 @@ def crear_servidor(app: Aplicacion, puerto: int = None, host: str = None) -> Thr
                     return self._json(202, {"ok": True})
                 return self._json(409, {"error": "ya hay una búsqueda en curso"})
             escrituras = {
-                "/api/marcar": lambda con, d: buscar.marcar(con, d.get("url"), d.get("estado"), d.get("restaurar")),
+                "/api/marcar": lambda con, d: buscar.marcar(con, d.get("url"), d.get("estado"), d.get("restaurar"),
+                                                            d.get("fase"), d.get("origen")),
                 "/api/nota": lambda con, d: {"oferta": buscar.actualizar_seguimiento(
                     con, d.get("url"), {k: v for k, v in d.items() if k != "url"})},
                 "/api/ajustes/soporte": lambda con, d: buscar.guardar_soporte(con, d),

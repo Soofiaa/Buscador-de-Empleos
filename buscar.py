@@ -14,7 +14,7 @@ import sqlite3
 import time
 import uuid
 from collections import Counter
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from urllib.parse import urlsplit
 
 import pandas as pd
@@ -192,6 +192,101 @@ def _migrar_v7(con) -> None:
         con.execute(f"PRAGMA user_version = {VERSION_DB}")
 
 
+# ------------------------------------------------------------------ historial de estados (Fase C)
+# Tabla ADITIVA: la base sigue en v7, así que el código anterior la abre igual y solo la ignora (volver atrás = cambiar
+# la imagen). Es solo de agregado y lo garantiza la base: triggers que abortan UPDATE y DELETE del historial, y que
+# impiden cambiar la url o borrar una oferta que tenga historial (sus filas quedarían huérfanas).
+ORIGENES_HISTORIAL = ("tablero", "modal", "lista", "manual", "deshacer")
+ORIGENES_DE_LA_PAGINA = ("tablero", "lista", "modal")      # 'manual' y 'deshacer' los fija SIEMPRE el servidor
+CAMPOS_HISTORIAL = ("estado", "fase", "fecha_postulacion")  # solo _cambiar_seguimiento() los escribe
+DDL_HISTORIAL = {                # nombre -> sentencia, en orden (la tabla antes que su índice y sus triggers)
+    "historial_estados": """CREATE TABLE IF NOT EXISTS historial_estados (
+        id            INTEGER PRIMARY KEY AUTOINCREMENT,
+        url           TEXT NOT NULL,
+        estado_antes  TEXT NOT NULL,
+        fase_antes    TEXT NOT NULL,
+        fecha_antes   TEXT NOT NULL,
+        estado_nuevo  TEXT NOT NULL,
+        fase_nueva    TEXT NOT NULL,
+        fecha_nueva   TEXT NOT NULL,
+        cambiado_en   TEXT NOT NULL,
+        origen        TEXT NOT NULL CHECK (origen IN ('tablero', 'modal', 'lista', 'manual', 'deshacer')))""",
+    "historial_por_oferta": "CREATE INDEX IF NOT EXISTS historial_por_oferta ON historial_estados (url, id)",
+    "historial_sin_update": """CREATE TRIGGER IF NOT EXISTS historial_sin_update BEFORE UPDATE ON historial_estados
+        BEGIN SELECT RAISE(ABORT, 'historial_estados: solo se agregan filas'); END""",
+    "historial_sin_delete": """CREATE TRIGGER IF NOT EXISTS historial_sin_delete BEFORE DELETE ON historial_estados
+        BEGIN SELECT RAISE(ABORT, 'historial_estados: solo se agregan filas'); END""",
+    "ofertas_url_fija_con_historial": """CREATE TRIGGER IF NOT EXISTS ofertas_url_fija_con_historial
+        BEFORE UPDATE OF url ON ofertas WHEN EXISTS (SELECT 1 FROM historial_estados WHERE url = OLD.url)
+        BEGIN SELECT RAISE(ABORT, 'la oferta tiene historial: su url no cambia'); END""",
+    "ofertas_sin_borrar_con_historial": """CREATE TRIGGER IF NOT EXISTS ofertas_sin_borrar_con_historial
+        BEFORE DELETE ON ofertas WHEN EXISTS (SELECT 1 FROM historial_estados WHERE url = OLD.url)
+        BEGIN SELECT RAISE(ABORT, 'la oferta tiene historial: no se borra'); END""",
+}
+
+
+def _asegurar_historial(con) -> list[str]:
+    """En CADA conexión: comprueba que existan los 6 objetos del historial y recrea los que falten (p. ej. una migración
+    futura que reconstruya 'ofertas' se lleva sus triggers). Si están todos, solo lee: no toma el turno de escritura."""
+    marcas = ", ".join("?" * len(DDL_HISTORIAL))
+    existentes = {r[0] for r in con.execute(f"SELECT name FROM sqlite_master WHERE name IN ({marcas})", list(DDL_HISTORIAL))}
+    faltan = [n for n in DDL_HISTORIAL if n not in existentes]
+    if faltan:
+        with transaccion(con):
+            for nombre in faltan:
+                con.execute(DDL_HISTORIAL[nombre])
+    return faltan
+
+
+def ahora_utc() -> str:
+    """Instante del historial: UTC con desfase explícito ('2026-10-14T00:17:05+00:00'); el cambio de horario no lo afecta."""
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+
+
+def _cambiar_seguimiento(con, url: str, antes, nuevo: dict, origen: str) -> bool:
+    """La ÚNICA función que escribe estado, fase y fecha_postulacion (lo comprueba tests/test_fase_c1.py escaneando el
+    código). Va DENTRO de la transacción de quien llama: el cambio y su fila de historial se guardan juntos o ninguno.
+    antes = los valores leídos en esa transacción, o None en un alta (queda con antes vacíos). Si nada cambia, no
+    escribe nada y devuelve False."""
+    if not con.in_transaction:
+        raise RuntimeError("_cambiar_seguimiento debe ir dentro de una transacción")
+    if origen not in ORIGENES_HISTORIAL:
+        raise ValueError(f"origen no válido: {origen!r}")
+    if antes is not None and all(antes[c] == nuevo[c] for c in CAMPOS_HISTORIAL):
+        return False
+    previo = antes or {c: "" for c in CAMPOS_HISTORIAL}
+    con.execute("UPDATE ofertas SET estado = ?, fase = ?, fecha_postulacion = ? WHERE url = ?",
+                (nuevo["estado"], nuevo["fase"], nuevo["fecha_postulacion"], url))
+    con.execute("INSERT INTO historial_estados (url, estado_antes, fase_antes, fecha_antes, estado_nuevo, fase_nueva, "
+                "fecha_nueva, cambiado_en, origen) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (url, previo["estado"], previo["fase"], previo["fecha_postulacion"],
+                 nuevo["estado"], nuevo["fase"], nuevo["fecha_postulacion"], ahora_utc(), origen))
+    return True
+
+
+def _revierte(deshacer: dict, cambio: dict) -> bool:
+    return all(deshacer[a] == cambio[n] and deshacer[n] == cambio[a]
+               for a, n in (("estado_antes", "estado_nuevo"), ("fase_antes", "fase_nueva"), ("fecha_antes", "fecha_nueva")))
+
+
+def en_fase_desde(filas: list[dict], estado: str, fase: str):
+    """Desde cuándo (cambiado_en, UTC) la oferta está en su estado y fase actuales, según su historial (por id), o None.
+    - Un 'deshacer' que revierte exactamente el cambio vigente anterior anula a ambos: el contador vuelve a su valor.
+    - Las filas donde solo cambió la fecha no reinician el contador.
+    - Si el último cambio de estado/fase no deja la oferta como está ahora, hubo un hueco (un cambio hecho con el código
+      anterior, que no registra): None, y la página usa los días desde la postulación."""
+    vigentes = []
+    for f in sorted(filas, key=lambda f: f["id"]):
+        if f["origen"] == "deshacer" and vigentes and _revierte(f, vigentes[-1]):
+            vigentes.pop()
+            continue
+        vigentes.append(f)
+    for f in reversed(vigentes):
+        if (f["estado_antes"], f["fase_antes"]) != (f["estado_nuevo"], f["fase_nueva"]):
+            return f["cambiado_en"] if (f["estado_nuevo"], f["fase_nueva"]) == (estado, fase or "") else None
+    return None
+
+
 def conectar(path=None) -> sqlite3.Connection:
     path = path or config.DB_PATH
     con = _abrir(path)
@@ -230,6 +325,7 @@ def conectar(path=None) -> sqlite3.Connection:
     con.commit()
     if version < VERSION_DB:          # solo cuando hace falta: así cada petición no toma el turno de escritura
         _migrar_v7(con)
+    _asegurar_historial(con)          # después de migrar: si la migración falla, no se crea nada
     return con
 
 
@@ -613,6 +709,11 @@ def ofertas_para_pagina(con) -> dict:
     for lista in datos.values():
         for o in lista:
             o["corrida_id"] = corrida_de(o.get("detectada_en"), corridas)
+    historial = {}
+    for r in con.execute("SELECT * FROM historial_estados ORDER BY id"):     # por id: nunca por la hora en texto
+        historial.setdefault(r["url"], []).append(dict(r))
+    for o in datos["principal"]:
+        o["en_fase_desde"] = en_fase_desde(historial.get(o["url"], []), o["estado"], o.get("fase") or "")
     datos["total_descartadas"] = con.execute(
         f"SELECT COUNT(*) FROM ofertas WHERE categoria = 'descartada' AND {otra}").fetchone()[0]
     datos["corridas"] = corridas
@@ -671,19 +772,28 @@ def _fecha_valida(valor) -> bool:
 
 
 def _seguimiento(con, url) -> dict:
-    fila = con.execute("SELECT estado, fecha_postulacion FROM ofertas WHERE url = ?", (url,)).fetchone()
+    fila = con.execute("SELECT estado, fase, fecha_postulacion FROM ofertas WHERE url = ?", (url,)).fetchone()
     if fila is None:
         raise ErrorDatos(404, "la oferta no existe")
-    return {"estado": fila["estado"], "fecha_postulacion": fila["fecha_postulacion"] or ""}
+    return {"estado": fila["estado"], "fase": fila["fase"] or "", "fecha_postulacion": fila["fecha_postulacion"] or ""}
 
 
-def marcar(con, url: str, estado: str = None, restaurar: dict = None) -> dict:
-    """Cambia el estado de una oferta y devuelve {anterior, actual} (estado y fecha_postulacion) para poder deshacer.
+def _fecha_no_futura(valor: str) -> bool:
+    """'' o una fecha que no pasa de hoy en Chile (las fechas AAAA-MM-DD se comparan bien como texto)."""
+    return valor == "" or valor <= ahora_chile().strftime("%Y-%m-%d")
 
+
+def marcar(con, url: str, estado: str = None, restaurar: dict = None, fase: str = None, origen: str = None) -> dict:
+    """Cambia el estado (y, si viene, la fase) de una oferta en UNA transacción y devuelve {anterior, actual} con estado,
+    fase y fecha_postulacion, para poder deshacer. Queda en el historial con su origen.
+
+    - origen: lo envía la página y solo puede ser tablero, lista o modal (otro valor o ninguno: 400). Al deshacer, el
+      servidor registra 'deshacer' sin importar lo que llegue.
     - Al entrar a postulada/entrevista sin fecha, se pone la de hoy (hora de Chile). Ningún cambio posterior la borra.
-    - Deshacer: restaurar = {estado, fecha_postulacion, si_actual: {estado, fecha_postulacion}}. Deja exactamente el
-      estado y la fecha anteriores, pero SOLO si la oferta sigue como la dejó el cambio que se deshace (si_actual):
-      si alguien la cambió entre medias, 409 y no se toca nada."""
+    - Sin fase, la fase no cambia (compatible con lo anterior a la Fase C).
+    - Deshacer: restaurar = {estado, fecha_postulacion, fase, si_actual: {estado, fecha_postulacion, fase}}. Deja
+      exactamente lo anterior, pero SOLO si la oferta sigue como la dejó el cambio que se deshace (si_actual): si
+      alguien la cambió entre medias, 409 y no se toca nada. La fase es opcional en restaurar (deshaceres de antes)."""
     if not isinstance(url, str) or not url:
         raise ErrorDatos(400, "falta la oferta")
     if restaurar is not None:
@@ -692,41 +802,58 @@ def marcar(con, url: str, estado: str = None, restaurar: dict = None) -> dict:
         for d in (restaurar, restaurar["si_actual"]):
             if d.get("estado") not in ESTADOS or not _fecha_valida(d.get("fecha_postulacion")):
                 raise ErrorDatos(400, "estado o fecha no válidos en restaurar")
-    elif estado not in ESTADOS:
-        raise ErrorDatos(400, "estado no válido")
+            if "fase" in d and d["fase"] not in FASES:
+                raise ErrorDatos(400, "fase no válida en restaurar")
+        if origen is not None and origen not in ORIGENES_DE_LA_PAGINA:
+            raise ErrorDatos(400, "origen no válido")
+        origen = "deshacer"
+    else:
+        if estado not in ESTADOS:
+            raise ErrorDatos(400, "estado no válido")
+        if fase is not None and fase not in FASES:
+            raise ErrorDatos(400, "fase no válida")
+        if origen not in ORIGENES_DE_LA_PAGINA:
+            raise ErrorDatos(400, "origen no válido (tablero, lista o modal)")
     with transaccion(con):
         anterior = _seguimiento(con, url)
         if restaurar is not None:
-            esperado = {k: restaurar["si_actual"][k] for k in ("estado", "fecha_postulacion")}
-            if anterior != esperado:
+            si_actual = restaurar["si_actual"]
+            if any(anterior[k] != si_actual[k] for k in CAMPOS_HISTORIAL if k in si_actual):
                 raise ErrorDatos(409, "la oferta cambió después; no se deshizo para no pisar ese cambio")
-            actual = {"estado": restaurar["estado"], "fecha_postulacion": restaurar["fecha_postulacion"]}
+            actual = {"estado": restaurar["estado"], "fase": restaurar.get("fase", anterior["fase"]),
+                      "fecha_postulacion": restaurar["fecha_postulacion"]}
         else:
             fecha = anterior["fecha_postulacion"]
             if estado in ESTADOS_CON_FECHA and not fecha:
                 fecha = ahora_chile().strftime("%Y-%m-%d")
-            actual = {"estado": estado, "fecha_postulacion": fecha}
-        con.execute("UPDATE ofertas SET estado = ?, fecha_postulacion = ? WHERE url = ?",
-                    (actual["estado"], actual["fecha_postulacion"], url))
+            actual = {"estado": estado, "fase": anterior["fase"] if fase is None else fase, "fecha_postulacion": fecha}
+        _cambiar_seguimiento(con, url, anterior, actual, origen)
     return {"anterior": anterior, "actual": actual}
 
 
-def marcar_estado(con, url: str, estado: str) -> bool:
+def marcar_estado(con, url: str, estado: str, origen: str) -> bool:
     """Compatibilidad: True si se cambió el estado; False si el estado no existe o la oferta no está."""
     try:
-        marcar(con, url, estado)
+        marcar(con, url, estado, origen=origen)
         return True
     except ErrorDatos:
         return False
 
 
+# lo que /api/nota escribe directo; la fecha de postulación va por _cambiar_seguimiento (queda en el historial)
+COLUMNAS_NOTA_LIBRES = ["notas", "sueldo_manual", "prioridad_manual"]
+
+
 def actualizar_seguimiento(con, url: str, cambios: dict) -> dict:
-    """Actualización PARCIAL de lo que escribe la usuaria (solo las claves presentes). Devuelve la oferta guardada."""
+    """Actualización PARCIAL de lo que escribe la usuaria (solo las claves presentes). Devuelve la oferta guardada.
+    El estado y la fase NO se cambian aquí (400): van por /api/marcar, para que haya un solo camino de escritura."""
     if not isinstance(url, str) or not url:
         raise ErrorDatos(400, "falta la oferta")
     if not isinstance(cambios, dict) or not cambios:
         raise ErrorDatos(400, "no hay nada que guardar")
-    validos = {"notas", "fecha_postulacion", "fase", "sueldo_manual", "prioridad_manual"}
+    if "estado" in cambios or "fase" in cambios:
+        raise ErrorDatos(400, "el estado y la fase se cambian con /api/marcar")
+    validos = {"fecha_postulacion", *COLUMNAS_NOTA_LIBRES}
     desconocidos = set(cambios) - validos
     if desconocidos:
         raise ErrorDatos(400, "campos no permitidos: " + ", ".join(sorted(desconocidos)))
@@ -739,15 +866,18 @@ def actualizar_seguimiento(con, url: str, cambios: dict) -> dict:
         raise ErrorDatos(400, f"el sueldo tiene más de {LIMITE_SUELDO_MANUAL} caracteres")
     if "fecha_postulacion" in cambios and not _fecha_valida(cambios["fecha_postulacion"]):
         raise ErrorDatos(400, "la fecha debe ser AAAA-MM-DD")
-    if cambios.get("fase", "") not in FASES:
-        raise ErrorDatos(400, "fase no válida")
+    if "fecha_postulacion" in cambios and not _fecha_no_futura(cambios["fecha_postulacion"]):
+        raise ErrorDatos(400, "la fecha de postulación no puede ser futura")
     if cambios.get("prioridad_manual", "") not in [""] + PRIORIDADES:
         raise ErrorDatos(400, "prioridad no válida")
-    columnas = sorted(cambios)                    # nombres de una lista cerrada: nunca vienen del pedido tal cual
+    columnas = [c for c in COLUMNAS_NOTA_LIBRES if c in cambios]   # lista cerrada: nunca vienen del pedido tal cual
     with transaccion(con):
-        _seguimiento(con, url)
-        con.execute(f"UPDATE ofertas SET {', '.join(c + ' = ?' for c in columnas)} WHERE url = ?",
-                    [cambios[c] for c in columnas] + [url])
+        anterior = _seguimiento(con, url)
+        if columnas:
+            con.execute(f"UPDATE ofertas SET {', '.join(c + ' = ?' for c in columnas)} WHERE url = ?",
+                        [cambios[c] for c in columnas] + [url])
+        if "fecha_postulacion" in cambios:
+            _cambiar_seguimiento(con, url, anterior, {**anterior, "fecha_postulacion": cambios["fecha_postulacion"]}, "modal")
         fila = con.execute("SELECT url, estado, notas, fecha_postulacion, fase, sueldo_manual, prioridad_manual, "
                            "prioridad FROM ofertas WHERE url = ?", (url,)).fetchone()
     return _con_prioridad_mostrada(dict(fila))
@@ -800,6 +930,8 @@ def crear_oferta_manual(con, datos) -> dict:
         raise ErrorDatos(400, "prioridad no válida")
     if not _fecha_valida(d.get("fecha_postulacion", "")):
         raise ErrorDatos(400, "la fecha debe ser AAAA-MM-DD")
+    if not _fecha_no_futura(d.get("fecha_postulacion", "")):
+        raise ErrorDatos(400, "la fecha de postulación no puede ser futura")
     if len(d.get("notas", "")) > LIMITE_NOTAS:
         raise ErrorDatos(400, f"las notas tienen más de {LIMITE_NOTAS} caracteres")
     if len(d.get("sueldo_manual", "")) > LIMITE_SUELDO_MANUAL:
@@ -816,11 +948,13 @@ def crear_oferta_manual(con, datos) -> dict:
         "publicada": "", "raw": json.dumps({"manual": True, **{k: d.get(k, "") for k in ("titulo", "empresa", "url", "ubicacion")}},
                                            ensure_ascii=False),
         "categoria": "principal", "razon": "", "tipo": TIPO_MANUAL, "prioridad": "", "modalidad": d.get("modalidad", ""),
-        "contrato": "", "sueldo": "", "experiencia": "", "motivo": "Ingresada a mano", "estado": estado,
+        "contrato": "", "sueldo": "", "experiencia": "", "motivo": "Ingresada a mano",
         "busqueda": "manual", "detectada_en": ahora.strftime("%Y-%m-%d %H:%M"), "fuente": "manual",
-        "notas": d.get("notas", ""), "fecha_postulacion": fecha, "fase": d.get("fase", ""),
-        "sueldo_manual": d.get("sueldo_manual", ""), "prioridad_manual": d.get("prioridad_manual", ""),
+        "notas": d.get("notas", ""), "sueldo_manual": d.get("sueldo_manual", ""), "prioridad_manual": d.get("prioridad_manual", ""),
     }
+    # estado, fase y fecha NO van en el INSERT: los escribe _cambiar_seguimiento (alta en el historial, origen 'manual')
+    seguimiento = {"estado": estado, "fase": d.get("fase", ""), "fecha_postulacion": fecha}
+    assert not set(fila) & set(CAMPOS_HISTORIAL)
     with transaccion(con):
         if con.execute("SELECT 1 FROM ofertas WHERE url = ?", (fila["url"],)).fetchone():
             raise ErrorDatos(409, "ya tienes esa URL", url_existente=fila["url"])
@@ -830,6 +964,7 @@ def crear_oferta_manual(con, datos) -> dict:
                              url_existente=existente if isinstance(existente, str) else existente[0])
         cols = list(fila)
         con.execute(f"INSERT INTO ofertas ({', '.join(cols)}) VALUES ({', '.join('?' * len(cols))})", [fila[c] for c in cols])
+        _cambiar_seguimiento(con, fila["url"], None, seguimiento, "manual")
         guardada = dict(con.execute("SELECT * FROM ofertas WHERE url = ?", (fila["url"],)).fetchone())
     guardada.pop("raw", None)
     return _con_prioridad_mostrada(guardada)

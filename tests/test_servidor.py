@@ -157,12 +157,12 @@ def test_la_correccion_de_contraste_esta_preparada_pero_no_aplicada():
 
 def test_cambiar_estado_se_guarda(srv):
     _, puerto, _ = srv
-    st, _, _ = pedir(puerto, "POST", "/api/marcar", {"url": "http://qa", "estado": "postulada"})
+    st, _, _ = pedir(puerto, "POST", "/api/marcar", {"url": "http://qa", "estado": "postulada", "origen": "lista"})
     assert st == 200
     d = json.loads(pedir(puerto, "GET", "/api/ofertas")[2])
     assert d["principal"][0]["estado"] == "postulada"
-    assert pedir(puerto, "POST", "/api/marcar", {"url": "http://qa", "estado": "x"})[0] == 400
-    assert pedir(puerto, "POST", "/api/marcar", {"url": "http://otra", "estado": "revisada"})[0] == 404   # Fase A: oferta inexistente = 404
+    assert pedir(puerto, "POST", "/api/marcar", {"url": "http://qa", "estado": "x", "origen": "lista"})[0] == 400
+    assert pedir(puerto, "POST", "/api/marcar", {"url": "http://otra", "estado": "revisada", "origen": "lista"})[0] == 404   # Fase A: oferta inexistente = 404
     assert pedir(puerto, "POST", "/api/marcar", [1, 2])[0] == 400
 
 

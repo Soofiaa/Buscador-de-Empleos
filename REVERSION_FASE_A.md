@@ -192,3 +192,80 @@ activa, pero queda en la base apartada (`retirada_restauracion_*`).
    Y en la página (`http://127.0.0.1:8765/`, Ctrl+F5): el pie "SQLite Conectado · N ofertas" y Seguimiento.
 
 Probado sobre una copia (volumen temporal) con el primer respaldo automático, `ofertas_auto_20261013-182831.db`.
+
+# Fase C1 + historial de estados + fecha editable (pendiente de despliegue)
+
+Qué cambia:
+- `/api/marcar` escribe estado y fase juntos y exige `origen` (tablero, lista o modal).
+- `/api/nota` ya no acepta estado ni fase, y la fecha de postulación no puede ser futura.
+- La tabla `historial_estados` es **aditiva**: la base sigue en v7, así que la imagen anterior la abre igual y solo la
+  ignora.
+
+## (a) Volver a la imagen anterior (sin historial)
+
+Basta con la imagen: **la base no se restaura** y no se pierde nada de lo hecho en la página.
+
+| Pieza | Valor |
+|---|---|
+| Imagen anterior | `job-tracker:respaldo` (se etiqueta al desplegar) |
+| Base anterior (por si acaso) | `ofertas_pre_historial_<fecha>.db` (volumen y `respaldos\`), con su sha256 |
+
+```
+docker compose stop jobtracker
+docker tag job-tracker:respaldo job-tracker-jobtracker:latest
+docker compose up -d --no-build
+```
+
+**Qué se pierde mientras corra la imagen anterior:**
+- Los cambios de estado, fase y fecha **no se registran** en el historial. Quedan huecos, y no se rellenan después,
+  para no inventar datos.
+- Al volver a la imagen nueva, el historial sigue desde ahí. En una oferta con hueco, "días en la fase" no se inventa:
+  se usan los días desde la postulación o no se muestra nada.
+
+La tabla, el índice y los 4 triggers se quedan en la base. Los triggers no molestan al código anterior: nunca cambia la
+url de una oferta ni borra ofertas, como se comprobó con la imagen v7 real sobre una copia del respaldo.
+
+## (b) Borrar A PROPÓSITO una oferta que tiene historial (p. ej. una manual creada por error)
+
+Los triggers lo impiden a propósito: así ningún error deja filas huérfanas. Para un borrado consciente, hay que
+desactivarlos de forma controlada, **dentro de una transacción**. En SQLite, `DROP TRIGGER` también es transaccional:
+si algo falla, todo vuelve atrás y los triggers siguen ahí. No está automatizado a propósito.
+
+1. **Respaldo previo:** "💾 Respaldar ahora" en la página. Anota el archivo y verifica su `.sha256` con el paso 1 de
+   la sección "Restaurar un respaldo".
+2. **Copia la url exacta** de la oferta (Exportar → CSV, columna `url`; las manuales sin URL empiezan con `manual:`).
+3. **Detén el contenedor:** `docker compose stop jobtracker`.
+4. **Borra** en un contenedor desechable, sin red. Reemplaza `URL_A_BORRAR`:
+
+   ```
+   MSYS_NO_PATHCONV=1 docker run --rm --network none -v job-tracker_jt_datos:/datos --entrypoint python \
+     job-tracker-jobtracker -c "
+   import sqlite3, sys
+   sys.path.insert(0, '/app'); import buscar
+   URL = 'URL_A_BORRAR'
+   con = sqlite3.connect('/datos/ofertas.db', isolation_level=None)
+   con.execute('BEGIN IMMEDIATE')
+   try:
+       f = con.execute('SELECT titulo, empresa, estado FROM ofertas WHERE url = ?', (URL,)).fetchone()
+       assert f, 'esa url no existe: no se borró nada'
+       print('Se borra:', f)
+       con.execute('DROP TRIGGER ofertas_sin_borrar_con_historial')
+       con.execute('DROP TRIGGER historial_sin_delete')
+       h = con.execute('DELETE FROM historial_estados WHERE url = ?', (URL,)).rowcount
+       con.execute('DELETE FROM alertas WHERE url = ?', (URL,))
+       o = con.execute('DELETE FROM ofertas WHERE url = ?', (URL,)).rowcount
+       con.execute(buscar.DDL_HISTORIAL['historial_sin_delete'])
+       con.execute(buscar.DDL_HISTORIAL['ofertas_sin_borrar_con_historial'])
+       assert o == 1
+       con.execute('COMMIT')
+   except BaseException:
+       con.execute('ROLLBACK'); print('ROLLBACK: no se borró nada'); raise
+   faltan = [n for n in buscar.DDL_HISTORIAL if not con.execute('SELECT 1 FROM sqlite_master WHERE name = ?', (n,)).fetchone()]
+   print('borrada: 1 oferta,', h, 'filas de historial | triggers que faltan:', faltan or 'ninguno',
+         '| integridad', con.execute('PRAGMA integrity_check').fetchone()[0])
+   "
+   ```
+
+   Debe terminar con "triggers que faltan: ninguno" e "integridad ok". Aunque faltara alguno, `conectar()` recrea al
+   arrancar los objetos que falten.
+5. **Levanta:** `docker compose up -d --no-build`, y comprueba en la página que la oferta ya no está.

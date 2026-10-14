@@ -50,9 +50,9 @@ def fila(ruta_db, url):
 # ------------------------------------------------------------------ /api/marcar
 def test_postular_pone_la_fecha_de_hoy_y_deshacer_la_quita_exactamente(srv):
     puerto, db = srv
-    st, r = post(puerto, "/api/marcar", {"url": "http://a", "estado": "postulada"})
-    assert st == 200 and r["anterior"] == {"estado": "nueva", "fecha_postulacion": ""}
-    assert r["actual"] == {"estado": "postulada", "fecha_postulacion": HOY}
+    st, r = post(puerto, "/api/marcar", {"url": "http://a", "estado": "postulada", "origen": "lista"})
+    assert st == 200 and r["anterior"] == {"estado": "nueva", "fase": "", "fecha_postulacion": ""}
+    assert r["actual"] == {"estado": "postulada", "fase": "", "fecha_postulacion": HOY}
     st, _ = post(puerto, "/api/marcar", {"url": "http://a", "restaurar": {**r["anterior"], "si_actual": r["actual"]}})
     assert st == 200
     f = fila(db, "http://a")
@@ -61,16 +61,16 @@ def test_postular_pone_la_fecha_de_hoy_y_deshacer_la_quita_exactamente(srv):
 
 def test_una_fecha_existente_no_se_pisa_ni_se_borra(srv):
     puerto, db = srv
-    _, r = post(puerto, "/api/marcar", {"url": "http://c", "estado": "entrevista"})
-    assert r["actual"] == {"estado": "entrevista", "fecha_postulacion": "2026-10-01"}
-    post(puerto, "/api/marcar", {"url": "http://c", "estado": "descartada"})
+    _, r = post(puerto, "/api/marcar", {"url": "http://c", "estado": "entrevista", "origen": "lista"})
+    assert r["actual"] == {"estado": "entrevista", "fase": "", "fecha_postulacion": "2026-10-01"}
+    post(puerto, "/api/marcar", {"url": "http://c", "estado": "descartada", "origen": "lista"})
     assert fila(db, "http://c")["fecha_postulacion"] == "2026-10-01"         # cambiar de estado no borra el historial
 
 
 def test_deshacer_no_pisa_un_cambio_hecho_entre_medias(srv):
     puerto, db = srv
-    _, r1 = post(puerto, "/api/marcar", {"url": "http://b", "estado": "postulada"})
-    post(puerto, "/api/marcar", {"url": "http://b", "estado": "entrevista"})   # otro cambio después
+    _, r1 = post(puerto, "/api/marcar", {"url": "http://b", "estado": "postulada", "origen": "lista"})
+    post(puerto, "/api/marcar", {"url": "http://b", "estado": "entrevista", "origen": "lista"})   # otro cambio después
     st, r = post(puerto, "/api/marcar", {"url": "http://b", "restaurar": {**r1["anterior"], "si_actual": r1["actual"]}})
     assert st == 409 and "cambió" in r["error"]
     assert fila(db, "http://b")["estado"] == "entrevista"
@@ -93,21 +93,21 @@ def test_restaurar_invalido_es_400_y_no_cambia_nada(srv, restaurar):
 
 def test_marcar_oferta_inexistente_o_estado_invalido(srv):
     puerto, _ = srv
-    assert post(puerto, "/api/marcar", {"url": "http://no-existe", "estado": "revisada"})[0] == 404
-    assert post(puerto, "/api/marcar", {"url": "http://a", "estado": "x"})[0] == 400
-    assert post(puerto, "/api/marcar", {"estado": "revisada"})[0] == 400
+    assert post(puerto, "/api/marcar", {"url": "http://no-existe", "estado": "revisada", "origen": "lista"})[0] == 404
+    assert post(puerto, "/api/marcar", {"url": "http://a", "estado": "x", "origen": "lista"})[0] == 400
+    assert post(puerto, "/api/marcar", {"estado": "revisada", "origen": "lista"})[0] == 400
 
 
 # ------------------------------------------------------------------ /api/nota
 def test_nota_es_parcial_solo_cambia_lo_enviado(srv):
     puerto, db = srv
     antes = fila(db, "http://b")
-    st, r = post(puerto, "/api/nota", {"url": "http://b", "fase": "rrhh", "sueldo_manual": "$1.300.000"})
-    assert st == 200 and r["oferta"]["fase"] == "rrhh" and r["oferta"]["sueldo_manual"] == "$1.300.000"
+    st, r = post(puerto, "/api/nota", {"url": "http://b", "fecha_postulacion": "2026-10-10", "sueldo_manual": "$1.300.000"})
+    assert st == 200 and r["oferta"]["fecha_postulacion"] == "2026-10-10" and r["oferta"]["sueldo_manual"] == "$1.300.000"
     despues = fila(db, "http://b")
     assert despues["notas"] == "nota previa" and despues["sueldo"] == antes["sueldo"]   # no pisa el sueldo calculado
-    assert {k: v for k, v in despues.items() if k not in ("fase", "sueldo_manual")} == \
-        {k: v for k, v in antes.items() if k not in ("fase", "sueldo_manual")}
+    assert {k: v for k, v in despues.items() if k not in ("fecha_postulacion", "sueldo_manual")} == \
+        {k: v for k, v in antes.items() if k not in ("fecha_postulacion", "sueldo_manual")}
 
 
 def test_nota_guarda_texto_con_html_tal_cual(srv):
@@ -138,10 +138,10 @@ def test_nota_rechaza_campos_o_valores_no_validos(srv, cambio):
     assert fila(db, "http://a") == antes
 
 
-def test_nota_acepta_todas_las_fases_y_prioridades_y_borrar(srv):
+def test_marcar_acepta_todas_las_fases_y_nota_las_prioridades_y_borrar(srv):   # Fase C: la fase va por /api/marcar
     puerto, _ = srv
     for fase in buscar.FASES:
-        assert post(puerto, "/api/nota", {"url": "http://a", "fase": fase})[0] == 200
+        assert post(puerto, "/api/marcar", {"url": "http://a", "estado": "entrevista", "fase": fase, "origen": "modal"})[0] == 200
     for p in ["", "Alta", "Media", "Baja"]:
         assert post(puerto, "/api/nota", {"url": "http://a", "prioridad_manual": p})[0] == 200
     assert post(puerto, "/api/nota", {"url": "http://a", "fecha_postulacion": ""})[0] == 200
@@ -169,7 +169,7 @@ def test_base_ocupada_responde_503_y_no_escribe(srv, monkeypatch):
     otra.execute("BEGIN IMMEDIATE")
     try:
         st, r = post(puerto, "/api/nota", {"url": "http://a", "notas": "no debe quedar"})
-        st2, _ = post(puerto, "/api/marcar", {"url": "http://a", "estado": "postulada"})
+        st2, _ = post(puerto, "/api/marcar", {"url": "http://a", "estado": "postulada", "origen": "lista"})
     finally:
         otra.execute("ROLLBACK")
         otra.close()

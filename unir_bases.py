@@ -53,6 +53,14 @@ def unir(base: tuple, otras: list, excepciones: dict, salida, fecha_union: str, 
     """Devuelve la lista de conflictos (para mostrarla) y deja la base unida en `salida`."""
     nombre_base, ruta_base = base
     src = abrir_ro(ruta_base)
+    # Exenta de la regla "solo _cambiar_seguimiento escribe estado, fase y fecha" (tests/test_fase_c1.py): fue una
+    # herramienta de UNA vez (13-10-2026), trabaja sobre un archivo nuevo con el contenedor detenido, y sus cambios son
+    # una importación desde otras bases, no decisiones de la usuaria (no hay origen para eso en el historial). Para que
+    # la exención no esconda un hueco, se niega a correr sobre una base que ya tenga historial.
+    if src.execute("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'historial_estados'").fetchone() and \
+            src.execute("SELECT 1 FROM historial_estados LIMIT 1").fetchone():
+        raise ErrorUnion(f"{nombre_base} ya tiene historial de estados: la unión fue de una vez y no se repite sobre "
+                         "una base con historial (sus cambios no quedarían registrados)")
     filas_base = filas_por_url(src)
     otras_filas = {n: filas_por_url(abrir_ro(r)) for n, r in otras}
 

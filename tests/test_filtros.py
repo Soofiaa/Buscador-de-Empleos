@@ -378,9 +378,9 @@ def test_datos_de_la_pagina_orden_listas_y_estado(tmp_path):
     assert [f["url"] for f in d["descartadas"]] == ["http://acc"] and d["total_descartadas"] == 1
     assert d["descartadas"][0]["razon"] == "empresa excluida"
 
-    assert buscar.marcar_estado(con, "http://qa-remoto", "postulada")
-    assert not buscar.marcar_estado(con, "http://qa-remoto", "inventado")
-    assert not buscar.marcar_estado(con, "http://no-existe", "revisada")
+    assert buscar.marcar_estado(con, "http://qa-remoto", "postulada", origen="lista")
+    assert not buscar.marcar_estado(con, "http://qa-remoto", "inventado", origen="lista")
+    assert not buscar.marcar_estado(con, "http://no-existe", "revisada", origen="lista")
     # una oferta ya postulada baja al final de la lista
     assert buscar.ofertas_para_pagina(con)["principal"][-1]["url"] == "http://qa-remoto"
 
@@ -394,7 +394,7 @@ def test_postulacion_en_curso_sigue_en_principal_aunque_cambie_su_categoria(tmp_
     buscar.guardar(con, buscar.procesar(df_de({"job_url": "http://qa", "title": "QA Tester", "company": "A"},
                                               {"job_url": "http://otra", "title": "QA Analyst", "company": "B"}), "t"))
     con.execute("UPDATE ofertas SET categoria = ?", (categoria,))
-    buscar.marcar_estado(con, "http://qa", estado)
+    buscar.marcar_estado(con, "http://qa", estado, origen="lista")
     d = buscar.ofertas_para_pagina(con)
     assert [f["url"] for f in d["principal"]] == ["http://qa"]
     assert [f["url"] for f in d[lista]] == ["http://otra"]          # sin repetirla en su lista
@@ -405,7 +405,7 @@ def test_postulacion_en_curso_sigue_en_principal_aunque_cambie_su_categoria(tmp_
 def test_descartada_por_la_usuaria_no_se_cuela_en_principal(tmp_path):
     con = buscar.conectar(str(tmp_path / "t.db"))
     buscar.guardar(con, buscar.procesar(df_de({"job_url": "http://acc", "title": "QA", "company": "Accenture"}), "t"))
-    buscar.marcar_estado(con, "http://acc", "descartada")
+    buscar.marcar_estado(con, "http://acc", "descartada", origen="lista")
     d = buscar.ofertas_para_pagina(con)
     assert d["principal"] == [] and [f["url"] for f in d["descartadas"]] == ["http://acc"]
 
