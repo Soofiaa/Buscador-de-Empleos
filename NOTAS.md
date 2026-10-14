@@ -20,7 +20,8 @@
 - **Imágenes para volver atrás:** `job-tracker:c1` (C1, `c461ada1…`), `:respaldo` (la anterior a C1, `ac00ce13…`),
   `:B1`, `:genero`, `:soporte`, `:faseA`, `:fase0`.
   - Siguen las candidatas viejas `:historial-candidata`, `:respaldo-candidata`, `:faseB1-candidata` y
-    `:faseA-candidata`, y la imagen sin etiqueta `34574e21…` (primera candidata de C2); se borran si Sofia lo aprueba.
+    `:faseA-candidata`; se borran si Sofia lo aprueba. (La imagen sin etiqueta `34574e21…`, primera candidata de C2,
+    ya no existe: no aparece ni con `docker images -a`.)
   - Sigue corriendo la candidata `jt_revision_c2` (127.0.0.1:8766, su volumen y su copia); se borra con la limpieza.
 - **Commits sin push:** no se anotan aquí; se cuentan siempre con `git rev-list --count origin/main..HEAD`.
 
@@ -29,16 +30,28 @@
   `respaldo.py` no cambió con C2), en `C:\Users\sofia\Respaldos\job-tracker\`: sha256 OK (`sha256sum -c`),
   integrity_check ok, un solo archivo (journal `delete`, sin -wal/-shm) y `historial_estados` incluida con sus 6
   objetos. El de `20261013-182831` es anterior a C1 (sin `historial_estados`) y está OK.
-- **Código 137 al detener el contenedor** (diagnosticado, sin cambiar nada, espera aprobación). Volvió a pasar al
-  desplegar C2 (dos veces, en ~3,7 s; el integrity_check posterior dio ok):
-  - Causa: el PID 1 es `python servidor.py`, sin init y sin manejador de SIGTERM (SigCgt = 2 y 33). Linux descarta
-    ese SIGTERM y Docker mata el proceso.
-  - Arreglo propuesto: `signal.signal(SIGTERM, signal.default_int_handler)` en `servidor.main`, y en el `finally` un
-    `PRAGMA wal_checkpoint(TRUNCATE)`.
-  - Prueba: un subproceso con `signal.raise_signal(SIGTERM)` debe salir con código 0 en menos de 3 s, con el -wal
-    vacío. Al desplegar, `docker compose stop` debe dar 0 en 1–2 s.
-- **Limpieza de C2** (espera aprobación): contenedor y volumen `jt_revision_c2`, imagen `34574e21…`, las 4 candidatas
-  viejas y las copias del scratchpad.
+- **Código 137 al detener el contenedor.** Decisión de Sofia (13-10-2026): **A + C**, solo en local, con commit
+  aparte, sin push ni despliegue hasta su revisión de una candidata.
+  - Diagnóstico (solo lectura: `/proc/1/status` del 8766, `docker inspect` de ambos y eventos de Docker): el PID 1 es
+    `python servidor.py --no-abrir` (CMD en forma de lista, sin ENTRYPOINT, sin init). `SigCgt = 0x100000002`: solo
+    SIGINT (2) y la 33 interna de Python; SIGTERM (15) no se captura y Linux lo descarta en el PID 1. Init, StopTimeout
+    y StopSignal sin definir en ambos contenedores; compose sin `init` ni `stop_*`.
+  - Por qué ~3,7 s y no 10: los eventos muestran SIGTERM 23:02:35 → SIGKILL 23:02:38 (y 23:04:17 → 23:04:20): el
+    plazo lo puso `docker compose stop` (Compose v5.6.0) en 3 s, porque nada lo fija. 137 = 128 + 9 (SIGKILL).
+  - A: manejar SIGTERM en `servidor.main` (lanza KeyboardInterrupt en el hilo principal, que es el que atiende) y, al
+    cerrar, esperar un respaldo en curso (hasta 5 s) y hacer `PRAGMA wal_checkpoint(TRUNCATE)` con límite de tiempo;
+    si falla o se agota, cerrar igual y dejar el motivo en stderr. Salida con código 0.
+  - C: `stop_grace_period: 10s` en `docker-compose.yml`, para no depender del plazo por defecto de Compose.
+  - Prueba: SIGTERM a un servidor real en un subproceso (salida 0, -wal consolidado) y, en una candidata en el 8766,
+    `docker compose stop` con 0 en menos de 1 s, integrity_check ok y huellas iguales.
+- **Limpieza de C2** (espera aprobación, después de validar el arreglo del 137 y el respaldo automático del 14-10):
+  contenedor y volumen `jt_revision_c2`, las 4 candidatas viejas y las copias del scratchpad. Se conservan `:c1`,
+  `:c2-candidata` (la imagen de producción) y las etiquetas de vuelta atrás.
+- **«informático junior»** (commit `6660133`, empujado, NO desplegado): término en Indeed, Glassdoor/Get on Board y
+  Chiletrabajos (8 solicitudes más por corrida) y regla de último recurso A: TI, Baja. Corrida en seco sobre las 1143
+  ofertas: 0 cambios. Se despliega después del arreglo del 137. **Criterio de salida:** contar las ofertas que
+  lleguen con el motivo «rol: informático junior»; si tras unas 10 corridas no aparece ninguna útil, se quita el
+  término.
 - **C2 desplegada** el 13-10-2026. Sigue C3. B2 (importar) no se hará.
 
 ### Reglas comunes de la Fase C
