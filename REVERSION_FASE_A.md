@@ -301,3 +301,36 @@ respondió 200 sin el tablero, y las huellas de la base fueron idénticas a la r
 
 **Qué se pierde mientras corra la imagen anterior:** solo la vista de tablero (Seguimiento vuelve a la lista). Lo
 guardado en el navegador (`vistaSeguimiento`) se ignora y se vuelve a usar al regresar a C2.
+
+# Código 137 + respaldos atómicos + «informático junior» (despliegue del 14-10-2026, commits `6660133`, `9561c19` y `a7339c1`)
+
+Qué cambia: `servidor.py` (SIGTERM → cierre ordenado: espera un respaldo en curso y hace el checkpoint del -wal con
+límite), `respaldo.py` (el `.sha256` se escribe al final y de forma atómica; un `.db` sin `.sha256` es «incompleto» y
+se informa), `web/pagina.html` (aviso de incompletos), `docker-compose.yml` (`stop_grace_period: 15s`) y
+`config.py`/`filtros.py` (término «informático junior» y regla de último recurso A: TI, Baja). El esquema no cambia
+(v7, sin tablas ni triggers nuevos).
+
+## Volver a la imagen anterior
+
+Basta con la imagen: **la base no se restaura**. Los respaldos hechos con el código nuevo (`.db` + `.sha256`) son los
+mismos archivos que entiende la imagen anterior.
+
+| Pieza | Valor |
+|---|---|
+| Imagen anterior | `job-tracker:c2` = `job-tracker:c2-candidata` (`sha256:f1943914dee8b150c76e69973d65124cc7f0d7c76fa3f6df3c53c010e7203180`) |
+| Imagen desplegada | `job-tracker:137-respaldo-candidata` = `job-tracker-jobtracker:latest` (`sha256:ff5a2615845e1b7a57719015697166e31c319972ce6efbb3e3ac99809b1bbc3f`), sin reconstruir |
+| Base anterior (por si acaso) | `ofertas_pre_137_20261014.db` (volumen y `C:\Users\sofia\Respaldos\job-tracker\`), sha256 `f42673e5451fd53891c4281fa9f0b67b0340f1ed3f846f933922bac209dbb1ec` |
+
+```
+docker compose stop jobtracker
+docker tag job-tracker:c2 job-tracker-jobtracker:latest
+docker compose up -d --no-build
+```
+
+Probado sobre una copia de la referencia en un volumen temporal (`jt_reversion_prueba`, 127.0.0.1:8767): la imagen
+`job-tracker:c2` quedó healthy, `GET /` respondió 200 y las huellas de la base fueron idénticas a la referencia. El
+contenedor y el volumen se borraron.
+
+**Qué se pierde mientras corra la imagen anterior:** el cierre ordenado (cada `stop` vuelve a terminar con 137, ahora
+tras 15 s por el `stop_grace_period`, que se queda en el compose), el `.sha256` atómico y el aviso de incompletos, y el
+término «informático junior» con su regla (las ofertas ya clasificadas así se quedan como están).

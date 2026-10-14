@@ -11,48 +11,61 @@
   - sha256 por tabla: ofertas `bf4f46f55ad6fff401a14c6ebbc18a3b1179a82d3ee179f6009c378f2211a453` · historial_estados
     `9508c9fac38f09fd220ff89c3f12548be306444cbeb212ee95d32614aef5a9c2` · corridas
     `0f9522379daa29318a415041e7ec1453e9e370fb168f427239048ac00465bf57`.
-  - Medido el 13-10-2026 a las 23:05, después del despliegue de C2 (idéntico a la referencia).
-- **Última referencia:** `ofertas_pre_c2_20261013.db` (volumen y `C:\Users\sofia\Respaldos\job-tracker\`, fuera de
-  OneDrive), sha256 `309228dd26ea1610e7160065e5fe624b9e578d0dc2bcd9ae32461a95be05a16d`.
-- **En producción:** commit `7a16eef` (C2: tablero de Seguimiento + follow-up), imagen `job-tracker:c2-candidata`
-  `sha256:f1943914dee8b150c76e69973d65124cc7f0d7c76fa3f6df3c53c010e7203180`, desplegada sin reconstruir
-  (`docker tag` + `docker compose up -d --no-build`).
-- **Imágenes para volver atrás:** `job-tracker:c1` (C1, `c461ada1…`), `:respaldo` (la anterior a C1, `ac00ce13…`),
-  `:B1`, `:genero`, `:soporte`, `:faseA`, `:fase0`.
-  - Siguen las candidatas viejas `:historial-candidata`, `:respaldo-candidata`, `:faseB1-candidata` y
-    `:faseA-candidata`; se borran si Sofia lo aprueba. (La imagen sin etiqueta `34574e21…`, primera candidata de C2,
-    ya no existe: no aparece ni con `docker images -a`.)
-  - Sigue corriendo la candidata `jt_revision_c2` (127.0.0.1:8766, su volumen y su copia); se borra con la limpieza.
+  - Medido el 14-10-2026 a las 10:17, después del despliegue del 137 y del segundo stop/start (idéntico a la
+    referencia). El archivo real no cambia desde el 13-10 22:50:35 (sha256 `b69f5aed…`, en modo WAL, sin -wal/-shm).
+- **Última referencia:** `ofertas_pre_137_20261014.db` (volumen y `C:\Users\sofia\Respaldos\job-tracker\`, fuera de
+  OneDrive), sha256 `f42673e5451fd53891c4281fa9f0b67b0340f1ed3f846f933922bac209dbb1ec` (igual a
+  `ofertas_auto_20261014-000439` y `ofertas_manual_20261013-233504`). La anterior, `ofertas_pre_c2_20261013.db`
+  (`309228dd…`), se conserva.
+- **En producción (14-10-2026, 10:15):** commit `a7339c1` (incluye `6660133` «informático junior», `9561c19` cierre
+  con SIGTERM y `a7339c1` respaldos atómicos), imagen `job-tracker:137-respaldo-candidata`
+  `sha256:ff5a2615845e1b7a57719015697166e31c319972ce6efbb3e3ac99809b1bbc3f`, desplegada sin reconstruir
+  (`docker tag` + `docker compose up -d --no-build`). StopTimeout 15 s.
+  - Primer stop (imagen vieja): SIGTERM → SIGKILL a los 3,0 s, código 137; integrity_check ok y sin -wal después. El
+    contenedor viejo no tenía StopTimeout (se creó antes del `stop_grace_period`).
+  - Segundo stop (imagen nueva): `docker compose stop` en 595 ms, SIGTERM → salida 0 en 343 ms, sin SIGKILL,
+    «Servidor detenido.» en el log; integrity_check ok y huellas iguales.
+- **Imágenes para volver atrás:** `job-tracker:c2` (= `:c2-candidata`, `f1943914…`; reversión en
+  `REVERSION_FASE_A.md`, probada), `:c1` (`c461ada1…`), `:respaldo` (`ac00ce13…`), `:B1`, `:genero`, `:soporte`,
+  `:faseA`, `:fase0`.
+  - Siguen las candidatas viejas `:historial-candidata`, `:respaldo-candidata`, `:faseB1-candidata`,
+    `:faseA-candidata` y `:137-candidata` (`f9b15255…`); se borran si Sofia lo aprueba.
+  - Contenedores detenidos que esperan la limpieza (no se tocan sin aprobación): `jt_revision_c2` (255, por el apagado
+    del 14-10), `jt_revision_137` y `jt_revision_137r` (0), con sus volúmenes.
 - **Commits sin push:** no se anotan aquí; se cuentan siempre con `git rev-list --count origin/main..HEAD`.
 
+### Hallazgos del 14-10-2026
+- **Reinicio de Docker a las 09:47:** fue por el apagado del PC de Sofia, no por una falla. Los contenedores se
+  cerraron sin cierre ordenado (la imagen vieja ignoraba SIGTERM; `docker events` no guardó el cierre porque los
+  eventos viven en la memoria del daemon). La base quedó intacta: integrity_check ok y huellas idénticas al respaldo
+  de las 00:04. Refuerza el arreglo del 137.
+- **Respaldo automático del 14-10** (`ofertas_auto_20261014-000439`, el primero con `historial_estados`):
+  `sha256sum -c` OK, integrity_check ok, un solo archivo y huellas iguales a la base real.
+- **Un `.db` incompleto** (sin su `.sha256`) suele estar íntegro: se podría ofrecer «completar huella» a pedido
+  (integrity_check y escribir el `.sha256`). No implementado.
+- **Copias de solo lectura de la base real:** con el volumen en `:ro`, `mode=ro` falla si no hay -shm; si no hay
+  -wal/-shm se usa `mode=ro&immutable=1` comprobando tamaño, mtime y sha256 antes y después. Si hay -wal: volumen
+  en rw con `mode=ro` (como el respaldo del servidor), nunca `immutable`.
+
 ### Pendientes
-- **Comprobar el respaldo automático** `ofertas_auto_20261014-…`, el primero con `historial_estados` (código de C1;
-  `respaldo.py` no cambió con C2), en `C:\Users\sofia\Respaldos\job-tracker\`: sha256 OK (`sha256sum -c`),
-  integrity_check ok, un solo archivo (journal `delete`, sin -wal/-shm) y `historial_estados` incluida con sus 6
-  objetos. El de `20261013-182831` es anterior a C1 (sin `historial_estados`) y está OK.
-- **Código 137 al detener el contenedor.** Decisión de Sofia (13-10-2026): **A + C**, solo en local, con commit
-  aparte, sin push ni despliegue hasta su revisión de una candidata.
-  - Diagnóstico (solo lectura: `/proc/1/status` del 8766, `docker inspect` de ambos y eventos de Docker): el PID 1 es
-    `python servidor.py --no-abrir` (CMD en forma de lista, sin ENTRYPOINT, sin init). `SigCgt = 0x100000002`: solo
-    SIGINT (2) y la 33 interna de Python; SIGTERM (15) no se captura y Linux lo descarta en el PID 1. Init, StopTimeout
-    y StopSignal sin definir en ambos contenedores; compose sin `init` ni `stop_*`.
-  - Por qué ~3,7 s y no 10: los eventos muestran SIGTERM 23:02:35 → SIGKILL 23:02:38 (y 23:04:17 → 23:04:20): el
-    plazo lo puso `docker compose stop` (Compose v5.6.0) en 3 s, porque nada lo fija. 137 = 128 + 9 (SIGKILL).
-  - A: manejar SIGTERM en `servidor.main` (lanza KeyboardInterrupt en el hilo principal, que es el que atiende) y, al
-    cerrar, esperar un respaldo en curso (hasta 5 s) y hacer `PRAGMA wal_checkpoint(TRUNCATE)` con límite de tiempo;
-    si falla o se agota, cerrar igual y dejar el motivo en stderr. Salida con código 0.
-  - C: `stop_grace_period: 10s` en `docker-compose.yml`, para no depender del plazo por defecto de Compose.
-  - Prueba: SIGTERM a un servidor real en un subproceso (salida 0, -wal consolidado) y, en una candidata en el 8766,
-    `docker compose stop` con 0 en menos de 1 s, integrity_check ok y huellas iguales.
-- **Limpieza de C2** (espera aprobación, después de validar el arreglo del 137 y el respaldo automático del 14-10):
-  contenedor y volumen `jt_revision_c2`, las 4 candidatas viejas y las copias del scratchpad. Se conservan `:c1`,
-  `:c2-candidata` (la imagen de producción) y las etiquetas de vuelta atrás.
-- **«informático junior»** (commit `6660133`, empujado, NO desplegado): término en Indeed, Glassdoor/Get on Board y
-  Chiletrabajos (8 solicitudes más por corrida) y regla de último recurso A: TI, Baja. Corrida en seco sobre las 1143
-  ofertas: 0 cambios. Se despliega después del arreglo del 137. **Criterio de salida:** contar las ofertas que
-  lleguen con el motivo «rol: informático junior»; si tras unas 10 corridas no aparece ninguna útil, se quita el
+- **Commit 3: orden de `listar()`** (aprobado para después del despliegue, con prueba; espera la orden). `listar()`
+  ordena por nombre y deja todos los manuales antes que los auto, así que «Último respaldo» muestra el manual del
+  13-10 23:35 aunque el auto del 14-10 00:04 es más nuevo. `_retener` no tiene el defecto: filtra solo los auto
+  válidos y su nombre ordena por fecha; los manuales e incompletos no cuentan ni se borran.
+- **«informático junior» ACTIVO** desde el 14-10-2026: término en Indeed, Glassdoor/Get on Board y Chiletrabajos
+  (8 solicitudes más por corrida) y regla de último recurso A: TI, Baja. **Criterio de salida:** contar las ofertas
+  que lleguen con el motivo «rol: informático junior»; si en unas 10 corridas no llega ninguna útil, se quita el
   término.
-- **C2 desplegada** el 13-10-2026. Sigue C3. B2 (importar) no se hará.
+- **Limpieza** (espera aprobación): contenedores y volúmenes `jt_revision_c2`, `jt_revision_137`, `jt_revision_137r`
+  (y sus `_respaldos`), las 5 candidatas viejas y las copias del scratchpad. Se conservan `:c2`, `:c2-candidata`,
+  `:137-respaldo-candidata` (producción) y las etiquetas de vuelta atrás.
+- **OneDrive** (después del despliegue, con aprobación; no se ha copiado ni borrado nada): destino
+  `C:\Users\sofia\Respaldos\job-tracker-referencias\` (hermana, fuera de OneDrive y fuera de su copia de seguridad).
+  En `job-tracker\respaldos\` hay 16 `.db` (4 pares duplicados por sha256: pre_fase0 = pre_faseA, pre_B1 =
+  pre_respaldo, node_docker-data = padre, unida_v2 = unida_instalada). Candidatos a limpieza:
+  `OneDrive\OneDrive\Documentos\GitHub\Buscador-de-empleos\docker-compose.yml` (usa el 8765) y el volumen
+  `buscador-de-empleos_jt_datos` (sin contenedores).
+- **C2 desplegada** el 13-10-2026. Sigue C3. B2 (importar) no se hará. Resiliencia/LinkedIn sin aprobar.
 
 ### Reglas comunes de la Fase C
 - **Un solo camino de escritura.** Estado y fase van siempre por `/api/marcar` (`pedidoMarcar` en la página), con
