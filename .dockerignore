@@ -11,3 +11,4 @@ prueba.py
 diagnostico*.py
 probar_*.py
 .git/
+.claude/
