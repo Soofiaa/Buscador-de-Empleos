@@ -3,16 +3,18 @@
 ## Estado actual (se actualiza en cada despliegue; leer al empezar cada sesión)
 
 ### Producción y base
-- **Base real:** v7, integrity_check ok, 1143 ofertas, 6 corridas, 14 postuladas, 6 POR VERIFICAR (notas con
+- **Base real:** v7, integrity_check ok, 1223 ofertas, 7 corridas, 14 postuladas, 6 POR VERIFICAR (notas con
   "POR VERIFICAR").
-  - `historial_estados` tiene 1 fila (id 1, origen `modal`: un cambio de fase a `postulacion` con fecha en una oferta
-    principal), con sus 6 objetos.
-  - Estados: descartada/nueva 1081 · principal/descartada 48 · principal/postulada 14.
-  - sha256 por tabla: ofertas `bf4f46f55ad6fff401a14c6ebbc18a3b1179a82d3ee179f6009c378f2211a453` · historial_estados
-    `9508c9fac38f09fd220ff89c3f12548be306444cbeb212ee95d32614aef5a9c2` · corridas
-    `0f9522379daa29318a415041e7ec1453e9e370fb168f427239048ac00465bf57`.
-  - Medido el 14-10-2026 a las 10:17, después del despliegue del 137 y del segundo stop/start (idéntico a la
-    referencia). El archivo real no cambia desde el 13-10 22:50:35 (sha256 `b69f5aed…`, en modo WAL, sin -wal/-shm).
+  - `historial_estados` tiene 4 filas (id 1 de origen `modal`, un cambio de fase a `postulacion`; ids 2 a 4 de origen
+    `lista`, 3 descartes de ofertas nuevas de la corrida 7), con sus 6 objetos.
+  - Estados: descartada/nueva 1158 · principal/descartada 51 · principal/postulada 14.
+  - sha256 por tabla: ofertas `0b0cdd232823e8a346f04f917fe5fcf07a5fa0ef7e12b8c7558d00ca72fd4caa` · historial_estados
+    `2d0571282216e7d4f26e7324091777129347551db2620d9f0993d30d6c438828` · corridas
+    `36016c3a2b471986c0280d25a7436cb56db4c480887222e8c42753a128c80238`.
+  - Medido el 14-10-2026 sobre el respaldo MANUAL `ofertas_manual_20261014-110711.db` (sha256
+    `e96b708207459018c313d3875a3e69306c0bb9d335606d5930f854744d771597`), hecho por Sofia después de la corrida 7.
+  - Frente al automático de las 00:04 solo cambian `ofertas` (+80, ninguna existente modificada), `corridas` (+1),
+    `historial_estados` (+3) y `sqlite_sequence`; sin tablas ni objetos nuevos.
 - **Última referencia:** `ofertas_pre_137_20261014.db` (volumen y `C:\Users\sofia\Respaldos\job-tracker\`, fuera de
   OneDrive), sha256 `f42673e5451fd53891c4281fa9f0b67b0340f1ed3f846f933922bac209dbb1ec` (igual a
   `ofertas_auto_20261014-000439` y `ofertas_manual_20261013-233504`). La anterior, `ofertas_pre_c2_20261013.db`
@@ -41,6 +43,19 @@
   de las 00:04. Refuerza el arreglo del 137.
 - **Respaldo automático del 14-10** (`ofertas_auto_20261014-000439`, el primero con `historial_estados`):
   `sha256sum -c` OK, integrity_check ok, un solo archivo y huellas iguales a la base real.
+- **Corrida 7** (14-10, 10:55 → 11:02, 7 min; las corridas 1 a 6 duraron entre 6 y 8 min), la primera con
+  «informático junior». 80 ofertas nuevas: Indeed 40, Chiletrabajos 20, BNE 9, Trabajando 9, Glassdoor 2, Get on
+  Board 0. Principales 3 (Indeed 2, Chiletrabajos 1; A: TI, Media; Sofia las descartó desde la lista) y 77
+  descartadas al clasificar (sin rol objetivo 54, práctica/estudiante 20, 2+ años 2, rol puente 1).
+  - Ventana de 2 días (3 en BNE), por eso hubo más encontradas que en la corrida 6: Indeed 174 (126), Glassdoor 31
+    (24), Get on Board 3 (3), BNE 29 (17), Trabajando 11 (1), Chiletrabajos 42 (29).
+  - Errores 0 en las 6 fuentes, como en las corridas 1 a 6. `terminos_no_disponibles` sin cambios (los 2 de
+    Trabajando, hasta el 10-11). El detalle de la corrida no guarda códigos HTTP (429/403/404) ni el número de
+    solicitudes: `red.py` las cuenta en memoria y no las registra, así que las «8 extra» no se pueden medir.
+  - «informático junior», corrida 1 de ~10: 0 ofertas con el motivo «rol: informático junior»; el término trajo 1
+    oferta (Glassdoor), descartada como práctica/estudiante.
+  - Una de las 3 principales era un cargo comercial clasificado como «rol: desarrollo» (falso positivo de la palabra
+    «desarrollador»).
 - **Un `.db` incompleto** (sin su `.sha256`) suele estar íntegro: se podría ofrecer «completar huella» a pedido
   (integrity_check y escribir el `.sha256`). No implementado.
 - **Copias de solo lectura de la base real:** con el volumen en `:ro`, `mode=ro` falla si no hay -shm; si no hay
@@ -63,6 +78,8 @@
   (8 solicitudes más por corrida) y regla de último recurso A: TI, Baja. **Criterio de salida:** contar las ofertas
   que lleguen con el motivo «rol: informático junior»; si en unas 10 corridas no llega ninguna útil, se quita el
   término.
+  - Cuenta como «oferta útil» una que entre como principal con el motivo «rol: informático junior». Corridas medidas
+    con el término: 1 (7).
 - **Limpieza** (espera aprobación): contenedores y volúmenes `jt_revision_c2`, `jt_revision_137`, `jt_revision_137r`
   (y sus `_respaldos`), las 5 candidatas viejas y las copias del scratchpad. Se conservan `:c2`, `:c2-candidata`,
   `:137-respaldo-candidata` (producción) y las etiquetas de vuelta atrás.
