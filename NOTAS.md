@@ -22,8 +22,7 @@
   - Siguen las candidatas viejas `:historial-candidata`, `:respaldo-candidata`, `:faseB1-candidata` y
     `:faseA-candidata`, y la imagen sin etiqueta `34574e21…` (primera candidata de C2); se borran si Sofia lo aprueba.
   - Sigue corriendo la candidata `jt_revision_c2` (127.0.0.1:8766, su volumen y su copia); se borra con la limpieza.
-- **Commits sin push:** se cuentan con `git rev-list --count origin/main..HEAD`. El 13-10-2026 se empujaron los 35
-  pendientes hasta `a2db142`; después de este commit quedan 0.
+- **Commits sin push:** no se anotan aquí; se cuentan siempre con `git rev-list --count origin/main..HEAD`.
 
 ### Pendientes
 - **Comprobar el respaldo automático** `ofertas_auto_20261014-…`, el primero con `historial_estados` (código de C1;
