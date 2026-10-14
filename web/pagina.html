@@ -610,6 +610,7 @@ const TXT = {
   ofertas: n => plural(n, "oferta", "ofertas"),
   masRecientes: n => plural(n, "más reciente", "más recientes"),
   descartadasMasRecientes: n => plural(n, "descartada más reciente", "descartadas más recientes"),
+  respaldosIncompletos: n => plural(n, "respaldo incompleto", "respaldos incompletos"),
 };
 // "encontradas" cuenta solo las ofertas dentro de la ventana de antigüedad; las más antiguas se informan aparte
 const textoAntiguas = n => TXT.antiguasOmitidas(n);
@@ -706,10 +707,12 @@ function textoRespaldo(r, hoy) {                 // línea de estado del respald
   if (!r || !r.configurado) return { texto: "Respaldo automático no configurado", clase: "apagado" };
   if (!r.disponible) return { texto: "⚠️ Carpeta de respaldos no disponible", clase: "error" };
   if (r.error_auto) return { texto: "⚠️ Falló el respaldo automático: " + r.error_auto, clase: "error" };
-  if (!r.ultimo) return { texto: "Aún no hay respaldos", clase: "" };
+  // un .db sin su .sha256 (se cortó al escribir la huella) no es válido: se avisa, sin ocultar el último bueno
+  const aviso = r.incompletos ? " · ⚠️ " + TXT.respaldosIncompletos(r.incompletos) + " (sin huella .sha256)" : "";
+  if (!r.ultimo) return aviso ? { texto: "Aún no hay respaldos válidos" + aviso, clase: "error" } : { texto: "Aún no hay respaldos", clase: "" };
   const dia = r.ultimo.fecha.slice(0, 10), etq = etiquetaDia(dia, hoy);
   const cuando = etq === "Hoy" ? "hoy" : etq === "Ayer" ? "ayer" : fechaCL(dia);
-  return { texto: "Último respaldo: " + cuando + " " + horaDe(r.ultimo.fecha) + " ✓", clase: "ok" };
+  return { texto: "Último respaldo: " + cuando + " " + horaDe(r.ultimo.fecha) + " ✓" + aviso, clase: aviso ? "error" : "ok" };
 }
 function textoTotalOfertas(n) {                  // pie de la columna izquierda
   return "SQLite Conectado · " + TXT.ofertas(n);

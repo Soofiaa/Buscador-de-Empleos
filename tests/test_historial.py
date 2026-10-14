@@ -262,6 +262,7 @@ def test_todos_los_textos_con_contador_concuerdan_en_singular_y_plural():
         "ofertas": ["0 ofertas", "1 oferta", "2 ofertas"],
         "masRecientes": ["0 más recientes", "1 más reciente", "2 más recientes"],
         "descartadasMasRecientes": ["0 descartadas más recientes", "1 descartada más reciente", "2 descartadas más recientes"],
+        "respaldosIncompletos": ["0 respaldos incompletos", "1 respaldo incompleto", "2 respaldos incompletos"],
         "antiguas": ["0 antiguas omitidas", "1 antigua omitida", "2 antiguas omitidas"],
         "ventana": ["Ventana de antigüedad: hoy y ayer", "Ventana de antigüedad: hoy y los 2 días anteriores"],
         "pie": ["SQLite Conectado · 0 ofertas", "SQLite Conectado · 1 oferta", "SQLite Conectado · 2 ofertas"],
@@ -329,3 +330,12 @@ def test_linea_de_estado_del_respaldo():
                  {"texto": "Último respaldo: hoy 09:30 ✓", "clase": "ok"},
                  {"texto": "Último respaldo: ayer 23:05 ✓", "clase": "ok"},
                  {"texto": "Último respaldo: 01/10/2026 08:00 ✓", "clase": "ok"}]
+    con_incompletos = correr_js("""
+      const r = (n, ult) => ({configurado: true, disponible: true, error_auto: "", incompletos: n, ultimo: ult});
+      return [r(1, {fecha: "2026-10-13 09:30"}), r(2, null), r(null, {fecha: "2026-10-13 09:30"}), r(0, null)]
+        .map(x => textoRespaldo(x, "2026-10-13"));""")
+    assert con_incompletos == [
+        {"texto": "Último respaldo: hoy 09:30 ✓ · ⚠️ 1 respaldo incompleto (sin huella .sha256)", "clase": "error"},
+        {"texto": "Aún no hay respaldos válidos · ⚠️ 2 respaldos incompletos (sin huella .sha256)", "clase": "error"},
+        {"texto": "Último respaldo: hoy 09:30 ✓", "clase": "ok"},              # con un respaldo en curso: null, sin aviso
+        {"texto": "Aún no hay respaldos", "clase": ""}]

@@ -134,7 +134,13 @@ class Aplicacion:
             est["total_ofertas"] = con.execute("SELECT COUNT(*) FROM ofertas").fetchone()[0]
         finally:
             con.close()
-        est["respaldo"] = {**respaldo.estado(self.carpeta_respaldos), "error_auto": self.error_respaldo_auto}
+        # locked() solo mira el turno, no lo toma: nunca demora ni hace fallar un "Respaldar ahora". Con un respaldo en
+        # curso no se cuentan incompletos (su .db puede estar, por milisegundos, antes que su .sha256)
+        en_curso = self._lock_respaldo.locked()
+        est["respaldo"] = {**respaldo.estado(self.carpeta_respaldos), "error_auto": self.error_respaldo_auto,
+                           "en_curso": en_curso}
+        if en_curso and "incompletos" in est["respaldo"]:
+            est["respaldo"]["incompletos"] = None
         return est
 
     def respaldar_ahora(self) -> dict:
@@ -162,6 +168,7 @@ class Aplicacion:
             return hecho
         except Exception as ex:                             # el servidor sigue atendiendo pase lo que pase
             self.error_respaldo_auto = f"{type(ex).__name__}: {ex}"
+            _log(f"respaldo automático falló: {self.error_respaldo_auto}")
             return None
 
     def iniciar_respaldo_diario(self, cada_s: int = 3600):
@@ -308,6 +315,8 @@ def crear_servidor(app: Aplicacion, puerto: int = None, host: str = None) -> Thr
                     return self._json(503, {"error": str(ex)})
                 except respaldo.SinEspacio as ex:
                     return self._json(507, {"error": str(ex)})
+                except respaldo.HuellaNoEscrita as ex:         # la copia quedó, pero incompleta: se dice tal cual
+                    return self._json(500, {"error": str(ex)})
                 except Exception as ex:                     # el servidor sigue; la página muestra el motivo
                     return self._json(500, {"error": f"el respaldo falló: {type(ex).__name__}: {ex}"})
             if ruta == "/api/buscar":

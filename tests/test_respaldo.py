@@ -199,3 +199,118 @@ def test_carpeta_no_montada_es_503_y_el_servidor_sigue(srv):
     st, _, cuerpo = pedir(puerto, "POST", "/api/respaldo", {})
     assert st == 503 and "no existe o no está montada" in json.loads(cuerpo)["error"]
     assert pedir(puerto, "GET", "/api/ofertas")[0] == 200
+
+
+# ------------------------------------------------------------------ .sha256 al final y atómico; válido = .db con su .sha256
+def sha256_ok(carpeta, nombre):                                         # como `sha256sum -c`
+    linea = open(os.path.join(carpeta, nombre + ".sha256"), encoding="utf-8").read().split()
+    return linea[1] == nombre and linea[0] == hashlib.sha256(open(os.path.join(carpeta, nombre), "rb").read()).hexdigest()
+
+
+def test_a_corte_entre_el_db_y_su_sha256_deja_un_incompleto_que_no_cuenta(base, monkeypatch):
+    ruta, carpeta = base
+    def corte(*a):
+        raise OSError("corte justo después del .db")
+    monkeypatch.setattr(respaldo, "_escribir_huella", corte)
+    with pytest.raises(respaldo.HuellaNoEscrita, match="queda como respaldo incompleto"):
+        respaldo.respaldar(ruta, carpeta, "auto", AHORA)
+    monkeypatch.undo()
+    assert os.listdir(carpeta) == ["ofertas_auto_20261013-093000.db"]   # quedó el .db, sin .sha256 ni temporales
+    assert respaldo.listar(carpeta) == [] and respaldo.incompletos(carpeta) == ["ofertas_auto_20261013-093000.db"]
+    est = respaldo.estado(carpeta)
+    assert est["ultimo"] is None and est["total_auto"] == 0 and est["incompletos"] == 1
+    assert not respaldo.hay_auto_de_hoy(carpeta, AHORA)                 # no cuenta como el de hoy: se vuelve a intentar
+    app = servidor.Aplicacion(ruta, lambda con: 0, carpeta_respaldos=carpeta, reloj=Reloj(AHORA + timedelta(minutes=1)))
+    hecho = app.revisar_respaldo_diario()
+    assert hecho["archivo"] == "ofertas_auto_20261013-093100.db" and sha256_ok(carpeta, hecho["archivo"])
+    assert respaldo.estado(carpeta)["incompletos"] == 1                 # el incompleto no se borra solo: se informa
+
+
+def test_b_corte_al_escribir_el_sha256_no_deja_nada_que_parezca_valido(base, monkeypatch):
+    ruta, carpeta = base
+    def fsync_falla(fd):
+        raise OSError("disco desconectado")
+    monkeypatch.setattr(respaldo.os, "fsync", fsync_falla)
+    with pytest.raises(respaldo.HuellaNoEscrita, match="Motivo: OSError: disco desconectado"):
+        respaldo.respaldar(ruta, carpeta, "manual", AHORA)
+    monkeypatch.undo()
+    assert sorted(os.listdir(carpeta)) == ["ofertas_manual_20261013-093000.db"]   # sin .sha256 final ni temporal
+    assert respaldo.listar(carpeta) == []
+    # si el proceso muere a mitad (sin llegar al finally), queda solo el temporal: se ignora y se limpia
+    resto = os.path.join(carpeta, respaldo.PREFIJO_TMP + "ofertas_manual_20261013-093000.db.sha256")
+    open(resto, "w").write("a medias")
+    os.utime(resto, (0, 0))
+    assert respaldo.listar(carpeta) == []
+    respaldo.respaldar(ruta, carpeta, "auto", AHORA)
+    assert not os.path.exists(resto)
+
+
+def test_c_la_rotacion_cuenta_y_borra_solo_validos(base):
+    ruta, carpeta = base
+    for d in range(3):                                                  # 3 incompletos, más viejos que todo
+        nombre = f"ofertas_auto_{AHORA - timedelta(days=60 + d):%Y%m%d}-093000.db"
+        shutil.copy(ruta, os.path.join(carpeta, nombre))
+    for d in range(32):
+        respaldo.respaldar(ruta, carpeta, "auto", AHORA - timedelta(days=32 - d))
+    validos = [r["archivo"] for r in respaldo.listar(carpeta)]
+    assert len(validos) == respaldo.RETENER_AUTO == 30
+    assert validos[-1] == f"ofertas_auto_{AHORA - timedelta(days=30):%Y%m%d}-093000.db"   # se fueron los 2 válidos más viejos
+    assert len(respaldo.incompletos(carpeta)) == 3                      # intactos: ni cuentan ni se borran
+    assert all(sha256_ok(carpeta, n) for n in validos)
+
+
+def test_d_formato_antiguo_sigue_valido_y_un_sha256_suelto_se_ignora(base):
+    ruta, carpeta = base
+    hecho = respaldo.respaldar(ruta, carpeta, "auto", AHORA - timedelta(days=1))
+    viejo = "ofertas_auto_20261001-093000.db"                          # formato antiguo: .sha256 escrito ANTES del .db
+    huella = hashlib.sha256(open(os.path.join(carpeta, hecho["archivo"]), "rb").read()).hexdigest()
+    open(os.path.join(carpeta, viejo + ".sha256"), "w", encoding="utf-8").write(f"{huella}  {viejo}\n")
+    shutil.copy(os.path.join(carpeta, hecho["archivo"]), os.path.join(carpeta, viejo))
+    open(os.path.join(carpeta, "ofertas_auto_20260901-093000.db.sha256"), "w").write("x  suelto\n")   # sin su .db
+    assert [r["archivo"] for r in respaldo.listar(carpeta)] == [hecho["archivo"], viejo]
+    assert respaldo.incompletos(carpeta) == [] and sha256_ok(carpeta, viejo)
+
+
+def test_un_respaldo_automatico_fallido_queda_en_stderr(base, capsys):
+    ruta, carpeta = base
+    app = servidor.Aplicacion(ruta, lambda con: 0, carpeta_respaldos=os.path.join(carpeta, "desmontada"), reloj=Reloj(AHORA))
+    assert app.revisar_respaldo_diario() is None
+    err = capsys.readouterr().err
+    assert "respaldo automático falló: RespaldoNoDisponible" in err and app.error_respaldo_auto in err
+
+
+def test_snapshot_no_toma_el_turno_del_respaldo(base):
+    ruta, carpeta = base
+    shutil.copy(ruta, os.path.join(carpeta, "ofertas_manual_20261001-093000.db"))      # un incompleto
+    app = servidor.Aplicacion(ruta, lambda con: 0, carpeta_respaldos=carpeta, reloj=Reloj(AHORA))
+    r = app.snapshot()["respaldo"]
+    assert r["en_curso"] is False and r["incompletos"] == 1
+    app._lock_respaldo.acquire()                                       # un respaldo en curso
+    try:
+        r = app.snapshot()["respaldo"]                                 # responde al tiro, sin esperar el turno
+        assert r["en_curso"] is True and r["incompletos"] is None
+    finally:
+        app._lock_respaldo.release()
+    app.snapshot()
+    assert app._lock_respaldo.acquire(blocking=False)                  # snapshot nunca deja el turno tomado
+    app._lock_respaldo.release()
+
+
+def test_si_falla_el_replace_del_sha256_el_mensaje_lo_dice_claro(srv, monkeypatch):
+    puerto, app, carpeta = srv
+    replace_real = os.replace
+    def replace(src, dst):
+        if str(dst).endswith(".sha256"):
+            raise PermissionError(13, "Permission denied")
+        return replace_real(src, dst)
+    monkeypatch.setattr(respaldo.os, "replace", replace)
+    st, _, cuerpo = pedir(puerto, "POST", "/api/respaldo", {}, {"Origin": "http://127.0.0.1", "Content-Type": "application/json"})
+    monkeypatch.undo()
+    error = json.loads(cuerpo)["error"]
+    assert st == 500
+    assert error.startswith("la copia ofertas_manual_20261013-093000.db se guardó, pero no su huella (.sha256): "
+                            "queda como respaldo incompleto, no válido. Motivo: PermissionError")
+    assert "el respaldo falló" not in error
+    r = json.loads(pedir(puerto, "GET", "/api/respaldo")[2])
+    assert r["incompletos"] == 1 and r["ultimo"] is None and r["en_curso"] is False
+    assert sorted(os.listdir(carpeta)) == ["ofertas_manual_20261013-093000.db"]   # sin temporales
