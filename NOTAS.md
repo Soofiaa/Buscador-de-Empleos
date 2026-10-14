@@ -183,6 +183,17 @@ Probado con graphifyy 0.9.53 (`graphify update`, solo AST, sin LLM ni red), sobr
 - `hook install` escribe en `.gitattributes`, que está versionado.
 - grep resultó más rápido y más completo para este proyecto (33 archivos).
 
+## codegraph (evaluado el 13-10-2026 sin instalar; NO se usa en job-tracker)
+
+Evaluado `colbymchenry/codegraph` v1.6.2 (`@colbymchenry/codegraph`) leyendo su README y su instalador, sin instalar nada. Decisión: no se instala.
+
+- `web/pagina.html` (donde viven C2 y C3) queda fuera del grafo: no soporta HTML con JavaScript embebido (solo `.js`, `.jsx`, `.mjs`).
+- El instalador agrega el permiso `mcp__codegraph__*`, que aprueba sus herramientas sin preguntar.
+- La telemetría queda encendida por defecto si se instala con `--yes`.
+- Su base SQLite (`.codegraph/codegraph.db`) quedaría dentro de OneDrive y se reescribe con cada cambio.
+- No se tocaron `~/.claude.json`, `~/.claude/settings.json`, `~/.claude/CLAUDE.md` ni `~/.codegraph/`.
+- Se retoma solo si el servidor Python crece y el análisis de impacto lo justifica. Se probaría sobre una copia fuera de OneDrive, con `--no-permissions` y la telemetría apagada.
+
 ## Historial de estados (Fase C)
 
 - `historial_estados` es aditiva: la base sigue en v7, y volver atrás es solo cambiar la imagen
