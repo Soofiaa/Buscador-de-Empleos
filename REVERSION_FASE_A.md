@@ -273,3 +273,31 @@ si algo falla, todo vuelve atrás y los triggers siguen ahí. No está automatiz
    Debe terminar con "triggers que faltan: ninguno" e "integridad ok". Aunque faltara alguno, `conectar()` recrea al
    arrancar los objetos que falten.
 5. **Levanta:** `docker compose up -d --no-build`, y comprueba en la página que la oferta ya no está.
+
+# Fase C2: tablero de Seguimiento (despliegue del 13-10-2026, commit `7a16eef`)
+
+Qué cambia: solo la página (`web/pagina.html`). El tablero "📊 Tablero / 📋 Lista" en Seguimiento, con las mismas
+escrituras de siempre (`/api/marcar` con `origen: "tablero"`). El servidor, el esquema y la base no cambian.
+
+## Volver a la imagen anterior (sin tablero)
+
+Basta con la imagen: **la base no se restaura** y no se pierde nada de lo hecho en la página. Las filas de historial
+con origen `tablero` se quedan; la imagen de C1 ya acepta ese origen.
+
+| Pieza | Valor |
+|---|---|
+| Imagen anterior | `job-tracker:c1` (`sha256:c461ada148c73309630793675c8b4c7b5e46777a99c4570df57f9b8e8fc6935f`) |
+| Imagen desplegada | `job-tracker:c2-candidata` = `job-tracker-jobtracker:latest` (`sha256:f1943914dee8b150c76e69973d65124cc7f0d7c76fa3f6df3c53c010e7203180`), sin reconstruir |
+| Base anterior (por si acaso) | `ofertas_pre_c2_20261013.db` (volumen y `C:\Users\sofia\Respaldos\job-tracker\`), sha256 `309228dd26ea1610e7160065e5fe624b9e578d0dc2bcd9ae32461a95be05a16d` |
+
+```
+docker compose stop jobtracker
+docker tag job-tracker:c1 job-tracker-jobtracker:latest
+docker compose up -d --no-build
+```
+
+Probado sobre una copia de la referencia en un volumen temporal: la imagen `job-tracker:c1` quedó healthy, `GET /`
+respondió 200 sin el tablero, y las huellas de la base fueron idénticas a la referencia. El volumen se borró.
+
+**Qué se pierde mientras corra la imagen anterior:** solo la vista de tablero (Seguimiento vuelve a la lista). Lo
+guardado en el navegador (`vistaSeguimiento`) se ignora y se vuelve a usar al regresar a C2.
