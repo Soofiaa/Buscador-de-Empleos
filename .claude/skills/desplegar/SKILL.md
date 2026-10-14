@@ -16,8 +16,8 @@ Script de huellas: `.claude/skills/desplegar/huellas.py` (solo lectura, solo bib
 - Candidata revisada y aprobada por Sofia.
 - `venv/Scripts/python.exe -m pytest -q` en verde (mostrar solo el resumen y los fallos).
 - Commit hecho (sin push) y `git status` sin cambios del despliegue.
-- sha256 de TODOS los respaldos anteriores (carpeta `respaldos\`, volumen y `C:/Users/sofia/Respaldos/job-tracker`),
-  guardado para compararlo al final.
+- sha256 de TODOS los respaldos anteriores (`C:/Users/sofia/Respaldos/job-tracker-referencias`, volumen y
+  `C:/Users/sofia/Respaldos/job-tracker`), guardado para compararlo al final.
 
 ## 1. Etiquetar la imagen actual
     docker tag job-tracker-jobtracker:latest job-tracker:<ETIQUETA>
@@ -31,11 +31,13 @@ antes de seguir, y el 137 va en el reporte.
 ## 3. Referencia: respaldo con sha256 e integrity_check
 En un contenedor desechable sin red (`--network none`, imagen `job-tracker:<ETIQUETA>`), con la API de backup de
 SQLite: `/datos/ofertas_pre_<NOMBRE>_<AAAAMMDD>.db` en el volumen, en `PRAGMA journal_mode = DELETE` (un solo
-archivo), y una copia en `respaldos\`. Mostrar el sha256 COMPLETO de ambas (deben coincidir) y el integrity_check.
+archivo), y una copia en `C:/Users/sofia/Respaldos/job-tracker-referencias/` (fuera de OneDrive; nunca en
+`respaldos\` del repo, que queda vacía). Mostrar el sha256 COMPLETO de ambas (deben coincidir) y el integrity_check.
 Si no es `ok`: detenerse, volver a levantar la imagen <ETIQUETA> y avisar.
 
 ## 4. Huellas ANTES
-    python .claude/skills/desplegar/huellas.py respaldos/ofertas_pre_<NOMBRE>_<AAAAMMDD>.db > <tmp>/antes.json
+    python .claude/skills/desplegar/huellas.py \
+        C:/Users/sofia/Respaldos/job-tracker-referencias/ofertas_pre_<NOMBRE>_<AAAAMMDD>.db > <tmp>/antes.json
 
 ## 5. Reconstruir y levantar
     docker compose build && docker compose up -d
