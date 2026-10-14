@@ -5,8 +5,8 @@
 ### Producción y base
 - **Base real:** v7, integrity_check ok, 1143 ofertas, 6 corridas, 14 postuladas, 6 POR VERIFICAR (notas con
   "POR VERIFICAR").
-  - `historial_estados` tiene 1 fila (id 1, 13-10-2026 22:50, origen `modal`: Sofia puso fase `postulacion` y fecha
-    2026-10-13 en "Analista de Sistemas Junior (Odoo)"), con sus 6 objetos.
+  - `historial_estados` tiene 1 fila (id 1, origen `modal`: un cambio de fase a `postulacion` con fecha en una oferta
+    principal), con sus 6 objetos.
   - Estados: descartada/nueva 1081 · principal/descartada 48 · principal/postulada 14.
   - sha256 por tabla: ofertas `bf4f46f55ad6fff401a14c6ebbc18a3b1179a82d3ee179f6009c378f2211a453` · historial_estados
     `9508c9fac38f09fd220ff89c3f12548be306444cbeb212ee95d32614aef5a9c2` · corridas
@@ -59,12 +59,21 @@
 - **Limpieza** (espera aprobación): contenedores y volúmenes `jt_revision_c2`, `jt_revision_137`, `jt_revision_137r`
   (y sus `_respaldos`), las 5 candidatas viejas y las copias del scratchpad. Se conservan `:c2`, `:c2-candidata`,
   `:137-respaldo-candidata` (producción) y las etiquetas de vuelta atrás.
-- **OneDrive** (después del despliegue, con aprobación; no se ha copiado ni borrado nada): destino
-  `C:\Users\sofia\Respaldos\job-tracker-referencias\` (hermana, fuera de OneDrive y fuera de su copia de seguridad).
-  En `job-tracker\respaldos\` hay 16 `.db` (4 pares duplicados por sha256: pre_fase0 = pre_faseA, pre_B1 =
-  pre_respaldo, node_docker-data = padre, unida_v2 = unida_instalada). Candidatos a limpieza:
-  `OneDrive\OneDrive\Documentos\GitHub\Buscador-de-empleos\docker-compose.yml` (usa el 8765) y el volumen
-  `buscador-de-empleos_jt_datos` (sin contenedores).
+- **Referencias fuera de OneDrive (14-10-2026):** copiadas (no movidas) a
+  `C:\Users\sofia\Respaldos\job-tracker-referencias\` (hermana de la que monta el contenedor; fuera de OneDrive y de su
+  copia de seguridad), una por sha256 distinto, cada una con sha256 igual al origen e integrity_check ok:
+  `ofertas_pre_fase0_20261013.db` (= pre_faseA, `a3d914a2…`), `ofertas_pre_B1_20261013.db` (= pre_respaldo,
+  `c000a469…`), `ofertas_pre_soporte_20261013.db` (`027a0ea9…`), `ofertas_pre_genero_20261013.db` (`405a0e02…`),
+  `ofertas_pre_historial_20261013.db` (`e1f849f6…`), `ofertas_pre_verificar_20261013.db` (`dfa9fcf8…`),
+  `ofertas_unida_20261013.db` (`1c2a3256…`), `ofertas_unida_20261013_v2.db` (= unida_instalada, `fc299710…`),
+  `ofertas_volumen_job-tracker_20261013-112247.db` (`bd69a22b…`) y `excepciones_union_20261013.json` (`8a54b739…`).
+  Las bases Node (v5, 866 ofertas: volumen_buscador-de-empleos, node_docker-data = padre, final_node) no se copian:
+  Sofia no las necesita y sus 2/6/6 ofertas con postulación (y las 5 excepciones de la unión) ya están en la base
+  real con su estado y fecha.
+- **OneDrive: borrar los originales** (espera aprobación; no se ha borrado nada): `job-tracker\respaldos\`,
+  `OneDrive\OneDrive\Documentos\GitHub\Buscador-de-empleos\` (su compose usa el 8765) y el volumen
+  `buscador-de-empleos_jt_datos` (sin contenedores). **La papelera de OneDrive la vacía Sofia a mano;** mientras no
+  lo haga, lo borrado sigue en la nube (y en la papelera de reciclaje local).
 - **C2 desplegada** el 13-10-2026. Sigue C3. B2 (importar) no se hará. Resiliencia/LinkedIn sin aprobar.
 
 ### Reglas comunes de la Fase C

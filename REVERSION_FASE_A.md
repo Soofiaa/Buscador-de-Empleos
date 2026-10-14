@@ -9,7 +9,7 @@ Piezas que deben existir antes de desplegar la Fase A:
 | Pieza | Dónde | Cómo se comprueba |
 |---|---|---|
 | Imagen de la Fase 0 | etiqueta `job-tracker:fase0` | `docker image inspect job-tracker:fase0` |
-| Base anterior a la migración | `/datos/ofertas_pre_faseA_20261013.db` en el volumen `job-tracker_jt_datos` y una copia en `respaldos\` | sha256 anotado al crearla + `PRAGMA integrity_check` = ok |
+| Base anterior a la migración | `/datos/ofertas_pre_faseA_20261013.db` en el volumen `job-tracker_jt_datos`; copia fuera de OneDrive en `C:\Users\sofia\Respaldos\job-tracker-referencias\ofertas_pre_fase0_20261013.db` (mismo archivo: pre_faseA = pre_fase0) | sha256 `a3d914a29dd03616ebb13c38ef22ac300e8cb4328c9661747c9dd453d9ae096d` + `PRAGMA integrity_check` = ok |
 
 ## Procedimiento (PowerShell o Git Bash, desde la carpeta `job-tracker`)
 
@@ -65,7 +65,7 @@ cambia el esquema** (la base sigue en v7), así que la imagen de la Fase A puede
 | Pieza | Dónde |
 |---|---|
 | Imagen de la Fase A | etiqueta `job-tracker:faseA` |
-| Base anterior al despliegue | `/datos/ofertas_pre_soporte_20261013.db` en el volumen y copia en `respaldos\`, sha256 `027a0ea92023ee9a7314a82b60f833d8ae2d97af472b80c43dedd708649c918e` |
+| Base anterior al despliegue | `/datos/ofertas_pre_soporte_20261013.db` en el volumen y copia en `C:\Users\sofia\Respaldos\job-tracker-referencias\`, sha256 `027a0ea92023ee9a7314a82b60f833d8ae2d97af472b80c43dedd708649c918e` |
 
 Los pasos son los mismos de arriba, cambiando tres cosas:
 
@@ -89,7 +89,7 @@ cambia el esquema (v7). Mismo procedimiento de arriba, con:
 | Pieza | Valor |
 |---|---|
 | Imagen anterior | `job-tracker:soporte` (`docker tag job-tracker:soporte job-tracker-jobtracker:latest`) |
-| Base anterior | `ofertas_pre_genero_20261013.db` (volumen y `respaldos\`), sha256 `405a0e02aeaf4fbb943d37f5ad9a16586744ba7685e033242c789c4202ec1ad2` |
+| Base anterior | `ofertas_pre_genero_20261013.db` (volumen y `C:\Users\sofia\Respaldos\job-tracker-referencias\`), sha256 `405a0e02aeaf4fbb943d37f5ad9a16586744ba7685e033242c789c4202ec1ad2` |
 | Prefijo de la base apartada | `retirada_genero_` |
 | Verificación | versión 7; al desplegar había 1123 ofertas, 5 corridas, 11 postuladas |
 
@@ -105,7 +105,7 @@ idéntica en todas sus tablas. Mismo procedimiento de arriba, con:
 | Pieza | Valor |
 |---|---|
 | Imagen anterior | `job-tracker:genero` (`docker tag job-tracker:genero job-tracker-jobtracker:latest`) |
-| Base anterior | `ofertas_pre_B1_20261013.db` (volumen y `respaldos\`), sha256 `c000a4696dde9dbe509a85d727b39c03f7e0466323b39bc9e865d6620bb82ade` |
+| Base anterior | `ofertas_pre_B1_20261013.db` (volumen y `C:\Users\sofia\Respaldos\job-tracker-referencias\`), sha256 `c000a4696dde9dbe509a85d727b39c03f7e0466323b39bc9e865d6620bb82ade` |
 | Prefijo de la base apartada | `retirada_B1_` |
 | Verificación | versión 7; al desplegar había 1123 ofertas, 5 corridas, 14 postuladas |
 
@@ -128,7 +128,7 @@ Este despliegue no cambió la base (todas las tablas quedaron idénticas), así 
 | Pieza | Valor |
 |---|---|
 | Imagen anterior | `job-tracker:B1` |
-| Base anterior (por si acaso) | `ofertas_pre_respaldo_20261013.db` (volumen y `respaldos\`), sha256 `c000a4696dde9dbe509a85d727b39c03f7e0466323b39bc9e865d6620bb82ade` |
+| Base anterior (por si acaso) | `ofertas_pre_respaldo_20261013.db` (volumen; fuera de OneDrive está como `C:\Users\sofia\Respaldos\job-tracker-referencias\ofertas_pre_B1_20261013.db`, mismo archivo), sha256 `c000a4696dde9dbe509a85d727b39c03f7e0466323b39bc9e865d6620bb82ade` |
 
 ```
 docker compose stop jobtracker
@@ -209,7 +209,7 @@ Basta con la imagen: **la base no se restaura** y no se pierde nada de lo hecho 
 |---|---|
 | Imagen anterior | `job-tracker:respaldo` (`sha256:ac00ce130d5460e89713e5e0021786691d48d6685d41ba2f6b7d34bacc27c610`) |
 | Imagen desplegada | `job-tracker-jobtracker:latest` (`sha256:c461ada148c73309630793675c8b4c7b5e46777a99c4570df57f9b8e8fc6935f`) |
-| Base anterior (por si acaso) | `ofertas_pre_historial_20261013.db` (volumen y `respaldos\`), sha256 `e1f849f6932b2caa477f9b40f9e97984e1f80f89f6c6f127c98a869c02f38da5` |
+| Base anterior (por si acaso) | `ofertas_pre_historial_20261013.db` (volumen y `C:\Users\sofia\Respaldos\job-tracker-referencias\ofertas_pre_historial_20261013.db`), sha256 `e1f849f6932b2caa477f9b40f9e97984e1f80f89f6c6f127c98a869c02f38da5` |
 
 Probado sobre una copia de la base ya desplegada: la imagen `job-tracker:respaldo` la abrió sin renombrarla (v7,
 integridad ok, los 6 objetos del historial intactos) y sus escrituras funcionaron, sin quedar en el historial.
