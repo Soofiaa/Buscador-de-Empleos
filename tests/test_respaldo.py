@@ -245,6 +245,33 @@ def test_b_corte_al_escribir_el_sha256_no_deja_nada_que_parezca_valido(base, mon
     assert not os.path.exists(resto)
 
 
+def test_listar_ordena_por_la_fecha_del_nombre_mezclando_auto_y_manual(base):
+    ruta, carpeta = base
+    respaldo.respaldar(ruta, carpeta, "manual", AHORA - timedelta(hours=10))           # 12-10 23:30 (manual, más viejo)
+    respaldo.respaldar(ruta, carpeta, "auto", AHORA - timedelta(days=2))               # 11-10 09:30
+    respaldo.respaldar(ruta, carpeta, "auto", AHORA - timedelta(hours=9, minutes=25))  # 13-10 00:05 (el más nuevo)
+    respaldo.respaldar(ruta, carpeta, "manual", AHORA - timedelta(days=3))             # 10-10 09:30
+    shutil.copy(ruta, os.path.join(carpeta, "ofertas_manual_20261013-120000.db"))     # incompleto: no cuenta como último
+    assert [r["archivo"] for r in respaldo.listar(carpeta)] == [
+        "ofertas_auto_20261013-000500.db", "ofertas_manual_20261012-233000.db",
+        "ofertas_auto_20261011-093000.db", "ofertas_manual_20261010-093000.db"]
+    e = respaldo.estado(carpeta)
+    assert e["ultimo"]["archivo"] == "ofertas_auto_20261013-000500.db" and e["ultimo"]["fecha"] == "2026-10-13 00:05"
+    assert e["incompletos"] == 1 and e["total_auto"] == 2 and e["total_manual"] == 2
+
+
+def test_la_retencion_no_cambia_con_el_nuevo_orden(base):
+    ruta, carpeta = base
+    for d in range(3):                                                  # manuales más nuevos que todos los auto
+        respaldo.respaldar(ruta, carpeta, "manual", AHORA + timedelta(days=d))
+    for d in range(32):
+        respaldo.respaldar(ruta, carpeta, "auto", AHORA - timedelta(days=32 - d))
+    todos = respaldo.listar(carpeta)
+    assert [r["tipo"] for r in todos[:3]] == ["manual"] * 3
+    autos = [r["archivo"] for r in todos if r["tipo"] == "auto"]
+    assert len(autos) == 30 and autos[-1] == f"ofertas_auto_{AHORA - timedelta(days=30):%Y%m%d}-093000.db"
+
+
 def test_c_la_rotacion_cuenta_y_borra_solo_validos(base):
     ruta, carpeta = base
     for d in range(3):                                                  # 3 incompletos, más viejos que todo

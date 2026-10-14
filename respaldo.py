@@ -61,8 +61,10 @@ def _limpiar_temporales(carpeta: str, edad_s: int = 3600) -> None:
 
 
 def _respaldos_db(carpeta: str) -> list[str]:
-    return [n for n in sorted(os.listdir(carpeta), reverse=True)
-            if n.startswith(("ofertas_auto_", "ofertas_manual_")) and n.endswith(".db")]
+    # del más nuevo al más viejo por la fecha del nombre (AAAAMMDD-HHMMSS), no por el nombre completo: si no, todos los
+    # "manual" quedan antes que los "auto" y el "último respaldo" puede ser un manual más viejo
+    nombres = [n for n in os.listdir(carpeta) if n.startswith(("ofertas_auto_", "ofertas_manual_")) and n.endswith(".db")]
+    return sorted(nombres, key=lambda n: (n[-18:-3], n), reverse=True)
 
 
 def incompletos(carpeta: str) -> list[str]:
