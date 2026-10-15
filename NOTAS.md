@@ -117,7 +117,10 @@
   que lleguen con el motivo «rol: informático junior»; si en unas 10 corridas no llega ninguna útil, se quita el
   término.
   - Cuenta como «oferta útil» una que entre como principal con el motivo «rol: informático junior». Corridas medidas
-    con el término: 3 (7, 8 y 9), 0 ofertas útiles (respaldo del 15-10).
+    con el término: 6 (7 a 12), 0 ofertas útiles; el término trajo 1 oferta (corrida 7, descartada por práctica /
+    estudiante) y 0 en las corridas 8 a 12. «Traídas por el término» cuenta solo ofertas NUEVAS guardadas, atribuidas
+    al primer término que las encontró (las repetidas de otro término no aparecen): esos 0 son un piso, no una
+    medición exacta. Medido en la referencia oficial `ofertas_pre_telemetria_20261015.db`.
 - **Falso positivo «Desarrollador de Negocios» → «rol: desarrollo»** (corrida 7; un cargo comercial clasificado como
   A: TI por la palabra «desarrollador»). Pendiente, sin cambiar la regla: se revisa solo si el patrón se repite en
   las próximas corridas.
