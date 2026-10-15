@@ -3,17 +3,23 @@
 ## Estado actual (se actualiza en cada despliegue; leer al empezar cada sesión)
 
 ### Producción y base
-- **Base real:** v7, integrity_check ok, 1223 ofertas, 7 corridas, 14 postuladas, 6 POR VERIFICAR (notas con
-  "POR VERIFICAR").
-  - `historial_estados` tiene 4 filas (id 1 de origen `modal`, un cambio de fase a `postulacion`; ids 2 a 4 de origen
-    `lista`, 3 descartes de ofertas nuevas de la corrida 7), con sus 6 objetos.
-  - Estados: descartada/nueva 1158 · principal/descartada 51 · principal/postulada 14.
-  - sha256 por tabla: ofertas `0b0cdd232823e8a346f04f917fe5fcf07a5fa0ef7e12b8c7558d00ca72fd4caa` · historial_estados
-    `2d0571282216e7d4f26e7324091777129347551db2620d9f0993d30d6c438828` · corridas
+- **Base real — son DOS mediciones distintas; no mezclar sus cifras.**
+- **Medición del 15-10-2026 (conteos; vigente):** v7, integrity_check ok, 1321 ofertas, 9 corridas (la 8 y la 9 del
+  14-10, 13:46 y 19:09), 15 postuladas, 6 POR VERIFICAR (notas con "POR VERIFICAR").
+  - Sobre una copia de `ofertas_auto_20261015-110938.db` (sha256
+    `a559805fb1be7b5a9fc6c2496a84aeb979fff89b3a19c7970e9d8c78ab8a566d`, igual a su `.sha256`), abierta en solo lectura.
+  - `historial_estados` tiene 10 filas (1 de origen `modal`, 9 de origen `lista`).
+  - Estados: descartada/nueva 1250 · principal/descartada 56 · principal/postulada 15.
+  - **No incluye sha256 por tabla:** se miden dentro de `/desplegar`, al tomar la referencia del próximo despliegue.
+- **Medición del 14-10-2026 (anterior; sus sha256 por tabla NO corresponden a la base del 15-10):** 1223 ofertas,
+  7 corridas, 14 postuladas, `historial_estados` con 4 filas; estados descartada/nueva 1158 · principal/descartada 51 ·
+  principal/postulada 14.
+  - sha256 por tabla (14-10): ofertas `0b0cdd232823e8a346f04f917fe5fcf07a5fa0ef7e12b8c7558d00ca72fd4caa` ·
+    historial_estados `2d0571282216e7d4f26e7324091777129347551db2620d9f0993d30d6c438828` · corridas
     `36016c3a2b471986c0280d25a7436cb56db4c480887222e8c42753a128c80238`.
   - Medido el 14-10-2026 sobre el respaldo MANUAL `ofertas_manual_20261014-110711.db` (sha256
     `e96b708207459018c313d3875a3e69306c0bb9d335606d5930f854744d771597`), hecho por Sofia después de la corrida 7.
-  - Frente al automático de las 00:04 solo cambian `ofertas` (+80, ninguna existente modificada), `corridas` (+1),
+  - Frente al automático del 14-10 00:04 solo cambian `ofertas` (+80, ninguna existente modificada), `corridas` (+1),
     `historial_estados` (+3) y `sqlite_sequence`; sin tablas ni objetos nuevos.
 - **Última referencia:** `ofertas_pre_137_20261014.db` (volumen y `C:\Users\sofia\Respaldos\job-tracker\`, fuera de
   OneDrive), sha256 `f42673e5451fd53891c4281fa9f0b67b0340f1ed3f846f933922bac209dbb1ec` (igual a
@@ -34,6 +40,9 @@
     `:faseA-candidata` y `:137-candidata` (`f9b15255…`); se borran si Sofia lo aprueba.
   - Contenedores detenidos que esperan la limpieza (no se tocan sin aprobación): `jt_revision_c2` (255, por el apagado
     del 14-10), `jt_revision_137` y `jt_revision_137r` (0), con sus volúmenes.
+- **Nombres de respaldo fuera de formato** (`481aab7`, rama `feat/telemetria`, sin desplegar): los nombres que no
+  calzan con `ofertas_(auto|manual)_AAAAMMDD-HHMMSS.db` se ignoran: no cuentan como «Último respaldo», no cuentan para
+  la retención y nunca se borran.
 - **Commits sin push:** no se anotan aquí; se cuentan siempre con `git rev-list --count origin/main..HEAD`.
 
 ### Hallazgos del 14-10-2026
@@ -74,12 +83,26 @@
   fecha del nombre. Los nombres siempre son `ofertas_{auto|manual}_AAAAMMDD-HHMMSS.db` (un solo lugar los genera,
   `respaldo.respaldar`, sin sufijo por colisión). `_retener` no cambia: filtra solo los auto válidos; los manuales e
   incompletos no cuentan ni se borran.
+- **Telemetría pasiva de corridas** — **commiteada en la rama `feat/telemetria` (`e754ff6`, 15-10), sin fusionar en
+  `main` y NO desplegada**; se decide junto con el commit 3. Las corridas 1 a 9 no la traen: la imagen en producción
+  (`ff5a2615…`, código de `a7339c1`) se construyó antes de escribirla. Solo contadores por fuente en
+  `corridas.detalle.fuentes[i].telemetria` (solicitudes, códigos 200/403/404/429/5xx/otros/conexión, vacías) y una
+  línea `[corrida]` en stderr; sin URLs, parámetros ni términos, sin DDL (v7), las corridas antiguas no cambian. No
+  cambia pausas, reintentos ni orden.
+  - Es **por fuente, no por término**: no dice qué término falló.
+  - **Indeed y Glassdoor** (JobSpy) se miden como «consultas» (llamadas, vacías y errores); JobSpy no expone sus
+    solicitudes y no se intercepta `requests` dentro de la librería. Un 429 que JobSpy traga aparece como vacía, así
+    que **un bloqueo se detecta cuando todas las consultas de una corrida salen vacías en una fuente que antes
+    devolvía resultados**.
 - **«informático junior» ACTIVO** desde el 14-10-2026: término en Indeed, Glassdoor/Get on Board y Chiletrabajos
   (8 solicitudes más por corrida) y regla de último recurso A: TI, Baja. **Criterio de salida:** contar las ofertas
   que lleguen con el motivo «rol: informático junior»; si en unas 10 corridas no llega ninguna útil, se quita el
   término.
   - Cuenta como «oferta útil» una que entre como principal con el motivo «rol: informático junior». Corridas medidas
-    con el término: 1 (7).
+    con el término: 3 (7, 8 y 9), 0 ofertas útiles (respaldo del 15-10).
+- **Falso positivo «Desarrollador de Negocios» → «rol: desarrollo»** (corrida 7; un cargo comercial clasificado como
+  A: TI por la palabra «desarrollador»). Pendiente, sin cambiar la regla: se revisa solo si el patrón se repite en
+  las próximas corridas.
 - **Limpieza** (espera aprobación): contenedores y volúmenes `jt_revision_c2`, `jt_revision_137`, `jt_revision_137r`
   (y sus `_respaldos`), las 5 candidatas viejas y las copias del scratchpad. Se conservan `:c2`, `:c2-candidata`,
   `:137-respaldo-candidata` (producción) y las etiquetas de vuelta atrás.

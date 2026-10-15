@@ -18,6 +18,8 @@ en producción, lo aprobado y lo pendiente.
 ## Estructura
 - `buscar.py`: base de datos (conectar, migraciones, transaccion), búsqueda, seguimiento (marcar, nota, manual),
   historial de estados, exportar. `VERSION_DB = 7`.
+- `telemetria.py`: telemetría pasiva de corridas, solo contadores por fuente en `corridas.detalle` (sin URLs ni
+  términos; JobSpy se mide como consultas).
 - `filtros.py`: clasificar (tipos A/B/S/M, SAP/ERP, soporte), sin_genero, plural, ahora_chile.
 - `config.py`: perfil, reglas de clasificación, rutas (`JT_DB`, `JT_RESPALDOS`).
 - `servidor.py`: HTTP (ThreadingHTTPServer), rutas /api/*, Host/Origin locales, límites de cuerpo por ruta.
