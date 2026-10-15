@@ -84,14 +84,18 @@ class GestorRobots:
         self.agente = agente_robots
         self.timeout = timeout
         self._cache = {}
+        self.al_responder = None            # telemetría pasiva: recibe solo el status (0 = sin respuesta)
 
     def _descargar(self, base: str) -> Robots:
         req = urllib.request.Request(base + "/robots.txt", headers={"User-Agent": self.ua_http})
+        status = 0
         try:
             with urllib.request.urlopen(req, timeout=self.timeout) as r:
                 texto = r.read().decode("utf-8", errors="replace")
+                status = getattr(r, "status", 200)
             return Robots(texto, self.agente)
         except urllib.error.HTTPError as e:
+            status = e.code
             if es_bloqueo(e.code):
                 return Robots("", bloqueo="HTTP %d" % e.code)
             if 400 <= e.code < 500:
@@ -99,6 +103,12 @@ class GestorRobots:
             return Robots("", bloquear_todo=True)
         except Exception:
             return Robots("", bloquear_todo=True)
+        finally:
+            if self.al_responder:
+                try:
+                    self.al_responder(status)
+                except Exception:
+                    pass                    # la telemetría nunca cambia lo que se decide con el robots.txt
 
     def permitido(self, url: str) -> bool:
         return self._de(url).permitido(url)

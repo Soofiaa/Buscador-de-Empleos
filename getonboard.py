@@ -110,13 +110,33 @@ def _pedir(termino, resultados, expand):
                                 "expand[]": expand})
 
 
-def buscar(termino: str, resultados: int = 30) -> pd.DataFrame:
+def _pedir_observado(termino, resultados, expand, al_responder):
+    """_pedir y, después, el status a la telemetría pasiva (0 si no hubo respuesta). No cambia nada más."""
+    try:
+        r = _pedir(termino, resultados, expand)
+    except requests.RequestException:
+        _avisar(al_responder, 0)
+        raise
+    _avisar(al_responder, getattr(r, "status_code", 0))
+    return r
+
+
+def _avisar(al_responder, status):
+    if al_responder:
+        try:
+            al_responder(status)
+        except Exception:
+            pass
+
+
+def buscar(termino: str, resultados: int = 30, al_responder=None) -> pd.DataFrame:
     """Busca ofertas publicadas que coincidan con el texto. Lanza excepción si la API falla.
     Pide también el nivel (seniority) expandido, porque por defecto solo trae un id numérico;
-    si la API rechazara esa expansión, reintenta solo con la empresa."""
-    r = _pedir(termino, resultados, ["company", "seniority"])
+    si la API rechazara esa expansión, reintenta solo con la empresa.
+    al_responder: telemetría pasiva, recibe el status de cada solicitud."""
+    r = _pedir_observado(termino, resultados, ["company", "seniority"], al_responder)
     if r.status_code in (400, 422):
-        r = _pedir(termino, resultados, ["company"])
+        r = _pedir_observado(termino, resultados, ["company"], al_responder)
     r.raise_for_status()
     datos = r.json().get("data") or []
     filas = [f for f in (a_fila(i) for i in datos) if f and f["job_url"] and f["title"]]

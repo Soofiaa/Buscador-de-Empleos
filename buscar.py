@@ -11,6 +11,7 @@ import json
 import os
 import re
 import sqlite3
+import sys
 import time
 import uuid
 from collections import Counter
@@ -23,6 +24,7 @@ import bne
 import chiletrabajos
 import config
 import getonboard
+import telemetria
 import trabajando
 from red import Bloqueo, ClienteHTTP, ErrorFuente, NoEncontrada, USER_AGENT_HTTP
 from robots import GestorRobots
@@ -517,9 +519,11 @@ def _es_candidata(raw: dict) -> bool:
     return cl["categoria"] == "principal" or cl["razon"].startswith("rol puente con")
 
 
-def _buscar_portal(con, sitio, st, avisos, cliente, robots, ahora: datetime | None = None, dias: int | None = None) -> int:
+def _buscar_portal(con, sitio, st, avisos, cliente, robots, ahora: datetime | None = None, dias: int | None = None,
+                   tele: dict | None = None) -> int:
     """BNE / Trabajando / Chiletrabajos: lista términos, deja fuera las antiguas, abre el detalle de las nuevas
-    candidatas (con tope) y guarda."""
+    candidatas (con tope) y guarda. tele: contadores pasivos de la corrida (aquí solo se anotan los listados vacíos;
+    las solicitudes las anotan el cliente y el gestor de robots.txt)."""
     mod, nombre = PORTALES[sitio], config.NOMBRE_FUENTE[sitio]
     ahora, dias = ahora or ahora_chile(), dias or config.MAX_ANTIGUEDAD_DIAS.get(sitio, 1)
     terminos = _terminos_portal(sitio)
@@ -548,6 +552,8 @@ def _buscar_portal(con, sitio, st, avisos, cliente, robots, ahora: datetime | No
                 break
             continue
         seguidos = 0
+        if tele is not None:
+            telemetria.anotar_si_vacio(tele, df)            # tolerante: con df None o raro no lanza
         df, antiguas = recientes(df, sitio, ahora, dias)   # antes de clasificar y de abrir detalles
         st["encontradas"] += len(df)
         st["antiguas"] = st.get("antiguas", 0) + antiguas
@@ -615,6 +621,8 @@ def buscar_ofertas(con) -> int:
             for t in (config.TERMINOS_A + config.TERMINOS_B if s == "indeed" else config.TERMINOS_SECUNDARIOS)
             for l in (["Chile"] if s == "getonboard" else lugares)]   # la API de Get on Board no usa ubicación
     stats = {s: {"encontradas": 0, "antiguas": 0, "relevantes": 0, "sin_chile": 0, "errores": 0} for s in config.SITIOS}
+    # telemetría pasiva (solo contadores): JobSpy no expone sus solicitudes, se cuentan sus llamadas
+    tele = {s: telemetria.contador("http" if s in PORTALES or s == "getonboard" else "consulta") for s in config.SITIOS}
     total = 0
     avisos = []
     ahora = ahora_chile()
@@ -627,15 +635,25 @@ def buscar_ofertas(con) -> int:
     for n, (sitio, termino, lugar) in enumerate(plan, start=1):
         etiqueta = f"{termino} | {lugar}"
         st = stats[sitio]
+        t = tele[sitio]
         try:
             if sitio == "getonboard":
-                df = getonboard.buscar(termino, config.RESULTADOS_POR_BUSQUEDA)
+                df = getonboard.buscar(termino, config.RESULTADOS_POR_BUSQUEDA,
+                                       al_responder=lambda status, t=t: telemetria.anotar_status(t, status))
             else:
                 df = scrape_jobs(**consulta(sitio, termino, lugar, dias=ventanas[sitio]))
         except Exception as e:
             st["errores"] += 1
+            if sitio != "getonboard":                 # Get on Board ya anotó cada solicitud con su status
+                telemetria.anotar_excepcion(t, e)
             _say(f"  ! [{sitio}] {etiqueta}: {type(e).__name__}: {e}")
             continue
+        vacia = df is None or len(df) == 0
+        if sitio == "getonboard":
+            if vacia:
+                telemetria.anotar_vacia(t)
+        else:
+            telemetria.anotar_consulta(t, 0 if vacia else len(df))
         df, antiguas = recientes(df, sitio, ahora, ventanas[sitio])   # antes de clasificar: no se guardan ni cuentan
         filas = procesar(df, f"{sitio} | {etiqueta}", sitio)
         nuevas = guardar(con, filas)
@@ -653,7 +671,10 @@ def buscar_ofertas(con) -> int:
     if activos:
         cliente, robots = ClienteHTTP(), GestorRobots(USER_AGENT_HTTP)
         for sitio in activos:
-            total += _buscar_portal(con, sitio, stats[sitio], avisos, cliente, robots, ahora, ventanas[sitio])
+            anotar = (lambda status, t=tele[sitio]: telemetria.anotar_status(t, status))
+            cliente.al_responder = robots.al_responder = anotar       # el robots.txt de cada sitio cuenta para él
+            total += _buscar_portal(con, sitio, stats[sitio], avisos, cliente, robots, ahora, ventanas[sitio],
+                                    tele=tele[sitio])
 
     _say("\nPor fuente (encontradas / relevantes nuevas / descartadas por no ser Chile / errores / antiguas omitidas):")
     for sitio, st in stats.items():
@@ -666,9 +687,13 @@ def buscar_ofertas(con) -> int:
               f"{st['sin_chile']} / {st['errores']} / {st['antiguas']}{aviso}")
     for a in avisos:
         _say("  " + a)
-    detalle = {"fuentes": [{"fuente": config.NOMBRE_FUENTE[s], **st, "ventana_dias": ventanas[s]}
+    detalle = {"fuentes": [{"fuente": config.NOMBRE_FUENTE[s], **st, "ventana_dias": ventanas[s], "telemetria": tele[s]}
                            for s, st in stats.items()],
                "ventana_dias": ventanas, "avisos": avisos}
+    try:                                              # una línea por corrida en stderr (docker logs); solo contadores
+        print(telemetria.resumen({config.NOMBRE_FUENTE[s]: tele[s] for s in stats}), file=sys.stderr, flush=True)
+    except Exception:
+        pass
     con.execute("INSERT INTO corridas (inicio, fin, nuevas, detalle) VALUES (?, ?, ?, ?)",
                 (inicio, ahora_chile().strftime("%Y-%m-%d %H:%M"), total, json.dumps(detalle, ensure_ascii=False)))
     con.commit()

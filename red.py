@@ -60,12 +60,22 @@ class ClienteHTTP:
         self._abrir = abrir or urllib.request.urlopen
         self._primera = True
         self.peticiones = 0
+        self.al_responder: Optional[Callable[[int], None]] = None   # telemetría pasiva: recibe solo el status
 
     def get(self, url: str) -> Respuesta:
         if not self._primera:
             self._dormir(self._azar(*self.pausa))
         self._primera = False
         self.peticiones += 1
+        respuesta = self._get(url)
+        if self.al_responder:
+            try:
+                self.al_responder(respuesta.status)
+            except Exception:
+                pass                                       # la telemetría nunca cambia lo que pasa con la fuente
+        return respuesta
+
+    def _get(self, url: str) -> Respuesta:
         req = urllib.request.Request(url, headers={
             "User-Agent": self.ua, "Accept": "text/html,application/xhtml+xml,application/json;q=0.9",
             "Accept-Language": "es-CL,es;q=0.9", "Accept-Encoding": "identity",
