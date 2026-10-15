@@ -13,6 +13,7 @@ lleno, se informa con un error claro y el servidor sigue funcionando.
 """
 import hashlib
 import os
+import re
 import shutil
 import sqlite3
 import time
@@ -20,6 +21,8 @@ import time
 RETENER_AUTO = 30                    # ~ un mes de copias diarias
 ESPACIO_MINIMO = 50 * 1024 * 1024    # además del doble del tamaño de la base
 PREFIJO_TMP = ".tmp-"
+# el único formato que genera respaldar(); re.ASCII: \d solo acepta 0-9 (no dígitos de otros alfabetos)
+NOMBRE_RESPALDO = re.compile(r"^ofertas_(auto|manual)_\d{8}-\d{6}\.db$", re.ASCII)
 
 
 class RespaldoNoDisponible(Exception):
@@ -62,8 +65,10 @@ def _limpiar_temporales(carpeta: str, edad_s: int = 3600) -> None:
 
 def _respaldos_db(carpeta: str) -> list[str]:
     # del más nuevo al más viejo por la fecha del nombre (AAAAMMDD-HHMMSS), no por el nombre completo: si no, todos los
-    # "manual" quedan antes que los "auto" y el "último respaldo" puede ser un manual más viejo
-    nombres = [n for n in os.listdir(carpeta) if n.startswith(("ofertas_auto_", "ofertas_manual_")) and n.endswith(".db")]
+    # "manual" quedan antes que los "auto" y el "último respaldo" puede ser un manual más viejo.
+    # Solo nombres exactos: uno que no calce (una copia renombrada a mano) se ignora del todo: no es "último", no cuenta
+    # para la retención, no es incompleto y nunca se borra.
+    nombres = [n for n in os.listdir(carpeta) if NOMBRE_RESPALDO.fullmatch(n)]
     return sorted(nombres, key=lambda n: (n[-18:-3], n), reverse=True)
 
 
