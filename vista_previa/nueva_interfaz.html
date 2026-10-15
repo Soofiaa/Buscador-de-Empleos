@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- La misma política que envía servidor.py: si algo externo se colara, el navegador lo bloquearía. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; form-action 'none'; base-uri 'none'">
+<title>Búsqueda de empleo · vista previa</title>
+<style>
+  :root {
+    --sans: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --display: "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  }
+  :root[data-tema="girly-claro"], :root:not([data-tema]) { --fondo:#FFF5F8; --panel:#FFFFFF; --panel2:#FFEBF2; --borde:#F5D3E2; --tinta:#381E2B; --suave:#8F5972; --accion:#DA2A64; --accion-tinta:#FFFFFF; --accion-texto:#DA2A64; --sel:rgba(224, 77, 125, 0.12); --alta:#BB3560; --alta-fondo:rgba(224, 77, 125, 0.14); --media:#8E44AD; --media-fondo:rgba(142, 68, 173, 0.12); --baja:#875E70; --baja-fondo:rgba(150, 105, 124, 0.12); --nueva:#C11856; --nueva-fondo:rgba(216, 27, 96, 0.14); --aviso:#A25904; --aviso-fondo:rgba(217, 119, 6, 0.12); --rojo:#CF1B42; --rojo-fondo:rgba(225, 29, 72, 0.10); --sueldo:#047857; --sueldo-fondo:rgba(16, 185, 129, 0.12); color-scheme:light; }
+  :root[data-tema="girly-oscuro"] { --fondo:#160D14; --panel:#231420; --panel2:#301D2D; --borde:#462940; --tinta:#FDE8F3; --suave:#C492B1; --accion:#E80D33; --accion-tinta:#FFFFFF; --accion-texto:#F4395A; --sel:rgba(244, 63, 94, 0.18); --alta:#FB7185; --alta-fondo:rgba(251, 113, 133, 0.16); --media:#DD59F1; --media-fondo:rgba(217, 70, 239, 0.15); --baja:#B2819F; --baja-fondo:rgba(168, 113, 147, 0.14); --nueva:#FDA4AF; --nueva-fondo:rgba(244, 63, 94, 0.20); --aviso:#FBBF24; --aviso-fondo:rgba(251, 191, 36, 0.14); --rojo:#F65C76; --rojo-fondo:rgba(244, 63, 94, 0.15); --sueldo:#34D399; --sueldo-fondo:rgba(52, 211, 153, 0.15); color-scheme:dark; }
+  :root[data-tema="hombre-claro"] { --fondo:#F1F5F9; --panel:#FFFFFF; --panel2:#E2E8F0; --borde:#CBD5E1; --tinta:#0F172A; --suave:#475569; --accion:#1D4ED8; --accion-tinta:#FFFFFF; --accion-texto:#1D4ED8; --sel:rgba(29, 78, 216, 0.12); --alta:#0270A9; --alta-fondo:rgba(2, 132, 199, 0.12); --media:#4F46E5; --media-fondo:rgba(79, 70, 229, 0.10); --baja:#5B6A7F; --baja-fondo:rgba(100, 116, 139, 0.12); --nueva:#1759EA; --nueva-fondo:rgba(37, 99, 235, 0.14); --aviso:#A25904; --aviso-fondo:rgba(217, 119, 6, 0.12); --rojo:#CD2121; --rojo-fondo:rgba(220, 38, 38, 0.10); --sueldo:#047857; --sueldo-fondo:rgba(16, 185, 129, 0.12); color-scheme:light; }
+  :root[data-tema="hombre-oscuro"] { --fondo:#0B1120; --panel:#151E2E; --panel2:#1E293B; --borde:#2D3D54; --tinta:#F1F5F9; --suave:#94A3B8; --accion:#196CF4; --accion-tinta:#FFFFFF; --accion-texto:#4085F6; --sel:rgba(59, 130, 246, 0.18); --alta:#38BDF8; --alta-fondo:rgba(56, 189, 248, 0.16); --media:#8690F8; --media-fondo:rgba(129, 140, 248, 0.14); --baja:#94A3B8; --baja-fondo:rgba(148, 163, 184, 0.12); --nueva:#60A5FA; --nueva-fondo:rgba(96, 165, 250, 0.18); --aviso:#FBBF24; --aviso-fondo:rgba(251, 191, 36, 0.14); --rojo:#F87171; --rojo-fondo:rgba(248, 113, 113, 0.14); --sueldo:#34D399; --sueldo-fondo:rgba(52, 211, 153, 0.15); color-scheme:dark; }
+  :root[data-tema="neutro-claro"] { --fondo:#F8FAFC; --panel:#FFFFFF; --panel2:#F1F5F9; --borde:#E2E8F0; --tinta:#0F172A; --suave:#64748B; --accion:#0B7CAF; --accion-tinta:#FFFFFF; --accion-texto:#0B7CAF; --sel:rgba(14, 165, 233, 0.12); --alta:#AF5109; --alta-fondo:rgba(245, 158, 11, 0.12); --media:#4338CA; --media-fondo:rgba(99, 102, 241, 0.10); --baja:#5E6D82; --baja-fondo:rgba(100, 116, 139, 0.10); --nueva:#0270A9; --nueva-fondo:rgba(14, 165, 233, 0.12); --aviso:#AF5109; --aviso-fondo:rgba(245, 158, 11, 0.12); --rojo:#BE123C; --rojo-fondo:rgba(225, 29, 72, 0.08); --sueldo:#047857; --sueldo-fondo:rgba(16, 185, 129, 0.12); color-scheme:light; }
+  :root[data-tema="neutro-oscuro"] { --fondo:#111317; --panel:#1A1D24; --panel2:#242832; --borde:#303644; --tinta:#F3F4F6; --suave:#9CA3AF; --accion:#8452F5; --accion-tinta:#FFFFFF; --accion-texto:#996FF7; --sel:rgba(139, 92, 246, 0.16); --alta:#FBBF24; --alta-fondo:rgba(251, 191, 36, 0.14); --media:#A78BFA; --media-fondo:rgba(167, 139, 250, 0.14); --baja:#9CA3AF; --baja-fondo:rgba(156, 163, 175, 0.12); --nueva:#C084FC; --nueva-fondo:rgba(192, 132, 252, 0.16); --aviso:#F59E0B; --aviso-fondo:rgba(245, 158, 11, 0.14); --rojo:#F87171; --rojo-fondo:rgba(248, 113, 113, 0.14); --sueldo:#34D399; --sueldo-fondo:rgba(52, 211, 153, 0.15); color-scheme:dark; }
+  * { box-sizing: border-box; }
+  [hidden] { display:none !important; }
+  body { margin:0; background:var(--fondo); color:var(--tinta); font:15px/1.6 var(--sans); -webkit-font-smoothing:antialiased; }
+  h1, h2, h3 { font-family:var(--display); font-weight:700; letter-spacing:-0.02em; }
+  button, select, input { font:inherit; color:inherit; }
+  :focus-visible { outline:2px solid var(--accion-texto); outline-offset:2px; border-radius:6px; }
+  .sub { color:var(--suave); font-size:.86rem; }
+  .aviso-previa { background:var(--aviso-fondo); color:var(--aviso); font-size:.82rem; font-weight:600; text-align:center; padding:6px 12px; border-bottom:1px solid var(--borde); }
+
+  /* ---------- dos columnas */
+  .app { display:grid; grid-template-columns:304px minmax(0,1fr); min-height:100vh; }
+  .lateral { background:var(--panel); border-right:1px solid var(--borde); padding:22px 16px 28px; position:sticky; top:0; height:100vh; overflow-y:auto; }
+  .principal { padding:26px 36px 48px; width:100%; max-width:1280px; min-width:0; }
+  @media (max-width:860px) {
+    .app { grid-template-columns:minmax(0,1fr); }
+    .lateral { position:static; height:auto; border-right:0; border-bottom:1px solid var(--borde); }
+    .principal { padding:20px 16px 40px; }
+  }
+
+  /* ---------- columna izquierda */
+  .marca { display:flex; flex-direction:column; gap:10px; }
+  .marca h1 { font-size:1.3rem; margin:0; }
+  .selector-tema { background:var(--panel2); color:var(--tinta); border:1px solid var(--borde); border-radius:10px; padding:6px 10px; font-size:.83rem; font-weight:600; cursor:pointer; }
+  .selector-tema:hover { border-color:var(--accion-texto); }
+  #ultima { margin:10px 0 14px; }
+  .seccion-lateral-titulo { font-size:.74rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--suave); margin:14px 2px 6px; }
+  .boton { background:var(--accion); color:var(--accion-tinta); border:0; border-radius:10px; padding:10px 16px; font-weight:600; cursor:pointer; }
+  .boton:hover { filter:brightness(1.06); }
+  .boton:disabled { opacity:.55; cursor:progress; }
+  .boton.ancho { width:100%; }
+  .nota { color:var(--suave); font-size:.8rem; margin:6px 2px 10px; }
+  .progreso { font-size:.84rem; color:var(--suave); min-height:1.2em; margin:0 2px 4px; overflow-wrap:anywhere; }
+  .barra { height:6px; background:var(--panel2); border-radius:99px; overflow:hidden; margin:4px 2px 12px; }
+  .barra-relleno { height:100%; width:0; background:var(--accion); border-radius:99px; transition:width .4s ease; }
+
+  .historial { margin-top:14px; border-top:1px solid var(--borde); padding-top:12px; }
+  .historial h2 { font-size:1rem; color:var(--suave); margin:4px 10px 8px; }
+  .item { display:flex; align-items:baseline; gap:8px; width:100%; text-align:left; background:none; border:0; border-radius:10px; padding:7px 10px; cursor:pointer; color:var(--tinta); }
+  .item:hover { background:var(--panel2); }
+  .item[aria-pressed="true"] { background:var(--sel); box-shadow:inset 3px 0 0 var(--accion); }
+  .item[aria-pressed="true"] .etq { color:var(--nueva); font-weight:650; }
+  .item .num { margin-left:auto; font-variant-numeric:tabular-nums; font-size:.84rem; color:var(--suave); }
+  .item[aria-pressed="true"] .num { color:var(--tinta); }
+  .item.todas { font-weight:600; margin-bottom:6px; }
+  .dia { margin-top:8px; }
+  .dia-btn .etq { font-weight:600; }
+  .dia-btn .fecha { color:var(--suave); font-size:.8rem; }
+  .horas { list-style:none; margin:2px 0 4px 10px; padding:0 0 0 8px; border-left:1px solid var(--borde); }
+  .hora { font-size:.9rem; padding:5px 10px; }
+  .hora .t { font-variant-numeric:tabular-nums; min-width:3.1em; }
+  .hora .franja { color:var(--suave); font-size:.8rem; }
+  .item.antes { margin-top:12px; color:var(--suave); }
+
+  /* ---------- columna principal */
+  .encabezado { margin-bottom:18px; }
+  .titulo-sel { font-size:1.75rem; margin:0 0 2px; line-height:1.2; }
+  .fuentes-sel { display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:10px; margin-top:14px; }
+  .fuente-mini { background:var(--panel); border:1px solid var(--borde); border-radius:12px; padding:10px 12px; }
+  .fuente-mini .nombre { font-size:.82rem; color:var(--suave); }
+  .fuente-mini .cifras { font-size:.9rem; font-variant-numeric:tabular-nums; margin-top:2px; white-space:nowrap; }
+  .fuente-mini .cifras .rel { color:var(--accion-texto); font-weight:650; }
+  .fuente-mini .cifras .err { color:var(--aviso); }
+  .fuente-mini .antiguas { font-size:.78rem; color:var(--suave); margin-top:1px; }
+  details.panel { background:var(--panel); border:1px solid var(--borde); border-radius:12px; padding:9px 14px; margin-top:14px; }
+  details.panel summary { cursor:pointer; color:var(--suave); font-size:.88rem; }
+  table.fuentes { border-collapse:collapse; width:100%; margin-top:8px; font-size:.86rem; }
+  table.fuentes th, table.fuentes td { text-align:left; padding:4px 8px; border-bottom:1px solid var(--borde); }
+  table.fuentes th { color:var(--suave); font-weight:600; }
+  .avisos li { color:var(--aviso); font-size:.86rem; }
+
+  nav.pestanas { display:flex; flex-wrap:wrap; gap:4px; border-bottom:1px solid var(--borde); margin-bottom:14px; }
+  nav.pestanas button { background:none; border:0; border-bottom:3px solid transparent; padding:8px 12px; cursor:pointer; color:var(--suave); }
+  nav.pestanas button:hover { color:var(--tinta); }
+  nav.pestanas button[aria-selected="true"] { color:var(--tinta); border-bottom-color:var(--accion); font-weight:600; }
+  .cuenta { font-size:.78rem; background:var(--panel2); color:var(--suave); border-radius:99px; padding:1px 8px; margin-left:6px; font-variant-numeric:tabular-nums; }
+  .filtros { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:8px; margin-bottom:16px; align-items:center; }
+  .filtros input[type=search] { grid-column:1 / -1; }
+  .filtros input, .filtros select { width:100%; background:var(--panel); border:1px solid var(--borde); border-radius:10px; padding:8px 11px; }
+  .selector-vista { display:flex; gap:4px; background:var(--panel2); border:1px solid var(--borde); border-radius:10px; padding:3px; }
+  .btn-vista { flex:1; background:none; border:0; border-radius:7px; padding:5px 8px; font-size:.82rem; font-weight:600; cursor:pointer; color:var(--suave); }
+  .btn-vista[aria-pressed="true"] { background:var(--panel); color:var(--tinta); box-shadow:0 1px 3px rgba(0,0,0,.08); }
+  .btn-limpiar-filtros { background:var(--rojo-fondo); color:var(--rojo); border:1px solid var(--borde); border-radius:10px; padding:7px 12px; font-size:.83rem; font-weight:600; cursor:pointer; }
+  h3.grupo { font-size:1.08rem; margin:24px 0 10px; display:flex; align-items:center; gap:4px; }
+
+  /* ---------- tarjetas */
+  .tarjeta { background:var(--panel); border:1px solid var(--borde); border-left:4px solid var(--borde); border-radius:16px; padding:16px 20px; margin-bottom:12px; overflow:hidden; }
+  .tarjeta.prio-alta { border-left-color:var(--alta); }
+  .tarjeta.prio-media { border-left-color:var(--media); }
+  .tarjeta.prio-baja { border-left-color:var(--baja); }
+  .tarjeta.cerrada { opacity:.8; }
+  .tarjeta-header { display:flex; align-items:flex-start; gap:12px; }
+  .avatar-empresa { width:34px; height:34px; border-radius:9px; background:var(--panel2); border:1px solid var(--borde); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:.88rem; color:var(--accion-texto); flex-shrink:0; }
+  .tarjeta-titulos { flex:1; min-width:0; }
+  .fila-titulo { display:flex; align-items:center; gap:8px; }
+  .titulo { flex:1 1 auto; min-width:0; font-family:var(--display); font-weight:650; font-size:1.1rem; line-height:1.35; color:var(--tinta); text-decoration:none; overflow-wrap:anywhere; }
+  .titulo:hover { color:var(--accion-texto); text-decoration:underline; text-underline-offset:3px; }
+  .btn-enlace-externo { display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:7px; background:var(--panel2); border:1px solid var(--borde); color:var(--suave); text-decoration:none; font-size:.85rem; flex-shrink:0; }
+  .btn-enlace-externo:hover { color:var(--accion-texto); border-color:var(--accion-texto); }
+  .meta-limpia { font-size:.84rem; color:var(--suave); display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin:3px 0 6px; }
+  .meta-sep { opacity:.5; font-weight:700; }
+  select.estado { flex-shrink:0; background:var(--panel2); color:var(--tinta); border:1px solid var(--borde); border-radius:10px; padding:6px 10px; font-size:.83rem; font-weight:600; cursor:pointer; }
+  select.estado:hover { border-color:var(--accion-texto); }
+  .chips { display:flex; flex-wrap:wrap; gap:6px; margin:6px 0 2px; }
+  .chip { font-size:.78rem; border-radius:99px; padding:2px 10px; background:var(--panel2); color:var(--tinta); }
+  .chip.Alta { background:var(--alta-fondo); color:var(--alta); font-weight:600; }
+  .chip.Media { background:var(--media-fondo); color:var(--media); font-weight:600; }
+  .chip.Baja { background:var(--baja-fondo); color:var(--baja); font-weight:600; }
+  .chip.aviso { background:var(--aviso-fondo); color:var(--aviso); }
+  .chip.nueva { background:var(--nueva-fondo); color:var(--nueva); font-weight:600; }
+  .chip.sueldo { background:var(--sueldo-fondo); color:var(--sueldo); font-weight:700; }
+  .chip.dias-ok { background:var(--nueva-fondo); color:var(--nueva); font-weight:600; }
+  .chip.dias-revisar { background:var(--aviso-fondo); color:var(--aviso); font-weight:600; }
+  .chip.dias-alerta { background:var(--rojo-fondo); color:var(--rojo); font-weight:600; }
+  .skill { font-size:.74rem; font-weight:600; padding:1px 8px; border-radius:6px; background:var(--panel2); border:1px solid var(--borde); color:var(--tinta); }
+  .motivo { font-size:.85rem; color:var(--suave); margin-top:8px; }
+  .notas { font-size:.84rem; color:var(--tinta); background:var(--panel2); border-radius:8px; padding:6px 10px; margin-top:8px; white-space:pre-line; }
+  .razon { font-size:.85rem; color:var(--rojo); margin-top:6px; }
+  .vacio { color:var(--suave); padding:28px 0; text-align:center; }
+
+  /* ---------- vista compacta */
+  .tabla-compacta { display:flex; flex-direction:column; gap:6px; }
+  .fila-compacta { background:var(--panel); border:1px solid var(--borde); border-left:4px solid var(--borde); border-radius:12px; padding:8px 12px; display:grid; grid-template-columns:30px minmax(180px,2fr) minmax(110px,1fr) 70px 100px 150px 26px; gap:12px; align-items:center; }
+  .fila-compacta.prio-alta { border-left-color:var(--alta); } .fila-compacta.prio-media { border-left-color:var(--media); } .fila-compacta.prio-baja { border-left-color:var(--baja); }
+  .fila-compacta .avatar-empresa { width:28px; height:28px; font-size:.78rem; }
+  .cargo-box { display:flex; flex-direction:column; min-width:0; }
+  .cargo-titulo { font-weight:700; font-size:.92rem; color:var(--tinta); text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .cargo-titulo:hover { color:var(--accion-texto); }
+  .cargo-empresa { font-size:.8rem; color:var(--suave); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  @media (max-width:980px) { .fila-compacta { grid-template-columns:28px 1fr auto 26px; } .ocultar-movil { display:none; } }
+
+  /* ---------- toast con deshacer */
+  .toast-container { position:fixed; bottom:24px; right:24px; z-index:10; }
+  .toast { background:var(--panel); border:1px solid var(--borde); box-shadow:0 12px 32px rgba(0,0,0,.22); border-radius:12px; padding:12px 16px; display:flex; align-items:center; gap:12px; font-size:.88rem; max-width:420px; }
+  .toast button { border-radius:6px; padding:4px 10px; font-size:.82rem; font-weight:700; cursor:pointer; }
+  .toast .deshacer { background:var(--accion); color:var(--accion-tinta); border:0; }
+  .toast .cerrar { background:none; border:0; color:var(--suave); }
+  @media (max-width:620px) { .fila-titulo { flex-wrap:wrap; } select.estado { width:100%; } .tarjeta { padding:14px 16px; } }
+</style>
+</head>
+<body>
+<div class="aviso-previa" role="note">Vista previa estática · datos inventados · nada se guarda ni se envía a ningún servidor</div>
+<div class="app">
+  <aside class="lateral">
+    <div class="marca">
+      <h1>Búsqueda de empleo</h1>
+      <select class="selector-tema" id="tema" aria-label="Tema visual">
+        <option value="auto">Automático (según el sistema)</option>
+        <optgroup label="Rosado"><option value="girly-claro">Rosado claro</option><option value="girly-oscuro">Rosado oscuro</option></optgroup>
+        <optgroup label="Azul"><option value="hombre-claro">Azul claro</option><option value="hombre-oscuro">Azul oscuro</option></optgroup>
+        <optgroup label="Neutro"><option value="neutro-claro">Neutro claro</option><option value="neutro-oscuro">Neutro oscuro</option></optgroup>
+      </select>
+    </div>
+    <div class="sub" id="ultima"></div>
+    <button class="boton ancho" id="buscar" type="button">Buscar empleos</button>
+    <p class="nota">Una búsqueda completa toma unos 5 minutos. (En esta vista previa solo se simula el avance.)</p>
+    <div class="progreso" id="progreso" role="status" aria-live="polite"></div>
+    <div class="barra" id="barra" role="progressbar" aria-label="Avance de la búsqueda" aria-valuemin="0" hidden><div class="barra-relleno" id="barra-relleno"></div></div>
+    <nav class="historial" id="historial" aria-label="Historial de búsquedas"></nav>
+  </aside>
+  <main class="principal">
+    <header class="encabezado">
+      <h2 class="titulo-sel" id="titulo-sel">Todas las ofertas</h2>
+      <div class="sub" id="sub-sel"></div>
+      <div class="fuentes-sel" id="fuentes-sel" hidden></div>
+      <details class="panel" id="panel-corrida" hidden><summary>Resultado de la última búsqueda por fuente</summary><div id="corrida"></div></details>
+    </header>
+    <nav class="pestanas" id="pestanas" role="tablist" aria-label="Categorías de ofertas"></nav>
+    <div class="filtros" id="filtros"></div>
+    <div id="lista"></div>
+  </main>
+</div>
+<div class="toast-container" id="toast" aria-live="polite"></div>
+
+<script>
+"use strict";
+// ---------- funciones puras (iguales a las de informe.py, más las nuevas de esta propuesta)
+const CERRADOS = new Set(["postulada", "entrevista", "descartada"]);
+const DIAS = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+const mayus = s => s.charAt(0).toUpperCase() + s.slice(1);
+const dosDig = n => String(n).padStart(2, "0");
+const diaISO = f => f.getFullYear() + "-" + dosDig(f.getMonth() + 1) + "-" + dosDig(f.getDate());
+const horaDe = t => (t || "").slice(11, 16);
+function fechaLarga(dia) { const [a, m, d] = dia.split("-").map(Number); return mayus(DIAS[new Date(a, m - 1, d).getDay()]) + " " + d + " de " + MESES[m - 1]; }
+function etiquetaDia(dia, hoy) {
+  if (dia === hoy) return "Hoy";
+  const [a, m, d] = hoy.split("-").map(Number);
+  if (dia === diaISO(new Date(a, m - 1, d - 1))) return "Ayer";
+  return fechaLarga(dia);
+}
+function franja(hhmm) { return hhmm >= "06:00" && hhmm <= "12:00" ? "mañana" : hhmm > "12:00" && hhmm <= "19:59" ? "tarde" : "noche"; }
+function terminoRelativo(fin, hoy) {
+  const dia = (fin || "").slice(0, 10), t = horaDe(fin), etq = etiquetaDia(dia, hoy);
+  const cuando = etq === "Hoy" ? "hoy" : etq === "Ayer" ? "ayer" : "el " + etq.charAt(0).toLowerCase() + etq.slice(1);
+  return cuando + ", terminó a las " + t;
+}
+function agruparPorDia(corridas) {
+  const dias = new Map();
+  for (const c of corridas || []) {
+    const dia = (c.inicio || "").slice(0, 10);
+    if (!dias.has(dia)) dias.set(dia, { dia, total: 0, corridas: [] });
+    const g = dias.get(dia); g.total += c.nuevas || 0; g.corridas.push(c);
+  }
+  return [...dias.values()].sort((x, y) => x.dia < y.dia ? 1 : x.dia > y.dia ? -1 : 0);
+}
+function idsSeleccion(sel, corridas) {
+  if (!sel || sel.tipo === "todas") return null;
+  if (sel.tipo === "hora") return new Set([sel.id]);
+  if (sel.tipo === "dia") return new Set((corridas || []).filter(c => (c.inicio || "").slice(0, 10) === sel.dia).map(c => c.id));
+  if (sel.tipo === "antes") return new Set([null]);
+  return null;
+}
+function filtrarSeleccion(lista, pestana, sel, corridas) {
+  if (pestana === "seguimiento") return lista;
+  const ids = idsSeleccion(sel, corridas);
+  return ids ? lista.filter(o => ids.has(o.corrida_id === undefined ? null : o.corrida_id)) : lista;
+}
+function listaDe(datos, pestana, sel) {
+  if (!datos) return [];
+  const base = pestana === "ofertas" ? datos.principal.filter(o => !CERRADOS.has(o.estado))
+    : pestana === "seguimiento" ? datos.principal.filter(o => CERRADOS.has(o.estado)) : (datos[pestana] || []);
+  return filtrarSeleccion(base, pestana, sel, datos.corridas);
+}
+function progresoDe(mensaje) {
+  const m = /\[(?:[^\[\]]*\s)?(\d+)\/(\d+)\]/.exec(mensaje || "");
+  if (!m || !+m[2]) return null;
+  const n = +m[1], total = +m[2];
+  return { n, total, pct: Math.max(0, Math.min(100, Math.round(100 * n / total))) };
+}
+function tituloSeleccion(sel, corridas) {
+  if (sel.tipo === "dia") return fechaLarga(sel.dia);
+  if (sel.tipo === "hora") { const c = (corridas || []).find(x => x.id === sel.id); return "Búsqueda de las " + (c ? horaDe(c.inicio) : "?"); }
+  if (sel.tipo === "antes") return "Antes del historial";
+  return "Todas las ofertas";
+}
+const NOMBRE_FUENTE = { indeed: "Indeed", google: "Google", glassdoor: "Glassdoor", getonboard: "Get on Board", bne: "BNE", trabajando: "Trabajando", chiletrabajos: "Chiletrabajos" };
+const nombreFuente = f => NOMBRE_FUENTE[f] || f || "sin fuente";
+function textoProgreso(mensaje) {
+  const m = /^\s*\[(\d+)\/(\d+)\]\s*([^|\[\]]+?)\s*\|\s*([^|:]+?)\s*(?:[|:]|$)/.exec(mensaje || "");
+  return m ? "Buscando en " + nombreFuente(m[3]) + " · " + m[4] + " · " + m[1] + " de " + m[2] : (mensaje || "");
+}
+const norm = s => (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+function coincideTexto(o, texto) {
+  const t = norm([o.titulo, o.empresa, o.ubicacion, o.motivo, o.notas].join(" "));
+  return (texto || "").split(/\s+/).every(w => t.includes(norm(w)));
+}
+// nuevas (propuesta): todas puras, para probarlas con Node igual que las anteriores
+function fechaCL(f) { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(f || "")); return m ? m[3] + "/" + m[2] + "/" + m[1] : (f || ""); }
+function diasDesde(fecha, hoy) {
+  if (!/^\d{4}-\d{2}-\d{2}/.test(fecha || "")) return null;
+  const [a, m, d] = fecha.slice(0, 10).split("-").map(Number), [ah, mh, dh] = hoy.split("-").map(Number);
+  return Math.max(0, Math.round((Date.UTC(ah, mh - 1, dh) - Date.UTC(a, m - 1, d)) / 86400000));
+}
+function chipDias(d) {                            // {texto, clase} según los días desde la postulación
+  if (d === null) return null;
+  if (d === 0) return { texto: "Postulada hoy", clase: "dias-ok" };
+  const txt = "Hace " + d + (d === 1 ? " día" : " días");
+  return d <= 3 ? { texto: txt, clase: "dias-ok" } : d <= 5 ? { texto: txt + " · revisar", clase: "dias-revisar" } : { texto: txt + " · hacer seguimiento", clase: "dias-alerta" };
+}
+const SKILLS = ["Python", "SQL", "API", "REST", "Jira", "Cypress", "Selenium", "Postman", "Docker", "Git", "Java", "JavaScript", "TypeScript", "React", "Power BI", "Excel", "Scrum", "BPMN", "AWS", "Azure"];
+function extraerSkills(o, max = 5) {
+  const t = " " + norm([o.titulo, o.tipo, o.motivo].join(" ")) + " ";
+  return SKILLS.filter(s => new RegExp("[^a-z0-9]" + norm(s).replace(/[.+]/g, "\\$&") + "[^a-z0-9]").test(t)).slice(0, max);
+}
+const sueldoConocido = s => !!s && !/^(no indicado|a convenir|no especificado)$/i.test(String(s).trim());
+const TEMAS = ["girly-claro", "girly-oscuro", "hombre-claro", "hombre-oscuro", "neutro-claro", "neutro-oscuro"];
+function normalizarTema(t, sistemaOscuro) {        // valores antiguos de la página actual: "claro" / "oscuro"
+  if (t === "claro") return "girly-claro";
+  if (t === "oscuro") return "girly-oscuro";
+  if (TEMAS.includes(t)) return t;
+  return sistemaOscuro ? "girly-oscuro" : "girly-claro";
+}
+
+// ---------- datos de ejemplo (inventados; fechas relativas a hoy para que "Hoy/Ayer" se vean)
+const hoyF = new Date(), hace = n => { const f = new Date(hoyF); f.setDate(f.getDate() - n); return diaISO(f); };
+const ej = (n, extra) => Object.assign({ url: "https://ejemplo.invalid/oferta/" + n, estado: "nueva", fuente: "indeed", ubicacion: "Santiago, Región Metropolitana",
+  publicada: hace(1), tipo: "TI", modalidad: "Híbrido", contrato: "Indefinido", sueldo: "No indicado", experiencia: "No indicada", notas: "", fecha_postulacion: "" }, extra);
+const DATOS = {
+  corridas: [
+    { id: 3, inicio: hace(0) + " 09:12", fin: hace(0) + " 09:19", nuevas: 4, fuentes: [
+      { fuente: "Indeed", encontradas: 312, relevantes: 3, errores: 0, antiguas: 41, ventana_dias: 1 },
+      { fuente: "Get on Board", encontradas: 18, relevantes: 1, errores: 0, ventana_dias: 1 },
+      { fuente: "BNE", encontradas: 27, relevantes: 0, errores: 1, ventana_dias: 3 },
+      { fuente: "Chiletrabajos", encontradas: 1, relevantes: 0, errores: 0, antiguas: 1, ventana_dias: 1 }] },
+    { id: 2, inicio: hace(1) + " 19:04", fin: hace(1) + " 19:12", nuevas: 3, fuentes: [{ fuente: "Indeed", encontradas: 298, relevantes: 3, errores: 0, ventana_dias: 1 }] },
+    { id: 1, inicio: hace(3) + " 10:58", fin: hace(3) + " 11:06", nuevas: 2, fuentes: [] }],
+  principal: [
+    ej(1, { titulo: "Analista QA Junior (ejemplo)", empresa: "Empresa Ejemplo Uno", prioridad: "Alta", modalidad: "Remoto", sueldo: "$1.100.000 líquido", corrida_id: 3,
+            motivo: "Rol QA junior con Cypress y Postman; remoto.", experiencia: "1 año" }),
+    ej(2, { titulo: "Analista Funcional TI", empresa: "Banco Inventado", prioridad: "Alta", fuente: "getonboard", corrida_id: 3, motivo: "Levantamiento de requerimientos, BPMN y Jira." }),
+    ej(3, { titulo: "Desarrollador/a Python Trainee", empresa: "Startup Demo", prioridad: "Media", corrida_id: 3, contrato: "Plazo fijo 3 meses", motivo: "Python, SQL y API REST." }),
+    ej(4, { titulo: "Analista de Datos Junior", empresa: "Retail Imaginario", prioridad: "Media", fuente: "chiletrabajos", estado: "revisada", corrida_id: 2, motivo: "SQL, Excel y Power BI." }),
+    ej(5, { titulo: "Business Analyst", empresa: "Consultora Ficticia", prioridad: "Baja", modalidad: "Presencial", ubicacion: "Viña del Mar", corrida_id: 2, motivo: "Análisis de procesos." }),
+    ej(6, { titulo: "Tester Automatizador", empresa: "Software Ejemplar", prioridad: "Media", fuente: "bne", corrida_id: null, publicada: "", motivo: "Selenium y Java." }),
+    ej(7, { titulo: "Analista QA Funcional", empresa: "Aseguradora Modelo", prioridad: "Alta", estado: "postulada", fecha_postulacion: hace(0), corrida_id: 2, motivo: "QA funcional, Jira." }),
+    ej(8, { titulo: "Analista de Sistemas", empresa: "Clínica de Muestra", prioridad: "Alta", estado: "postulada", fecha_postulacion: hace(4), corrida_id: 1,
+            notas: "[unión 2026-10-13] POR VERIFICAR: ejemplo de nota que el buscador encuentra con «verif»." }),
+    ej(9, { titulo: "Data Analyst", empresa: "Tienda Ficticia", prioridad: "Media", estado: "postulada", fecha_postulacion: hace(9), corrida_id: 1, sueldo: "$900.000" }),
+    ej(10, { titulo: "QA Engineer", empresa: "Fintech Ilustrativa", prioridad: "Alta", estado: "entrevista", fecha_postulacion: hace(6), corrida_id: 1, motivo: "Cypress y API." }),
+    ej(11, { titulo: "Desarrollador Backend Junior", empresa: "Agencia Inventada", prioridad: "Baja", estado: "descartada", corrida_id: 2 })],
+  fuera_perfil: [ej(20, { titulo: "Soporte TI Nivel 1", empresa: "Mesa de Ayuda Ejemplo", corrida_id: 3, razon: "soporte / mesa de ayuda" })],
+  sospechosas: [ej(21, { titulo: "Analista desde casa, ingresos inmediatos", empresa: "Sin nombre", corrida_id: 2, razon: "contacto solo por WhatsApp" })],
+  descartadas: [ej(22, { titulo: "QA Lead Senior", empresa: "Gran Empresa Ejemplo", corrida_id: 3, razon: "nivel senior" }),
+                ej(23, { titulo: "Práctica profesional QA", empresa: "Universidad Ejemplo", corrida_id: 2, razon: "práctica / estudiante" })],
+  total_descartadas: 2
+};
+
+// ---------- estado y utilidades de DOM (h() igual que en informe.py: nunca innerHTML)
+const ESTADOS = ["nueva", "revisada", "postulada", "entrevista", "descartada"];
+const ETIQUETA_ESTADO = { nueva: "Nueva", revisada: "Revisada", postulada: "Postulada", entrevista: "En entrevista", descartada: "Descartada" };
+const PESTANAS = [["ofertas", "Ofertas"], ["seguimiento", "Seguimiento"], ["fuera_perfil", "Fuera de perfil"], ["sospechosas", "Sospechosas"], ["descartadas", "Descartadas por filtros"]];
+const FILTROS_VACIOS = () => ({ texto: "", estado: "activas", prioridad: "", modalidad: "", fuente: "", tipo: "" });
+const S = { datos: DATOS, pestana: "ofertas", sel: { tipo: "todas" }, ultima: null, f: FILTROS_VACIOS(), agrupar: "prioridad", densidad: "tarjetas" };
+function h(tag, attrs, ...hijos) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (v === null || v === undefined || v === false) continue;
+    if (k === "class") e.className = v; else if (k.startsWith("on")) e.addEventListener(k.slice(2), v); else e.setAttribute(k, v);
+  }
+  for (const c of hijos.flat()) if (c !== null && c !== undefined && c !== false) e.append(c.nodeType ? c : document.createTextNode(String(c)));
+  return e;
+}
+const textoAntiguas = n => n + (n === 1 ? " antigua omitida" : " antiguas omitidas");
+const textoVentana = f => f.ventana_dias ? "Ventana de antigüedad: " + (f.ventana_dias === 1 ? "hoy y ayer" : "hoy y los " + f.ventana_dias + " días anteriores") : null;
+const urlSegura = u => /^https?:\/\//i.test(u || "") ? u : "#";
+const $ = id => document.getElementById(id);
+const corridas = () => S.datos.corridas || [];
+const claveSel = sel => sel.tipo + ":" + (sel.dia || sel.id || "");
+const hoy = () => diaISO(new Date());
+try { const d = localStorage.getItem("densidad"); if (d === "compacta" || d === "tarjetas") S.densidad = d; } catch (e) {}
+
+// ---------- tema
+const oscuroSistema = () => matchMedia("(prefers-color-scheme: dark)").matches;
+function aplicarTema(valor) {
+  document.documentElement.setAttribute("data-tema", normalizarTema(valor === "auto" ? null : valor, oscuroSistema()));
+  $("tema").value = valor === "auto" || !valor ? "auto" : normalizarTema(valor, oscuroSistema());
+}
+let temaGuardado = null;
+try { temaGuardado = localStorage.getItem("tema"); } catch (e) {}
+aplicarTema(temaGuardado || "auto");
+$("tema").addEventListener("change", e => { aplicarTema(e.target.value); try { localStorage.setItem("tema", e.target.value); } catch (x) {} });
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { if ($("tema").value === "auto") aplicarTema("auto"); });
+
+// ---------- toast con deshacer (en la app usaría /api/marcar, que ya existe)
+let timerToast = null;
+function toast(mensaje, deshacer) {
+  const cont = $("toast"); clearTimeout(timerToast);
+  cont.replaceChildren(h("div", { class: "toast" }, h("span", {}, mensaje),
+    deshacer ? h("button", { type: "button", class: "deshacer", onclick: () => { cont.replaceChildren(); deshacer(); } }, "Deshacer") : null,
+    h("button", { type: "button", class: "cerrar", "aria-label": "Cerrar aviso", onclick: () => cont.replaceChildren() }, "✕")));
+  timerToast = setTimeout(() => cont.replaceChildren(), 6000);
+}
+function cambiarEstado(o, nuevo) {
+  const antes = o.estado;
+  if (antes === nuevo) return;
+  o.estado = nuevo;
+  if ((nuevo === "postulada" || nuevo === "entrevista") && !o.fecha_postulacion) o.fecha_postulacion = hoy();
+  pintar();
+  toast("Movida a «" + ETIQUETA_ESTADO[nuevo] + "»", () => { o.estado = antes; pintar(); toast("Cambio deshecho"); });
+}
+
+// ---------- búsqueda simulada (solo para ver la barra de avance)
+$("buscar").addEventListener("click", () => {
+  const pasos = ["indeed | qa tester | Santiago", "indeed | analista funcional | Santiago", "getonboard | analista de datos | Chile", "glassdoor | QA | Santiago"];
+  let n = 0; $("buscar").disabled = true; $("barra").hidden = false;
+  const t = setInterval(() => {
+    n++;
+    const msj = "[" + n + "/" + pasos.length + "] " + pasos[n - 1] + ": 12 encontradas, 0 nuevas relevantes";
+    $("progreso").textContent = textoProgreso(msj) + " (simulación)";
+    $("barra-relleno").style.width = progresoDe(msj).pct + "%";
+    if (n === pasos.length) { clearInterval(t); $("buscar").disabled = false; $("barra").hidden = true; $("progreso").textContent = "Búsqueda simulada terminada: no se buscó nada de verdad."; }
+  }, 700);
+});
+
+// ---------- columna izquierda
+function elegir(sel) { S.sel = sel; pintar(); }
+function botonSel(sel, clase, etiqueta, hijos) {
+  return h("button", { type: "button", class: "item " + clase, "aria-pressed": String(claveSel(S.sel) === claveSel(sel)), "aria-label": etiqueta,
+    "data-clave": claveSel(sel), onclick: () => elegir(sel) }, hijos);
+}
+function pintarHistorial() {
+  const d = hoy(), activas = listaDe(S.datos, "ofertas", { tipo: "todas" }).length;
+  const partes = [h("h2", {}, "Historial"),
+    botonSel({ tipo: "todas" }, "todas", "Todas las ofertas: " + activas + " activas", [h("span", { class: "etq" }, "Todas las ofertas"), h("span", { class: "num" }, activas)])];
+  for (const g of agruparPorDia(corridas())) {
+    const etq = etiquetaDia(g.dia, d), rel = etq === "Hoy" || etq === "Ayer";
+    partes.push(h("section", { class: "dia" },
+      botonSel({ tipo: "dia", dia: g.dia }, "dia-btn", (rel ? etq + ", " + fechaLarga(g.dia) : etq) + ": " + g.total + " ofertas relevantes nuevas",
+        [h("span", { class: "etq" }, etq), rel ? h("span", { class: "fecha" }, fechaLarga(g.dia)) : null, h("span", { class: "num" }, g.total)]),
+      h("ul", { class: "horas" }, g.corridas.map(c => { const t = horaDe(c.inicio);
+        return h("li", {}, botonSel({ tipo: "hora", id: c.id }, "hora", "Búsqueda de las " + t + " (" + franja(t) + ")",
+          [h("span", { class: "t etq" }, t), h("span", { class: "franja" }, franja(t)), h("span", { class: "num" }, c.nuevas)])); }))));
+  }
+  const n = listaDe(S.datos, "ofertas", { tipo: "antes" }).length;
+  partes.push(botonSel({ tipo: "antes" }, "antes", "Antes del historial: " + n + " activas", [h("span", { class: "etq" }, "Antes del historial"), h("span", { class: "num" }, n)]));
+  $("historial").replaceChildren(...partes);
+  const u = corridas()[0];
+  $("ultima").textContent = u ? "Última búsqueda: " + terminoRelativo(u.fin, d) + " · " + u.nuevas + (u.nuevas === 1 ? " relevante nueva" : " relevantes nuevas") : "Todavía no hay búsquedas.";
+}
+
+// ---------- encabezado
+function pintarEncabezado() {
+  const sel = S.sel, cs = corridas();
+  $("titulo-sel").textContent = tituloSeleccion(sel, cs);
+  let sub = "";
+  if (sel.tipo === "todas") sub = cs.length + (cs.length === 1 ? " búsqueda registrada" : " búsquedas registradas");
+  else if (sel.tipo === "dia") { const g = agruparPorDia(cs).find(x => x.dia === sel.dia); if (g) sub = g.corridas.length + (g.corridas.length === 1 ? " búsqueda · " : " búsquedas · ") + g.total + " ofertas relevantes nuevas"; }
+  else if (sel.tipo === "hora") { const c = cs.find(x => x.id === sel.id); if (c) sub = "De " + horaDe(c.inicio) + " a " + horaDe(c.fin) + " · " + fechaLarga(c.inicio.slice(0, 10)) + " · " + c.nuevas + " ofertas relevantes nuevas"; }
+  else sub = "Ofertas detectadas fuera de toda búsqueda registrada.";
+  $("sub-sel").textContent = sub;
+  const mini = $("fuentes-sel"), panel = $("panel-corrida");
+  const c = sel.tipo === "hora" ? cs.find(x => x.id === sel.id) : null;
+  if (c) {
+    mini.hidden = false; panel.hidden = true;
+    mini.replaceChildren(...(c.fuentes.length ? c.fuentes.map(f => h("div", { class: "fuente-mini", title: textoVentana(f) },
+      h("div", { class: "nombre" }, f.fuente),
+      h("div", { class: "cifras" }, (f.encontradas ?? 0) + (f.encontradas === 1 ? " encontrada · " : " encontradas · "),
+        h("span", { class: f.relevantes ? "rel" : null }, (f.relevantes ?? 0) + (f.relevantes === 1 ? " nueva relevante" : " nuevas relevantes")),
+        f.errores ? h("span", { class: "err" }, " · " + f.errores + (f.errores === 1 ? " error" : " errores")) : null),
+      f.antiguas ? h("div", { class: "antiguas" }, textoAntiguas(f.antiguas)) : null))
+      : [h("div", { class: "sub" }, "Esta búsqueda no guardó el detalle por fuente.")]));
+    return;
+  }
+  mini.hidden = true;
+  const u = cs[0]; panel.hidden = !u; if (!u) return;
+  $("corrida").replaceChildren(h("table", { class: "fuentes" }, h("tr", {}, h("th", {}, "Fuente"), h("th", {}, "Encontradas"), h("th", {}, "Relevantes nuevas"), h("th", {}, "Errores")),
+    u.fuentes.map(f => h("tr", { title: textoVentana(f) }, h("td", {}, f.fuente), h("td", {}, f.encontradas, f.antiguas ? h("div", { class: "sub" }, textoAntiguas(f.antiguas)) : null),
+      h("td", {}, f.relevantes), h("td", {}, f.errores)))),
+    h("ul", { class: "avisos" }, h("li", {}, "BNE: 1 error de conexión (ejemplo de aviso)")));
+}
+
+// ---------- pestañas y filtros
+function pasa(o) {
+  const f = S.f;
+  if (f.texto && !coincideTexto(o, f.texto)) return false;
+  if (S.pestana === "ofertas" && f.estado !== "activas" && f.estado !== "" && o.estado !== f.estado) return false;
+  for (const k of ["prioridad", "modalidad", "fuente", "tipo"]) if (f[k] && o[k] !== f[k]) return false;
+  return true;
+}
+function pintarPestanas() {
+  $("pestanas").replaceChildren(...PESTANAS.map(([id, nombre]) => h("button", { type: "button", role: "tab", "aria-selected": String(S.pestana === id),
+    onclick: () => { S.pestana = id; pintar(); } }, nombre, h("span", { class: "cuenta" }, listaDe(S.datos, id, S.sel).length))));
+}
+function selector(clave, etiqueta, opciones, extra, nombre) {
+  const s = h("select", { "aria-label": etiqueta, onchange: e => { S.f[clave] = e.target.value; pintarLista(); pintarFiltros(); } },
+    ...(extra || [h("option", { value: "" }, etiqueta + ": todas")]), ...opciones.map(v => h("option", { value: v }, nombre ? nombre(v) : v)));
+  s.value = S.f[clave]; return s;
+}
+function pintarFiltros() {
+  const base = S.pestana === "ofertas" || S.pestana === "seguimiento" ? S.datos.principal : (S.datos[S.pestana] || []);
+  const unicos = campo => [...new Set(base.map(o => o[campo]).filter(Boolean))].sort();
+  const partes = [h("input", { type: "search", placeholder: "Buscar por cargo, empresa, texto o notas…  (tecla / )", "aria-label": "Buscar", value: S.f.texto,
+    oninput: e => { S.f.texto = e.target.value; pintarLista(); } })];
+  if (S.pestana === "ofertas") partes.push(selector("estado", "Estado", ["nueva", "revisada"], [h("option", { value: "activas" }, "Estado: activas"), h("option", { value: "" }, "Estado: todas")]));
+  if (S.pestana === "ofertas" || S.pestana === "seguimiento")
+    partes.push(selector("prioridad", "Prioridad", ["Alta", "Media", "Baja"]), selector("modalidad", "Modalidad", unicos("modalidad")), selector("tipo", "Tipo", unicos("tipo")));
+  partes.push(selector("fuente", "Fuente", unicos("fuente"), null, nombreFuente));
+  if (S.pestana === "ofertas") {
+    const g = h("select", { "aria-label": "Agrupar", onchange: e => { S.agrupar = e.target.value; pintarLista(); } },
+      h("option", { value: "prioridad" }, "Agrupar: prioridad"), h("option", { value: "fuente" }, "Agrupar: fuente"));
+    g.value = S.agrupar; partes.push(g);
+  }
+  const vista = v => h("button", { type: "button", class: "btn-vista", "aria-pressed": String(S.densidad === v),
+    onclick: () => { S.densidad = v; try { localStorage.setItem("densidad", v); } catch (e) {} pintarLista(); pintarFiltros(); } }, v === "tarjetas" ? "Tarjetas" : "Compacta");
+  partes.push(h("div", { class: "selector-vista", role: "group", "aria-label": "Densidad de la lista" }, vista("tarjetas"), vista("compacta")));
+  const vacios = FILTROS_VACIOS();
+  if (Object.keys(vacios).some(k => S.f[k] !== vacios[k]))
+    partes.push(h("button", { type: "button", class: "btn-limpiar-filtros", onclick: () => { S.f = FILTROS_VACIOS(); pintarLista(); pintarFiltros(); } }, "Limpiar filtros"));
+  $("filtros").replaceChildren(...partes);
+}
+
+// ---------- tarjetas
+function selectorEstado(o) {
+  const s = h("select", { class: "estado", "aria-label": "Estado de seguimiento de " + (o.titulo || "la oferta"), onchange: e => cambiarEstado(o, e.target.value) },
+    ESTADOS.map(v => h("option", { value: v }, ETIQUETA_ESTADO[v])));
+  s.value = o.estado; return s;
+}
+const inicial = o => ((o.empresa || "?").trim().charAt(0) || "?").toUpperCase();
+const clasePrio = o => o.prioridad ? " prio-" + o.prioridad.toLowerCase() : "";
+function tarjeta(o, completa) {
+  const url = urlSegura(o.url);
+  const meta = [o.empresa, o.ubicacion, completa ? o.modalidad : null, o.publicada ? "publicada " + fechaCL(o.publicada) : "sin fecha", nombreFuente(o.fuente)].filter(Boolean);
+  const chips = [];
+  if (completa) {
+    if (o.estado === "nueva") chips.push(h("span", { class: "chip nueva" }, "nueva"));
+    if (o.prioridad) chips.push(h("span", { class: "chip " + o.prioridad }, o.prioridad));
+    for (const v of [o.tipo, o.contrato, o.experiencia && o.experiencia !== "No indicada" ? o.experiencia : ""]) if (v) chips.push(h("span", { class: "chip" + (/plazo/i.test(v) ? " aviso" : "") }, v));
+    if (sueldoConocido(o.sueldo)) chips.push(h("span", { class: "chip sueldo" }, o.sueldo));
+    const cd = (o.estado === "postulada" || o.estado === "entrevista") ? chipDias(diasDesde(o.fecha_postulacion, hoy())) : null;
+    if (cd) chips.push(h("span", { class: "chip " + cd.clase }, cd.texto));
+    for (const s of extraerSkills(o)) chips.push(h("span", { class: "skill" }, s));
+  }
+  return h("article", { class: "tarjeta" + clasePrio(o) + (CERRADOS.has(o.estado) ? " cerrada" : "") },
+    h("div", { class: "tarjeta-header" },
+      h("div", { class: "avatar-empresa", "aria-hidden": "true" }, inicial(o)),
+      h("div", { class: "tarjeta-titulos" },
+        h("div", { class: "fila-titulo" },
+          h("a", { class: "titulo", href: url, target: "_blank", rel: "noopener noreferrer" }, o.titulo || "(sin título)"),
+          h("a", { class: "btn-enlace-externo", href: url, target: "_blank", rel: "noopener noreferrer", "aria-label": "Abrir el aviso en " + nombreFuente(o.fuente) }, "↗"),
+          selectorEstado(o)),
+        h("div", { class: "meta-limpia" }, meta.flatMap((m, i) => i ? [h("span", { class: "meta-sep", "aria-hidden": "true" }, "·"), h("span", {}, m)] : [h("span", {}, m)])))),
+    chips.length ? h("div", { class: "chips" }, chips) : null,
+    completa && o.motivo ? h("div", { class: "motivo" }, o.motivo) : null,
+    completa && o.notas ? h("div", { class: "notas" }, "Notas: " + o.notas) : null,
+    !completa && o.razon ? h("div", { class: "razon" }, "Motivo: " + o.razon) : null);
+}
+function filaCompacta(o) {
+  const url = urlSegura(o.url);
+  return h("div", { class: "fila-compacta" + clasePrio(o) },
+    h("div", { class: "avatar-empresa", "aria-hidden": "true" }, inicial(o)),
+    h("div", { class: "cargo-box" }, h("a", { class: "cargo-titulo", href: url, target: "_blank", rel: "noopener noreferrer" }, o.titulo || "(sin título)"),
+      h("span", { class: "cargo-empresa" }, [o.empresa, o.ubicacion].filter(Boolean).join(" · "))),
+    sueldoConocido(o.sueldo) ? h("span", { class: "chip sueldo ocultar-movil" }, o.sueldo) : h("span", { class: "sub ocultar-movil" }, "—"),
+    o.prioridad ? h("span", { class: "chip " + o.prioridad + " ocultar-movil" }, o.prioridad) : h("span", { class: "ocultar-movil" }),
+    h("span", { class: "sub ocultar-movil" }, o.modalidad || "—"),
+    selectorEstado(o),
+    h("a", { class: "btn-enlace-externo", href: url, target: "_blank", rel: "noopener noreferrer", "aria-label": "Abrir el aviso" }, "↗"));
+}
+function pintarLista() {
+  const cont = $("lista"), filas = listaDe(S.datos, S.pestana, S.sel).filter(pasa);
+  if (!filas.length) { cont.replaceChildren(h("div", { class: "vacio" }, S.pestana === "ofertas" ? "No hay ofertas con estos filtros." : "Nada que mostrar aquí.")); return; }
+  const completa = S.pestana === "ofertas" || S.pestana === "seguimiento";
+  const pintarGrupo = lista => S.densidad === "compacta" ? [h("div", { class: "tabla-compacta" }, lista.map(filaCompacta))] : lista.map(o => tarjeta(o, completa));
+  if (S.pestana !== "ofertas") { cont.replaceChildren(...pintarGrupo(filas)); return; }
+  const porFuente = S.agrupar === "fuente", grupos = new Map();
+  for (const o of filas) { const k = porFuente ? nombreFuente(o.fuente) : (o.prioridad || "sin prioridad"); if (!grupos.has(k)) grupos.set(k, []); grupos.get(k).push(o); }
+  const orden = ["Alta", "Media", "Baja"];
+  const claves = [...grupos.keys()].sort(porFuente ? (a, b) => grupos.get(b).length - grupos.get(a).length || a.localeCompare(b) : (a, b) => (orden.indexOf(a) + 1 || 9) - (orden.indexOf(b) + 1 || 9));
+  cont.replaceChildren(...claves.flatMap(k => [h("h3", { class: "grupo" }, porFuente ? k : "Prioridad " + k, h("span", { class: "cuenta" }, grupos.get(k).length)), ...pintarGrupo(grupos.get(k))]));
+}
+function pintar() { pintarHistorial(); pintarEncabezado(); pintarPestanas(); pintarFiltros(); pintarLista(); }
+
+// atajo: "/" o Ctrl+K enfocan el buscador (salvo que ya se esté escribiendo en un campo)
+window.addEventListener("keydown", e => {
+  const escribiendo = ["INPUT", "TEXTAREA", "SELECT"].includes((document.activeElement || {}).tagName);
+  if ((e.key === "/" && !escribiendo) || ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k")) {
+    e.preventDefault(); const b = document.querySelector(".filtros input[type=search]"); if (b) { b.focus(); b.select(); }
+  }
+});
+pintar();
+</script>
+</body>
+</html>
