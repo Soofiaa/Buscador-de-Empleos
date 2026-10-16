@@ -49,14 +49,10 @@ TERMINOS_CHILETRABAJOS = ["analista funcional", "analista de procesos", "analist
                           "analista programador", "desarrollador junior", "analista de datos",
                           "analista de reporteria", "control de gestion", "analista de operaciones", "datos maestros",
                           "informatico junior"]
-# LinkedIn: endpoint público para invitados (sin cuenta). Ver linkedin.py.
-TERMINOS_LINKEDIN = ["analista funcional", "QA", "tester", "analista de procesos",
-                     "desarrollador python", "desarrollador backend", "analista de sistemas",
-                     "analista de datos junior", "informatico junior"]
 # Los listados de estos portales vienen recortados: el detalle de cada aviso se abre SOLO para ofertas nuevas que
 # podrían servir (las más recientes primero), con este tope por corrida. Las que no alcanzan no se guardan: quedan
 # para la próxima corrida.
-MAX_DETALLES = {"bne": 5, "trabajando": 5, "chiletrabajos": 10, "linkedin": 5}
+MAX_DETALLES = {"bne": 5, "trabajando": 5, "chiletrabajos": 10}
 DIAS_RECORDAR_404 = 30
 ERRORES_SEGUIDOS_PARA_ABORTAR = 3
 # Fuentes que no son Indeed no traen código de región fiable: la ubicación debe

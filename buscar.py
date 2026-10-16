@@ -24,7 +24,6 @@ import bne
 import chiletrabajos
 import config
 import getonboard
-import linkedin
 import telemetria
 import trabajando
 from red import Bloqueo, ClienteHTTP, ErrorFuente, NoEncontrada, USER_AGENT_HTTP
@@ -40,7 +39,7 @@ def _say(mensaje: str):
     salida(mensaje)
 
 
-PORTALES = {"bne": bne, "trabajando": trabajando, "chiletrabajos": chiletrabajos, "linkedin": linkedin}
+PORTALES = {"bne": bne, "trabajando": trabajando, "chiletrabajos": chiletrabajos}
 ESTADOS = ["nueva", "revisada", "postulada", "entrevista", "descartada"]
 ESTADOS_CERRADOS = {"postulada", "entrevista", "descartada"}
 LIMITE_DESCARTADAS = 300   # la página muestra las descartadas más recientes (con su motivo)
@@ -509,7 +508,7 @@ def _recordar_404(con, sitio, termino):
 
 def _terminos_portal(sitio):
     return {"bne": config.TERMINOS_BNE, "trabajando": config.TERMINOS_TRABAJANDO,
-            "chiletrabajos": config.TERMINOS_CHILETRABAJOS, "linkedin": config.TERMINOS_LINKEDIN}[sitio]
+            "chiletrabajos": config.TERMINOS_CHILETRABAJOS}[sitio]
 
 
 def _es_candidata(raw: dict) -> bool:

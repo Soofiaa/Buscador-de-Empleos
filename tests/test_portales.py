@@ -262,24 +262,28 @@ def test_linkedin_respuesta_vacia_es_error_de_fuente():
         linkedin.parsear_listado("")
 
 
-def test_linkedin_flujo_portal(con, monkeypatch):
-    ahora = datetime(2026, 10, 15, 12, 0, tzinfo=ZONA)
-    monkeypatch.setattr(config, "TERMINOS_LINKEDIN", ["analista funcional"])
-    monkeypatch.setitem(config.MAX_DETALLES, "linkedin", 2)
-    cli = Falso({"seeMoreJobPostings": (200, leer("linkedin_listado.html")),
-                 "jobPosting": (200, leer("linkedin_detalle.html"))})
-    st = {"encontradas": 0, "relevantes": 0, "sin_chile": 0, "errores": 0}
-    avisos = []
-    buscar._buscar_portal(con, "linkedin", st, avisos, cli, RobotsLibre(), ahora, 40)
-    detalles = [u for u in cli.pedidas if "jobPosting" in u]
-    assert len(detalles) <= 2
-    filas = con.execute("SELECT url, fuente, titulo FROM ofertas").fetchall()
-    assert filas and all(f["fuente"] == "linkedin" for f in filas)
+def test_linkedin_listar_con_red():
+    cli = Falso({"seeMoreJobPostings": (200, leer("linkedin_listado.html"))})
+    df = linkedin.listar("analista funcional", cli, RobotsLibre())
+    assert len(df) == 10 and list(df.columns) == linkedin.COLUMNAS
+    assert (df["title"] != "").all()
+
+
+def test_linkedin_en_consulta_y_config():
+    assert "linkedin" in config.SITIOS
+    assert "linkedin" in config.NOMBRE_FUENTE
+    kw = buscar.consulta("linkedin", "QA", "Santiago, Chile", dias=2)
+    assert kw["site_name"] == ["linkedin"]
+    assert kw["search_term"] == "QA"
+    assert kw["location"] == "Santiago, Chile"
+    assert kw["hours_old"] == 48
+
 
 
 def test_los_portales_estan_en_las_fuentes_y_tienen_nombre():
-    for s in ("bne", "trabajando", "chiletrabajos", "linkedin"):
+    for s in ("bne", "trabajando", "chiletrabajos"):
         assert s in config.SITIOS and s in config.NOMBRE_FUENTE and s in config.MAX_DETALLES
+    assert "linkedin" in config.SITIOS and "linkedin" in config.NOMBRE_FUENTE
     assert "ocupacion:7643" in config.TERMINOS_BNE
-    assert len(config.TERMINOS_LINKEDIN) > 0
+
 
