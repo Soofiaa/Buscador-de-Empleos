@@ -24,6 +24,7 @@ import bne
 import chiletrabajos
 import config
 import getonboard
+import linkedin
 import telemetria
 import trabajando
 from red import Bloqueo, ClienteHTTP, ErrorFuente, NoEncontrada, USER_AGENT_HTTP
@@ -39,7 +40,7 @@ def _say(mensaje: str):
     salida(mensaje)
 
 
-PORTALES = {"bne": bne, "trabajando": trabajando, "chiletrabajos": chiletrabajos}
+PORTALES = {"bne": bne, "trabajando": trabajando, "chiletrabajos": chiletrabajos, "linkedin": linkedin}
 ESTADOS = ["nueva", "revisada", "postulada", "entrevista", "descartada"]
 ESTADOS_CERRADOS = {"postulada", "entrevista", "descartada"}
 LIMITE_DESCARTADAS = 300   # la página muestra las descartadas más recientes (con su motivo)
@@ -508,7 +509,7 @@ def _recordar_404(con, sitio, termino):
 
 def _terminos_portal(sitio):
     return {"bne": config.TERMINOS_BNE, "trabajando": config.TERMINOS_TRABAJANDO,
-            "chiletrabajos": config.TERMINOS_CHILETRABAJOS}[sitio]
+            "chiletrabajos": config.TERMINOS_CHILETRABAJOS, "linkedin": config.TERMINOS_LINKEDIN}[sitio]
 
 
 def _es_candidata(raw: dict) -> bool:
@@ -621,8 +622,9 @@ def buscar_ofertas(con) -> int:
             for t in (config.TERMINOS_A + config.TERMINOS_B if s == "indeed" else config.TERMINOS_SECUNDARIOS)
             for l in (["Chile"] if s == "getonboard" else lugares)]   # la API de Get on Board no usa ubicación
     stats = {s: {"encontradas": 0, "antiguas": 0, "relevantes": 0, "sin_chile": 0, "errores": 0} for s in config.SITIOS}
-    # telemetría pasiva (solo contadores): JobSpy no expone sus solicitudes, se cuentan sus llamadas
-    tele = {s: telemetria.contador("http" if s in PORTALES or s == "getonboard" else "consulta") for s in config.SITIOS}
+    # telemetría pasiva (solo contadores): JobSpy no expone sus solicitudes, se cuentan sus llamadas, también por ubicación
+    tele = {s: (telemetria.contador("http") if s in PORTALES or s == "getonboard"
+                else telemetria.contador("consulta", lugares)) for s in config.SITIOS}
     total = 0
     avisos = []
     ahora = ahora_chile()
@@ -645,7 +647,7 @@ def buscar_ofertas(con) -> int:
         except Exception as e:
             st["errores"] += 1
             if sitio != "getonboard":                 # Get on Board ya anotó cada solicitud con su status
-                telemetria.anotar_excepcion(t, e)
+                telemetria.anotar_excepcion(t, e, lugar)
             _say(f"  ! [{sitio}] {etiqueta}: {type(e).__name__}: {e}")
             continue
         vacia = df is None or len(df) == 0
@@ -653,7 +655,7 @@ def buscar_ofertas(con) -> int:
             if vacia:
                 telemetria.anotar_vacia(t)
         else:
-            telemetria.anotar_consulta(t, 0 if vacia else len(df))
+            telemetria.anotar_consulta(t, 0 if vacia else len(df), lugar)
         df, antiguas = recientes(df, sitio, ahora, ventanas[sitio])   # antes de clasificar: no se guardan ni cuentan
         filas = procesar(df, f"{sitio} | {etiqueta}", sitio)
         nuevas = guardar(con, filas)
