@@ -419,3 +419,29 @@ POR VERIFICAR, objetos del esquema y las huellas de las ocho tablas coincidieron
 (o remoto internacional), el límite de hasta 2 años, el criterio de antigüedad (Associate se acepta y Mid-Senior se
 descarta) y la exclusión de BairesDev. No se pierden ni se reclasifican ofertas ya guardadas; futuras búsquedas
 vuelven a usar los filtros de la imagen anterior.
+
+# Rechazar nivel Mid-Senior en LinkedIn (despliegue del 16-10-2026; commit `a245ece`)
+
+Qué cambia: se descartan ofertas de LinkedIn que indiquen nivel Mid-Senior; Associate sigue aceptándose. Sin cambios
+de esquema ni reclasificación de ofertas existentes: para volver atrás basta con usar la imagen anterior y **no
+restaurar la base**.
+
+| Pieza | Valor |
+|---|---|
+| Imagen anterior | `job-tracker:linkedin-filtros-23241` (`sha256:d4d6b5347f13f5ced733f060f8ba3dad81f6ce2830f53714b4359eac6f8a45d9`) |
+| Imagen desplegada | `job-tracker:linkedin-mid-senior` = `job-tracker-jobtracker:latest` (`sha256:915bc9fd6217faac57431091bf4804844f5119592c15e52c5f989cc677ad6694`) |
+| Referencia de la base | `ofertas_pre_mid_senior_20261016.db` (volumen y `C:\Users\sofia\Respaldos\job-tracker-referencias\`), sha256 `e3856c8346f07a065c8bc65213d2aa674049012d38d01e78c65ba2e35ebc0dd3`, integrity_check `ok` |
+
+```
+docker compose stop jobtracker
+docker tag job-tracker:linkedin-filtros-23241 job-tracker-jobtracker:latest
+docker compose up -d --no-build
+```
+
+Probado sobre una copia de la referencia en un volumen temporal: la imagen anterior quedó healthy; `/`,
+`/api/estado`, `/api/ofertas` y `/api/respaldo` respondieron 200; las huellas de las ocho tablas y los conteos
+coincidieron con la referencia. El contenedor y volumen temporales se borraron.
+
+**Qué se pierde mientras corra la imagen anterior:** la regla que descarta explícitamente nivel Mid-Senior. No se
+pierden ni se reclasifican ofertas guardadas; Associate y los demás filtros de LinkedIn de la imagen anterior
+permanecen.

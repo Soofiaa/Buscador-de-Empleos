@@ -3,11 +3,11 @@
 ## Estado actual (se actualiza en cada despliegue; leer al empezar cada sesión)
 
 ### Producción y base
-- **Base real — línea base OFICIAL (16-10-2026, 11:30, despliegue de filtros LinkedIn; vigente):** v7,
+- **Base real — línea base OFICIAL (16-10-2026, 12:35, regla de antigüedad LinkedIn; vigente):** v7,
   integrity_check ok, 1967 ofertas, 17 corridas, 44 filas en `historial_estados`, 16 postuladas, 6 POR VERIFICAR;
   estados descartada/nueva 1838 · principal/descartada 88 · principal/entrevista 1 · principal/nueva 24 ·
   principal/postulada 16.
-  - Medida con `huellas.py` sobre la referencia `ofertas_pre_linkedin_filtros_20261016.db` (contenedor detenido) y
+  - Medida con `huellas.py` sobre la referencia `ofertas_pre_mid_senior_20261016.db` (contenedor detenido) y
     repetida en la base real después del despliegue y después de las comprobaciones: idéntica las tres veces.
   - sha256 por tabla: ajustes (4) `8928191ee9f0b506cee48f285e4167b71105de6cf7871705417a6518c3797aec` ·
     alertas (0) `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` ·
@@ -23,22 +23,25 @@
   Referencia: `ofertas_pre_telemetria_20261015.db` (`844341c7…`).
 - **Medición del 15-10-2026, mañana (solo conteos):** v7, integrity_check ok, 1321 ofertas, 9 corridas, 15 postuladas.
 - **Medición del 14-10-2026:** 1223 ofertas, 7 corridas, 14 postuladas, `historial_estados` con 4 filas.
-- **Última referencia (oficial):** `ofertas_pre_linkedin_filtros_20261016.db` (volumen y
+- **Última referencia (oficial):** `ofertas_pre_mid_senior_20261016.db` (volumen y
   `C:\Users\sofia\Respaldos\job-tracker-referencias\`), sha256
   `e3856c8346f07a065c8bc65213d2aa674049012d38d01e78c65ba2e35ebc0dd3` en las dos copias, integrity_check ok.
   Tomada con el contenedor detenido (salida 0).
-- **En producción (16-10-2026, 11:30):** commit local `23241ba` (rama `feat/contadores-ubicacion`, sin push);
-  imagen `job-tracker-jobtracker:latest` y `job-tracker:linkedin-filtros`,
-  `sha256:d4d6b5347f13f5ced733f060f8ba3dad81f6ce2830f53714b4359eac6f8a45d9`.
+- **En producción (16-10-2026, 12:35):** commit local `a245ece` (rama `feat/contadores-ubicacion`, sin push);
+  imagen `job-tracker-jobtracker:latest` y `job-tracker:linkedin-mid-senior`,
+  `sha256:915bc9fd6217faac57431091bf4804844f5119592c15e52c5f989cc677ad6694`.
   - Reconstruida con `docker compose build` y levantada con `docker compose up -d`; health `healthy`.
-  - Imagen anterior identificada en producción como código de `229f120`, etiquetada `job-tracker:linkedin-229f`
-    (`sha256:d4529c349a47a830c421a161b64dd58cf31ce47486e7f9104e4eb7d16d5f5c1a`); `docker compose stop` salió 0.
+  - Imagen anterior, del commit `23241ba`, etiquetada `job-tracker:linkedin-filtros-23241`
+    (`sha256:d4d6b5347f13f5ced733f060f8ba3dad81f6ce2830f53714b4359eac6f8a45d9`); `docker compose stop` salió 0.
   - Comprobado sin escrituras de datos: GET 200; Host y Origin ajenos 403; POST rechazados con 403, 400 y 413.
     Huellas completas, conteos, estados y objetos de las 8 tablas idénticos antes/después. `GET /api/respaldo` sin
     `error_auto`; último: `ofertas_auto_20261016-000213.db`.
-  - Referencia completa y reversión a la imagen anterior probadas sobre copias; ver `REVERSION_FASE_A.md`.
-- **Imágenes para volver atrás:** `job-tracker:linkedin-filtros` (`d4d6b534…`; producción actual),
-  `job-tracker:linkedin-229f` (`d4529c34…`; reversión inmediata),
+  - Candidata revisada: Associate aceptado y Mid-Senior descartado. Referencia y huellas completas idénticas.
+    No reclasifica ofertas guardadas ni altera la base. Reversión probada sobre una copia; ver `REVERSION_FASE_A.md`.
+- **Imágenes para volver atrás:** `job-tracker:linkedin-mid-senior` (`915bc9fd…`; producción actual),
+  `job-tracker:linkedin-filtros-23241` (`d4d6b534…`; reversión inmediata),
+  `job-tracker:linkedin-filtros` (`d4d6b534…`; etiqueta anterior del mismo artefacto),
+  `job-tracker:linkedin-229f` (`d4529c34…`; anterior a los filtros),
   `job-tracker:telemetria` (`ad7b2b19ced7…`; reversión en `REVERSION_FASE_A.md`),
   `job-tracker:137` (`ff5a2615…`), `job-tracker:c2` (`f1943914…`), `:c1`, `:respaldo`, `:B1`, `:genero`, `:soporte`, `:faseA`, `:fase0`.
   - Siguen las candidatas viejas `:historial-candidata`, `:respaldo-candidata`, `:faseB1-candidata`,
@@ -155,7 +158,7 @@
   carpetas) y el volumen `buscador-de-empleos_jt_datos` (0 contenedores; solo una base Node v5). **La papelera de
   OneDrive la vacía Sofia a mano;** mientras no lo haga, lo borrado sigue en la nube.
 - **C2 desplegada** el 13-10-2026. Sigue C3. B2 (importar) no se hará. Resiliencia sin aprobar.
-- **Filtro de LinkedIn y exclusión de BairesDev (16-10-2026; desplegado en `23241ba`):** no reclasifica ofertas
+- **Filtro de LinkedIn y exclusión de BairesDev (16-10-2026; desplegado en `a245ece`):** no reclasifica ofertas
   guardadas ni modifica estados. Se aceptan Santiago, Viña del Mar y Valparaíso si la ubicación identifica Chile.
   Si LinkedIn no indica ciudad, se busca una ciudad objetivo en la descripción; otras ciudades se descartan.
   Se acepta cualquier país si el aviso indica remoto. En experiencia se acepta un máximo de 2 años; rangos que
