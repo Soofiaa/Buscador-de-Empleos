@@ -3,37 +3,46 @@
 ## Estado actual (se actualiza en cada despliegue; leer al empezar cada sesión)
 
 ### Producción y base
-- **Base real:** v7, integrity_check ok, 1223 ofertas, 7 corridas, 14 postuladas, 6 POR VERIFICAR (notas con
-  "POR VERIFICAR").
-  - `historial_estados` tiene 4 filas (id 1 de origen `modal`, un cambio de fase a `postulacion`; ids 2 a 4 de origen
-    `lista`, 3 descartes de ofertas nuevas de la corrida 7), con sus 6 objetos.
-  - Estados: descartada/nueva 1158 · principal/descartada 51 · principal/postulada 14.
-  - sha256 por tabla: ofertas `0b0cdd232823e8a346f04f917fe5fcf07a5fa0ef7e12b8c7558d00ca72fd4caa` · historial_estados
-    `2d0571282216e7d4f26e7324091777129347551db2620d9f0993d30d6c438828` · corridas
-    `36016c3a2b471986c0280d25a7436cb56db4c480887222e8c42753a128c80238`.
-  - Medido el 14-10-2026 sobre el respaldo MANUAL `ofertas_manual_20261014-110711.db` (sha256
-    `e96b708207459018c313d3875a3e69306c0bb9d335606d5930f854744d771597`), hecho por Sofia después de la corrida 7.
-  - Frente al automático de las 00:04 solo cambian `ofertas` (+80, ninguna existente modificada), `corridas` (+1),
-    `historial_estados` (+3) y `sqlite_sequence`; sin tablas ni objetos nuevos.
-- **Última referencia:** `ofertas_pre_137_20261014.db` (volumen y `C:\Users\sofia\Respaldos\job-tracker\`, fuera de
-  OneDrive), sha256 `f42673e5451fd53891c4281fa9f0b67b0340f1ed3f846f933922bac209dbb1ec` (igual a
-  `ofertas_auto_20261014-000439` y `ofertas_manual_20261013-233504`). La anterior, `ofertas_pre_c2_20261013.db`
-  (`309228dd…`), se conserva.
-- **En producción (14-10-2026, 10:15):** commit `a7339c1` (incluye `6660133` «informático junior», `9561c19` cierre
-  con SIGTERM y `a7339c1` respaldos atómicos), imagen `job-tracker:137-respaldo-candidata`
-  `sha256:ff5a2615845e1b7a57719015697166e31c319972ce6efbb3e3ac99809b1bbc3f`, desplegada sin reconstruir
-  (`docker tag` + `docker compose up -d --no-build`). StopTimeout 15 s.
-  - Primer stop (imagen vieja): SIGTERM → SIGKILL a los 3,0 s, código 137; integrity_check ok y sin -wal después. El
-    contenedor viejo no tenía StopTimeout (se creó antes del `stop_grace_period`).
-  - Segundo stop (imagen nueva): `docker compose stop` en 595 ms, SIGTERM → salida 0 en 343 ms, sin SIGKILL,
-    «Servidor detenido.» en el log; integrity_check ok y huellas iguales.
-- **Imágenes para volver atrás:** `job-tracker:c2` (= `:c2-candidata`, `f1943914…`; reversión en
-  `REVERSION_FASE_A.md`, probada), `:c1` (`c461ada1…`), `:respaldo` (`ac00ce13…`), `:B1`, `:genero`, `:soporte`,
-  `:faseA`, `:fase0`.
+- **Base real — línea base OFICIAL (15-10-2026, 23:45, despliegue de LinkedIn y contadores; vigente):** v7, integrity_check
+  ok, 1588 ofertas, 14 corridas, 15 filas en `historial_estados`, 16 postuladas, 6 POR VERIFICAR; estados
+  descartada/nueva 1512 · principal/descartada 60 · principal/postulada 16.
+  - Medida con `huellas.py` sobre la referencia oficial `ofertas_pre_linkedin_20261015.db` (contenedor detenido) y
+    repetida en la base real después de desplegar y después de las comprobaciones: idéntica las tres veces.
+  - sha256 por tabla: ajustes (4) `8928191ee9f0b506cee48f285e4167b71105de6cf7871705417a6518c3797aec` ·
+    alertas (0) `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` ·
+    corridas (14) `15850a30cd2fa782fe020f503e78030f977fbd21957509cc754aba4aa5efd999` ·
+    historial_estados (15) `ccf3f3a5da6f46cf02cc5546417b41f640f9cf47faa9f2420d125606ee46b087` ·
+    ofertas (1588) `f27311349d9eeacd36056c1fd16339bc031fbdf8dff15f50b9dac33a2f4c080b` ·
+    pruebas_fuentes (0) `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` ·
+    sqlite_sequence (2) `48c26b24f6639345d4baaa3c40bd611da7daa4805a9900a9f7e47b01a9cfb330` ·
+    terminos_no_disponibles (2) `0821946c3a741fa08fe0d2d793030aa14a531e6bf00096b4aa102d92f1e6d8c5`.
+- **Mediciones anteriores (no mezclar sus cifras con la oficial):**
+- **Medición del 15-10-2026, 18:53 (telemetría):** 1536 ofertas, 12 corridas, 14 historial, 15 postuladas.
+  Referencia: `ofertas_pre_telemetria_20261015.db` (`844341c7…`).
+- **Medición del 15-10-2026, mañana (solo conteos):** v7, integrity_check ok, 1321 ofertas, 9 corridas, 15 postuladas.
+- **Medición del 14-10-2026:** 1223 ofertas, 7 corridas, 14 postuladas, `historial_estados` con 4 filas.
+- **Última referencia (oficial):** `ofertas_pre_linkedin_20261015.db` (volumen y
+  `C:\Users\sofia\Respaldos\job-tracker-referencias\`), sha256
+  `dce49a107791bc8c2a65b5d382cfab1e43d8341fa507cd73ebcfc823440e895d` en las dos copias, integrity_check ok. Tomada con
+  el contenedor detenido (salida 0). Las anteriores se conservan: `ofertas_pre_telemetria_20261015.db` (`844341c7…`),
+  `ofertas_pre_137_20261014.db` (`f42673e5…`), `ofertas_pre_c2_20261013.db` (`309228dd…`).
+- **En producción (15-10-2026, 23:45):** código de `62dc59d` (rama `feat/contadores-ubicacion`), imagen
+  `job-tracker-jobtracker:latest`, `sha256:22c86fa2872dad7cb9f7d4a7ab27539e6f79e3b0c552fa69fe6f549e5440a83c`.
+  - Reconstruido con `docker compose build` y levantado con `docker compose up -d`.
+  - Stop de la imagen anterior: `docker compose stop`, salida 0, «Servidor detenido.», sin SIGKILL.
+  - Comprobado sin escribir: GET 200; Host u Origin ajeno 403; POST rechazados (403, 413 y 400) sin tocar la base;
+    «Último respaldo» = `ofertas_auto_20261015-110938` sin `error_auto`.
+  - Anterior: imagen `ad7b2b19…` (15-10, 18:53), con la etiqueta `job-tracker:telemetria`.
+- **Imágenes para volver atrás:** `job-tracker:telemetria` (`ad7b2b19ced7…`; reversión en `REVERSION_FASE_A.md`),
+  `job-tracker:137` (`ff5a2615…`), `job-tracker:c2` (`f1943914…`), `:c1`, `:respaldo`, `:B1`, `:genero`, `:soporte`, `:faseA`, `:fase0`.
   - Siguen las candidatas viejas `:historial-candidata`, `:respaldo-candidata`, `:faseB1-candidata`,
     `:faseA-candidata` y `:137-candidata` (`f9b15255…`); se borran si Sofia lo aprueba.
   - Contenedores detenidos que esperan la limpieza (no se tocan sin aprobación): `jt_revision_c2` (255, por el apagado
-    del 14-10), `jt_revision_137` y `jt_revision_137r` (0), con sus volúmenes.
+    del 14-10), `jt_revision_137` y `jt_revision_137r` (0), `jt_revision_telemetria` y `jt_revision_telemetria_rev`
+    (0, 15-10), con sus volúmenes.
+- **Nombres de respaldo fuera de formato** (`481aab7`, desplegado el 15-10): los nombres que no
+  calzan con `ofertas_(auto|manual)_AAAAMMDD-HHMMSS.db` se ignoran: no cuentan como «Último respaldo», no cuentan para
+  la retención y nunca se borran.
 - **Commits sin push:** no se anotan aquí; se cuentan siempre con `git rev-list --count origin/main..HEAD`.
 
 ### Hallazgos del 14-10-2026
@@ -67,22 +76,61 @@
   se hace público, se publica una copia limpia (sin ese historial).
 
 ### Pendientes
-- **Commit 3: orden de `listar()`** — **en `main` (`09409f3`) pero NO desplegado**; la imagen en producción
-  (`ff5a2615…`) sigue con el orden anterior. Se despliega solo con aprobación de Sofia, después de verificar el
-  respaldo automático del 15-10. `listar()` ordenaba por nombre y dejaba todos los manuales antes que los auto, así que
-  «Último respaldo» muestra el manual del 13-10 23:35 aunque el auto del 14-10 00:04 es más nuevo; ahora ordena por la
-  fecha del nombre. Los nombres siempre son `ofertas_{auto|manual}_AAAAMMDD-HHMMSS.db` (un solo lugar los genera,
-  `respaldo.respaldar`, sin sufijo por colisión). `_retener` no cambia: filtra solo los auto válidos; los manuales e
-  incompletos no cuentan ni se borran.
+- **Commit 3: orden de `listar()`** (`09409f3`) — **desplegado el 15-10-2026** con la telemetría. `listar()` ordenaba
+  por nombre y dejaba todos los manuales antes que los auto, así que «Último respaldo» mostraba un manual más viejo
+  aunque hubiera un auto más nuevo; ahora ordena por la fecha del nombre. Los nombres siempre son
+  `ofertas_{auto|manual}_AAAAMMDD-HHMMSS.db` (un solo lugar los genera, `respaldo.respaldar`, sin sufijo por
+  colisión). `_retener` no cambia: filtra solo los auto válidos; los manuales e incompletos no cuentan ni se borran.
+- **Telemetría pasiva de corridas** (`e754ff6`) — **desplegada el 15-10-2026, 18:53**. Las corridas 1 a 12 no la
+  traen (la imagen anterior no la tenía); la primera corrida con telemetría la lanza Sofia. Solo contadores por fuente
+  en `corridas.detalle.fuentes[i].telemetria` (solicitudes, códigos 200/403/404/429/5xx/otros/conexión, vacías) y una
+  línea `[corrida]` en stderr; sin URLs, parámetros ni términos, sin DDL (v7), las corridas antiguas no cambian. No
+  cambia pausas, reintentos ni orden.
+  - Es **por fuente, no por término**: no dice qué término falló.
+  - **Indeed y Glassdoor** (JobSpy) se miden como «consultas» (llamadas, vacías y errores); JobSpy no expone sus
+    solicitudes y no se intercepta `requests` dentro de la librería. Un 429 que JobSpy traga aparece como vacía, así
+    que **un bloqueo se detecta cuando todas las consultas de una corrida salen vacías en una fuente que antes
+    devolvía resultados**.
 - **«informático junior» ACTIVO** desde el 14-10-2026: término en Indeed, Glassdoor/Get on Board y Chiletrabajos
   (8 solicitudes más por corrida) y regla de último recurso A: TI, Baja. **Criterio de salida:** contar las ofertas
   que lleguen con el motivo «rol: informático junior»; si en unas 10 corridas no llega ninguna útil, se quita el
   término.
   - Cuenta como «oferta útil» una que entre como principal con el motivo «rol: informático junior». Corridas medidas
-    con el término: 1 (7).
-- **Limpieza** (espera aprobación): contenedores y volúmenes `jt_revision_c2`, `jt_revision_137`, `jt_revision_137r`
-  (y sus `_respaldos`), las 5 candidatas viejas y las copias del scratchpad. Se conservan `:c2`, `:c2-candidata`,
-  `:137-respaldo-candidata` (producción) y las etiquetas de vuelta atrás.
+    con el término: 6 (7 a 12), 0 ofertas útiles; el término trajo 1 oferta (corrida 7, descartada por práctica /
+    estudiante) y 0 en las corridas 8 a 12. «Traídas por el término» cuenta solo ofertas NUEVAS guardadas, atribuidas
+    al primer término que las encontró (las repetidas de otro término no aparecen): esos 0 son un piso, no una
+    medición exacta. Medido en la referencia oficial `ofertas_pre_telemetria_20261015.db`.
+- **Diagnóstico de términos (15-10-2026, solo lectura; plan PENDIENTE de aprobación, nada decidido salvo la fase a).**
+  Sobre la referencia oficial (corridas 1 a 12) y una copia de solo lectura de la base viva (corrida 13). «Traídas»
+  cuenta solo ofertas NUEVAS atribuidas al primer término que las encontró: es un piso.
+  - Indeed: 13 de 30 términos nunca dieron una principal (datos maestros, master data, key user, asistente de
+    proyectos, PMO, analista de operaciones, analista SAP, analista de datos junior, tester, BPMN, desarrollador
+    junior, desarrollador frontend, informático junior); «desarrollador junior» y «desarrollador frontend» devuelven 0.
+    Mantener pese a llevar 6+ corridas sin útil: analista funcional (3 en seguimiento), usuario clave (2), testing.
+  - Get on Board: 0 principales en toda la historia (sobre todo por senior). Glassdoor: solo «analista de sistemas» y
+    «analista de procesos» dieron alguna.
+  - Ubicaciones: Viña (30 consultas de Indeed por corrida) 0 principales en toda la historia; remoto 0 desde la
+    corrida 1; Glassdoor remoto 0 traídas. Ninguna de las 75 principales está en la Región de Valparaíso; las 12
+    remotas vienen de Chiletrabajos (11) y de la consulta de Santiago de Indeed (1).
+  - Cobertura: QA/testing llega sobre todo por Chiletrabajos («analista qa»); en Indeed faltan «analista QA»,
+    automatización de pruebas, RPA y «programador». No hay términos de soporte (unas 0,6 ofertas de soporte por
+    corrida llegan por otros términos, 41 % principales).
+  - Clasificador (si se agregan términos de soporte): «Soporte Funcional» queda descartada (sin rol); «Operario
+    Nivel 1» entra como S (falso positivo de `nivel 1`); call center, soporte en terreno y «soporte» sin contexto TI
+    entran como S.
+  - **Plan propuesto, por fases, cada una con su diff, pruebas, candidata y despliegue:** (a) contadores —
+    `"200": null` («no medido») y `por_ubicacion` en Indeed/Glassdoor; **aprobada el 15-10 y en curso en la rama
+    `feat/contadores-ubicacion`, sin desplegar**; (b) retiros de términos y ubicaciones (opciones A: solo Santiago, B:
+    Viña y remoto solo para 6 términos, C: sin Viña, D: sin cambios) — **pendiente**; (c) términos nuevos (analista
+    QA, automatización de pruebas, programador, RPA) y de soporte, con los ajustes del clasificador — **pendiente**.
+- **Falso positivo «Desarrollador de Negocios» → «rol: desarrollo»** (corrida 7; un cargo comercial clasificado como
+  A: TI por la palabra «desarrollador»). Pendiente, sin cambiar la regla: se revisa solo si el patrón se repite en
+  las próximas corridas.
+- **Limpieza** (espera aprobación): contenedores y volúmenes `jt_revision_c2`, `jt_revision_137`, `jt_revision_137r`,
+  `jt_revision_telemetria` y `jt_revision_telemetria_rev` (y sus `_respaldos`), las 5 candidatas viejas, la referencia
+  en caliente `ofertas_ref_etapa1_telemetria_20261015.db` (igual a la oficial), `/tmp/huellas.py` dentro de
+  `jobtracker` y las copias del scratchpad. Se conservan `:telemetria-candidata` (producción), `:137` (=
+  `:137-respaldo-candidata`), `:c2`, `:c2-candidata` y las etiquetas de vuelta atrás.
 - **Referencias fuera de OneDrive (14-10-2026):** copiadas (no movidas) a
   `C:\Users\sofia\Respaldos\job-tracker-referencias\` (hermana de la que monta el contenedor; fuera de OneDrive y de su
   copia de seguridad), una por sha256 distinto, cada una con sha256 igual al origen e integrity_check ok:

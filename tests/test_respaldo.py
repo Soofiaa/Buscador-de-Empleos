@@ -272,6 +272,60 @@ def test_la_retencion_no_cambia_con_el_nuevo_orden(base):
     assert len(autos) == 30 and autos[-1] == f"ofertas_auto_{AHORA - timedelta(days=30):%Y%m%d}-093000.db"
 
 
+# nombres que empiezan y terminan como un respaldo pero no son el formato exacto (copias renombradas a mano)
+NOMBRES_RAROS = ["ofertas_auto_x.db", "ofertas_manual_copia.db", "ofertas_auto_20261013.db",
+                 "ofertas_auto_20261013-0930.db", "ofertas_manual_20261013-093000-copia.db",
+                 "ofertas_auto_20261013-09300\uff10.db"]                       # último dígito "０" de ancho completo
+
+
+def poner_raros(carpeta, origen):
+    """Copia un respaldo válido con cada nombre raro y le escribe su .sha256 correcto: parecerían válidos."""
+    huella = hashlib.sha256(open(os.path.join(carpeta, origen), "rb").read()).hexdigest()
+    for n in NOMBRES_RAROS:
+        shutil.copy(os.path.join(carpeta, origen), os.path.join(carpeta, n))
+        open(os.path.join(carpeta, n + ".sha256"), "w", encoding="utf-8").write(f"{huella}  {n}\n")
+
+
+def test_a_un_nombre_que_no_calza_no_queda_primero(base):
+    ruta, carpeta = base
+    respaldo.respaldar(ruta, carpeta, "manual", AHORA - timedelta(days=1))
+    nuevo = respaldo.respaldar(ruta, carpeta, "auto", AHORA)["archivo"]
+    poner_raros(carpeta, nuevo)
+    shutil.copy(os.path.join(carpeta, nuevo), os.path.join(carpeta, "ofertas_manual_sin_huella.db"))   # raro y sin .sha256
+    assert [r["archivo"] for r in respaldo.listar(carpeta)] == [nuevo, "ofertas_manual_20261012-093000.db"]
+    e = respaldo.estado(carpeta)
+    assert e["ultimo"]["archivo"] == nuevo and e["ultimo"]["fecha"] == "2026-10-13 09:30"
+    assert e["total_auto"] == 1 and e["total_manual"] == 1 and e["incompletos"] == 0   # los raros ni siquiera son incompletos
+    assert not respaldo.hay_auto_de_hoy(carpeta, AHORA + timedelta(days=1))           # un raro no cuenta como "el de hoy"
+
+
+def test_b_la_retencion_no_cuenta_ni_borra_un_nombre_que_no_calza(base):
+    ruta, carpeta = base
+    primero = respaldo.respaldar(ruta, carpeta, "auto", AHORA - timedelta(days=40))["archivo"]
+    poner_raros(carpeta, primero)                                       # antes de rotar: deben sobrevivir a todas las rotaciones
+    for d in range(32):
+        respaldo.respaldar(ruta, carpeta, "auto", AHORA - timedelta(days=32 - d))
+    autos = [r["archivo"] for r in respaldo.listar(carpeta)]
+    assert len(autos) == respaldo.RETENER_AUTO == 30                    # 30 válidos: los raros no ocupan cupo
+    assert autos[-1] == f"ofertas_auto_{AHORA - timedelta(days=30):%Y%m%d}-093000.db"
+    assert not os.path.exists(os.path.join(carpeta, primero))          # el válido más viejo sí se fue
+    for n in NOMBRES_RAROS:                                             # los raros siguen ahí, con su .sha256
+        assert os.path.exists(os.path.join(carpeta, n)) and os.path.exists(os.path.join(carpeta, n + ".sha256"))
+
+
+def test_c_el_orden_entre_nombres_validos_no_cambia_con_raros(base):
+    ruta, carpeta = base
+    for tipo, delta in [("manual", timedelta(hours=-10)), ("auto", timedelta(days=-2)), ("auto", timedelta(hours=-9)),
+                        ("manual", timedelta(days=-3)), ("manual", timedelta(0)), ("auto", timedelta(0))]:
+        respaldo.respaldar(ruta, carpeta, tipo, AHORA + delta)
+    antes = [r["archivo"] for r in respaldo.listar(carpeta)]
+    assert antes == ["ofertas_manual_20261013-093000.db", "ofertas_auto_20261013-093000.db",   # misma hora: manual > auto
+                     "ofertas_auto_20261013-003000.db", "ofertas_manual_20261012-233000.db",
+                     "ofertas_auto_20261011-093000.db", "ofertas_manual_20261010-093000.db"]
+    poner_raros(carpeta, antes[0])
+    assert [r["archivo"] for r in respaldo.listar(carpeta)] == antes
+
+
 def test_c_la_rotacion_cuenta_y_borra_solo_validos(base):
     ruta, carpeta = base
     for d in range(3):                                                  # 3 incompletos, más viejos que todo

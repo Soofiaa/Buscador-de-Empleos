@@ -30,3 +30,11 @@ Requisito: Docker Desktop (gratis para uso personal) y, en sus ajustes, "Start D
     python -m pytest -q
 
 Todo se ajusta en `config.py`.
+
+## Créditos y licencias
+- Las ofertas de Indeed y Glassdoor se obtienen con [JobSpy](https://github.com/speedyapply/JobSpy)
+  (`python-jobspy`), software de código abierto bajo licencia MIT, © 2023 Cullen Watson. Se usa como dependencia,
+  sin modificar su código.
+- Get on Board se consulta con su API oficial. BNE, Trabajando y Chiletrabajos se leen con código propio, respetando
+  robots.txt.
+- El texto completo de la licencia MIT se instala junto con el paquete (python_jobspy-1.3.0.dist-info).

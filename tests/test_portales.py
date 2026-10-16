@@ -13,6 +13,7 @@ import bne
 import chiletrabajos
 import config
 import geo
+import linkedin
 import trabajando
 from filtros import ZONA, clasificar, extraer_experiencia
 from red import Bloqueo, ClienteHTTP, ErrorFuente, NoEncontrada, Respuesta, pedir
@@ -232,7 +233,53 @@ def test_trabajando_trae_hora_de_publicacion():
     assert df["posted_at"].str.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}").all()
 
 
+def test_linkedin_listado():
+    df = linkedin.parsear_listado(leer("linkedin_listado.html"))
+    assert len(df) == 10 and list(df.columns) == linkedin.COLUMNAS
+    assert df["job_url"].str.contains("linkedin.com/jobs/view/").all()
+    assert (df["title"] != "").all()
+    assert (df["company"] != "").all()
+    assert df["date_posted"].str.fullmatch(r"\d{4}-\d{2}-\d{2}").all()
+
+
+def test_linkedin_detalle_y_completar():
+    det = linkedin.parsear_detalle(leer("linkedin_detalle.html"))
+    assert "Oracle Fusion Cloud" in det["descripcion"]
+    assert "nivel de antiguedad" in det["criterios"]
+    fila = {"description": "Consultor Funcional", "location": "Santiago, Chile", "is_remote": False}
+    assert linkedin.completar(fila, det)
+    assert "Nivel: Algo de responsabilidad." in fila["description"]
+    assert "Oracle Fusion Cloud" in fila["description"]
+
+
+def test_linkedin_extrae_job_id():
+    url = "https://cl.linkedin.com/jobs/view/analista-funcional-at-lisit-4464585712?position=1&pageNum=0"
+    assert linkedin._job_id(url) == "4464585712"
+
+
+def test_linkedin_respuesta_vacia_es_error_de_fuente():
+    with pytest.raises(ErrorFuente):
+        linkedin.parsear_listado("")
+
+
+def test_linkedin_flujo_portal(con, monkeypatch):
+    ahora = datetime(2026, 10, 15, 12, 0, tzinfo=ZONA)
+    monkeypatch.setattr(config, "TERMINOS_LINKEDIN", ["analista funcional"])
+    monkeypatch.setitem(config.MAX_DETALLES, "linkedin", 2)
+    cli = Falso({"seeMoreJobPostings": (200, leer("linkedin_listado.html")),
+                 "jobPosting": (200, leer("linkedin_detalle.html"))})
+    st = {"encontradas": 0, "relevantes": 0, "sin_chile": 0, "errores": 0}
+    avisos = []
+    buscar._buscar_portal(con, "linkedin", st, avisos, cli, RobotsLibre(), ahora, 40)
+    detalles = [u for u in cli.pedidas if "jobPosting" in u]
+    assert len(detalles) <= 2
+    filas = con.execute("SELECT url, fuente, titulo FROM ofertas").fetchall()
+    assert filas and all(f["fuente"] == "linkedin" for f in filas)
+
+
 def test_los_portales_estan_en_las_fuentes_y_tienen_nombre():
-    for s in ("bne", "trabajando", "chiletrabajos"):
+    for s in ("bne", "trabajando", "chiletrabajos", "linkedin"):
         assert s in config.SITIOS and s in config.NOMBRE_FUENTE and s in config.MAX_DETALLES
     assert "ocupacion:7643" in config.TERMINOS_BNE
+    assert len(config.TERMINOS_LINKEDIN) > 0
+

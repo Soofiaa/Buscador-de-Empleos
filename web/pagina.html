@@ -582,7 +582,7 @@ function tituloSeleccion(sel, corridas) {
   return "Todas las ofertas";
 }
 const NOMBRE_FUENTE = { indeed: "Indeed", google: "Google", glassdoor: "Glassdoor", getonboard: "Get on Board",
-  bne: "BNE", trabajando: "Trabajando", chiletrabajos: "Chiletrabajos", manual: "✍️ Manual" };
+  bne: "BNE", trabajando: "Trabajando", chiletrabajos: "Chiletrabajos", linkedin: "LinkedIn", manual: "✍️ Manual" };
 const nombreFuente = f => NOMBRE_FUENTE[f] || f || "sin fuente";
 function textoProgreso(mensaje) {                // "[3/40] indeed | qa tester | …" -> "Buscando en Indeed · qa tester · 3 de 40"
   const m = /^\s*\[(\d+)\/(\d+)\]\s*([^|\[\]]+?)\s*\|\s*([^|:]+?)\s*(?:[|:]|$)/.exec(mensaje || "");

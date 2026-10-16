@@ -334,3 +334,63 @@ contenedor y el volumen se borraron.
 **Qué se pierde mientras corra la imagen anterior:** el cierre ordenado (cada `stop` vuelve a terminar con 137, ahora
 tras 15 s por el `stop_grace_period`, que se queda en el compose), el `.sha256` atómico y el aviso de incompletos, y el
 término «informático junior» con su regla (las ofertas ya clasificadas así se quedan como están).
+
+# Telemetría pasiva + orden de respaldos + nombres de respaldo (despliegue del 15-10-2026, 18:53; código de `f9cef86`)
+
+Qué cambia: `buscar.py`, `getonboard.py`, `red.py`, `robots.py` y `telemetria.py` (nuevo): contadores por fuente en
+`corridas.detalle.fuentes[i].telemetria` y una línea `[corrida]` en stderr (`e754ff6`); `respaldo.py`: «Último
+respaldo» por la fecha del nombre (`09409f3`) y los nombres fuera de `ofertas_(auto|manual)_AAAAMMDD-HHMMSS.db` se
+ignoran (`481aab7`). Sin DDL: la base sigue en v7, sin tablas, índices ni triggers nuevos, y no se reclasifica nada.
+
+## Volver a la imagen anterior
+
+Basta con la imagen: **la base no se restaura**. Las corridas nuevas guardan la clave `telemetria` en su detalle; la
+imagen anterior la ignora (la página no la lee). Los respaldos tienen el mismo formato en las dos imágenes.
+
+| Pieza | Valor |
+|---|---|
+| Imagen anterior (etiqueta estable, 15-10-2026) | `job-tracker:137` = `job-tracker:137-respaldo-candidata` (`sha256:ff5a2615845e1b7a57719015697166e31c319972ce6efbb3e3ac99809b1bbc3f`) |
+| Imagen desplegada | `job-tracker:telemetria-candidata` = `job-tracker-jobtracker:latest` (`sha256:ad7b2b19ced76563f80620cceca3a5ea29f1896991edfa3ff1ca3ced64389683`), construida desde la carpeta de trabajo limpia en `f9cef86` y desplegada sin reconstruir (`docker tag` + `docker compose up -d --no-build`) |
+| Base anterior (referencia oficial, por si acaso) | `ofertas_pre_telemetria_20261015.db` (volumen y `C:\Users\sofia\Respaldos\job-tracker-referencias\`), sha256 `844341c7d2bc057f79b42e117e065f18910083249e8afb2c5ac34e06ed8b87b2`, integrity_check ok; tomada con el contenedor detenido (salida 0) |
+
+```
+docker compose stop jobtracker
+docker tag job-tracker:137 job-tracker-jobtracker:latest
+docker compose up -d --no-build
+```
+
+Probado el 15-10-2026 (etapa 1): la imagen `job-tracker:137` levantada con `docker run` sobre una copia de la
+referencia (`jt_revision_telemetria_rev`, 127.0.0.1:8767) quedó healthy; `/`, `/api/estado`, `/api/ofertas`,
+`/api/respaldo` y `/api/exportar` respondieron 200, los conteos de la API coincidieron con la copia y las huellas
+por tabla fueron idénticas antes y después. **Los tres comandos de arriba (con `docker compose`) siguen sin
+probarse:** el despliegue del 15-10 usó la misma forma (`docker tag` + `docker compose up -d --no-build`) en el
+sentido contrario, pero la vuelta atrás en sí no se ha ejecutado. El contenedor y los volúmenes de la prueba
+(`jt_revision_telemetria_rev`) quedaron detenidos, sin borrar, a la espera de la limpieza.
+
+**Qué se pierde mientras corra la imagen anterior:** la telemetría de las corridas nuevas (las ya guardadas conservan
+su clave), el orden de «Último respaldo» (vuelve a mostrar primero el manual más reciente aunque haya un automático más
+nuevo) y el filtro de nombres de respaldo fuera de formato.
+
+# LinkedIn (portal público sin cuenta) + Contadores por ubicación (despliegue del 15-10-2026, 23:45; código de `62dc59d`)
+
+Qué cambia: `linkedin.py` (nuevo portal), `config.py` (SITIOS, NOMBRE_FUENTE, TERMINOS_LINKEDIN), `buscar.py` (PORTALES),
+`web/pagina.html` (NOMBRE_FUENTE) y telemetría por ubicación. Sin DDL: la base sigue en v7, sin tablas nuevas.
+
+## Volver a la imagen anterior
+
+Basta con la imagen: **la base no se restaura**.
+
+| Pieza | Valor |
+|---|---|
+| Imagen anterior | `job-tracker:telemetria` (`sha256:ad7b2b19ced76563f80620cceca3a5ea29f1896991edfa3ff1ca3ced64389683`) |
+| Imagen desplegada | `job-tracker-jobtracker:latest` (`sha256:22c86fa2872dad7cb9f7d4a7ab27539e6f79e3b0c552fa69fe6f549e5440a83c`) |
+| Base anterior (referencia, por si acaso) | `ofertas_pre_linkedin_20261015.db` (volumen y `C:\Users\sofia\Respaldos\job-tracker-referencias\`), sha256 `dce49a107791bc8c2a65b5d382cfab1e43d8341fa507cd73ebcfc823440e895d`, integrity_check ok |
+
+```
+docker compose stop jobtracker
+docker tag job-tracker:telemetria job-tracker-jobtracker:latest
+docker compose up -d --no-build
+```
+
+**Qué se pierde mientras corra la imagen anterior:** la recopilación de ofertas de LinkedIn y los contadores por ubicación.
+
