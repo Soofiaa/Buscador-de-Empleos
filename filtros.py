@@ -193,6 +193,10 @@ def _linkedin_experiencia_mayor_a_dos(d: str):
     return False, ""
 
 
+def _linkedin_nivel_mid_senior(d: str) -> bool:
+    return bool(re.search(r"\bnivel\s*:?\s*mid[ -]?senior\b", normalizar(d)))
+
+
 def _miles(n: float) -> str:
     return f"{n:,.0f}".replace(",", ".")
 
@@ -329,6 +333,8 @@ def clasificar(o: dict) -> dict:
     if es_senior(t, d):
         return fin("descartada", "nivel semi senior / senior")
     if fuente == "linkedin":
+        if _linkedin_nivel_mid_senior(d):
+            return fin("descartada", "nivel Mid-Senior de LinkedIn")
         supera_experiencia, exp_linkedin = _linkedin_experiencia_mayor_a_dos(d)
         exp_txt = exp_linkedin or exp_txt
     else:

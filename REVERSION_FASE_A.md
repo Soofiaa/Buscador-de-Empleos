@@ -416,5 +416,6 @@ quedó healthy; `/api/estado`, `/api/ofertas` y `/api/respaldo` respondieron 200
 POR VERIFICAR, objetos del esquema y las huellas de las ocho tablas coincidieron con la referencia.
 
 **Qué se pierde mientras corra la imagen anterior:** la restricción de LinkedIn a Santiago, Viña del Mar y Valparaíso
-(o remoto internacional), el límite de hasta 2 años y la exclusión de BairesDev. No se pierden ni se reclasifican
-ofertas ya guardadas; futuras búsquedas vuelven a usar los filtros de la imagen anterior.
+(o remoto internacional), el límite de hasta 2 años, el criterio de antigüedad (Associate se acepta y Mid-Senior se
+descarta) y la exclusión de BairesDev. No se pierden ni se reclasifican ofertas ya guardadas; futuras búsquedas
+vuelven a usar los filtros de la imagen anterior.

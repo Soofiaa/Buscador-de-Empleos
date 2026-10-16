@@ -310,6 +310,18 @@ def test_linkedin_acepta_remoto_internacional():
     assert r["modalidad"] == "Remoto"
 
 
+def test_linkedin_nivel_associate_no_se_descarta():
+    r = clasificar(oferta("Analista Funcional", "Nivel: Associate.", fuente="linkedin"))
+    assert r["categoria"] == "principal"
+
+
+@pytest.mark.parametrize("nivel", ["Nivel: Mid-Senior.", "Nivel: Mid Senior level."])
+def test_linkedin_nivel_mid_senior_se_descarta(nivel):
+    r = clasificar(oferta("Analista Funcional", nivel, fuente="linkedin"))
+    assert r["categoria"] == "descartada"
+    assert r["razon"] == "nivel Mid-Senior de LinkedIn"
+
+
 @pytest.mark.parametrize("desc", [
     "0 años de experiencia",
     "1 año de experiencia",
