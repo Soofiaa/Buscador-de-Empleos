@@ -322,6 +322,27 @@ def test_linkedin_nivel_mid_senior_se_descarta(nivel):
     assert r["razon"] == "nivel Mid-Senior de LinkedIn"
 
 
+@pytest.mark.parametrize("titulo, desc", [
+    ("Analista Funcional Experto", ""),
+    ("Analista Funcional", "Nivel: Experto."),
+    ("Analista Funcional", "Nivel: Expert."),
+    ("Analista Funcional", "Nivel: Experta."),
+])
+def test_linkedin_experto_se_descarta(titulo, desc):
+    r = clasificar(oferta(titulo, desc, fuente="linkedin"))
+    assert r["categoria"] == "descartada"
+    assert r["razon"] == "nivel experto de LinkedIn"
+
+
+@pytest.mark.parametrize("titulo, desc", [
+    ("Senior Analista Funcional", ""),
+    ("Analista Funcional", "Nivel: Senior."),
+])
+def test_linkedin_senior_se_descarta(titulo, desc):
+    r = clasificar(oferta(titulo, desc, fuente="linkedin"))
+    assert r["categoria"] == "descartada"
+
+
 @pytest.mark.parametrize("desc", [
     "0 años de experiencia",
     "1 año de experiencia",
