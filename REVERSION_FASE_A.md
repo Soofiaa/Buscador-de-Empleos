@@ -370,3 +370,27 @@ sentido contrario, pero la vuelta atrás en sí no se ha ejecutado. El contenedo
 **Qué se pierde mientras corra la imagen anterior:** la telemetría de las corridas nuevas (las ya guardadas conservan
 su clave), el orden de «Último respaldo» (vuelve a mostrar primero el manual más reciente aunque haya un automático más
 nuevo) y el filtro de nombres de respaldo fuera de formato.
+
+# LinkedIn (portal público sin cuenta) + Contadores por ubicación (despliegue del 15-10-2026, 23:45; código de `62dc59d`)
+
+Qué cambia: `linkedin.py` (nuevo portal), `config.py` (SITIOS, NOMBRE_FUENTE, TERMINOS_LINKEDIN), `buscar.py` (PORTALES),
+`web/pagina.html` (NOMBRE_FUENTE) y telemetría por ubicación. Sin DDL: la base sigue en v7, sin tablas nuevas.
+
+## Volver a la imagen anterior
+
+Basta con la imagen: **la base no se restaura**.
+
+| Pieza | Valor |
+|---|---|
+| Imagen anterior | `job-tracker:telemetria` (`sha256:ad7b2b19ced76563f80620cceca3a5ea29f1896991edfa3ff1ca3ced64389683`) |
+| Imagen desplegada | `job-tracker-jobtracker:latest` (`sha256:22c86fa2872dad7cb9f7d4a7ab27539e6f79e3b0c552fa69fe6f549e5440a83c`) |
+| Base anterior (referencia, por si acaso) | `ofertas_pre_linkedin_20261015.db` (volumen y `C:\Users\sofia\Respaldos\job-tracker-referencias\`), sha256 `dce49a107791bc8c2a65b5d382cfab1e43d8341fa507cd73ebcfc823440e895d`, integrity_check ok |
+
+```
+docker compose stop jobtracker
+docker tag job-tracker:telemetria job-tracker-jobtracker:latest
+docker compose up -d --no-build
+```
+
+**Qué se pierde mientras corra la imagen anterior:** la recopilación de ofertas de LinkedIn y los contadores por ubicación.
+
