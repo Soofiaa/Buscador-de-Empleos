@@ -3,52 +3,64 @@
 ## Estado actual (se actualiza en cada despliegue; leer al empezar cada sesión)
 
 ### Producción y base
-- **Base real — línea base OFICIAL (16-10-2026, 12:35, regla de antigüedad LinkedIn; vigente):** v7,
-  integrity_check ok, 1967 ofertas, 17 corridas, 44 filas en `historial_estados`, 16 postuladas, 6 POR VERIFICAR;
-  estados descartada/nueva 1838 · principal/descartada 88 · principal/entrevista 1 · principal/nueva 24 ·
-  principal/postulada 16.
-  - Medida con `huellas.py` sobre la referencia `ofertas_pre_mid_senior_20261016.db` (contenedor detenido) y
-    repetida en la base real después del despliegue y después de las comprobaciones: idéntica las tres veces.
+- **Base real — línea base OFICIAL (16-10-2026, despliegue del filtro LinkedIn Senior/Experto; vigente):** v7,
+  integrity_check ok, 2046 ofertas, 18 corridas, 77 filas en `historial_estados`, 18 postuladas, 6 POR VERIFICAR;
+  estados descartada/nueva 1908 · principal/descartada 119 · principal/entrevista 1 · principal/postulada 18.
+  - Medida con `huellas.py` sobre `ofertas_pre_linkedin_senior_experto_20261016.db` y repetida en la base real
+    después del despliegue y después de las comprobaciones HTTP: idéntica las tres veces.
   - sha256 por tabla: ajustes (4) `8928191ee9f0b506cee48f285e4167b71105de6cf7871705417a6518c3797aec` ·
     alertas (0) `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` ·
-    corridas (17) `9e63aa4dc92ae580793909ab087819dbe4b68590d36a9d21c36100cd59724732` ·
-    historial_estados (44) `6bfad4c7e552194125988612975c4c3134a6fa8a0e9507f35c6193979904b838` ·
-    ofertas (1967) `bfbeb12bb1816ec87416a319b70953bd35b435e6633ab81bc54b2a2207ec4480` ·
+    corridas (18) `d0f41ce3679b057709e0c7d03bc16ef262e45ca61bfeb6008c148d5f630cccf7` ·
+    historial_estados (77) `54cfb36f57bb84f27dc84ab0c6eda9663c2435188e9c2750745c144707fc4e05` ·
+    ofertas (2046) `b983a93197af79447dee18ac5a2d98fa46de16e9b4fdc3d4ad776549ae5137bb` ·
     pruebas_fuentes (0) `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` ·
-    sqlite_sequence (2) `c2a2deef445e938e4c7058289fcb173ffad9af078e2aebae9df3561c89db3a3b` ·
+    sqlite_sequence (2) `982ad5fb96a03e4322ac57897c80df055d4dad26224ea78698d5cb8425e48d4c` ·
     terminos_no_disponibles (2) `0821946c3a741fa08fe0d2d793030aa14a531e6bf00096b4aa102d92f1e6d8c5`.
-- **Mediciones anteriores (no mezclar sus cifras con la oficial):** la línea base del 15-10-2026, 23:45, fue v7,
+- **Mediciones anteriores (no mezclar sus cifras con la oficial):** la línea base del 16-10-2026, 12:35, fue v7,
+  1967 ofertas, 17 corridas, 44 filas en `historial_estados`, 16 postuladas y 6 POR VERIFICAR; la del 15-10-2026,
+  23:45, fue v7,
   1588 ofertas, 14 corridas, 15 filas en `historial_estados`, 16 postuladas y 6 POR VERIFICAR.
 - **Medición del 15-10-2026, 18:53 (telemetría):** 1536 ofertas, 12 corridas, 14 historial, 15 postuladas.
   Referencia: `ofertas_pre_telemetria_20261015.db` (`844341c7…`).
 - **Medición del 15-10-2026, mañana (solo conteos):** v7, integrity_check ok, 1321 ofertas, 9 corridas, 15 postuladas.
 - **Medición del 14-10-2026:** 1223 ofertas, 7 corridas, 14 postuladas, `historial_estados` con 4 filas.
-- **Última referencia (oficial):** `ofertas_pre_mid_senior_20261016.db` (volumen y
+- **Última referencia (oficial):** `ofertas_pre_linkedin_senior_experto_20261016.db` (volumen y
   `C:\Users\sofia\Respaldos\job-tracker-referencias\`), sha256
-  `e3856c8346f07a065c8bc65213d2aa674049012d38d01e78c65ba2e35ebc0dd3` en las dos copias, integrity_check ok.
-  Tomada con el contenedor detenido (salida 0).
-- **En producción (16-10-2026, 12:35):** commit local `a245ece` (rama `feat/contadores-ubicacion`, sin push);
-  imagen `job-tracker-jobtracker:latest` y `job-tracker:linkedin-mid-senior`,
-  `sha256:915bc9fd6217faac57431091bf4804844f5119592c15e52c5f989cc677ad6694`.
-  - Reconstruida con `docker compose build` y levantada con `docker compose up -d`; health `healthy`.
-  - Imagen anterior, del commit `23241ba`, etiquetada `job-tracker:linkedin-filtros-23241`
-    (`sha256:d4d6b5347f13f5ced733f060f8ba3dad81f6ce2830f53714b4359eac6f8a45d9`); `docker compose stop` salió 0.
-  - Comprobado sin escrituras de datos: GET 200; Host y Origin ajenos 403; POST rechazados con 403, 400 y 413.
-    Huellas completas, conteos, estados y objetos de las 8 tablas idénticos antes/después. `GET /api/respaldo` sin
-    `error_auto`; último: `ofertas_auto_20261016-000213.db`.
-  - Candidata revisada: Associate aceptado y Mid-Senior descartado. Referencia y huellas completas idénticas.
-    No reclasifica ofertas guardadas ni altera la base. Reversión probada sobre una copia; ver `REVERSION_FASE_A.md`.
-- **Imágenes para volver atrás:** `job-tracker:linkedin-mid-senior` (`915bc9fd…`; producción actual),
-  `job-tracker:linkedin-filtros-23241` (`d4d6b534…`; reversión inmediata),
+  `6a43f4cddac9fddbdf66d75a40738f629b9b28457049c4822e87188a83152a83` en las dos copias, integrity_check ok.
+  Tomada con el contenedor detenido (salida 0); la copia de candidata y la referencia tienen huellas completas iguales.
+- **En producción (16-10-2026, 13:06):** commit local `eb3a33e` (rama `feat/contadores-ubicacion`, sin push);
+  imagen `job-tracker-jobtracker:latest` y `job-tracker:linkedin-senior-experto`,
+  `sha256:da1024401f2cd33609bf5934a2293ce56873872b633d69c335d0234b9ca31369`.
+  - Reconstruida con `docker compose build` y levantada con `docker compose up -d`; `jobtracker` healthy en
+    `127.0.0.1:8765`.
+  - Imagen anterior inmediata: `job-tracker:linkedin-senior-anterior-20261016`
+    (`sha256:915bc9fd6217faac57431091bf4804844f5119592c15e52c5f989cc677ad6694`).
+  - GET `/`, `/api/estado`, `/api/ofertas` y `/api/respaldo`: 200; Host/Origin ajenos: 403; POST sin Origin y con
+    campos no permitidos: 400; cuerpo sobredimensionado: 413. `GET /api/respaldo` sin `error_auto`.
+    Las huellas completas, conteos, estados y los ocho objetos/tablas quedaron idénticos antes/después y tras las
+    comprobaciones. Los 59 archivos previos de referencias y respaldos externos/en volumen conservaron sus hashes.
+  - Filtro LinkedIn: descarta Senior y Experto/Expert; Associate sigue aceptándose. Se mantiene el descarte si el
+    máximo requerido supera 2 años. No reclasifica ofertas guardadas ni altera datos/esquema. Reversión a la imagen
+    anterior probada en copia, healthy y con huellas idénticas; ver `REVERSION_FASE_A.md`.
+- **Imágenes para volver atrás:** `job-tracker:linkedin-senior-experto`
+  (`da102440…`; producción actual), `job-tracker:linkedin-senior-anterior-20261016`
+  (`915bc9fd…`; reversión inmediata), `job-tracker:linkedin-mid-senior` (`915bc9fd…`),
+  `job-tracker:linkedin-filtros-23241` (`d4d6b534…`; anterior a esos filtros),
   `job-tracker:linkedin-filtros` (`d4d6b534…`; etiqueta anterior del mismo artefacto),
   `job-tracker:linkedin-229f` (`d4529c34…`; anterior a los filtros),
   `job-tracker:telemetria` (`ad7b2b19ced7…`; reversión en `REVERSION_FASE_A.md`),
-  `job-tracker:137` (`ff5a2615…`), `job-tracker:c2` (`f1943914…`), `:c1`, `:respaldo`, `:B1`, `:genero`, `:soporte`, `:faseA`, `:fase0`.
-  - Siguen las candidatas viejas `:historial-candidata`, `:respaldo-candidata`, `:faseB1-candidata`,
-    `:faseA-candidata` y `:137-candidata` (`f9b15255…`); se borran si Sofia lo aprueba.
-  - Contenedores detenidos que esperan la limpieza (no se tocan sin aprobación): `jt_revision_c2` (255, por el apagado
-    del 14-10), `jt_revision_137` y `jt_revision_137r` (0), `jt_revision_telemetria` y `jt_revision_telemetria_rev`
-    (0, 15-10), con sus volúmenes.
+  `job-tracker:137` (`ff5a2615…`), `job-tracker:c2` (`f1943914…`), `:c1`, `:respaldo`, `:B1`, `:genero`, `:soporte`,
+  `:faseA`, `:fase0`.
+- **Candidata y reversión:** la candidata `jt_revision_linkedin_senior_experto` (8766) y su volumen se eliminaron
+  después del despliegue; la reversión sobre copia en 8767 también quedó healthy y se limpió. No quedan recursos
+  temporales de este despliegue.
+- **Decisiones aprobadas:** LinkedIn descarta Senior y Experto/Expert, mantiene Associate, y descarta requisitos cuyo
+  máximo supera 2 años. Ubicación, remoto y exclusión de BairesDev siguen como antes. Despliegue autorizado y hecho;
+  sin preguntas abiertas. Sin push.
+- **Candidatas antiguas que esperan aprobación para limpieza:** `:historial-candidata`, `:respaldo-candidata`,
+  `:faseB1-candidata`, `:faseA-candidata` y `:137-candidata` (`f9b15255…`).
+- **Contenedores detenidos que esperan aprobación para limpieza:** `jt_revision_c2` (255, apagado del 14-10),
+  `jt_revision_137`, `jt_revision_137r`, `jt_revision_telemetria` y `jt_revision_telemetria_rev` (0), con sus volúmenes.
 - **Nombres de respaldo fuera de formato** (`481aab7`, desplegado el 15-10): los nombres que no
   calzan con `ofertas_(auto|manual)_AAAAMMDD-HHMMSS.db` se ignoran: no cuentan como «Último respaldo», no cuentan para
   la retención y nunca se borran.

@@ -1,3 +1,40 @@
+# Reversión del filtro LinkedIn Senior/Experto (volver a Mid-Senior)
+
+Despliegue del 16-10-2026, commit local `eb3a33e`. No cambia el esquema ni reclasifica ofertas guardadas.
+
+| Pieza | Valor |
+|---|---|
+| Imagen desplegada | `job-tracker:linkedin-senior-experto`, `sha256:da1024401f2cd33609bf5934a2293ce56873872b633d69c335d0234b9ca31369` |
+| Imagen anterior | `job-tracker:linkedin-senior-anterior-20261016`, `sha256:915bc9fd6217faac57431091bf4804844f5119592c15e52c5f989cc677ad6694` |
+| Base de referencia | `ofertas_pre_linkedin_senior_experto_20261016.db`, en el volumen y en `C:\Users\sofia\Respaldos\job-tracker-referencias\` |
+| SHA-256 de la referencia | `6a43f4cddac9fddbdf66d75a40738f629b9b28457049c4822e87188a83152a83` en ambas copias; `integrity_check=ok` |
+| Línea base | SQLite v7; 2046 ofertas, 18 corridas, 77 filas en `historial_estados`, 18 postuladas y 6 POR VERIFICAR |
+
+## Procedimiento
+
+No restaurar la base: este despliegue no la modificó. Para volver a la imagen anterior:
+
+```powershell
+docker compose stop jobtracker
+docker tag job-tracker:linkedin-senior-anterior-20261016 job-tracker-jobtracker:latest
+docker compose up -d --no-build
+docker inspect jobtracker --format "{{.State.Health.Status}}"
+```
+
+Comprobar GET `/api/estado` y comparar las huellas de `/datos/ofertas.db` con la referencia de la tabla. La base v7
+debe conservar todos sus datos, estados, notas y postulaciones. Se pierde únicamente el filtro nuevo para el nivel
+LinkedIn `Nivel: Senior` y `Expert/Experto`; los filtros previos permanecen. Un cargo con «Senior» en el título puede
+seguir siendo descartado por la regla senior que ya existía.
+
+## Prueba de reversión
+
+Probada con la imagen anterior sobre una copia de la referencia en el volumen temporal
+`jt_revision_reversion_linkedin_senior_experto_20261016`, puerto `127.0.0.1:8767`: health `healthy`, GET
+`/api/estado` 200, SQLite v7 e `integrity_check=ok`. Las ocho tablas, sus conteos y SHA-256, las postuladas, POR
+VERIFICAR y estados coincidieron con la referencia. El contenedor y volumen temporales se eliminaron.
+
+---
+
 # Reversión de la Fase A (volver a la Fase 0)
 
 La Fase A migra la base de la versión 6 a la 7 al arrancar. **El código de la Fase 0 trata una base v7 como "versión
