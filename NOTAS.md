@@ -121,6 +121,29 @@
     estudiante) y 0 en las corridas 8 a 12. «Traídas por el término» cuenta solo ofertas NUEVAS guardadas, atribuidas
     al primer término que las encontró (las repetidas de otro término no aparecen): esos 0 son un piso, no una
     medición exacta. Medido en la referencia oficial `ofertas_pre_telemetria_20261015.db`.
+- **Diagnóstico de términos (15-10-2026, solo lectura; plan PENDIENTE de aprobación, nada decidido salvo la fase a).**
+  Sobre la referencia oficial (corridas 1 a 12) y una copia de solo lectura de la base viva (corrida 13). «Traídas»
+  cuenta solo ofertas NUEVAS atribuidas al primer término que las encontró: es un piso.
+  - Indeed: 13 de 30 términos nunca dieron una principal (datos maestros, master data, key user, asistente de
+    proyectos, PMO, analista de operaciones, analista SAP, analista de datos junior, tester, BPMN, desarrollador
+    junior, desarrollador frontend, informático junior); «desarrollador junior» y «desarrollador frontend» devuelven 0.
+    Mantener pese a llevar 6+ corridas sin útil: analista funcional (3 en seguimiento), usuario clave (2), testing.
+  - Get on Board: 0 principales en toda la historia (sobre todo por senior). Glassdoor: solo «analista de sistemas» y
+    «analista de procesos» dieron alguna.
+  - Ubicaciones: Viña (30 consultas de Indeed por corrida) 0 principales en toda la historia; remoto 0 desde la
+    corrida 1; Glassdoor remoto 0 traídas. Ninguna de las 75 principales está en la Región de Valparaíso; las 12
+    remotas vienen de Chiletrabajos (11) y de la consulta de Santiago de Indeed (1).
+  - Cobertura: QA/testing llega sobre todo por Chiletrabajos («analista qa»); en Indeed faltan «analista QA»,
+    automatización de pruebas, RPA y «programador». No hay términos de soporte (unas 0,6 ofertas de soporte por
+    corrida llegan por otros términos, 41 % principales).
+  - Clasificador (si se agregan términos de soporte): «Soporte Funcional» queda descartada (sin rol); «Operario
+    Nivel 1» entra como S (falso positivo de `nivel 1`); call center, soporte en terreno y «soporte» sin contexto TI
+    entran como S.
+  - **Plan propuesto, por fases, cada una con su diff, pruebas, candidata y despliegue:** (a) contadores —
+    `"200": null` («no medido») y `por_ubicacion` en Indeed/Glassdoor; **aprobada el 15-10 y en curso en la rama
+    `feat/contadores-ubicacion`, sin desplegar**; (b) retiros de términos y ubicaciones (opciones A: solo Santiago, B:
+    Viña y remoto solo para 6 términos, C: sin Viña, D: sin cambios) — **pendiente**; (c) términos nuevos (analista
+    QA, automatización de pruebas, programador, RPA) y de soporte, con los ajustes del clasificador — **pendiente**.
 - **Falso positivo «Desarrollador de Negocios» → «rol: desarrollo»** (corrida 7; un cargo comercial clasificado como
   A: TI por la palabra «desarrollador»). Pendiente, sin cambiar la regla: se revisa solo si el patrón se repite en
   las próximas corridas.

@@ -149,7 +149,7 @@ def test_resumen_usa_singular_y_plural():
     t = telemetria.contador("http")
     telemetria.anotar_status(t, 200)
     assert telemetria.resumen({"BNE": t, "Indeed": telemetria.contador("consulta")}) == \
-        "[corrida] BNE: 1 solicitud (200=1), 0 vacías | Indeed: 0 consultas (sin códigos), 0 vacías"
+        "[corrida] BNE: 1 solicitud (200=1), 0 vacías | Indeed: 0 consultas (200 no medido), 0 vacías"
 
 
 def test_clase_de_excepcion():
@@ -197,7 +197,8 @@ def test_jobspy_cuenta_consultas_vacias_y_errores_y_escribe_resumen(tmp_path, mo
     assert "terminoSecreto" not in guardado and "privada" not in guardado          # solo contadores
     err = capsys.readouterr().err
     linea = [l for l in err.splitlines() if l.startswith("[corrida] ")]
-    assert linea == ["[corrida] Indeed: 4 consultas (429=1, conexion=1), 1 vacía"]
+    assert linea == ["[corrida] Indeed: 4 consultas (200 no medido, 429=1, conexion=1), 1 vacía "
+                     "[Santiago 4/1 (2 errores)]"]
     assert "terminoSecreto" not in err and "privada" not in err
 
 
@@ -296,21 +297,26 @@ def test_telemetria_se_guarda_en_la_base_con_tipos_simples(tmp_path, monkeypatch
     crudo = sqlite3.connect(str(tmp_path / "t.db")).execute("SELECT detalle FROM corridas ORDER BY id DESC").fetchone()[0]
     t = json.loads(crudo)["fuentes"][0]["telemetria"]                          # leído de vuelta del disco
     assert t == {"medicion": "consulta", "solicitudes": 3, "vacias": 1,
-                 "codigos": {"200": 0, "403": 0, "404": 0, "429": 1, "5xx": 0, "otros": 0, "conexion": 0}}
+                 "codigos": {"200": None, "403": 0, "404": 0, "429": 1, "5xx": 0, "otros": 0, "conexion": 0},
+                 "por_ubicacion": {"Santiago, Chile": {"consultas": 3, "vacias": 1, "errores": 1}}}
+    assert '"200": null' in crudo                                                # "no medido" queda como null en el JSON
     for ruta, v in hojas(t):
-        assert type(v) in (int, str), ruta                                      # ni bool, ni numpy, ni float
+        if ruta == ".codigos.200":
+            assert v is None
+        else:
+            assert type(v) in (int, str), ruta                                  # ni bool, ni numpy, ni float
 
 
 def test_contadores_son_int_tras_cada_anotacion():
     import numpy as np
-    t = telemetria.contador("consulta")
-    telemetria.anotar_consulta(t, 0)
-    telemetria.anotar_consulta(t, np.int64(5))
+    t = telemetria.contador("consulta", ["Santiago, Chile"])
+    telemetria.anotar_consulta(t, 0, "Santiago, Chile")
+    telemetria.anotar_consulta(t, np.int64(5), "Santiago, Chile")
     telemetria.anotar_status(t, np.int64(429))
-    telemetria.anotar_excepcion(t, requests.Timeout("x"))
+    telemetria.anotar_excepcion(t, requests.Timeout("x"), "Santiago, Chile")
     telemetria.anotar_si_vacio(t, pd.DataFrame())
     for ruta, v in hojas(t):
-        assert type(v) in (int, str), ruta
+        assert (v is None) if ruta == ".codigos.200" else type(v) in (int, str), ruta
     json.dumps(t)                                                                # serializable sin default=
 
 
@@ -360,3 +366,80 @@ def test_corridas_antiguas_conservan_su_huella(tmp_path, monkeypatch):
     c.close()
     c, _, _ = corrida_jobspy(tmp_path, monkeypatch, {"QA": pd.DataFrame()})
     assert huella(c) == antes and c.execute("SELECT COUNT(*) FROM corridas").fetchone()[0] == 4
+
+
+# ---- fase (a): "200" no medido en JobSpy y consultas / vacías / errores por ubicación
+def test_contador_consulta_lleva_200_no_medido_y_sus_ubicaciones():
+    t = telemetria.contador("consulta", ["Santiago, Chile", "Chile (remoto)"])
+    assert t["codigos"]["200"] is None
+    assert t["por_ubicacion"] == {"Santiago, Chile": {"consultas": 0, "vacias": 0, "errores": 0},
+                                  "Chile (remoto)": {"consultas": 0, "vacias": 0, "errores": 0}}
+    h = telemetria.contador("http")                                             # portales y Get on Board: sin cambios
+    assert h["codigos"]["200"] == 0 and "por_ubicacion" not in h
+
+
+def test_una_excepcion_con_status_200_no_pisa_el_no_medido():
+    class Rara(Exception):
+        response = types.SimpleNamespace(status_code=200)
+    t = telemetria.contador("consulta", ["Santiago, Chile"])
+    telemetria.anotar_excepcion(t, Rara(), "Santiago, Chile")
+    telemetria.anotar_status(t, 200)                                            # tampoco por esta vía
+    assert t["codigos"]["200"] is None and t["codigos"]["otros"] == 2 and t["solicitudes"] == 2
+    assert t["por_ubicacion"]["Santiago, Chile"] == {"consultas": 1, "vacias": 0, "errores": 1}
+
+
+def test_una_ubicacion_no_declarada_cuenta_solo_en_el_total():
+    t = telemetria.contador("consulta", ["Santiago, Chile"])
+    telemetria.anotar_consulta(t, 0, "Otra, Chile")
+    telemetria.anotar_consulta(t, 0)                                            # sin ubicación: igual que antes
+    assert t["solicitudes"] == 2 and t["vacias"] == 2
+    assert list(t["por_ubicacion"]) == ["Santiago, Chile"] and t["por_ubicacion"]["Santiago, Chile"]["consultas"] == 0
+
+
+def corrida_ubicaciones(tmp_path, monkeypatch, sitio, responder):
+    """buscar_ofertas con una sola fuente JobSpy, el término 'terminoSecreto' y las 3 ubicaciones; responder(location,
+    search_term) devuelve un DataFrame o una excepción."""
+    def scrape_jobs(**kw):
+        r = responder(kw["location"], kw["search_term"])
+        if isinstance(r, Exception):
+            raise r
+        return r
+    monkeypatch.setitem(sys.modules, "jobspy", types.SimpleNamespace(scrape_jobs=scrape_jobs))
+    for k, v in {"SITIOS": [sitio], "TERMINOS_A": ["terminoSecreto"], "TERMINOS_B": [],
+                 "TERMINOS_SECUNDARIOS": ["terminoSecreto"], "UBICACIONES": ["Santiago, Chile", "Viña del Mar, Chile"],
+                 "INCLUIR_REMOTO": True, "PAUSA_ENTRE_BUSQUEDAS": 0}.items():
+        monkeypatch.setattr(config, k, v)
+    monkeypatch.setattr(buscar, "ahora_chile", lambda: AHORA)
+    c = buscar.conectar(str(tmp_path / "t.db"))
+    buscar.buscar_ofertas(c)
+    return c, buscar.ultima_corrida(c)["detalle"]
+
+
+@pytest.mark.parametrize("sitio, nombre", [("indeed", "Indeed"), ("glassdoor", "Glassdoor")])
+def test_por_ubicacion_en_una_corrida_y_en_la_linea(tmp_path, monkeypatch, capsys, sitio, nombre):
+    def responder(location, termino):
+        if termino.endswith(" remoto"):                                         # "Chile (remoto)" pide "... remoto"
+            return RuntimeError("HTTP 429 Too Many Requests")
+        if location == "Santiago, Chile":
+            return df_de({"job_url": "http://hoy/privada?x=1", "title": "QA Tester", "date_posted": "2026-10-11"})
+        return pd.DataFrame()
+    c, detalle = corrida_ubicaciones(tmp_path, monkeypatch, sitio, responder)
+    t = detalle["fuentes"][0]["telemetria"]
+    assert t["por_ubicacion"] == {"Santiago, Chile": {"consultas": 1, "vacias": 0, "errores": 0},
+                                  "Viña del Mar, Chile": {"consultas": 1, "vacias": 1, "errores": 0},
+                                  "Chile (remoto)": {"consultas": 1, "vacias": 0, "errores": 1}}
+    assert t["solicitudes"] == sum(u["consultas"] for u in t["por_ubicacion"].values()) == 3
+    assert t["vacias"] == sum(u["vacias"] for u in t["por_ubicacion"].values()) == 1
+    assert t["codigos"]["200"] is None and t["codigos"]["429"] == 1
+    guardado = json.dumps(detalle, ensure_ascii=False)
+    assert "terminoSecreto" not in guardado and "privada" not in guardado and "QA Tester" not in guardado
+    linea = [l for l in capsys.readouterr().err.splitlines() if l.startswith("[corrida] ")]
+    assert linea == [f"[corrida] {nombre}: 3 consultas (200 no medido, 429=1), 1 vacía "
+                     "[Santiago 1/0, Viña 1/1, remoto 1/0 (1 error)]"]
+    assert "terminoSecreto" not in linea[0]
+
+
+def test_sin_remoto_no_aparece_su_ubicacion(tmp_path, monkeypatch):
+    monkeypatch.setattr(config, "INCLUIR_REMOTO", False)
+    c, _, detalle = corrida_jobspy(tmp_path, monkeypatch, {"QA": pd.DataFrame()})
+    assert list(detalle["fuentes"][0]["telemetria"]["por_ubicacion"]) == ["Santiago, Chile"]
