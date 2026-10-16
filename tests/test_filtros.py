@@ -31,6 +31,13 @@ def test_accenture_se_excluye_siempre():
     assert r["categoria"] == "descartada"
 
 
+@pytest.mark.parametrize("empresa", ["BairesDev", "Baires Dev", "BairesDev LLC"])
+def test_bairesdev_se_excluye_siempre(empresa):
+    r = clasificar(oferta("Analista Funcional", empresa=empresa, fuente="linkedin"))
+    assert r["categoria"] == "descartada"
+    assert r["razon"] == "empresa excluida"
+
+
 @pytest.mark.parametrize("titulo", ["Práctica QA", "Practicante Desarrollo", "Memorista TI",
                                     "Pasantía Analista de Sistemas"])
 def test_practicas_excluidas(titulo):
@@ -260,6 +267,75 @@ def test_fuera_de_zona_se_descarta_salvo_remoto():
     assert clasificar(oferta("QA", ubic=lejos))["categoria"] == "descartada"
     assert clasificar(oferta("QA", "100% remoto", ubic=lejos))["categoria"] == "principal"
     assert clasificar(oferta("QA", ubic="Viña del Mar, VS, Chile"))["categoria"] == "principal"
+
+
+@pytest.mark.parametrize("ubic", [
+    "Santiago, Chile",
+    "Santiago, Región Metropolitana de Santiago, Chile",
+    "Viña del Mar, Valparaíso, Chile",
+    "Valparaíso, Chile",
+])
+def test_linkedin_acepta_solo_ubicaciones_objetivo_en_chile(ubic):
+    r = clasificar(oferta("Analista Funcional", ubic=ubic, fuente="linkedin"))
+    assert r["categoria"] == "principal"
+
+
+@pytest.mark.parametrize("ubic", ["Chile", "Antofagasta, Antofagasta, Chile"])
+def test_linkedin_descarta_chile_sin_ciudad_objetivo(ubic):
+    r = clasificar(oferta("Analista Funcional", ubic=ubic, fuente="linkedin"))
+    assert r["categoria"] == "descartada"
+    assert r["razon"] == "ubicación fuera del perfil LinkedIn"
+
+
+@pytest.mark.parametrize("ubic, desc", [
+    ("Chile", "Trabajo presencial en Santiago, Chile."),
+    ("Chile", "Trabajo presencial en Valparaíso."),
+    ("", "Trabajo presencial en Viña del Mar, Chile."),
+])
+def test_linkedin_usa_descripcion_si_ubicacion_no_indica_ciudad(ubic, desc):
+    r = clasificar(oferta("Analista Funcional", desc, ubic=ubic, fuente="linkedin"))
+    assert r["categoria"] == "principal"
+
+
+def test_linkedin_no_usa_ciudad_mencionada_en_descripcion_si_ubicacion_es_otra_ciudad():
+    r = clasificar(oferta("Analista Funcional", "Tenemos oficinas en Santiago, Chile.",
+                          ubic="Lima, Perú", fuente="linkedin"))
+    assert r["categoria"] == "descartada"
+
+
+def test_linkedin_acepta_remoto_internacional():
+    r = clasificar(oferta("Analista Funcional", ubic="Remoto, Argentina",
+                          desc="Trabajo 100% remoto.", fuente="linkedin"))
+    assert r["categoria"] == "principal"
+    assert r["modalidad"] == "Remoto"
+
+
+@pytest.mark.parametrize("desc", [
+    "0 años de experiencia",
+    "1 año de experiencia",
+    "2 años de experiencia",
+    "0 a 2 años de experiencia",
+    "1–2 años de experiencia",
+    "1 to 2 years of experience",
+    "sin experiencia previa",
+    "",
+])
+def test_linkedin_acepta_hasta_dos_anos(desc):
+    r = clasificar(oferta("Analista Funcional", desc, fuente="linkedin"))
+    assert r["categoria"] == "principal"
+
+
+@pytest.mark.parametrize("desc, requisito", [
+    ("3 años de experiencia", "3 años"),
+    ("1 a 3 años de experiencia", "1 a 3 años"),
+    ("2+ años de experiencia", "2+ años"),
+    ("1+ years of experience", "1+ years"),
+    ("1 to 3 years of experience", "1 to 3 years"),
+])
+def test_linkedin_descarta_experiencia_superior_a_dos(desc, requisito):
+    r = clasificar(oferta("Analista Funcional", desc, fuente="linkedin"))
+    assert r["categoria"] == "descartada"
+    assert r["razon"] == f"exige más de 2 años (requisito: {requisito})"
 
 
 def test_sueldo_desde_columnas_y_alerta_en_b():

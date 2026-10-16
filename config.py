@@ -86,7 +86,7 @@ PUERTO = int(os.environ.get("JT_PUERTO", "8765"))
 HOST = os.environ.get("JT_HOST", "127.0.0.1")        # en Docker: 0.0.0.0 dentro del contenedor (el puerto se publica solo en 127.0.0.1)
 
 # ============================================================== Exclusiones absolutas
-EXCLUIR_EMPRESAS = ["accenture"]
+EXCLUIR_EMPRESAS = ["accenture", "bairesdev", "baires dev"]
 EXCLUIR_PRACTICA_TITULO = [r"practic", r"pasant", r"\bintern\b", r"estudiante",
                            r"memorista", r"alumno"]
 EXCLUIR_PRACTICA_DESC = [r"practica profesional", r"practicante", r"memorista",

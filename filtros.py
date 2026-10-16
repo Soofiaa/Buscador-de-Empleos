@@ -179,6 +179,20 @@ def extraer_experiencia(d: str):
     return None, "No indicada"
 
 
+def _linkedin_experiencia_mayor_a_dos(d: str):
+    d = normalizar(d)
+    patron = r"(\d+)(?:\s*(?:a|-|–|—|y|o|to)\s*(\d+))?(\+)?\s*(anos?|years?)"
+    for m in re.finditer(patron, d):
+        if int(m.group(1)) > 15:   # años de la empresa, no requisito del cargo
+            continue
+        if not re.search(r"experiencia|experience", d[max(0, m.start() - 40):m.end() + 40]):
+            continue
+        texto_requisito = texto_anios(m.group(0)) if m.group(4).startswith("ano") else m.group(0)
+        supera = bool(m.group(3)) or int(m.group(2) or m.group(1)) > 2
+        return supera, texto_requisito
+    return False, ""
+
+
 def _miles(n: float) -> str:
     return f"{n:,.0f}".replace(",", ".")
 
@@ -205,6 +219,24 @@ def _region(ubicacion: str):
     if len(partes) >= 3 and re.fullmatch(r"[A-Z]{1,3}", partes[-2]):
         return partes[-2]
     return None
+
+
+def _ubicacion_linkedin_valida(ubicacion: str, descripcion: str) -> bool:
+    ubic_normalizada = _limpio(ubicacion)
+    partes = ubic_normalizada.split(",")
+    ciudad = partes[0] if partes else ""
+    patron_ciudad = r"\bsantiago\b|\bvalparaiso\b|\bvina(?: del mar)?\b"
+    cues_ubicacion = re.search(config.CUES_CHILE, normalizar(ubicacion))
+    if re.search(patron_ciudad, ciudad) and cues_ubicacion:
+        return True
+
+    # Si LinkedIn solo da el país o no da ubicación, buscar una ciudad objetivo en la descripción.
+    if ciudad_de(ubicacion):
+        return False
+    return bool(
+        re.search(patron_ciudad, normalizar(descripcion))
+        and (cues_ubicacion or re.search(config.CUES_CHILE, normalizar(descripcion)))
+    )
 
 
 def es_senior(t: str, d: str = "") -> bool:
@@ -277,22 +309,33 @@ def clasificar(o: dict) -> dict:
     # zona y modalidad
     modalidad, ev_modalidad = detectar_modalidad(t, d, bool(o.get("is_remote")))
     region = _region(ubic)
-    remoto_firme = modalidad == "Remoto" and ev_modalidad != EVIDENCIA_INDEED
-    if region and region not in config.REGIONES_VALIDAS and not remoto_firme:
+    fuente = texto(o.get("fuente")) or "indeed"
+    remoto_firme = modalidad == "Remoto" and (
+        ev_modalidad != EVIDENCIA_INDEED or (fuente == "linkedin" and bool(o.get("is_remote")))
+    )
+    if fuente == "linkedin" and not remoto_firme and not _ubicacion_linkedin_valida(ubic, d):
+        return fin("descartada", "ubicación fuera del perfil LinkedIn")
+    if fuente != "linkedin" and region and region not in config.REGIONES_VALIDAS and not remoto_firme:
         return fin("descartada", f"fuera de zona ({region})")
 
-    fuente = texto(o.get("fuente")) or "indeed"
-    if fuente != "indeed" and not remoto_firme and not re.search(config.CUES_CHILE, normalizar(ubic)):
+    if fuente not in ("indeed", "linkedin") and not remoto_firme and not re.search(config.CUES_CHILE, normalizar(ubic)):
         return fin("descartada", "ubicación no reconocida como Chile")
 
     contrato, ev_contrato = detectar_contrato(t, d)
     exp_min, exp_txt = extraer_experiencia(d)
     sueldo, mensual = extraer_sueldo(o, d)
 
-    # nivel: nada de semi senior / senior ni de 2+ años de experiencia
+    # nivel y experiencia máxima dependen del mismo criterio para cada fuente
     if es_senior(t, d):
         return fin("descartada", "nivel semi senior / senior")
-    if exp_min is not None and exp_min >= config.EXPERIENCIA_DESCARTA_DESDE:
+    if fuente == "linkedin":
+        supera_experiencia, exp_linkedin = _linkedin_experiencia_mayor_a_dos(d)
+        exp_txt = exp_linkedin or exp_txt
+    else:
+        supera_experiencia = exp_min is not None and exp_min >= config.EXPERIENCIA_DESCARTA_DESDE
+    if supera_experiencia:
+        if fuente == "linkedin":
+            return fin("descartada", f"exige más de 2 años (requisito: {exp_txt})")
         return fin("descartada", f"exige {exp_min}+ años de experiencia")   # "N+" siempre es plural
 
     # condiciones del tipo B

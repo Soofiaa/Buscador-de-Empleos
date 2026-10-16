@@ -148,7 +148,14 @@
   `C:\Users\sofia\OneDrive\OneDrive\` (solo tenía `Documentos\GitHub\Buscador-de-empleos\docker-compose.yml` y sus 4
   carpetas) y el volumen `buscador-de-empleos_jt_datos` (0 contenedores; solo una base Node v5). **La papelera de
   OneDrive la vacía Sofia a mano;** mientras no lo haga, lo borrado sigue en la nube.
-- **C2 desplegada** el 13-10-2026. Sigue C3. B2 (importar) no se hará. Resiliencia/LinkedIn sin aprobar.
+- **C2 desplegada** el 13-10-2026. Sigue C3. B2 (importar) no se hará. Resiliencia sin aprobar.
+- **Filtro de LinkedIn y exclusión de BairesDev (16-10-2026):** cambio local aún sin desplegar; no toca la base
+  real. Se aceptan Santiago, Viña del Mar y Valparaíso si la ubicación identifica Chile. Si LinkedIn no indica
+  ciudad, se busca una ciudad objetivo en la descripción; otras ciudades se descartan. Se acepta cualquier país
+  si el aviso indica remoto. En experiencia se acepta un máximo de 2 años; rangos que superen 2 y requisitos
+  abiertos con «+» se descartan. BairesDev/Baires Dev queda excluida en todas las fuentes. Pendiente revisar la
+  interpretación de los niveles de antigüedad propios de LinkedIn (por ejemplo, «Associate» / «Mid-Senior») antes
+  de añadir otra regla. Sofia pidió push, pero no se hará por la regla permanente de no publicar al remoto.
 
 ### Reglas comunes de la Fase C
 - **Un solo camino de escritura.** Estado y fase van siempre por `/api/marcar` (`pedidoMarcar` en la página), con
