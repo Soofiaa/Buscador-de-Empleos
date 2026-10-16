@@ -3,37 +3,43 @@
 ## Estado actual (se actualiza en cada despliegue; leer al empezar cada sesión)
 
 ### Producción y base
-- **Base real — línea base OFICIAL (15-10-2026, 23:45, despliegue de LinkedIn y contadores; vigente):** v7, integrity_check
-  ok, 1588 ofertas, 14 corridas, 15 filas en `historial_estados`, 16 postuladas, 6 POR VERIFICAR; estados
-  descartada/nueva 1512 · principal/descartada 60 · principal/postulada 16.
-  - Medida con `huellas.py` sobre la referencia oficial `ofertas_pre_linkedin_20261015.db` (contenedor detenido) y
-    repetida en la base real después de desplegar y después de las comprobaciones: idéntica las tres veces.
+- **Base real — línea base OFICIAL (16-10-2026, 11:30, despliegue de filtros LinkedIn; vigente):** v7,
+  integrity_check ok, 1967 ofertas, 17 corridas, 44 filas en `historial_estados`, 16 postuladas, 6 POR VERIFICAR;
+  estados descartada/nueva 1838 · principal/descartada 88 · principal/entrevista 1 · principal/nueva 24 ·
+  principal/postulada 16.
+  - Medida con `huellas.py` sobre la referencia `ofertas_pre_linkedin_filtros_20261016.db` (contenedor detenido) y
+    repetida en la base real después del despliegue y después de las comprobaciones: idéntica las tres veces.
   - sha256 por tabla: ajustes (4) `8928191ee9f0b506cee48f285e4167b71105de6cf7871705417a6518c3797aec` ·
     alertas (0) `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` ·
-    corridas (14) `15850a30cd2fa782fe020f503e78030f977fbd21957509cc754aba4aa5efd999` ·
-    historial_estados (15) `ccf3f3a5da6f46cf02cc5546417b41f640f9cf47faa9f2420d125606ee46b087` ·
-    ofertas (1588) `f27311349d9eeacd36056c1fd16339bc031fbdf8dff15f50b9dac33a2f4c080b` ·
+    corridas (17) `9e63aa4dc92ae580793909ab087819dbe4b68590d36a9d21c36100cd59724732` ·
+    historial_estados (44) `6bfad4c7e552194125988612975c4c3134a6fa8a0e9507f35c6193979904b838` ·
+    ofertas (1967) `bfbeb12bb1816ec87416a319b70953bd35b435e6633ab81bc54b2a2207ec4480` ·
     pruebas_fuentes (0) `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` ·
-    sqlite_sequence (2) `48c26b24f6639345d4baaa3c40bd611da7daa4805a9900a9f7e47b01a9cfb330` ·
+    sqlite_sequence (2) `c2a2deef445e938e4c7058289fcb173ffad9af078e2aebae9df3561c89db3a3b` ·
     terminos_no_disponibles (2) `0821946c3a741fa08fe0d2d793030aa14a531e6bf00096b4aa102d92f1e6d8c5`.
-- **Mediciones anteriores (no mezclar sus cifras con la oficial):**
+- **Mediciones anteriores (no mezclar sus cifras con la oficial):** la línea base del 15-10-2026, 23:45, fue v7,
+  1588 ofertas, 14 corridas, 15 filas en `historial_estados`, 16 postuladas y 6 POR VERIFICAR.
 - **Medición del 15-10-2026, 18:53 (telemetría):** 1536 ofertas, 12 corridas, 14 historial, 15 postuladas.
   Referencia: `ofertas_pre_telemetria_20261015.db` (`844341c7…`).
 - **Medición del 15-10-2026, mañana (solo conteos):** v7, integrity_check ok, 1321 ofertas, 9 corridas, 15 postuladas.
 - **Medición del 14-10-2026:** 1223 ofertas, 7 corridas, 14 postuladas, `historial_estados` con 4 filas.
-- **Última referencia (oficial):** `ofertas_pre_linkedin_20261015.db` (volumen y
+- **Última referencia (oficial):** `ofertas_pre_linkedin_filtros_20261016.db` (volumen y
   `C:\Users\sofia\Respaldos\job-tracker-referencias\`), sha256
-  `dce49a107791bc8c2a65b5d382cfab1e43d8341fa507cd73ebcfc823440e895d` en las dos copias, integrity_check ok. Tomada con
-  el contenedor detenido (salida 0). Las anteriores se conservan: `ofertas_pre_telemetria_20261015.db` (`844341c7…`),
-  `ofertas_pre_137_20261014.db` (`f42673e5…`), `ofertas_pre_c2_20261013.db` (`309228dd…`).
-- **En producción (15-10-2026, 23:45):** código de `62dc59d` (rama `feat/contadores-ubicacion`), imagen
-  `job-tracker-jobtracker:latest`, `sha256:22c86fa2872dad7cb9f7d4a7ab27539e6f79e3b0c552fa69fe6f549e5440a83c`.
-  - Reconstruido con `docker compose build` y levantado con `docker compose up -d`.
-  - Stop de la imagen anterior: `docker compose stop`, salida 0, «Servidor detenido.», sin SIGKILL.
-  - Comprobado sin escribir: GET 200; Host u Origin ajeno 403; POST rechazados (403, 413 y 400) sin tocar la base;
-    «Último respaldo» = `ofertas_auto_20261015-110938` sin `error_auto`.
-  - Anterior: imagen `ad7b2b19…` (15-10, 18:53), con la etiqueta `job-tracker:telemetria`.
-- **Imágenes para volver atrás:** `job-tracker:telemetria` (`ad7b2b19ced7…`; reversión en `REVERSION_FASE_A.md`),
+  `e3856c8346f07a065c8bc65213d2aa674049012d38d01e78c65ba2e35ebc0dd3` en las dos copias, integrity_check ok.
+  Tomada con el contenedor detenido (salida 0).
+- **En producción (16-10-2026, 11:30):** commit local `23241ba` (rama `feat/contadores-ubicacion`, sin push);
+  imagen `job-tracker-jobtracker:latest` y `job-tracker:linkedin-filtros`,
+  `sha256:d4d6b5347f13f5ced733f060f8ba3dad81f6ce2830f53714b4359eac6f8a45d9`.
+  - Reconstruida con `docker compose build` y levantada con `docker compose up -d`; health `healthy`.
+  - Imagen anterior identificada en producción como código de `229f120`, etiquetada `job-tracker:linkedin-229f`
+    (`sha256:d4529c349a47a830c421a161b64dd58cf31ce47486e7f9104e4eb7d16d5f5c1a`); `docker compose stop` salió 0.
+  - Comprobado sin escrituras de datos: GET 200; Host y Origin ajenos 403; POST rechazados con 403, 400 y 413.
+    Huellas completas, conteos, estados y objetos de las 8 tablas idénticos antes/después. `GET /api/respaldo` sin
+    `error_auto`; último: `ofertas_auto_20261016-000213.db`.
+  - Referencia completa y reversión a la imagen anterior probadas sobre copias; ver `REVERSION_FASE_A.md`.
+- **Imágenes para volver atrás:** `job-tracker:linkedin-filtros` (`d4d6b534…`; producción actual),
+  `job-tracker:linkedin-229f` (`d4529c34…`; reversión inmediata),
+  `job-tracker:telemetria` (`ad7b2b19ced7…`; reversión en `REVERSION_FASE_A.md`),
   `job-tracker:137` (`ff5a2615…`), `job-tracker:c2` (`f1943914…`), `:c1`, `:respaldo`, `:B1`, `:genero`, `:soporte`, `:faseA`, `:fase0`.
   - Siguen las candidatas viejas `:historial-candidata`, `:respaldo-candidata`, `:faseB1-candidata`,
     `:faseA-candidata` y `:137-candidata` (`f9b15255…`); se borran si Sofia lo aprueba.
@@ -149,11 +155,12 @@
   carpetas) y el volumen `buscador-de-empleos_jt_datos` (0 contenedores; solo una base Node v5). **La papelera de
   OneDrive la vacía Sofia a mano;** mientras no lo haga, lo borrado sigue en la nube.
 - **C2 desplegada** el 13-10-2026. Sigue C3. B2 (importar) no se hará. Resiliencia sin aprobar.
-- **Filtro de LinkedIn y exclusión de BairesDev (16-10-2026):** cambio local aún sin desplegar; no toca la base
-  real. Se aceptan Santiago, Viña del Mar y Valparaíso si la ubicación identifica Chile. Si LinkedIn no indica
-  ciudad, se busca una ciudad objetivo en la descripción; otras ciudades se descartan. Se acepta cualquier país
-  si el aviso indica remoto. En experiencia se acepta un máximo de 2 años; rangos que superen 2 y requisitos
-  abiertos con «+» se descartan. BairesDev/Baires Dev queda excluida en todas las fuentes. Pendiente revisar la
+- **Filtro de LinkedIn y exclusión de BairesDev (16-10-2026; desplegado en `23241ba`):** no reclasifica ofertas
+  guardadas ni modifica estados. Se aceptan Santiago, Viña del Mar y Valparaíso si la ubicación identifica Chile.
+  Si LinkedIn no indica ciudad, se busca una ciudad objetivo en la descripción; otras ciudades se descartan.
+  Se acepta cualquier país si el aviso indica remoto. En experiencia se acepta un máximo de 2 años; rangos que
+  superen 2 y requisitos abiertos con «+» se descartan. BairesDev/Baires Dev queda excluida en todas las fuentes.
+  Pendiente revisar la
   interpretación de los niveles de antigüedad propios de LinkedIn (por ejemplo, «Associate» / «Mid-Senior») antes
   de añadir otra regla. Sofia pidió push, pero no se hará por la regla permanente de no publicar al remoto.
 

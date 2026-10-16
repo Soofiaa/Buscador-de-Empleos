@@ -394,3 +394,27 @@ docker compose up -d --no-build
 
 **Qué se pierde mientras corra la imagen anterior:** la recopilación de ofertas de LinkedIn y los contadores por ubicación.
 
+# Filtro de LinkedIn y exclusión de BairesDev (despliegue del 16-10-2026; commit `23241ba`)
+
+La base no cambia de esquema ni se reclasifica durante el despliegue; para volver atrás basta con usar la imagen
+anterior y **no restaurar la base**.
+
+| Pieza | Valor |
+|---|---|
+| Imagen anterior | `job-tracker:linkedin-229f` (`sha256:d4529c349a47a830c421a161b64dd58cf31ce47486e7f9104e4eb7d16d5f5c1a`) |
+| Imagen desplegada | `job-tracker:linkedin-filtros` = `job-tracker-jobtracker:latest` (`sha256:d4d6b5347f13f5ced733f060f8ba3dad81f6ce2830f53714b4359eac6f8a45d9`) |
+| Referencia de la base | `ofertas_pre_linkedin_filtros_20261016.db` (volumen y `C:\Users\sofia\Respaldos\job-tracker-referencias\`), sha256 `e3856c8346f07a065c8bc65213d2aa674049012d38d01e78c65ba2e35ebc0dd3`, integrity_check `ok` |
+
+```
+docker compose stop jobtracker
+docker tag job-tracker:linkedin-229f job-tracker-jobtracker:latest
+docker compose up -d --no-build
+```
+
+Probado con la imagen anterior en `jt_revision_linkedin_reversion` (127.0.0.1:8767), sobre una copia de la referencia:
+quedó healthy; `/api/estado`, `/api/ofertas` y `/api/respaldo` respondieron 200; la versión, integrity_check, postuladas,
+POR VERIFICAR, objetos del esquema y las huellas de las ocho tablas coincidieron con la referencia.
+
+**Qué se pierde mientras corra la imagen anterior:** la restricción de LinkedIn a Santiago, Viña del Mar y Valparaíso
+(o remoto internacional), el límite de hasta 2 años y la exclusión de BairesDev. No se pierden ni se reclasifican
+ofertas ya guardadas; futuras búsquedas vuelven a usar los filtros de la imagen anterior.
