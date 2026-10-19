@@ -8,8 +8,9 @@ TERMINOS_A = [  # roles TI
     "analista funcional", "QA", "testing", "tester", "analista de pruebas",
     "business analyst", "análisis de requerimientos", "BPMN",
     "automatización de procesos", "desarrollador python",
-    "desarrollador backend", "desarrollador junior", "desarrollador frontend",
-    "analista de sistemas", "analista de datos junior", "reportería BI", "informático junior",
+    "desarrollador backend", "desarrollador junior", "desarrollador jr", "desarrollador frontend",
+    "analista de sistemas", "analista de datos junior", "analista de datos jr", "reportería BI",
+    "informático junior", "informático jr",
 ]
 # Nota: "BPMN UML" (0 resultados en todas las zonas) se reemplazó por "BPMN";
 # los términos con "junior" + varias palabras técnicas no devuelven nada en Indeed.
@@ -32,7 +33,8 @@ SITIOS = ["indeed", "glassdoor", "getonboard", "bne", "trabajando", "chiletrabaj
 TERMINOS_SECUNDARIOS = [
     "analista funcional", "QA", "tester", "business analyst", "analista de sistemas",
     "desarrollador python", "desarrollador backend", "analista de procesos",
-    "datos maestros", "analista de datos junior", "informático junior",
+    "datos maestros", "analista de datos junior", "analista de datos jr",
+    "informático junior", "informático jr",
 ]
 NOMBRE_FUENTE = {"indeed": "Indeed", "google": "Google", "glassdoor": "Glassdoor", "getonboard": "Get on Board",
                  "bne": "BNE", "trabajando": "Trabajando", "chiletrabajos": "Chiletrabajos", "linkedin": "LinkedIn"}
@@ -46,9 +48,9 @@ TERMINOS_BNE = ["ocupacion:7643", "analista funcional", "analista de procesos", 
 TERMINOS_TRABAJANDO = ["analista-funcional", "analista-de-procesos", "analista-qa", "analista-programador",
                        "desarrollador-backend", "programador", "desarrollador-python"]   # los 3 últimos, sin verificar
 TERMINOS_CHILETRABAJOS = ["analista funcional", "analista de procesos", "analista qa", "tester",
-                          "analista programador", "desarrollador junior", "analista de datos",
+                          "analista programador", "desarrollador junior", "desarrollador jr", "analista de datos",
                           "analista de reporteria", "control de gestion", "analista de operaciones", "datos maestros",
-                          "informatico junior"]
+                          "informatico junior", "informatico jr"]
 # Los listados de estos portales vienen recortados: el detalle de cada aviso se abre SOLO para ofertas nuevas que
 # podrían servir (las más recientes primero), con este tope por corrida. Las que no alcanzan no se guardan: quedan
 # para la próxima corrida.
