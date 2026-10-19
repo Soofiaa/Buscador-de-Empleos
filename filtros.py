@@ -166,31 +166,43 @@ def texto_anios(expr: str) -> str:
     return f"{base} {unidad}"
 
 
+_PATRON_ANOS = r"(\d+)(?:\s*(?:a|-|–|—|y|o|to)\s*(\d+))?(\+)?\s*(anos?|years?)"
+
+
+def _requisito_experiencia(d: str):
+    """(mínimo, máximo, texto) del requisito de cargo, o None. '2 años' -> (2, 2, ...); '0 a 2' -> (0, 2, ...)."""
+    d = normalizar(d)
+    for m in re.finditer(_PATRON_ANOS, d):
+        lo = int(m.group(1))
+        if lo > 15:   # años de la empresa, no requisito del cargo
+            continue
+        if not re.search(r"experiencia|experience", d[max(0, m.start() - 40): m.end() + 40]):
+            continue
+        hi = int(m.group(2)) if m.group(2) else lo
+        texto_requisito = texto_anios(m.group(0)) if m.group(4).startswith("ano") else m.group(0)
+        return lo, hi, texto_requisito
+    if re.search(r"sin experiencia|recien (titulad|egresad)|poca experiencia", d):
+        return 0, 0, "Sin experiencia / recién titulado"
+    return None
+
+
 def extraer_experiencia(d: str):
     """Devuelve (años mínimos o None, texto para mostrar)."""
-    d = normalizar(d)
-    for m in re.finditer(r"(\d+)(?:\s*(?:a|-|y|o)\s*\d+)?\s*\+?\s*anos?", d):
-        if int(m.group(1)) > 15:   # años de la empresa, no requisito del cargo
-            continue
-        if "experiencia" in d[max(0, m.start() - 40): m.end() + 40]:
-            return int(m.group(1)), texto_anios(m.group(0))
-    if re.search(r"sin experiencia|recien (titulad|egresad)|poca experiencia", d):
-        return 0, "Sin experiencia / recién titulado"
-    return None, "No indicada"
+    req = _requisito_experiencia(d)
+    if req is None:
+        return None, "No indicada"
+    return req[0], req[2]
 
 
-def _linkedin_experiencia_mayor_a_dos(d: str):
-    d = normalizar(d)
-    patron = r"(\d+)(?:\s*(?:a|-|–|—|y|o|to)\s*(\d+))?(\+)?\s*(anos?|years?)"
-    for m in re.finditer(patron, d):
-        if int(m.group(1)) > 15:   # años de la empresa, no requisito del cargo
-            continue
-        if not re.search(r"experiencia|experience", d[max(0, m.start() - 40):m.end() + 40]):
-            continue
-        texto_requisito = texto_anios(m.group(0)) if m.group(4).startswith("ano") else m.group(0)
-        supera = bool(m.group(3)) or int(m.group(2) or m.group(1)) > 2
-        return supera, texto_requisito
-    return False, ""
+def experiencia_excede_perfil(d: str):
+    """True si pide 2 años o más de mínimo, o un rango que supera 2 (p. ej. 1 a 3). '0 a 2' y '1 año' no."""
+    req = _requisito_experiencia(d)
+    if req is None:
+        return False, ""
+    lo, hi, texto_requisito = req
+    if lo >= config.EXPERIENCIA_DESCARTA_DESDE or hi > config.EXPERIENCIA_MAXIMA:
+        return True, texto_requisito
+    return False, texto_requisito
 
 
 def _linkedin_nivel_mid_senior(d: str) -> bool:
@@ -335,6 +347,9 @@ def clasificar(o: dict) -> dict:
 
     contrato, ev_contrato = detectar_contrato(t, d)
     exp_min, exp_txt = extraer_experiencia(d)
+    supera_experiencia, exp_req = experiencia_excede_perfil(d)
+    if exp_req:
+        exp_txt = exp_req
     sueldo, mensual = extraer_sueldo(o, d)
 
     # nivel y experiencia máxima dependen del mismo criterio para cada fuente
@@ -347,14 +362,10 @@ def clasificar(o: dict) -> dict:
             return fin("descartada", "nivel semi senior / senior")
         if _linkedin_experto(t, d):
             return fin("descartada", "nivel experto de LinkedIn")
-        supera_experiencia, exp_linkedin = _linkedin_experiencia_mayor_a_dos(d)
-        exp_txt = exp_linkedin or exp_txt
-    else:
-        supera_experiencia = exp_min is not None and exp_min >= config.EXPERIENCIA_DESCARTA_DESDE
     if supera_experiencia:
-        if fuente == "linkedin":
-            return fin("descartada", f"exige más de 2 años (requisito: {exp_txt})")
-        return fin("descartada", f"exige {exp_min}+ años de experiencia")   # "N+" siempre es plural
+        if exp_min is not None and exp_min >= config.EXPERIENCIA_DESCARTA_DESDE:
+            return fin("descartada", f"exige {exp_min}+ años de experiencia")   # "N+" siempre es plural
+        return fin("descartada", f"exige más de 2 años (requisito: {exp_txt})")
 
     # condiciones del tipo B
     senales = []

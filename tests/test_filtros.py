@@ -196,15 +196,17 @@ def test_analista_generico_no_entra():
 @pytest.mark.parametrize("desc", [
     "Se requieren 2 años de experiencia en el cargo.", "Mínimo 3 años de experiencia.",
     "Experiencia de 2 a 4 años en testing.", "5 años de experiencia demostrable.",
+    "1 a 3 años de experiencia", "3 a 5 años de experiencia",
 ])
 def test_dos_o_mas_anos_de_experiencia_se_descarta(desc):
     r = clasificar(oferta("Analista Funcional", desc))
-    assert r["categoria"] == "descartada" and "años de experiencia" in r["razon"]
+    assert r["categoria"] == "descartada" and "años" in r["razon"]
 
 
 @pytest.mark.parametrize("desc", ["1 año de experiencia", "0 a 2 años de experiencia",
-                                  "1 a 2 años de experiencia", "sin experiencia previa", ""])
-def test_hasta_un_ano_o_rango_que_parte_en_menos_de_2_se_mantiene(desc):
+                                  "1 a 2 años de experiencia", "0–2 años de experiencia",
+                                  "1–2 años de experiencia", "sin experiencia previa", ""])
+def test_hasta_un_ano_o_rango_hasta_dos_se_mantiene(desc):
     assert clasificar(oferta("Analista Funcional", desc))["categoria"] == "principal"
 
 
@@ -229,6 +231,7 @@ def test_es_senior():
 def test_extraer_experiencia():
     assert extraer_experiencia("minimo 2 años de experiencia")[0] == 2
     assert extraer_experiencia("1 a 2 años de experiencia")[0] == 1
+    assert extraer_experiencia("1–2 años de experiencia")[0] == 1
     assert extraer_experiencia("sin experiencia previa")[0] == 0
     assert extraer_experiencia("empresa con 20 años en el mercado")[0] is None
 
@@ -346,29 +349,29 @@ def test_linkedin_senior_se_descarta(titulo, desc):
 @pytest.mark.parametrize("desc", [
     "0 años de experiencia",
     "1 año de experiencia",
-    "2 años de experiencia",
     "0 a 2 años de experiencia",
     "1–2 años de experiencia",
     "1 to 2 years of experience",
+    "1+ years of experience",
     "sin experiencia previa",
     "",
 ])
-def test_linkedin_acepta_hasta_dos_anos(desc):
+def test_linkedin_acepta_hasta_un_ano_o_rango_de_0_a_2(desc):
     r = clasificar(oferta("Analista Funcional", desc, fuente="linkedin"))
     assert r["categoria"] == "principal"
 
 
-@pytest.mark.parametrize("desc, requisito", [
-    ("3 años de experiencia", "3 años"),
-    ("1 a 3 años de experiencia", "1 a 3 años"),
-    ("2+ años de experiencia", "2+ años"),
-    ("1+ years of experience", "1+ years"),
-    ("1 to 3 years of experience", "1 to 3 years"),
+@pytest.mark.parametrize("desc, razon", [
+    ("2 años de experiencia", "exige 2+ años de experiencia"),
+    ("3 años de experiencia", "exige 3+ años de experiencia"),
+    ("1 a 3 años de experiencia", "exige más de 2 años (requisito: 1 a 3 años)"),
+    ("2+ años de experiencia", "exige 2+ años de experiencia"),
+    ("1 to 3 years of experience", "exige más de 2 años (requisito: 1 to 3 years)"),
 ])
-def test_linkedin_descarta_experiencia_superior_a_dos(desc, requisito):
+def test_linkedin_descarta_dos_anos_o_un_rango_que_supera_dos(desc, razon):
     r = clasificar(oferta("Analista Funcional", desc, fuente="linkedin"))
     assert r["categoria"] == "descartada"
-    assert r["razon"] == f"exige más de 2 años (requisito: {requisito})"
+    assert r["razon"] == razon
 
 
 def test_sueldo_desde_columnas_y_alerta_en_b():

@@ -351,3 +351,128 @@ Evaluado `colbymchenry/codegraph` v1.6.2 (`@colbymchenry/codegraph`) leyendo su 
   que falten, pero entre la migración y el siguiente arranque la base quedaría sin protección.
 - Los orígenes están cerrados por un CHECK: tablero, modal, lista, manual y deshacer. Agregar uno obliga a reconstruir
   la tabla y sus triggers.
+
+## Exploración de fuentes de empleo adicionales (16-10-2026; sin cambios en el proyecto)
+
+Sofia pidió evaluar otras fuentes chilenas antes de decidir si conviene incorporarlas. Esta exploración fue manual,
+con páginas públicas en navegador y consultas informativas de `robots.txt`; no se inició sesión, no se usaron enlaces
+de postulación ni se intentó sortear bloqueos. No se cambió código, configuración, base, contenedores ni imágenes, y
+no se hizo push. Jooble se descartó por decisión de Sofia. FirstJob se dejó abajo en prioridad porque lo observado
+estaba centrado en prácticas.
+
+### Alcance y método de la revisión del 16-10
+
+- Se tomaron como referencia los 29 términos configurados en `TERMINOS_A` y `TERMINOS_B`:
+  `analista funcional`, `QA`, `testing`, `tester`, `analista de pruebas`, `business analyst`,
+  `análisis de requerimientos`, `BPMN`, `automatización de procesos`, `desarrollador python`,
+  `desarrollador backend`, `desarrollador junior`, `desarrollador frontend`, `analista de sistemas`,
+  `analista de datos junior`, `reportería BI`, `informático junior`, `analista de procesos`, `mejora continua`,
+  `datos maestros`, `master data`, `analista de reportería`, `control de gestión`, `usuario clave`, `key user`,
+  `analista SAP`, `analista de implementación`, `analista de operaciones`, `PMO` y `asistente de proyectos`.
+- En Talent.com se probaron los 29 en Santiago y Viña del Mar. En Computrabajo se probaron los 29 en Santiago y
+  Valparaíso. Los portales devuelven coincidencias por relevancia, pueden presentar resultados repetidos o fuera de
+  la ciudad consultada y la revisión se limitó a los resultados visibles; no es un rastreo exhaustivo de todas las
+  páginas ni de todas las ofertas.
+- Empleos Públicos se revisó mediante sugerencias del buscador para los 29 términos; la búsqueda de convocatoria
+  completa no pudo validarse como un proceso estable. Laborum no se pudo probar con todos los términos de forma
+  compatible con sus restricciones.
+- Un rótulo como «actualizado hace X horas» no demuestra que el aviso se haya publicado en ese plazo. Se priorizó
+  la fecha explícita del detalle cuando fue posible y se distinguió entre publicación y actualización.
+- No se compararon las ofertas resultantes con la base real ni se pudo medir cuántas serían nuevas frente a Indeed,
+  Glassdoor, Get on Board, BNE, Trabajando, Chiletrabajos y LinkedIn. Por tanto, los conteos de resultados no
+  representan aportes incrementales deduplicados.
+
+### Resultados por fuente candidata
+
+**Computrabajo Chile (`cl.computrabajo.com`)**
+
+- La página de resultados se pudo leer con navegador; una descarga directa/consulta simple había devuelto 403. El
+  `robots.txt` se leyó desde el navegador: permite las páginas base de búsqueda probadas, pero prohíbe rutas de
+  ofertas con parámetros como `pubdate=`, además de rutas de perfiles y servicios. No usar las rutas prohibidas ni
+  intentar eludirlas.
+- La búsqueda de Santiago devolvió ofertas recientes, pero buena parte de las coincidencias examinadas no servía:
+  cargos Senior o con 3–5+ años, prácticas, funciones comerciales o resultados que solo coincidían por texto.
+  Ejemplos: QA Automation actualizado hace 9 horas pedía 3 años; QA Engineer senior pedía 4+; Full Stack remoto
+  pedía 2 años o más (el criterio vigente descarta requisitos cuyo máximo supera 2).
+- En la búsqueda amplia de Valparaíso apareció **Desarrollador/a Power Platform Jr – Casablanca, V Región**
+  (Kibernum), publicado/actualizado «Ayer»; el detalle acepta experiencia laboral inicial, práctica o proyectos
+  académicos y el portal declara 1 año de experiencia. Es presencial en Casablanca. Puede ser pertinente por rol y
+  experiencia, pero no cumple literalmente las ciudades objetivo actuales (Santiago, Valparaíso o Viña); tampoco se
+  autorizó ampliar ubicaciones a Casablanca.
+- También apareció **Encargado(a) de Soporte Informático – Concón**, con 5 años de experiencia, por lo que se
+  descarta. Los listados de Valparaíso incluyeron avisos de Santiago y otras localidades; el filtro del portal no
+  garantiza ubicación exacta.
+- Evaluación: técnicamente consultable en navegador y con alguna oferta junior potencial, pero no se confirmó un
+  aporte compatible con las ubicaciones aprobadas ni se deduplicó con producción. Mantener como candidata
+  exploratoria; no integrar.
+
+**Talent.com (`cl.talent.com`)**
+
+- Se pudieron leer páginas públicas de resultados y algunos detalles. El `robots.txt` prohíbe `/search-jobs/*`,
+  `/services/api-new/search`, redirecciones de postulación y otras rutas; no usarlas. Las páginas públicas
+  `/jobs?...` consultadas no fueron bloqueadas en esta prueba. Respetar siempre las reglas vigentes del sitio.
+- Santiago: de los resultados recientes visibles para los 29 términos hubo mucho solapamiento y ruido. Ejemplos
+  potencialmente afines: **QA Automatizador COD:MET044** (Santiago, actualizado hace 1 hora; la ficha visible no
+  detalló años de experiencia) y **Técnico de Centro de Datos, DCO** (Santiago, hace 3 horas; sus requisitos
+  incluyen experiencia práctica en hardware, Linux y redes; no se confirmó ajuste junior). **Analista de Datos de
+  Negocio** de Tenpo pedía entre 2 y 4 años, así que excede el máximo admitido.
+- Viña/Valparaíso: los términos devolvieron coincidencias repetidas y contenido irrelevante, además de puestos
+  remotos con ubicación etiquetada Valparaíso. **Associate Forward Deployed Engineer – Remote** de YO AI Labs
+  (hace 7 horas; el detalle anuncia trabajo remoto de tiempo completo para ingenieros junior y no especifica años)
+  es potencialmente afín, pero su elegibilidad geográfica/país no quedó confirmada. No asumir que por indicar
+  Valparaíso como ubicación el puesto esté abierto a Chile.
+- Evaluación: candidata más prometedora para observación por el posible puesto remoto junior; aún no hay prueba de
+  elegibilidad local ni de ofertas incrementales frente a las fuentes actuales. No integrar por ahora.
+
+**Empleos Públicos (`empleospublicos.cl`)**
+
+- La descarga directa del inicio y de `robots.txt` devolvió 403, pero el navegador mostró el portal público. El
+  listado inicial contenía convocatorias de múltiples áreas. Las sugerencias de los 29 términos dieron algunos
+  cargos de procesos, sistemas y automatización; la mayoría no produjo sugerencias directas o trajo puestos de
+  otras regiones/funciones.
+- Se había localizado una convocatoria técnica de Gendarmería en Puente Alto relacionada con estadísticas y un
+  sistema informático, con cierre el 19-10-2026; no se confirmó que sus tareas ni el perfil fueran adecuados.
+  Algunos títulos detectados por sugerencias eran de analista de procesos en Santiago, pero no se validaron sus
+  bases, antigüedad ni requisitos contra el criterio de experiencia.
+- El formulario completo no se pudo probar de manera repetible; escribir en el autocompletado no equivale a
+  verificar todos los resultados. La fecha de esta revisión es histórica y las convocatorias pueden haber vencido.
+- Evaluación: puede contener cargos TI públicos, pero pertinencia junior, ubicación y consulta completa quedan sin
+  validar. Mantener como referencia manual, no como conector.
+
+**Laborum (`laborum.cl`)**
+
+- La página necesita JavaScript: la descarga HTML simple solo mostró que hacía falta JavaScript. El `robots.txt`
+  permite determinados sitemaps/listados, pero bloquea rutas/parámetros de búsqueda, incluidos `recientes=true`,
+  `relevantes=true` y `localidades`. Un endpoint observado en la página devolvió 403 al consultarlo directamente;
+  no se probaron cabeceras, cookies ni otras formas de evadirlo.
+- En una prueba anterior, en listados permitidos de Santiago y Las Condes se observaron avisos potencialmente
+  pertinentes, pero varios tenían muchos días. **Desarrollador/a Full Stack Junior** tenía requisito de 0–2 años,
+  pero fecha de publicación 22-09-2026; el rótulo «actualizado hace 2 horas» no lo hacía nuevo. Dos avisos de
+  automatización/IA publicados el 08-10 y 10-10 no especificaban un máximo de años.
+- No se recorrieron los 29 términos: robots/403 impiden afirmar que la fuente se haya evaluado exhaustivamente.
+- Evaluación: no integrar mientras no exista una vía pública permitida y verificable para buscar.
+
+**Mipleo Chile (`mipleo.cl`)**
+
+- La página principal indicó 0 trabajos. Su `robots.txt` prohíbe búsquedas con el parámetro `q`; no se consultaron
+  rutas de búsqueda bloqueadas.
+- Evaluación: no aportó resultados y se deja fuera de la evaluación adicional por ahora.
+
+**FirstJob (`firstjob.me`)**
+
+- La página revisada mostraba un programa de prácticas. No se recorrieron los 29 términos; se dejó en baja
+  prioridad porque las prácticas no son el objetivo de búsqueda actual.
+
+### Decisión y preguntas abiertas
+
+- No se aprueba ni se inicia la integración de ninguna fuente nueva; no se hicieron cambios de código, configuración,
+  base de datos o Docker. Jooble queda descartado por preferencia de Sofia.
+- Talent.com y Computrabajo pueden quedar en observación, pero antes de proponer integración habría que confirmar
+  una muestra mayor de avisos que cumplan fechas, requisitos y ubicaciones, y medir la deduplicación contra la base
+  real solo mediante el procedimiento autorizado (sin tocar la base real fuera del despliegue).
+- Empleos Públicos queda para consulta manual; Laborum requiere una vía de lectura permitida; Mipleo no mostró
+  ofertas; FirstJob parece centrado en prácticas.
+- **Pendiente de decisión:** si se amplía el criterio territorial para aceptar Casablanca y otras comunas de la
+  Región de Valparaíso. La regla documentada/configurada hasta ahora es Santiago, Viña del Mar y Valparaíso; no se
+  amplió con esta exploración.
+- Esta nota registra una investigación exploratoria, no una autorización de implementación, despliegue o push.

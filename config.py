@@ -204,8 +204,9 @@ APORTA = {  # qué habilidad de TI suma cada señal
 # Se DESCARTAN las ofertas de nivel semi senior o superior (título o descripción).
 SENIORITY_TITULO = r"semi[ -]?senior|\bssr\b|\bsemi ?sr\b|\bsenior\b|\bsr\b|\blead\b|\blider\b|\bjefe\b|\bgerente\b|\barquitecto\b|\bmanager\b|\bsupervisor\b|\bcoordinador"
 SENIORITY_DESC = r"(perfil|nivel|cargo|rol|posicion) (de )?(semi[ -]?)?senior|(semi[ -]?senior|senior) (developer|engineer|analyst|desarrollador|ingeniero|analista)"
-EXPERIENCIA_DESCARTA_DESDE = 2    # si exige este mínimo de años (o más), la oferta se descarta
-                                  # ("1 a 2 años" se mantiene: el mínimo es 1)
+EXPERIENCIA_DESCARTA_DESDE = 2    # si el mínimo exigido es este (o más), se descarta ("2 años", "2 a 4")
+EXPERIENCIA_MAXIMA = 2            # si el rango supera este máximo, se descarta ("1 a 3", "3 años")
+                                  # se mantienen "1 año", "0 a 2", "1 a 2" y sin experiencia
 PLAZO_TITULO = [r"reemplazo", r"temporal", r"\d+ meses", r"pre y post natal"]
 PLAZO_DESC = [r"plazo fijo", r"por obra", r"faena", r"temporada", r"contrato temporal",
               r"vacante temporal", r"pre y post natal|prenatal|postnatal",
