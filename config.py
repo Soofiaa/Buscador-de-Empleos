@@ -11,6 +11,11 @@ TERMINOS_A = [  # roles TI
     "desarrollador backend", "desarrollador junior", "desarrollador jr", "desarrollador frontend",
     "analista de sistemas", "analista de datos junior", "analista de datos jr", "reportería BI",
     "informático junior", "informático jr",
+    "data engineer junior", "ETL junior", "analista BI junior",
+    "scrum master junior", "product owner junior",
+    "devops junior", "cloud junior",
+    "analista de ciberseguridad junior",
+    "desarrollador full stack junior",
 ]
 # Nota: "BPMN UML" (0 resultados en todas las zonas) se reemplazó por "BPMN";
 # los términos con "junior" + varias palabras técnicas no devuelven nada en Indeed.
@@ -19,6 +24,11 @@ TERMINOS_B = [  # roles puente (no TI)
     "analista de reportería", "control de gestión", "usuario clave", "key user",
     "analista SAP", "analista de implementación",
     "analista de operaciones", "PMO", "asistente de proyectos",
+    "analista de calidad", "analista de mejora",
+    "coordinador de proyectos junior", "gestor de proyectos junior",
+    "analista de transformación digital junior",
+    "consultor funcional junior",
+    "analista de requerimientos junior",
 ]
 # Fuentes. Indeed busca con todos los términos; Google y Glassdoor con la lista
 # corta (TERMINOS_SECUNDARIOS) para limitar peticiones y riesgo de bloqueo.
@@ -35,6 +45,10 @@ TERMINOS_SECUNDARIOS = [
     "desarrollador python", "desarrollador backend", "analista de procesos",
     "datos maestros", "analista de datos junior", "analista de datos jr",
     "informático junior", "informático jr",
+    "data engineer junior", "analista BI junior",
+    "devops junior",
+    "analista de calidad", "analista de mejora",
+    "analista de requerimientos junior",
 ]
 NOMBRE_FUENTE = {"indeed": "Indeed", "google": "Google", "glassdoor": "Glassdoor", "getonboard": "Get on Board",
                  "bne": "BNE", "trabajando": "Trabajando", "chiletrabajos": "Chiletrabajos", "linkedin": "LinkedIn"}
