@@ -36,7 +36,7 @@ TERMINOS_B = [  # roles puente (no TI)
 # con la ubicación escrita ("Santiago, Chile"). Es un rodeo: ver probar_fuentes.py.
 # Google está desactivado: JobSpy recibe "Google returned no job data" (probado 2026-10-10).
 # Para reintentarlo, agrégalo a la lista: SITIOS = ["indeed", "glassdoor", "google"]
-SITIOS = ["indeed", "glassdoor", "getonboard", "bne", "trabajando", "chiletrabajos", "computrabajo", "linkedin"]
+SITIOS = ["indeed", "glassdoor", "getonboard", "bne", "trabajando", "chiletrabajos", "computrabajo", "laborum", "buscojobs", "linkedin"]
 # getonboard: API oficial (ver getonboard.py). bne / trabajando / chiletrabajos: portales chilenos leídos sin JobSpy
 # (módulos bne.py, trabajando.py, chiletrabajos.py), con las mismas reglas de la app "Busca Empleo": robots.txt,
 # pausa de 3 a 5 s, y detención del sitio ante 401/403/429 o CAPTCHA (nunca se esquiva).
@@ -51,7 +51,8 @@ TERMINOS_SECUNDARIOS = [
     "analista de requerimientos junior",
 ]
 NOMBRE_FUENTE = {"indeed": "Indeed", "google": "Google", "glassdoor": "Glassdoor", "getonboard": "Get on Board",
-                 "bne": "BNE", "trabajando": "Trabajando", "chiletrabajos": "Chiletrabajos", "computrabajo": "Computrabajo", "linkedin": "LinkedIn"}
+                 "bne": "BNE", "trabajando": "Trabajando", "chiletrabajos": "Chiletrabajos", "computrabajo": "Computrabajo",
+                 "laborum": "Laborum", "buscojobs": "Buscojobs", "linkedin": "LinkedIn"}
 
 # ---- Portales chilenos (términos validados por la app anterior; sin tildes porque van en la URL) ----
 # BNE: "ocupacion:7643" = grupo TI "Desarrolladores y analistas de sistemas". Palabras de menos de 3 letras dan 0 ("qa").
@@ -69,10 +70,18 @@ TERMINOS_CHILETRABAJOS = ["analista funcional", "analista de procesos", "analist
 TERMINOS_COMPUTRABAJO = ["analista-funcional", "analista-de-procesos", "analista-qa", "tester",
                          "desarrollador-python", "desarrollador-backend", "desarrollador-junior",
                          "analista-de-datos", "data-engineer", "analista-bi"]
+# Laborum: términos sin tildes para URL
+TERMINOS_LABORUM = ["analista-funcional", "analista-de-procesos", "analista-qa", "tester",
+                    "desarrollador-python", "desarrollador-backend", "desarrollador-junior",
+                    "analista-de-datos", "data-engineer", "analista-bi"]
+# Buscojobs: términos sin tildes para URL
+TERMINOS_BUSCOJOBS = ["analista-funcional", "analista-de-procesos", "analista-qa", "tester",
+                      "desarrollador-python", "desarrollador-backend", "desarrollador-junior",
+                      "analista-de-datos", "data-engineer", "analista-bi"]
 # Los listados de estos portales vienen recortados: el detalle de cada aviso se abre SOLO para ofertas nuevas que
 # podrían servir (las más recientes primero), con este tope por corrida. Las que no alcanzan no se guardan: quedan
 # para la próxima corrida.
-MAX_DETALLES = {"bne": 5, "trabajando": 5, "chiletrabajos": 10, "computrabajo": 10}
+MAX_DETALLES = {"bne": 5, "trabajando": 5, "chiletrabajos": 10, "computrabajo": 10, "laborum": 10, "buscojobs": 10}
 DIAS_RECORDAR_404 = 30
 ERRORES_SEGUIDOS_PARA_ABORTAR = 3
 # Fuentes que no son Indeed no traen código de región fiable: la ubicación debe
@@ -91,7 +100,7 @@ PAUSA_ENTRE_BUSQUEDAS = 1.5       # segundos, para no gatillar bloqueos
 # ---- Antigüedad: solo se recolectan ofertas recientes (las más antiguas no se guardan ni cuentan) ----
 # Días hacia atrás por fuente: 1 = "hoy y ayer". Fuentes con hora (Get on Board, Trabajando, y el filtro de Indeed)
 # usan un corte exacto de 24 h por día. BNE publica con desfase, por eso 3. Las ofertas sin fecha pasan siempre.
-MAX_ANTIGUEDAD_DIAS = {"indeed": 1, "glassdoor": 1, "getonboard": 1, "bne": 3, "trabajando": 1, "chiletrabajos": 1, "computrabajo": 1, "linkedin": 1}
+MAX_ANTIGUEDAD_DIAS = {"indeed": 1, "glassdoor": 1, "getonboard": 1, "bne": 3, "trabajando": 1, "chiletrabajos": 1, "computrabajo": 1, "laborum": 1, "buscojobs": 1, "linkedin": 1}
 # Si pasan días sin buscar, la ventana crece sola (días desde el fin de la última búsqueda + 1), hasta este tope.
 DIAS_MAXIMOS = 14
 ZONA_HORARIA = "America/Santiago"   # "hoy" se calcula en hora de Chile, no con la hora del equipo o contenedor
