@@ -23,8 +23,11 @@ import pandas as pd
 import bne
 import buscojobs
 import chiletrabajos
+import chumi
 import computrabajo
 import config
+import empleospublicos
+import empleostech
 import getonboard
 import laborum
 import telemetria
@@ -42,7 +45,7 @@ def _say(mensaje: str):
     salida(mensaje)
 
 
-PORTALES = {"bne": bne, "trabajando": trabajando, "chiletrabajos": chiletrabajos, "computrabajo": computrabajo, "laborum": laborum, "buscojobs": buscojobs}
+PORTALES = {"bne": bne, "trabajando": trabajando, "chiletrabajos": chiletrabajos, "computrabajo": computrabajo, "laborum": laborum, "buscojobs": buscojobs, "empleospublicos": empleospublicos, "chumi": chumi, "empleostech": empleostech}
 ESTADOS = ["nueva", "revisada", "postulada", "entrevista", "descartada"]
 ESTADOS_CERRADOS = {"postulada", "entrevista", "descartada"}
 LIMITE_DESCARTADAS = 300   # la página muestra las descartadas más recientes (con su motivo)
@@ -512,7 +515,9 @@ def _recordar_404(con, sitio, termino):
 def _terminos_portal(sitio):
     return {"bne": config.TERMINOS_BNE, "trabajando": config.TERMINOS_TRABAJANDO,
             "chiletrabajos": config.TERMINOS_CHILETRABAJOS, "computrabajo": config.TERMINOS_COMPUTRABAJO,
-            "laborum": config.TERMINOS_LABORUM, "buscojobs": config.TERMINOS_BUSCOJOBS}[sitio]
+            "laborum": config.TERMINOS_LABORUM, "buscojobs": config.TERMINOS_BUSCOJOBS,
+            "empleospublicos": config.TERMINOS_EMPLEOSPUBLICOS, "chumi": config.TERMINOS_CHUMI,
+            "empleostech": config.TERMINOS_EMPLOSTECH}[sitio]
 
 
 def _es_candidata(raw: dict) -> bool:
