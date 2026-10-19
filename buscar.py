@@ -22,6 +22,7 @@ import pandas as pd
 
 import bne
 import chiletrabajos
+import computrabajo
 import config
 import getonboard
 import telemetria
@@ -39,7 +40,7 @@ def _say(mensaje: str):
     salida(mensaje)
 
 
-PORTALES = {"bne": bne, "trabajando": trabajando, "chiletrabajos": chiletrabajos}
+PORTALES = {"bne": bne, "trabajando": trabajando, "chiletrabajos": chiletrabajos, "computrabajo": computrabajo}
 ESTADOS = ["nueva", "revisada", "postulada", "entrevista", "descartada"]
 ESTADOS_CERRADOS = {"postulada", "entrevista", "descartada"}
 LIMITE_DESCARTADAS = 300   # la página muestra las descartadas más recientes (con su motivo)
@@ -508,7 +509,7 @@ def _recordar_404(con, sitio, termino):
 
 def _terminos_portal(sitio):
     return {"bne": config.TERMINOS_BNE, "trabajando": config.TERMINOS_TRABAJANDO,
-            "chiletrabajos": config.TERMINOS_CHILETRABAJOS}[sitio]
+            "chiletrabajos": config.TERMINOS_CHILETRABAJOS, "computrabajo": config.TERMINOS_COMPUTRABAJO}[sitio]
 
 
 def _es_candidata(raw: dict) -> bool:
