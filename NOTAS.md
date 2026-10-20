@@ -3,7 +3,41 @@
 ## Estado actual (se actualiza en cada despliegue; leer al empezar cada sesión)
 
 ### Producción y base
-- **Base real — línea base OFICIAL (16-10-2026, despliegue del filtro LinkedIn Senior/Experto; vigente):** v7,
+- **Base real — línea base OFICIAL (20-10-2026, despliegue de Chumi, Laborum y regla de experiencia; vigente):** v7,
+  integrity_check ok, 3150 ofertas, 34 corridas, 163 filas en `historial_estados`, 25 postuladas, 6 POR VERIFICAR;
+  estados descartada/nueva 2902 · principal/descartada 196 · principal/nueva 27 · principal/postulada 25.
+  - Medida con `huellas.py` sobre `ofertas_pre_laborum_20261020.db`, en la base real después del despliegue y otra vez
+    después de las comprobaciones HTTP: idéntica las tres veces.
+  - sha256 por tabla: ajustes (4) `8928191ee9f0b506cee48f285e4167b71105de6cf7871705417a6518c3797aec` ·
+    alertas (0) `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` ·
+    corridas (34) `f8049202517d2607d2da00f4fcf6c8f4dfdeb882e3f4d5cfc7827e59f2dbc87b` ·
+    historial_estados (163) `7d6a3de93dc88df927ac509c6e41a107b865df01113021694fff144dc41eb61e` ·
+    ofertas (3150) `26baf54b986d6481ed80451e74714e06d09534be3c555b81fc409de339a48629` ·
+    pruebas_fuentes (0) `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` ·
+    sqlite_sequence (2) `d0c4f1bdd2faf75f20ca7608fd23baf71f6899b09e387a55594a6f659c7ef285` ·
+    terminos_no_disponibles (2) `0821946c3a741fa08fe0d2d793030aa14a531e6bf00096b4aa102d92f1e6d8c5`.
+- **Última referencia (oficial):** `ofertas_pre_laborum_20261020.db` (volumen y
+  `C:\Users\sofia\Respaldos\job-tracker-referencias\`), sha256
+  `c40c50f5a99b1450f86bc260e7a2c33b7ba5f28f64b891cfd3edd5909130b472` en las dos copias, integrity_check ok, journal
+  delete. Tomada con el contenedor detenido (salida 0).
+- **En producción (20-10-2026):** commit local `e8abeee` (rama `feat/contadores-ubicacion`, sin push); imagen
+  `job-tracker-jobtracker:latest` = `job-tracker:laborum`
+  (`sha256:39378b0be7aaf453732037cb27fa6caad93ae7d9f6c99d5d739cc7e05315a5d3`, ~1,6 GB por Chromium); healthy en
+  `127.0.0.1:8765`. Imagen anterior inmediata: `job-tracker:pre-laborum-20261020` (`6353e0b5…`).
+  - GET `/`, `/api/estado`, `/api/ofertas`, `/api/respaldo`: 200; Host/Origin ajenos: 403; POST con origen inválido,
+    sin origen o con campo no permitido: 400; Origin ajeno: 403; cuerpo sobredimensionado: 413; respaldo sin
+    `error_auto`. La candidata respaldó bien (201, `sha256sum -c` OK). Los 79 respaldos y referencias anteriores
+    conservaron su sha256. Reversión probada en copia (8767) y documentada en `REVERSION_FASE_A.md`.
+  - Durante el paso 3 se creó por error un archivo vacío `/datos/=ro` en el volumen real; se comprobó vacío y se
+    borró. No afectó la base (huellas idénticas).
+  - **Decisión de Sofia (20-10):** regla de experiencia igual en TODAS las fuentes: rango con máximo de 2 o menos se
+    muestra («0 a 2», «0-2», «1 a 2», «hasta 2»); un número solo, como mucho 1 año; lo demás se descarta. Ratifica
+    `f8465ea`.
+- **Despliegue del 19-10 sin registro (hallado el 20-10):** el 19-10 a las 20:45 se reconstruyó y levantó producción
+  fuera del procedimiento (sin referencia, sin candidata, sin anotarlo), con el código hasta `326f427`: términos jr y
+  junior nuevos, regla de experiencia generalizada y Computrabajo, Laborum y Buscojobs (que fallaban solos, sin cortar
+  la corrida). Corrieron con esa versión las corridas 33 y 34. La base quedó sana.
+- **Línea base anterior (16-10-2026, LinkedIn Senior/Experto; ya no vigente):** v7,
   integrity_check ok, 2046 ofertas, 18 corridas, 77 filas en `historial_estados`, 18 postuladas, 6 POR VERIFICAR;
   estados descartada/nueva 1908 · principal/descartada 119 · principal/entrevista 1 · principal/postulada 18.
   - Medida con `huellas.py` sobre `ofertas_pre_linkedin_senior_experto_20261016.db` y repetida en la base real
@@ -24,11 +58,11 @@
   Referencia: `ofertas_pre_telemetria_20261015.db` (`844341c7…`).
 - **Medición del 15-10-2026, mañana (solo conteos):** v7, integrity_check ok, 1321 ofertas, 9 corridas, 15 postuladas.
 - **Medición del 14-10-2026:** 1223 ofertas, 7 corridas, 14 postuladas, `historial_estados` con 4 filas.
-- **Última referencia (oficial):** `ofertas_pre_linkedin_senior_experto_20261016.db` (volumen y
+- **Referencia anterior (16-10; ya no es la última):** `ofertas_pre_linkedin_senior_experto_20261016.db` (volumen y
   `C:\Users\sofia\Respaldos\job-tracker-referencias\`), sha256
   `6a43f4cddac9fddbdf66d75a40738f629b9b28457049c4822e87188a83152a83` en las dos copias, integrity_check ok.
   Tomada con el contenedor detenido (salida 0); la copia de candidata y la referencia tienen huellas completas iguales.
-- **En producción (16-10-2026, 13:06):** commit local `eb3a33e` (rama `feat/contadores-ubicacion`, sin push);
+- **Desplegado el 16-10-2026, 13:06 (reemplazado el 19-10 y luego el 20-10):** commit local `eb3a33e` (rama `feat/contadores-ubicacion`, sin push);
   imagen `job-tracker-jobtracker:latest` y `job-tracker:linkedin-senior-experto`,
   `sha256:da1024401f2cd33609bf5934a2293ce56873872b633d69c335d0234b9ca31369`.
   - Reconstruida con `docker compose build` y levantada con `docker compose up -d`; `jobtracker` healthy en
@@ -42,8 +76,9 @@
   - Filtro LinkedIn: descarta Senior y Experto/Expert; Associate sigue aceptándose. Se mantiene el descarte si el
     máximo requerido supera 2 años. No reclasifica ofertas guardadas ni altera datos/esquema. Reversión a la imagen
     anterior probada en copia, healthy y con huellas idénticas; ver `REVERSION_FASE_A.md`.
-- **Imágenes para volver atrás:** `job-tracker:linkedin-senior-experto`
-  (`da102440…`; producción actual), `job-tracker:linkedin-senior-anterior-20261016`
+- **Imágenes para volver atrás:** `job-tracker:laborum` (`39378b0b…`; producción actual),
+  `job-tracker:pre-laborum-20261020` (`6353e0b5…`; reversión inmediata, la versión del 19-10),
+  `job-tracker:linkedin-senior-experto` (`da102440…`; la última desplegada por procedimiento antes del 19-10), `job-tracker:linkedin-senior-anterior-20261016`
   (`915bc9fd…`; reversión inmediata), `job-tracker:linkedin-mid-senior` (`915bc9fd…`),
   `job-tracker:linkedin-filtros-23241` (`d4d6b534…`; anterior a esos filtros),
   `job-tracker:linkedin-filtros` (`d4d6b534…`; etiqueta anterior del mismo artefacto),
@@ -51,7 +86,10 @@
   `job-tracker:telemetria` (`ad7b2b19ced7…`; reversión en `REVERSION_FASE_A.md`),
   `job-tracker:137` (`ff5a2615…`), `job-tracker:c2` (`f1943914…`), `:c1`, `:respaldo`, `:B1`, `:genero`, `:soporte`,
   `:faseA`, `:fase0`.
-- **Candidata y reversión:** la candidata `jt_revision_linkedin_senior_experto` (8766) y su volumen se eliminaron
+- **Candidata y reversión (20-10):** la candidata `jt_revision_laborum` (8766), sus volúmenes y la reversión en 8767
+  se borraron después del despliegue. La imagen `job-tracker:laborum-candidata` queda, con las demás candidatas
+  antiguas, esperando aprobación para limpiarla.
+- **Candidata y reversión (16-10):** la candidata `jt_revision_linkedin_senior_experto` (8766) y su volumen se eliminaron
   después del despliegue; la reversión sobre copia en 8767 también quedó healthy y se limpió. No quedan recursos
   temporales de este despliegue.
 - **Decisiones aprobadas:** LinkedIn descarta Senior y Experto/Expert, mantiene Associate, y descarta requisitos cuyo

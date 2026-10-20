@@ -482,3 +482,35 @@ coincidieron con la referencia. El contenedor y volumen temporales se borraron.
 **Qué se pierde mientras corra la imagen anterior:** la regla que descarta explícitamente nivel Mid-Senior. No se
 pierden ni se reclasifican ofertas guardadas; Associate y los demás filtros de LinkedIn de la imagen anterior
 permanecen.
+
+# Chumi, Laborum (Playwright) y regla de experiencia (despliegue del 20-10-2026; commit `e8abeee`)
+
+Qué cambia: Chumi y Laborum entran a `SITIOS` (Laborum con Chromium sin ventana: la imagen pasa de 484 MB a ~1,6 GB);
+se borran Computrabajo, Buscojobs, Empleos Públicos y EmpleosTech (rechazan a la app o no existen); un portal que falla
+ya no corta la corrida; las antiguas cuya fecha llega con el detalle no se guardan; regla de experiencia en todas las
+fuentes («hasta N» = 0 a N); sección «Buscar a mano» en la página. Sin cambios de esquema ni reclasificación: para
+volver atrás basta con usar la imagen anterior y **no restaurar la base**.
+
+La imagen anterior NO es la de `linkedin-senior-experto`: el 19-10 a las 20:45 se reconstruyó y desplegó fuera del
+procedimiento una versión intermedia (hasta `326f427`, con Computrabajo, Laborum y Buscojobs rotos). Es la que se
+etiquetó aquí.
+
+| Pieza | Valor |
+|---|---|
+| Imagen anterior | `job-tracker:pre-laborum-20261020` (`sha256:6353e0b5950fb12634c0dc720d6d315c922e01591c99a44273111872ad27b707`; desplegada el 19-10 sin registro) |
+| Imagen desplegada | `job-tracker:laborum` = `job-tracker-jobtracker:latest` (`sha256:39378b0be7aaf453732037cb27fa6caad93ae7d9f6c99d5d739cc7e05315a5d3`) |
+| Referencia de la base | `ofertas_pre_laborum_20261020.db` (volumen y `C:\Users\sofia\Respaldos\job-tracker-referencias\`), sha256 `c40c50f5a99b1450f86bc260e7a2c33b7ba5f28f64b891cfd3edd5909130b472`, integrity_check `ok` |
+
+```
+docker compose stop jobtracker
+docker tag job-tracker:pre-laborum-20261020 job-tracker-jobtracker:latest
+docker compose up -d --no-build
+```
+
+Probado sobre una copia de la referencia en un volumen temporal (8767): la imagen anterior quedó healthy; `/`,
+`/api/estado`, `/api/ofertas` y `/api/respaldo` respondieron 200; las huellas completas coincidieron con la referencia.
+El contenedor y el volumen temporales se borraron.
+
+**Qué se pierde mientras corra la imagen anterior:** Chumi, Laborum, la sección «Buscar a mano», el aislamiento de un
+portal que falla y la regla «hasta N años». Vuelven los intentos contra Computrabajo, Laborum y Buscojobs (se detienen
+solos por 403 o por errores). No se pierden ni se reclasifican ofertas guardadas.
