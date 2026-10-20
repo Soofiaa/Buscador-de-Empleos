@@ -582,7 +582,7 @@ function tituloSeleccion(sel, corridas) {
   return "Todas las ofertas";
 }
 const NOMBRE_FUENTE = { indeed: "Indeed", google: "Google", glassdoor: "Glassdoor", getonboard: "Get on Board",
-  bne: "BNE", trabajando: "Trabajando", chiletrabajos: "Chiletrabajos", linkedin: "LinkedIn", manual: "✍️ Manual" };
+  bne: "BNE", trabajando: "Trabajando", chiletrabajos: "Chiletrabajos", chumi: "Chumi", linkedin: "LinkedIn", manual: "✍️ Manual" };
 const nombreFuente = f => NOMBRE_FUENTE[f] || f || "sin fuente";
 function textoProgreso(mensaje) {                // "[3/40] indeed | qa tester | …" -> "Buscando en Indeed · qa tester · 3 de 40"
   const m = /^\s*\[(\d+)\/(\d+)\]\s*([^|\[\]]+?)\s*\|\s*([^|:]+?)\s*(?:[|:]|$)/.exec(mensaje || "");
@@ -1035,7 +1035,7 @@ function pintarFiltros() {
   if (PESTANAS_PRINCIPAL.has(S.pestana)) {
     partes.push(selector("prioridad", "Prioridad", ["Alta", "Media", "Baja"]), selector("modalidad", "Modalidad", unicos("modalidad")), selector("tipo", "Tipo", unicos("tipo")));
   }
-  const fuentesConocidas = ["indeed", "linkedin", "chiletrabajos", "bne", "trabajando", "getonboard", "glassdoor"];
+  const fuentesConocidas = ["indeed", "linkedin", "chiletrabajos", "bne", "trabajando", "chumi", "getonboard", "glassdoor"];
   const fuentesOpciones = [...new Set([...fuentesConocidas, ...unicos("fuente")])].sort((a, b) => nombreFuente(a).localeCompare(nombreFuente(b)));
   partes.push(selector("fuente", "Fuente", fuentesOpciones, null, nombreFuente));
   if (S.pestana === "ofertas") {

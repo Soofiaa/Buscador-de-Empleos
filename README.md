@@ -1,6 +1,6 @@
 # Búsqueda de empleo (job-tracker)
 
-Busca ofertas en Indeed, Glassdoor, LinkedIn, Get on Board, BNE, Trabajando y Chiletrabajos; las clasifica según tu perfil y las
+Busca ofertas en Indeed, Glassdoor, LinkedIn, Get on Board, BNE, Trabajando, Chiletrabajos y Chumi; las clasifica según tu perfil y las
 muestra en una página local, con estados de seguimiento (nueva, revisada, postulada, entrevista, descartada).
 
 ## Con Docker (siempre encendida)
@@ -35,6 +35,6 @@ Todo se ajusta en `config.py`.
 - Las ofertas de Indeed, Glassdoor y LinkedIn se obtienen con [JobSpy](https://github.com/speedyapply/JobSpy)
   (`python-jobspy`), software de código abierto bajo licencia MIT, © 2023 Cullen Watson. Se usa como dependencia,
   sin modificar su código.
-- Get on Board se consulta con su API oficial. BNE, Trabajando y Chiletrabajos se leen con código propio, respetando
+- Get on Board se consulta con su API oficial. BNE, Trabajando, Chiletrabajos y Chumi se leen con código propio, respetando
   robots.txt.
 - El texto completo de la licencia MIT se instala junto con el paquete (python_jobspy-1.3.0.dist-info).

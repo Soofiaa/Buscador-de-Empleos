@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <!-- Google tag (gtag.js) - GA4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-E0D9EG0CPK"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-E0D9EG0CPK', {
+        'anonymize_ip': true,
+        'cookie_flags': 'SameSite=None;Secure'
+    });
+
+    // ===== EVENTOS DE CONVERSIÓN CENTRALIZADOS =====
+    // Evento: Postulación a empleo
+    window.trackPostulation = function(jobId, jobTitle) {
+        gtag('event', 'postulate', {
+            'job_id': jobId,
+            'job_title': jobTitle,
+            'event_category': 'engagement',
+            'event_label': jobTitle
+        });
+    };
+
+    // Evento: Registro completado
+    window.trackRegistration = function(userType) {
+        gtag('event', 'registro_completado', {
+            'user_type': userType,
+            'event_category': 'conversion'
+        });
+    };
+
+    // Evento: Descarga de CV
+    window.trackCvDownload = function(candidateName) {
+        gtag('event', 'descarga_cv', {
+            'candidate': candidateName,
+            'event_category': 'engagement'
+        });
+    };
+
+    // Evento: Contacto enviado
+    window.trackContact = function(formName) {
+        gtag('event', 'contacto_enviado', {
+            'form_name': formName,
+            'event_category': 'conversion'
+        });
+    };
+
+    // Evento: Vista de empleo
+    window.trackJobView = function(jobId, jobTitle) {
+        gtag('event', 'view_job', {
+            'job_id': jobId,
+            'job_title': jobTitle,
+            'event_category': 'engagement'
+        });
+    };
+
+    // Evento: Búsqueda de empleos
+    window.trackJobSearch = function(query, results) {
+        gtag('event', 'search_jobs', {
+            'search_query': query,
+            'results_count': results,
+            'event_category': 'engagement'
+        });
+    };
+
+    // Evento: Click en empleo externo
+    window.trackExternalJobClick = function(jobTitle, url) {
+        gtag('event', 'external_job_click', {
+            'job_title': jobTitle,
+            'url': url,
+            'event_category': 'outbound'
+        });
+    };
+</script>  <!-- ===== META TAGS BÁSICOS ===== -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Empleos y Trabajos en LATAM | Chumi IT</title>
+<meta name="description" content="Explora miles de empleos disponibles en LATAM. Busca por categoría, país o modalidad y encuentra tu próximo desafío profesional con Chumi IT.">
+<meta name="keywords" content="empleos LATAM, trabajos, bolsa de trabajo, ofertas laborales, tecnología, empleos remotos">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://chumi-it.com/trabajos">
+<meta name="author" content="CHUMI-IT · Talento Tecnológico en LATAM">
+<meta name="theme-color" content="#0B1220">
+
+<!-- ===== FAVICON ===== -->
+<link rel="icon" type="image/x-icon" href="https://chumi-it.com/resources/assets/img/chumiitlogo.png" />
+<link rel="apple-touch-icon" href="https://chumi-it.com/resources/assets/img/chumiitlogo.png">
+
+<!-- ===== OPEN GRAPH (Facebook, WhatsApp, LinkedIn) ===== -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="CHUMI-IT · Talento Tecnológico en LATAM">
+<meta property="og:title" content="Empleos y Trabajos en LATAM | Chumi IT">
+<meta property="og:description" content="Explora miles de empleos disponibles en LATAM. Busca por categoría, país o modalidad y encuentra tu próximo desafío profesional con Chumi IT.">
+<meta property="og:url" content="https://chumi-it.com/trabajos">
+<meta property="og:image" content="https://chumi-it.com/resources/assets/img/chumiitlogo.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="es_LA">
+<meta property="og:locale:alternate" content="es_ES">
+
+<!-- ===== TWITTER CARDS ===== -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Empleos y Trabajos en LATAM | Chumi IT">
+<meta name="twitter:description" content="Explora miles de empleos disponibles en LATAM. Busca por categoría, país o modalidad y encuentra tu próximo desafío profesional con Chumi IT.">
+<meta name="twitter:image" content="https://chumi-it.com/resources/assets/img/chumiitlogo.png">
+
+<!-- ===== JSON-LD SCHEMA.ORG ===== -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "CHUMI-IT · Talento Tecnológico en LATAM",
+    "url": "https://chumi-it.com",
+    "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://chumi-it.com/trabajos?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+    }
+}
+</script>
+
+
+<!-- ===== JSON-LD ORGANIZATION ===== -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "CHUMI-IT",
+    "alternateName": "Chumi IT",
+    "url": "https://chumi-it.com",
+    "logo": "https://chumi-it.com/resources/assets/img/chumiitlogo.png",
+    "description": "Plataforma de talento tecnológico y digital en Latinoamérica con inteligencia artificial.",
+    "foundingDate": "2024",
+    "sameAs": [
+        "https://www.linkedin.com/company/chumi-it"
+    ],
+    "knowsAbout": ["Desarrollo de Software", "Inteligencia Artificial", "Ciberseguridad", "Cloud Computing", "Data Science", "SAP", "Producto Digital", "Talento Tech LATAM"],
+    "areaServed": ["Chile", "Argentina", "Colombia", "Perú", "México", "Ecuador", "Uruguay", "Latinoamérica"],
+    "employmentType": ["REMOTE", "HYBRID", "ONSITE"]
+}
+</script>
+
+<!-- ===== JSON-LD WEB APPLICATION ===== -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "CHUMI-IT",
+    "url": "https://chumi-it.com",
+    "applicationCategory": "Employment",
+    "operatingSystem": "Web",
+    "browserRequirements": "Requires JavaScript",
+    "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/InStock"
+    }
+}
+</script>
+  <!-- Tailwind CSS 2026 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              200: '#bfdbfe',
+              300: '#93c5fd',
+              400: '#60a5fa',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+              950: '#172554'
+            },
+            secondary: {
+              50: '#f8fafc',
+              100: '#f1f5f9',
+              200: '#e2e8f0',
+              300: '#cbd5e1',
+              400: '#94a3b8',
+              500: '#64748b',
+              600: '#475569',
+              700: '#334155',
+              800: '#1e293b',
+              900: '#0f172a',
+              950: '#020617'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            display: ['Inter Display', 'Inter', 'system-ui', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Boxicons -->
+  <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
+</head>
+<body class="font-sans antialiased bg-gray-50">
+  <!-- Navigation -->
+  <nav class="fixed top-0 w-full bg-white/95 backdrop-blur-md shadow-sm z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <div class="flex items-center">
+          <a href="/" class="flex items-center gap-2">
+            <img src="https://chumi-it.com/resources/assets/img/chumiitlogo.png" alt="Chumi IT" class="h-8 w-auto">
+            <span class="text-xl font-bold text-gray-900">Chumi</span>
+          </a>
+        </div>
+        <div class="flex items-center gap-4">
+          <a href="/empresas" class="hidden sm:inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:border-primary-300 hover:text-primary-600 hover:bg-primary-50 transition-all whitespace-nowrap">
+            <i class='bx bx-building mr-1.5'></i>
+            Para Empresas
+          </a>
+                      <a href="/professional/login" class="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium">
+              Iniciar Sesión
+            </a>
+                  </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Header Hero -->
+  <section class="pt-24 pb-12 bg-gradient-to-br from-primary-50 via-white to-secondary-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <h1 class="text-4xl lg:text-5xl font-display font-bold text-gray-900 mb-4">
+          Empleos en <span class="text-primary-600">LATAM</span>
+        </h1>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+          Explora miles de oportunidades laborales en todas las industrias y encuentra tu próximo desafío profesional.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Jobs List -->
+  <section class="py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 card-hover">
+              <a href="/trabajos/ros1001-consultor-en-riesgo-tecnologico-y-ciberseguridad"  class="block">
+                <!-- Header -->
+                <div class="flex items-start justify-between mb-4">
+                  <div class="flex items-start gap-3 flex-1 min-w-0">
+                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                              <img src="/resources/assets/img/itthhgroup_logo.jpg" class="w-8 h-8 object-contain rounded" alt="Logo empresa" onerror="this.onerror=null; this.src='https://chumi-it.com/resources/assets/img/logochumiold.png';">
+                                          </div>
+                    <div class="flex-1 min-w-0">
+                      <h2 class="text-base font-semibold text-gray-900 leading-tight line-clamp-2 break-words">ROS1001 - Consultor en Riesgo Tecnológico y Ciberseguridad</h2>
+                      <p class="text-sm text-gray-600 truncate">IT-Talent</p>
+                    </div>
+                  </div>
+                  <div class="text-gray-400 flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Details -->
+                <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <i class='bx bx-map-pin'></i>
+                    <span>Chile</span>
+                </div>
+                  <span class="text-xs bg-primary-50 text-primary-700 px-3 py-1 rounded-md font-medium">
+                    Presencial
+                  </span>
+                </div>
+
+                <!-- Skills -->
+                              </a>
+            </div>
+                                  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 card-hover">
+              <a href="/trabajos/rrn1002-administrador-de-plataformas-e-infraestructura"  class="block">
+                <!-- Header -->
+                <div class="flex items-start justify-between mb-4">
+                  <div class="flex items-start gap-3 flex-1 min-w-0">
+                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                              <img src="/resources/assets/img/itthhgroup_logo.jpg" class="w-8 h-8 object-contain rounded" alt="Logo empresa" onerror="this.onerror=null; this.src='https://chumi-it.com/resources/assets/img/logochumiold.png';">
+                                          </div>
+                    <div class="flex-1 min-w-0">
+                      <h2 class="text-base font-semibold text-gray-900 leading-tight line-clamp-2 break-words">RRN1002 - Administrador de Plataformas e Infraestructura</h2>
+                      <p class="text-sm text-gray-600 truncate">IT-Talent</p>
+                    </div>
+                  </div>
+                  <div class="text-gray-400 flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Details -->
+                <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <i class='bx bx-map-pin'></i>
+                    <span>Chile</span>
+                </div>
+                  <span class="text-xs bg-primary-50 text-primary-700 px-3 py-1 rounded-md font-medium">
+                    Presencial
+                  </span>
+                </div>
+
+                <!-- Skills -->
+                              </a>
+            </div>
+                                  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 card-hover">
+              <a href="/trabajos/rrn1001-lider-mesa-de-soporte"  class="block">
+                <!-- Header -->
+                <div class="flex items-start justify-between mb-4">
+                  <div class="flex items-start gap-3 flex-1 min-w-0">
+                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                              <img src="/resources/assets/img/itthhgroup_logo.jpg" class="w-8 h-8 object-contain rounded" alt="Logo empresa" onerror="this.onerror=null; this.src='https://chumi-it.com/resources/assets/img/logochumiold.png';">
+                                          </div>
+                    <div class="flex-1 min-w-0">
+                      <h2 class="text-base font-semibold text-gray-900 leading-tight line-clamp-2 break-words">RRN1001 - Líder Mesa de Soporte</h2>
+                      <p class="text-sm text-gray-600 truncate">IT-Talent</p>
+                    </div>
+                  </div>
+                  <div class="text-gray-400 flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Details -->
+                <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <i class='bx bx-map-pin'></i>
+                    <span>Chile</span>
+                </div>
+                  <span class="text-xs bg-primary-50 text-primary-700 px-3 py-1 rounded-md font-medium">
+                    Presencial
+                  </span>
+                </div>
+
+                <!-- Skills -->
+                              </a>
+            </div>
+                                  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 card-hover">
+              <a href="/trabajos/desarrolladora-backend-fullstack-especializacion-en-erp-academico"  class="block">
+                <!-- Header -->
+                <div class="flex items-start justify-between mb-4">
+                  <div class="flex items-start gap-3 flex-1 min-w-0">
+                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                              <img src="/resources/assets/img/itthhgroup_logo.jpg" class="w-8 h-8 object-contain rounded" alt="Logo empresa" onerror="this.onerror=null; this.src='https://chumi-it.com/resources/assets/img/logochumiold.png';">
+                                          </div>
+                    <div class="flex-1 min-w-0">
+                      <h2 class="text-base font-semibold text-gray-900 leading-tight line-clamp-2 break-words">Desarrollador/a Backend / Fullstack (Especialización en ERP Académico)</h2>
+                      <p class="text-sm text-gray-600 truncate">IT-Talent</p>
+                    </div>
+                  </div>
+                  <div class="text-gray-400 flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Details -->
+                <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <i class='bx bx-map-pin'></i>
+                    <span>Chile</span>
+                </div>
+                  <span class="text-xs bg-primary-50 text-primary-700 px-3 py-1 rounded-md font-medium">
+                    Presencial
+                  </span>
+                </div>
+
+                <!-- Skills -->
+                                                                        <div class="flex flex-wrap gap-1.5 mt-3">
+                                              <span class="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded whitespace-nowrap">Java</span>
+                                              <span class="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded whitespace-nowrap">SQL</span>
+                                              <span class="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded whitespace-nowrap">Oracle</span>
+                                          </div>
+                                                </a>
+            </div>
+                                  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 card-hover">
+              <a href="/trabajos/caa0410-analista-de-licitaciones"  class="block">
+                <!-- Header -->
+                <div class="flex items-start justify-between mb-4">
+                  <div class="flex items-start gap-3 flex-1 min-w-0">
+                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                              <img src="/resources/assets/img/itthhgroup_logo.jpg" class="w-8 h-8 object-contain rounded" alt="Logo empresa" onerror="this.onerror=null; this.src='https://chumi-it.com/resources/assets/img/logochumiold.png';">
+                                          </div>
+                    <div class="flex-1 min-w-0">
+                      <h2 class="text-base font-semibold text-gray-900 leading-tight line-clamp-2 break-words">CAA0410 - Analista de Licitaciones</h2>
+                      <p class="text-sm text-gray-600 truncate">IT-Talent</p>
+                    </div>
+                  </div>
+                  <div class="text-gray-400 flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Details -->
+                <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <i class='bx bx-map-pin'></i>
+                    <span>Chile</span>
+                </div>
+                  <span class="text-xs bg-primary-50 text-primary-700 px-3 py-1 rounded-md font-medium">
+                    Presencial
+                  </span>
+                </div>
+
+                <!-- Skills -->
+                              </a>
+            </div>
+                                  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 card-hover">
+              <a href="/trabajos/consultora-sap-sdmm-presencial-santiago"  class="block">
+                <!-- Header -->
+                <div class="flex items-start justify-between mb-4">
+                  <div class="flex items-start gap-3 flex-1 min-w-0">
+                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                              <img src="/resources/assets/img/itthhgroup_logo.jpg" class="w-8 h-8 object-contain rounded" alt="Logo empresa" onerror="this.onerror=null; this.src='https://chumi-it.com/resources/assets/img/logochumiold.png';">
+                                          </div>
+                    <div class="flex-1 min-w-0">
+                      <h2 class="text-base font-semibold text-gray-900 leading-tight line-clamp-2 break-words">Consultor(a) SAP SD/MM (Presencial - Santiago)</h2>
+                      <p class="text-sm text-gray-600 truncate">IT-Talent</p>
+                    </div>
+                  </div>
+                  <div class="text-gray-400 flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Details -->
+                <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <i class='bx bx-map-pin'></i>
+                    <span>Chile</span>
+                </div>
+                  <span class="text-xs bg-primary-50 text-primary-700 px-3 py-1 rounded-md font-medium">
+                    Presencial
+                  </span>
+                </div>
+
+                <!-- Skills -->
+                                                                        <div class="flex flex-wrap gap-1.5 mt-3">
+                                              <span class="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded whitespace-nowrap">SAP</span>
+                                          </div>
+                                                </a>
+            </div>
+                                  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 card-hover">
+              <a href="/trabajos/desarrollador-full-stack-senior"  class="block">
+                <!-- Header -->
+                <div class="flex items-start justify-between mb-4">
+                  <div class="flex items-start gap-3 flex-1 min-w-0">
+                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                              <img src="https://chumi-it.com/resources/assets/img/logochumiold.png" class="w-8 h-8 object-contain rounded" alt="Logo empresa">
+                                          </div>
+                    <div class="flex-1 min-w-0">
+                      <h2 class="text-base font-semibold text-gray-900 leading-tight line-clamp-2 break-words">Desarrollador Full Stack Senior</h2>
+                      <p class="text-sm text-gray-600 truncate">Lean People</p>
+                    </div>
+                  </div>
+                  <div class="text-gray-400 flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Details -->
+                <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <i class='bx bx-map-pin'></i>
+                    <span>Chile</span>
+                </div>
+                  <span class="text-xs bg-primary-50 text-primary-700 px-3 py-1 rounded-md font-medium">
+                    Presencial
+                  </span>
+                </div>
+
+                <!-- Skills -->
+                                                                        <div class="flex flex-wrap gap-1.5 mt-3">
+                                              <span class="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded whitespace-nowrap">AWS</span>
+                                              <span class="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded whitespace-nowrap">Azure</span>
+                                              <span class="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded whitespace-nowrap">NodeJS</span>
+                                          </div>
+                                                </a>
+            </div>
+                                  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 card-hover">
+              <a href="/trabajos/caa0310-analista-de-servicios"  class="block">
+                <!-- Header -->
+                <div class="flex items-start justify-between mb-4">
+                  <div class="flex items-start gap-3 flex-1 min-w-0">
+                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                              <img src="/resources/assets/img/itthhgroup_logo.jpg" class="w-8 h-8 object-contain rounded" alt="Logo empresa" onerror="this.onerror=null; this.src='https://chumi-it.com/resources/assets/img/logochumiold.png';">
+                                          </div>
+                    <div class="flex-1 min-w-0">
+                      <h2 class="text-base font-semibold text-gray-900 leading-tight line-clamp-2 break-words">CAA0310 - Analista de Servicios</h2>
+                      <p class="text-sm text-gray-600 truncate">IT-Talent</p>
+                    </div>
+                  </div>
+                  <div class="text-gray-400 flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Details -->
+                <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <i class='bx bx-map-pin'></i>
+                    <span>Chile</span>
+                </div>
+                  <span class="text-xs bg-primary-50 text-primary-700 px-3 py-1 rounded-md font-medium">
+                    Presencial
+                  </span>
+                </div>
+
+                <!-- Skills -->
+                              </a>
+            </div>
+                                  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 card-hover">
+              <a href="/trabajos/desarrollador-full-stack"  class="block">
+                <!-- Header -->
+                <div class="flex items-start justify-between mb-4">
+                  <div class="flex items-start gap-3 flex-1 min-w-0">
+                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                              <img src="/resources/assets/img/itthhgroup_logo.jpg" class="w-8 h-8 object-contain rounded" alt="Logo empresa" onerror="this.onerror=null; this.src='https://chumi-it.com/resources/assets/img/logochumiold.png';">
+                                          </div>
+                    <div class="flex-1 min-w-0">
+                      <h2 class="text-base font-semibold text-gray-900 leading-tight line-clamp-2 break-words">Desarrollador Full Stack</h2>
+                      <p class="text-sm text-gray-600 truncate">IT-Talent</p>
+                    </div>
+                  </div>
+                  <div class="text-gray-400 flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Details -->
+                <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <i class='bx bx-map-pin'></i>
+                    <span>Chile</span>
+                </div>
+                  <span class="text-xs bg-primary-50 text-primary-700 px-3 py-1 rounded-md font-medium">
+                    Híbrida
+                  </span>
+                </div>
+
+                <!-- Skills -->
+                                                                        <div class="flex flex-wrap gap-1.5 mt-3">
+                                              <span class="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded whitespace-nowrap">Angular</span>
+                                              <span class="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded whitespace-nowrap">React</span>
+                                              <span class="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded whitespace-nowrap">Typescript</span>
+                                          </div>
+                                                </a>
+            </div>
+                                  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 card-hover">
+              <a href="/trabajos/senior-full-stack-developer"  class="block">
+                <!-- Header -->
+                <div class="flex items-start justify-between mb-4">
+                  <div class="flex items-start gap-3 flex-1 min-w-0">
+                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                              <img src="/resources/assets/img/itthhgroup_logo.jpg" class="w-8 h-8 object-contain rounded" alt="Logo empresa" onerror="this.onerror=null; this.src='https://chumi-it.com/resources/assets/img/logochumiold.png';">
+                                          </div>
+                    <div class="flex-1 min-w-0">
+                      <h2 class="text-base font-semibold text-gray-900 leading-tight line-clamp-2 break-words">Senior Full Stack Developer</h2>
+                      <p class="text-sm text-gray-600 truncate">IT-Talent</p>
+                    </div>
+                  </div>
+                  <div class="text-gray-400 flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Details -->
+                <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <i class='bx bx-map-pin'></i>
+                    <span>Chile</span>
+                </div>
+                  <span class="text-xs bg-primary-50 text-primary-700 px-3 py-1 rounded-md font-medium">
+                    Híbrida
+                  </span>
+                </div>
+
+                <!-- Skills -->
+                                                                        <div class="flex flex-wrap gap-1.5 mt-3">
+                                              <span class="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded whitespace-nowrap">Typescript</span>
+                                              <span class="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded whitespace-nowrap">NodeJS</span>
+                                              <span class="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded whitespace-nowrap">Angular</span>
+                                          </div>
+                                                </a>
+            </div>
+                                  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 card-hover">
+              <a href="/trabajos/sap-cpi-consultant-6abde20e54bb2"  class="block">
+                <!-- Header -->
+                <div class="flex items-start justify-between mb-4">
+                  <div class="flex items-start gap-3 flex-1 min-w-0">
+                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                              <img src="/resources/assets/img/itthhgroup_logo.jpg" class="w-8 h-8 object-contain rounded" alt="Logo empresa" onerror="this.onerror=null; this.src='https://chumi-it.com/resources/assets/img/logochumiold.png';">
+                                          </div>
+                    <div class="flex-1 min-w-0">
+                      <h2 class="text-base font-semibold text-gray-900 leading-tight line-clamp-2 break-words">SAP CPI Consultant</h2>
+                      <p class="text-sm text-gray-600 truncate">IT-Talent</p>
+                    </div>
+                  </div>
+                  <div class="text-gray-400 flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Details -->
+                <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <i class='bx bx-map-pin'></i>
+                    <span>Mexico (México)</span>
+                </div>
+                  <span class="text-xs bg-primary-50 text-primary-700 px-3 py-1 rounded-md font-medium">
+                    Híbrida
+                  </span>
+                </div>
+
+                <!-- Skills -->
+                              </a>
+            </div>
+                                  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 card-hover">
+              <a href="/trabajos/openshift-platform-architect-virtualization-ai"  class="block">
+                <!-- Header -->
+                <div class="flex items-start justify-between mb-4">
+                  <div class="flex items-start gap-3 flex-1 min-w-0">
+                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                              <img src="/resources/assets/img/itthhgroup_logo.jpg" class="w-8 h-8 object-contain rounded" alt="Logo empresa" onerror="this.onerror=null; this.src='https://chumi-it.com/resources/assets/img/logochumiold.png';">
+                                          </div>
+                    <div class="flex-1 min-w-0">
+                      <h2 class="text-base font-semibold text-gray-900 leading-tight line-clamp-2 break-words">OpenShift Platform Architect – Virtualization &amp; AI</h2>
+                      <p class="text-sm text-gray-600 truncate">IT-Talent</p>
+                    </div>
+                  </div>
+                  <div class="text-gray-400 flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Details -->
+                <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <i class='bx bx-map-pin'></i>
+                    <span>Mexico (México)</span>
+                </div>
+                  <span class="text-xs bg-primary-50 text-primary-700 px-3 py-1 rounded-md font-medium">
+                    Híbrida
+                  </span>
+                </div>
+
+                <!-- Skills -->
+                              </a>
+            </div>
+                                  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 card-hover">
+              <a href="/trabajos/business-partner-sap"  class="block">
+                <!-- Header -->
+                <div class="flex items-start justify-between mb-4">
+                  <div class="flex items-start gap-3 flex-1 min-w-0">
+                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                              <img src="/resources/assets/img/itthhgroup_logo.jpg" class="w-8 h-8 object-contain rounded" alt="Logo empresa" onerror="this.onerror=null; this.src='https://chumi-it.com/resources/assets/img/logochumiold.png';">
+                                          </div>
+                    <div class="flex-1 min-w-0">
+                      <h2 class="text-base font-semibold text-gray-900 leading-tight line-clamp-2 break-words">Business Partner SAP</h2>
+                      <p class="text-sm text-gray-600 truncate">IT-Talent</p>
+                    </div>
+                  </div>
+                  <div class="text-gray-400 flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Details -->
+                <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <i class='bx bx-map-pin'></i>
+                    <span>Chile</span>
+                </div>
+                  <span class="text-xs bg-primary-50 text-primary-700 px-3 py-1 rounded-md font-medium">
+                    Presencial
+                  </span>
+                </div>
+
+                <!-- Skills -->
+                                                                        <div class="flex flex-wrap gap-1.5 mt-3">
+                                              <span class="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded whitespace-nowrap">SAP</span>
+                                          </div>
+                                                </a>
+            </div>
+                                  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 card-hover">
+              <a href="/trabajos/cta0110-product-owner"  class="block">
+                <!-- Header -->
+                <div class="flex items-start justify-between mb-4">
+                  <div class="flex items-start gap-3 flex-1 min-w-0">
+                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                              <img src="/resources/assets/img/itthhgroup_logo.jpg" class="w-8 h-8 object-contain rounded" alt="Logo empresa" onerror="this.onerror=null; this.src='https://chumi-it.com/resources/assets/img/logochumiold.png';">
+                                          </div>
+                    <div class="flex-1 min-w-0">
+                      <h2 class="text-base font-semibold text-gray-900 leading-tight line-clamp-2 break-words">CTA0110 - Product Owner</h2>
+                      <p class="text-sm text-gray-600 truncate">IT-Talent</p>
+                    </div>
+                  </div>
+                  <div class="text-gray-400 flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Details -->
+                <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <i class='bx bx-map-pin'></i>
+                    <span>Chile</span>
+                </div>
+                  <span class="text-xs bg-primary-50 text-primary-700 px-3 py-1 rounded-md font-medium">
+                    Presencial
+                  </span>
+                </div>
+
+                <!-- Skills -->
+                              </a>
+            </div>
+                                  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 card-hover">
+              <a href="/trabajos/caa0109-jefe-de-tecnologias-de-operacion-ot"  class="block">
+                <!-- Header -->
+                <div class="flex items-start justify-between mb-4">
+                  <div class="flex items-start gap-3 flex-1 min-w-0">
+                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                              <img src="/resources/assets/img/itthhgroup_logo.jpg" class="w-8 h-8 object-contain rounded" alt="Logo empresa" onerror="this.onerror=null; this.src='https://chumi-it.com/resources/assets/img/logochumiold.png';">
+                                          </div>
+                    <div class="flex-1 min-w-0">
+                      <h2 class="text-base font-semibold text-gray-900 leading-tight line-clamp-2 break-words">CAA0109 - Jefe de Tecnologías de Operación (OT)</h2>
+                      <p class="text-sm text-gray-600 truncate">IT-Talent</p>
+                    </div>
+                  </div>
+                  <div class="text-gray-400 flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Details -->
+                <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <i class='bx bx-map-pin'></i>
+                    <span>Chile</span>
+                </div>
+                  <span class="text-xs bg-primary-50 text-primary-700 px-3 py-1 rounded-md font-medium">
+                    Presencial
+                  </span>
+                </div>
+
+                <!-- Skills -->
+                              </a>
+            </div>
+                                  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 card-hover">
+              <a href="/trabajos/fi0209-lider-de-informatica-de-ia"  class="block">
+                <!-- Header -->
+                <div class="flex items-start justify-between mb-4">
+                  <div class="flex items-start gap-3 flex-1 min-w-0">
+                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                              <img src="/resources/assets/img/itthhgroup_logo.jpg" class="w-8 h-8 object-contain rounded" alt="Logo empresa" onerror="this.onerror=null; this.src='https://chumi-it.com/resources/assets/img/logochumiold.png';">
+                                          </div>
+                    <div class="flex-1 min-w-0">
+                      <h2 class="text-base font-semibold text-gray-900 leading-tight line-clamp-2 break-words">FI0209 - Líder de informática de IA</h2>
+                      <p class="text-sm text-gray-600 truncate">IT-Talent</p>
+                    </div>
+                  </div>
+                  <div class="text-gray-400 flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Details -->
+                <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <i class='bx bx-map-pin'></i>
+                    <span>Chile</span>
+                </div>
+                  <span class="text-xs bg-primary-50 text-primary-700 px-3 py-1 rounded-md font-medium">
+                    Híbrida
+                  </span>
+                </div>
+
+                <!-- Skills -->
+                              </a>
+            </div>
+                                  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 card-hover">
+              <a href="/trabajos/mib0901-subgerente-sap"  class="block">
+                <!-- Header -->
+                <div class="flex items-start justify-between mb-4">
+                  <div class="flex items-start gap-3 flex-1 min-w-0">
+                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                              <img src="/resources/assets/img/itthhgroup_logo.jpg" class="w-8 h-8 object-contain rounded" alt="Logo empresa" onerror="this.onerror=null; this.src='https://chumi-it.com/resources/assets/img/logochumiold.png';">
+                                          </div>
+                    <div class="flex-1 min-w-0">
+                      <h2 class="text-base font-semibold text-gray-900 leading-tight line-clamp-2 break-words">MIB0901 - Subgerente SAP</h2>
+                      <p class="text-sm text-gray-600 truncate">IT-Talent</p>
+                    </div>
+                  </div>
+                  <div class="text-gray-400 flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Details -->
+                <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <i class='bx bx-map-pin'></i>
+                    <span>Chile</span>
+                </div>
+                  <span class="text-xs bg-primary-50 text-primary-700 px-3 py-1 rounded-md font-medium">
+                    Híbrida
+                  </span>
+                </div>
+
+                <!-- Skills -->
+                                                                        <div class="flex flex-wrap gap-1.5 mt-3">
+                                              <span class="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded whitespace-nowrap">SAP</span>
+                                          </div>
+                                                </a>
+            </div>
+                                  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 card-hover">
+              <a href="/trabajos/cuu0209-cto"  class="block">
+                <!-- Header -->
+                <div class="flex items-start justify-between mb-4">
+                  <div class="flex items-start gap-3 flex-1 min-w-0">
+                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                              <img src="/resources/assets/img/itthhgroup_logo.jpg" class="w-8 h-8 object-contain rounded" alt="Logo empresa" onerror="this.onerror=null; this.src='https://chumi-it.com/resources/assets/img/logochumiold.png';">
+                                          </div>
+                    <div class="flex-1 min-w-0">
+                      <h2 class="text-base font-semibold text-gray-900 leading-tight line-clamp-2 break-words">CUU0209 - CTO</h2>
+                      <p class="text-sm text-gray-600 truncate">IT-Talent</p>
+                    </div>
+                  </div>
+                  <div class="text-gray-400 flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Details -->
+                <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <i class='bx bx-map-pin'></i>
+                    <span>Chile</span>
+                </div>
+                  <span class="text-xs bg-primary-50 text-primary-700 px-3 py-1 rounded-md font-medium">
+                    Presencial
+                  </span>
+                </div>
+
+                <!-- Skills -->
+                              </a>
+            </div>
+                                  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 card-hover">
+              <a href="/trabajos/rma0901-subgerente-de-administracion-y-finanzas"  class="block">
+                <!-- Header -->
+                <div class="flex items-start justify-between mb-4">
+                  <div class="flex items-start gap-3 flex-1 min-w-0">
+                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                              <img src="/resources/assets/img/itthhgroup_logo.jpg" class="w-8 h-8 object-contain rounded" alt="Logo empresa" onerror="this.onerror=null; this.src='https://chumi-it.com/resources/assets/img/logochumiold.png';">
+                                          </div>
+                    <div class="flex-1 min-w-0">
+                      <h2 class="text-base font-semibold text-gray-900 leading-tight line-clamp-2 break-words">RMA0901 - Subgerente de Administración y Finanzas</h2>
+                      <p class="text-sm text-gray-600 truncate">IT-Talent</p>
+                    </div>
+                  </div>
+                  <div class="text-gray-400 flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Details -->
+                <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <i class='bx bx-map-pin'></i>
+                    <span>Chile</span>
+                </div>
+                  <span class="text-xs bg-primary-50 text-primary-700 px-3 py-1 rounded-md font-medium">
+                    Presencial
+                  </span>
+                </div>
+
+                <!-- Skills -->
+                              </a>
+            </div>
+                                  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 card-hover">
+              <a href="/trabajos/cer0309-consultor-funcional-sap-fi"  class="block">
+                <!-- Header -->
+                <div class="flex items-start justify-between mb-4">
+                  <div class="flex items-start gap-3 flex-1 min-w-0">
+                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                              <img src="/resources/assets/img/itthhgroup_logo.jpg" class="w-8 h-8 object-contain rounded" alt="Logo empresa" onerror="this.onerror=null; this.src='https://chumi-it.com/resources/assets/img/logochumiold.png';">
+                                          </div>
+                    <div class="flex-1 min-w-0">
+                      <h2 class="text-base font-semibold text-gray-900 leading-tight line-clamp-2 break-words">CER0309 - Consultor Funcional SAP FI</h2>
+                      <p class="text-sm text-gray-600 truncate">IT-Talent</p>
+                    </div>
+                  </div>
+                  <div class="text-gray-400 flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Details -->
+                <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <i class='bx bx-map-pin'></i>
+                    <span>Chile</span>
+                </div>
+                  <span class="text-xs bg-primary-50 text-primary-700 px-3 py-1 rounded-md font-medium">
+                    Híbrida
+                  </span>
+                </div>
+
+                <!-- Skills -->
+                              </a>
+            </div>
+                                  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 card-hover">
+              <a href="/trabajos/cur0309-lider-de-datos"  class="block">
+                <!-- Header -->
+                <div class="flex items-start justify-between mb-4">
+                  <div class="flex items-start gap-3 flex-1 min-w-0">
+                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                              <img src="/resources/assets/img/itthhgroup_logo.jpg" class="w-8 h-8 object-contain rounded" alt="Logo empresa" onerror="this.onerror=null; this.src='https://chumi-it.com/resources/assets/img/logochumiold.png';">
+                                          </div>
+                    <div class="flex-1 min-w-0">
+                      <h2 class="text-base font-semibold text-gray-900 leading-tight line-clamp-2 break-words">CUR0309 - Líder de Datos</h2>
+                      <p class="text-sm text-gray-600 truncate">IT-Talent</p>
+                    </div>
+                  </div>
+                  <div class="text-gray-400 flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Details -->
+                <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <i class='bx bx-map-pin'></i>
+                    <span>Chile</span>
+                </div>
+                  <span class="text-xs bg-primary-50 text-primary-700 px-3 py-1 rounded-md font-medium">
+                    Presencial
+                  </span>
+                </div>
+
+                <!-- Skills -->
+                              </a>
+            </div>
+                                  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 card-hover">
+              <a href="/trabajos/cur0209-consultor-funcional-sap-wm-mm"  class="block">
+                <!-- Header -->
+                <div class="flex items-start justify-between mb-4">
+                  <div class="flex items-start gap-3 flex-1 min-w-0">
+                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                              <img src="/resources/assets/img/itthhgroup_logo.jpg" class="w-8 h-8 object-contain rounded" alt="Logo empresa" onerror="this.onerror=null; this.src='https://chumi-it.com/resources/assets/img/logochumiold.png';">
+                                          </div>
+                    <div class="flex-1 min-w-0">
+                      <h2 class="text-base font-semibold text-gray-900 leading-tight line-clamp-2 break-words">CUR0209 - Consultor Funcional SAP WM / MM</h2>
+                      <p class="text-sm text-gray-600 truncate">IT-Talent</p>
+                    </div>
+                  </div>
+                  <div class="text-gray-400 flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Details -->
+                <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <i class='bx bx-map-pin'></i>
+                    <span>Chile</span>
+                </div>
+                  <span class="text-xs bg-primary-50 text-primary-700 px-3 py-1 rounded-md font-medium">
+                    Presencial
+                  </span>
+                </div>
+
+                <!-- Skills -->
+                              </a>
+            </div>
+                                  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 card-hover">
+              <a href="/trabajos/cuu0109-arquitecto-de-software"  class="block">
+                <!-- Header -->
+                <div class="flex items-start justify-between mb-4">
+                  <div class="flex items-start gap-3 flex-1 min-w-0">
+                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                              <img src="/resources/assets/img/itthhgroup_logo.jpg" class="w-8 h-8 object-contain rounded" alt="Logo empresa" onerror="this.onerror=null; this.src='https://chumi-it.com/resources/assets/img/logochumiold.png';">
+                                          </div>
+                    <div class="flex-1 min-w-0">
+                      <h2 class="text-base font-semibold text-gray-900 leading-tight line-clamp-2 break-words">CUU0109 - Arquitecto de Software</h2>
+                      <p class="text-sm text-gray-600 truncate">IT-Talent</p>
+                    </div>
+                  </div>
+                  <div class="text-gray-400 flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Details -->
+                <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <i class='bx bx-map-pin'></i>
+                    <span>Chile</span>
+                </div>
+                  <span class="text-xs bg-primary-50 text-primary-700 px-3 py-1 rounded-md font-medium">
+                    Híbrida
+                  </span>
+                </div>
+
+                <!-- Skills -->
+                              </a>
+            </div>
+                                  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 card-hover">
+              <a href="/trabajos/caa0109-especialista-en-marketing-digital"  class="block">
+                <!-- Header -->
+                <div class="flex items-start justify-between mb-4">
+                  <div class="flex items-start gap-3 flex-1 min-w-0">
+                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                              <img src="/resources/assets/img/itthhgroup_logo.jpg" class="w-8 h-8 object-contain rounded" alt="Logo empresa" onerror="this.onerror=null; this.src='https://chumi-it.com/resources/assets/img/logochumiold.png';">
+                                          </div>
+                    <div class="flex-1 min-w-0">
+                      <h2 class="text-base font-semibold text-gray-900 leading-tight line-clamp-2 break-words">CAA0109 - Especialista en Marketing Digital</h2>
+                      <p class="text-sm text-gray-600 truncate">IT-Talent</p>
+                    </div>
+                  </div>
+                  <div class="text-gray-400 flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Details -->
+                <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <i class='bx bx-map-pin'></i>
+                    <span>Chile</span>
+                </div>
+                  <span class="text-xs bg-primary-50 text-primary-700 px-3 py-1 rounded-md font-medium">
+                    Híbrida
+                  </span>
+                </div>
+
+                <!-- Skills -->
+                              </a>
+            </div>
+                                  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 card-hover">
+              <a href="/trabajos/rix0901-ingeniero-de-ciberseguridad-senior"  class="block">
+                <!-- Header -->
+                <div class="flex items-start justify-between mb-4">
+                  <div class="flex items-start gap-3 flex-1 min-w-0">
+                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                              <img src="/resources/assets/img/itthhgroup_logo.jpg" class="w-8 h-8 object-contain rounded" alt="Logo empresa" onerror="this.onerror=null; this.src='https://chumi-it.com/resources/assets/img/logochumiold.png';">
+                                          </div>
+                    <div class="flex-1 min-w-0">
+                      <h2 class="text-base font-semibold text-gray-900 leading-tight line-clamp-2 break-words">RIX0901 - Ingeniero de Ciberseguridad  Senior</h2>
+                      <p class="text-sm text-gray-600 truncate">IT-Talent</p>
+                    </div>
+                  </div>
+                  <div class="text-gray-400 flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Details -->
+                <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <i class='bx bx-map-pin'></i>
+                    <span>Chile</span>
+                </div>
+                  <span class="text-xs bg-primary-50 text-primary-700 px-3 py-1 rounded-md font-medium">
+                    Híbrida
+                  </span>
+                </div>
+
+                <!-- Skills -->
+                              </a>
+            </div>
+                  </div>
+
+        <!-- Pagination -->
+        <div class="mt-12">
+          <nav role="navigation" aria-label="Pagination Navigation" class="flex items-center justify-between">
+        <div class="flex justify-between flex-1 sm:hidden">
+                            <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default leading-5 rounded-md dark:text-gray-600 dark:bg-gray-800 dark:border-gray-600">
+                    &laquo; Previous
+                </span>
+            
+                            <a href="https://chumi-it.com/trabajos?page=2" class="relative inline-flex items-center px-4 py-2 ml-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5 rounded-md hover:text-gray-500 focus:outline-none focus:ring ring-gray-300 focus:border-blue-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:focus:border-blue-700 dark:active:bg-gray-700 dark:active:text-gray-300">
+                    Next &raquo;
+                </a>
+                    </div>
+
+        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+            <div>
+                <p class="text-sm text-gray-700 leading-5 dark:text-gray-400">
+                    Showing
+                                            <span class="font-medium">1</span>
+                        to
+                        <span class="font-medium">25</span>
+                                        of
+                    <span class="font-medium">106</span>
+                    results
+                </p>
+            </div>
+
+            <div>
+                <span class="relative z-0 inline-flex rtl:flex-row-reverse shadow-sm rounded-md">
+                    
+                                            <span aria-disabled="true" aria-label="&amp;laquo; Previous">
+                            <span class="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default rounded-l-md leading-5 dark:bg-gray-800 dark:border-gray-600" aria-hidden="true">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                </svg>
+                            </span>
+                        </span>
+                    
+                    
+                                            
+                        
+                        
+                                                                                                                        <span aria-current="page">
+                                        <span class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default leading-5 dark:bg-gray-800 dark:border-gray-600">1</span>
+                                    </span>
+                                                                                                                                <a href="https://chumi-it.com/trabajos?page=2" class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5 hover:text-gray-500 focus:z-10 focus:outline-none focus:ring ring-gray-300 focus:border-blue-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:text-gray-300 dark:active:bg-gray-700 dark:focus:border-blue-800" aria-label="Go to page 2">
+                                        2
+                                    </a>
+                                                                                                                                <a href="https://chumi-it.com/trabajos?page=3" class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5 hover:text-gray-500 focus:z-10 focus:outline-none focus:ring ring-gray-300 focus:border-blue-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:text-gray-300 dark:active:bg-gray-700 dark:focus:border-blue-800" aria-label="Go to page 3">
+                                        3
+                                    </a>
+                                                                                                                                <a href="https://chumi-it.com/trabajos?page=4" class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5 hover:text-gray-500 focus:z-10 focus:outline-none focus:ring ring-gray-300 focus:border-blue-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:text-gray-300 dark:active:bg-gray-700 dark:focus:border-blue-800" aria-label="Go to page 4">
+                                        4
+                                    </a>
+                                                                                                                                <a href="https://chumi-it.com/trabajos?page=5" class="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5 hover:text-gray-500 focus:z-10 focus:outline-none focus:ring ring-gray-300 focus:border-blue-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400 dark:hover:text-gray-300 dark:active:bg-gray-700 dark:focus:border-blue-800" aria-label="Go to page 5">
+                                        5
+                                    </a>
+                                                                                                        
+                    
+                                            <a href="https://chumi-it.com/trabajos?page=2" rel="next" class="relative inline-flex items-center px-2 py-2 -ml-px text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-r-md leading-5 hover:text-gray-400 focus:z-10 focus:outline-none focus:ring ring-gray-300 focus:border-blue-300 active:bg-gray-100 active:text-gray-500 transition ease-in-out duration-150 dark:bg-gray-800 dark:border-gray-600 dark:active:bg-gray-700 dark:focus:border-blue-800" aria-label="Next &amp;raquo;">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        </a>
+                                    </span>
+            </div>
+        </div>
+    </nav>
+
+        </div>
+          </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-white py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-4 gap-8">
+        <div>
+          <div class="flex items-center mb-4">
+            <img src="https://chumi-it.com/resources/assets/img/chumiitlogo.png" alt="Chumi IT" class="h-8 w-auto mr-3">
+            <span class="text-xl font-bold">Chumi</span>
+          </div>
+          <p class="text-gray-400">
+            Plataforma líder para encontrar talento IT en LATAM
+          </p>
+        </div>
+        <div>
+          <h4 class="font-semibold mb-4">Profesionales</h4>
+          <ul class="space-y-2 text-gray-400">
+            <li><a href="/professional/login" class="hover:text-white transition-colors">Iniciar Sesión</a></li>
+            <li><a href="/professional/register" class="hover:text-white transition-colors">Registrarse</a></li>
+            <li><a href="/#faq" class="hover:text-white transition-colors">Centro de Ayuda</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-semibold mb-4">Empresas</h4>
+          <ul class="space-y-2 text-gray-400">
+            <li><a href="/recruiter/login" class="hover:text-white transition-colors">Iniciar Sesión</a></li>
+            <li><a href="https://chumi-it.com/contact" class="hover:text-white transition-colors">Solicitar Demo</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-semibold mb-4">Legal</h4>
+          <ul class="space-y-2 text-gray-400">
+            <li><a href="/conditions" class="hover:text-white transition-colors">Términos</a></li>
+            <li><a href="/security" class="hover:text-white transition-colors">Privacidad</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+        <p>&copy; 2026 Chumi IT. Todos los derechos reservados.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

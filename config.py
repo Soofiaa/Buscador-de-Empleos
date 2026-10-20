@@ -36,8 +36,9 @@ TERMINOS_B = [  # roles puente (no TI)
 # con la ubicación escrita ("Santiago, Chile"). Es un rodeo: ver probar_fuentes.py.
 # Google está desactivado: JobSpy recibe "Google returned no job data" (probado 2026-10-10).
 # Para reintentarlo, agrégalo a la lista: SITIOS = ["indeed", "glassdoor", "google"]
-SITIOS = ["indeed", "glassdoor", "getonboard", "bne", "trabajando", "chiletrabajos", "linkedin"]
-# En pausa (2026-10-20): computrabajo, laborum, buscojobs, empleospublicos, chumi y empleostech. Sus módulos y términos
+SITIOS = ["indeed", "glassdoor", "getonboard", "bne", "trabajando", "chiletrabajos", "chumi", "linkedin"]
+# chumi: rehecho y verificado contra el sitio real el 2026-10-20 (ver chumi.py).
+# En pausa (2026-10-20): computrabajo, laborum, buscojobs, empleospublicos y empleostech. Sus módulos y términos
 # quedan, pero los selectores y URLs no están verificados contra el sitio real (ver NOTAS.md, exploración del 16-10).
 # Se reactiva uno a la vez: HTML real en tests/fixtures, un test de parseo, y agregarlo aquí y en buscar.PORTALES.
 # getonboard: API oficial (ver getonboard.py). bne / trabajando / chiletrabajos: portales chilenos leídos sin JobSpy
@@ -86,10 +87,9 @@ TERMINOS_BUSCOJOBS = ["analista-funcional", "analista-de-procesos", "analista-qa
 TERMINOS_EMPLEOSPUBLICOS = ["analista-funcional", "analista-de-procesos", "analista-qa", "tester",
                              "desarrollador-python", "desarrollador-backend", "desarrollador-junior",
                              "analista-de-datos", "data-engineer", "analista-bi"]
-# Chumi: términos sin tildes para URL (portal IT)
-TERMINOS_CHUMI = ["analista-funcional", "analista-de-procesos", "analista-qa", "tester",
-                  "desarrollador-python", "desarrollador-backend", "desarrollador-junior",
-                  "analista-de-datos", "data-engineer", "analista-bi"]
+# Chumi: no tiene búsqueda en HTML; se leen las primeras páginas de su listado general (/trabajos?page=N, ~25 cada una)
+# y el clasificador filtra como siempre.
+TERMINOS_CHUMI = ["página 1", "página 2", "página 3"]
 # EmpleosTech: términos sin tildes para URL (portal IT)
 TERMINOS_EMPLEOSTECH = ["analista-funcional", "analista-de-procesos", "analista-qa", "tester",
                         "desarrollador-python", "desarrollador-backend", "desarrollador-junior",

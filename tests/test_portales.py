@@ -12,11 +12,12 @@ import pytest
 import buscar
 import bne
 import chiletrabajos
+import chumi
 import config
 import geo
 import linkedin
 import trabajando
-from filtros import ZONA, clasificar, extraer_experiencia
+from filtros import ZONA, clasificar, extraer_experiencia, extraer_sueldo, normalizar
 from red import Bloqueo, ClienteHTTP, ErrorFuente, NoEncontrada, Respuesta, pedir
 
 FIX = Path(__file__).parent / "fixtures"
@@ -289,7 +290,7 @@ def test_los_portales_estan_en_las_fuentes_y_tienen_nombre():
 
 
 # ---- portales en pausa (2026-10-19): selectores sin verificar contra el sitio real
-EN_PAUSA = ("computrabajo", "laborum", "buscojobs", "empleospublicos", "chumi", "empleostech")
+EN_PAUSA = ("computrabajo", "laborum", "buscojobs", "empleospublicos", "empleostech")
 # Tarjeta SINTÉTICA: no valida el sitio real (eso exige un fixture con su HTML), solo que el parser no se cae
 TARJETA = """<html><body><div class="offer">
   <h2><a href="/oferta/analista-qa-123">Analista QA</a></h2>
@@ -313,6 +314,84 @@ def test_portal_en_pausa_lee_empresa_y_ubicacion_sin_caerse(sitio):
     assert fila["company"] == ("Gobierno de Chile" if sitio == "empleospublicos" else "Empresa X")
     assert fila["location"] == "Providencia, RM, Chile"
     assert fila["is_remote"]
+
+
+# ---- Chumi (fixtures reales del 20-10-2026)
+def test_chumi_esta_conectado():
+    assert "chumi" in config.SITIOS and "chumi" in buscar.PORTALES and "chumi" in config.MAX_DETALLES
+    assert chumi.url_busqueda("página 2") == "https://chumi-it.com/trabajos?page=2"
+    assert all(chumi.url_busqueda(t).startswith("https://chumi-it.com/trabajos?page=") for t in config.TERMINOS_CHUMI)
+
+
+def test_chumi_listado():
+    df = chumi.parsear_listado(leer("chumi_trabajos.html"))
+    assert len(df) == 25 and list(df.columns) == chumi.COLUMNAS
+    assert df["job_url"].str.startswith("https://chumi-it.com/trabajos/").all()
+    assert not df["title"].str.match(r"[A-Z]{2,5}\d{3,5} ").any()             # sin el código interno "ROS1001 - "
+    assert chumi._RX_CODIGO.sub("", "MIA0802 Desarrollador(a) Banner") == "Desarrollador(a) Banner"
+    assert (df["company"] != "").all()
+    assert (df["location"] == "Chile").sum() == 23                              # "Chile" a secas, sin región XX
+    assert (df["location"] == "Mexico (México)").sum() == 2
+    assert set(df["description"]) <= {"Modalidad presencial.", "Modalidad híbrida.", "Modalidad remota."}
+
+
+def test_chumi_listado_vacio_o_ajeno():
+    assert chumi.parsear_listado("<html><title>Empleos | CHUMI-IT</title><body></body></html>").empty
+    with pytest.raises(ErrorFuente):
+        chumi.parsear_listado("<html><title>Otra cosa</title></html>")
+
+
+def test_chumi_detalle_y_completar():
+    det = chumi.parsear_detalle(leer("chumi_detalle.html"))
+    assert det["publicada"] == "2026-10-19" and det["empresa"] == "IT-Talent"
+    assert det["sueldo"] == "USD 2.000 a 2.500 al mes"
+    fila = {"description": "Modalidad presencial.", "location": "Chile", "company": "", "date_posted": "", "is_remote": False}
+    assert chumi.completar(fila, det, datetime(2026, 10, 20))
+    assert fila["date_posted"] == "2026-10-19" and fila["company"] == "IT-Talent"
+    assert fila["description"].startswith("Modalidad presencial.") and "Mínimo 3 a 5 año" in fila["description"]
+    assert "Sueldo informado (Chumi): USD" in fila["description"]
+    assert extraer_sueldo(fila, normalizar(fila["description"]))[1] == 2000000                # el de la descripción, en pesos
+    linea_usd = "Sueldo informado (Chumi): %s." % det["sueldo"]
+    assert extraer_sueldo({}, normalizar(linea_usd)) == ("No indicado", None)                # USD no se lee como pesos
+    assert not chumi.completar({"description": ""}, det, datetime(2026, 11, 21))                # vencido
+
+
+def test_chumi_detalle_sin_jobposting_es_error_de_fuente():
+    with pytest.raises(ErrorFuente):
+        chumi.parsear_detalle("<html><body>sin datos</body></html>")
+
+
+def test_chumi_flujo_completo(con, monkeypatch):
+    monkeypatch.setattr(config, "TERMINOS_CHUMI", ["página 1"])
+    monkeypatch.setitem(config.MAX_DETALLES, "chumi", 3)
+    cli = Falso({"trabajos?page=": (200, leer("chumi_trabajos.html")),
+                 "/trabajos/": (200, leer("chumi_detalle.html"))})
+    st = {"encontradas": 0, "relevantes": 0, "sin_chile": 0, "errores": 0}
+    avisos = []
+    buscar._buscar_portal(con, "chumi", st, avisos, cli, RobotsLibre(), datetime(2026, 10, 20, 12, 0, tzinfo=ZONA), 1)
+    detalles = [u for u in cli.pedidas if "/trabajos/" in u]
+    assert 0 < len(detalles) <= 3 and st["encontradas"] == 25 and st["errores"] == 0
+    filas = con.execute("SELECT url, fuente FROM ofertas").fetchall()
+    assert filas and all(f["fuente"] == "chumi" and f["url"].startswith("https://chumi-it.com/trabajos/") for f in filas)
+    assert any("esperan a la próxima corrida" in a or "espera a la próxima" in a for a in avisos)
+
+
+def test_chumi_detalle_antiguo_no_se_guarda_ni_se_vuelve_a_pedir(con, monkeypatch):
+    # el detalle dice 2026-10-19 y vence el 20-11: el 10-11 sigue vigente pero ya es antiguo para una ventana de 1 día
+    monkeypatch.setattr(config, "TERMINOS_CHUMI", ["página 1"])
+    monkeypatch.setitem(config.MAX_DETALLES, "chumi", 2)
+    ahora = datetime(2026, 11, 10, 12, 0, tzinfo=ZONA)
+    respuestas = {"trabajos?page=": (200, leer("chumi_trabajos.html")), "/trabajos/": (200, leer("chumi_detalle.html"))}
+    st = {"encontradas": 0, "relevantes": 0, "sin_chile": 0, "errores": 0}
+    cli = Falso(respuestas)
+    buscar._buscar_portal(con, "chumi", st, [], cli, RobotsLibre(), ahora, 1)
+    abiertas = [u for u in cli.pedidas if "/trabajos/" in u]
+    assert len(abiertas) == 2 and st["antiguas"] == 2
+    guardadas = {u for (u,) in con.execute("SELECT url FROM ofertas")}
+    assert guardadas and not guardadas & set(abiertas)
+    cli2 = Falso(respuestas)
+    buscar._buscar_portal(con, "chumi", st, [], cli2, RobotsLibre(), ahora, 1)
+    assert not set(abiertas) & set(cli2.pedidas)                               # no se gastan detalles en ellas otra vez
 
 
 def test_un_portal_que_falla_no_corta_la_corrida(con, monkeypatch):

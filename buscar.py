@@ -22,6 +22,7 @@ import pandas as pd
 
 import bne
 import chiletrabajos
+import chumi
 import config
 import getonboard
 import telemetria
@@ -39,7 +40,7 @@ def _say(mensaje: str):
     salida(mensaje)
 
 
-PORTALES = {"bne": bne, "trabajando": trabajando, "chiletrabajos": chiletrabajos}   # en pausa: ver config.SITIOS
+PORTALES = {"bne": bne, "trabajando": trabajando, "chiletrabajos": chiletrabajos, "chumi": chumi}   # en pausa: ver config.SITIOS
 ESTADOS = ["nueva", "revisada", "postulada", "entrevista", "descartada"]
 ESTADOS_CERRADOS = {"postulada", "entrevista", "descartada"}
 LIMITE_DESCARTADAS = 300   # la página muestra las descartadas más recientes (con su motivo)
@@ -575,11 +576,13 @@ def _buscar_portal(con, sitio, st, avisos, cliente, robots, ahora: datetime | No
             filas.setdefault(r["job_url"], r)
     conocidas = {u for (u,) in con.execute("SELECT url FROM ofertas")}
     nuevas = [r for u, r in filas.items() if u not in conocidas]
-    candidatas = [r for r in nuevas if _es_candidata(a_raw(r, sitio))]
+    # una candidata que resultó antigua al abrir su detalle (Chumi: la fecha solo viene ahí) no se vuelve a abrir
+    excluir = {r["job_url"] for r in nuevas if _termino_recordado_404(con, sitio, r["job_url"])}
+    candidatas = [r for r in nuevas if r["job_url"] not in excluir and _es_candidata(a_raw(r, sitio))]
     candidatas.sort(key=lambda r: texto(r.get("date_posted")), reverse=True)
 
     # detalle de las que alcanzan; las demás candidatas no se guardan (quedan para la próxima corrida)
-    excluir, pendientes, cerradas, detenido = set(), 0, 0, False
+    pendientes, cerradas, detenido = 0, 0, False
     for n, r in enumerate(candidatas):
         if detenido or n >= config.MAX_DETALLES[sitio]:
             excluir.add(r["job_url"])
@@ -602,6 +605,10 @@ def _buscar_portal(con, sitio, st, avisos, cliente, robots, ahora: datetime | No
         if not mod.completar(r, det):      # el sitio dice que ya no está vigente
             excluir.add(r["job_url"])
             cerradas += 1
+        elif antiguedad(a_raw(r, sitio), ahora, dias) == "antigua":     # la fecha llegó con el detalle
+            excluir.add(r["job_url"])
+            st["antiguas"] = st.get("antiguas", 0) + 1
+            _recordar_404(con, sitio, r["job_url"])
     if pendientes:
         avisos.append(f"{nombre}: {plural(pendientes, 'candidata espera', 'candidatas esperan')} a la próxima corrida "
                       "(tope de detalles por corrida)")

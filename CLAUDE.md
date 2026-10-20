@@ -25,10 +25,10 @@ en producción, lo aprobado y lo pendiente.
 - `servidor.py`: HTTP (ThreadingHTTPServer), rutas /api/*, Host/Origin locales, límites de cuerpo por ruta.
 - `web/pagina.html`: la página (informe.PAGINA la lee). Funciones puras entre `// <puras>` y `// </puras>`.
 - `respaldo.py`: respaldos (API de backup, sha256, retención 30). `unir_bases.py`: unión de una vez (exenta).
-- Portales: `bne.py`, `trabajando.py`, `chiletrabajos.py`, `getonboard.py`; red: `red.py`, `robots.py`, `geo.py`.
+- Portales: `bne.py`, `trabajando.py`, `chiletrabajos.py`, `chumi.py`, `getonboard.py`; red: `red.py`, `robots.py`, `geo.py`.
   LinkedIn va por JobSpy (`config.SITIOS`); `linkedin.py` (endpoint de invitados) no está conectado, solo tiene tests.
 - En pausa, fuera de `SITIOS` y `PORTALES` (ver NOTAS.md, 20-10): `computrabajo.py`, `laborum.py`, `buscojobs.py`,
-  `empleospublicos.py`, `chumi.py`, `empleostech.py`. Ninguno funciona contra el sitio real.
+  `empleospublicos.py`, `empleostech.py`. Ninguno funciona contra el sitio real.
 - `tests/`: pytest (incluye funciones puras de la página corridas con Node).
 - Notas: `NOTAS.md` (estado actual, decisiones y hallazgos), `REVERSION_FASE_A.md` (cómo volver atrás de cada
   despliegue). Skill de despliegue: `.claude/skills/desplegar/`.

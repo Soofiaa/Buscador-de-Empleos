@@ -518,5 +518,32 @@ quedaron fuera del repositorio (en %TEMP%\jt-sondeo).
 
 - Chumi también lista avisos ajenos (de LinkedIn, empleosit.com.ar) en sus páginas por categoría; en `/trabajos`
   los enlaces son propios. Si se implementa, solo se abrirían detalles de `chumi-it.com`.
-- **Pendiente de decisión:** si se implementa Chumi (pese al punto 2 de sus condiciones) y si se borran los cinco
+- Chumi: implementación aprobada por Sofia el 20-10 (ver abajo). Pendiente de decisión: si se borran los cinco
   módulos que no pueden funcionar (computrabajo, laborum, buscojobs, empleospublicos, empleostech).
+
+### Chumi integrado (20-10-2026; commit local, sin desplegar)
+
+- `chumi.py` rehecho sobre el HTML real: lee `/trabajos?page=1..3` (`TERMINOS_CHUMI` son páginas: el sitio no tiene
+  búsqueda en HTML) y abre el detalle (JSON-LD `JobPosting`) de las candidatas, con tope `MAX_DETALLES["chumi"] = 10`.
+  Fixtures reales: `tests/fixtures/chumi_trabajos.html` y `chumi_detalle.html`.
+- La tarjeta no trae fecha y el listado no va por fecha (mezcla avisos de agosto). `_buscar_portal` ahora revisa la
+  antigüedad DESPUÉS del detalle: una candidata antigua no se guarda, cuenta como antigua y su URL se recuerda 30 días
+  en `terminos_no_disponibles` para no gastar el tope en ella cada corrida. Las no candidatas se guardan sin fecha
+  (como cualquier oferta sin fecha).
+- Ubicación: casi siempre «Chile» a secas; se deja así (como Glassdoor), sin región. El sueldo en USD va como texto
+  («Sueldo informado (Chumi)»), no en min/max_amount, para que no se compare en pesos con `SUELDO_ALERTA`.
+- Corrida real sobre una base temporal (no la real): 13 peticiones, 75 ofertas, 0 errores, 9 detalles antiguos
+  omitidos, 0 relevantes nuevas. Casi todo es de IT-Talent (headhunter) y de nivel senior: aporte esperado bajo.
+
+### Computrabajo, Laborum y Empleos Públicos: ¿automatizables? (20-10-2026)
+
+- Computrabajo y Empleos Públicos responden 403 a la app, que se identifica como bot, ya desde el `robots.txt`;
+  en un navegador abren. Automatizarlos exigiría hacerse pasar por navegador: contra la regla de `red.py`
+  («no se disfraza; nunca se esquiva»).
+- Laborum no bloquea: su `robots.txt` permite la búsqueda, pero búsqueda y detalle exigen JavaScript (la misma
+  página vacía de 63.603 bytes). Publica `sitemap_avisos_bum.xml` (16.399 avisos el 20-10) con el título en la URL,
+  pero sin empresa, ubicación ni fecha (`lastmod` es la fecha del sitemap). Sus términos no se pudieron leer (también
+  exigen JavaScript). Vías posibles: navegador sin ventana (Playwright: instalar algo, requiere aprobación) o su API
+  interna (no documentada).
+- Empleos Públicos: existe un espejo de terceros con API (Governance_Lab, govlab.cl, en una Raspberry Pi); no es
+  oficial.
