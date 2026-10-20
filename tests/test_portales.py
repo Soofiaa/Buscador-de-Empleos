@@ -1,4 +1,5 @@
 """BNE, Trabajando y Chiletrabajos (portados de la app 'Busca Empleo'). Todo con HTML/JSON real guardado, sin red."""
+import json
 import sqlite3
 import sys
 from datetime import datetime
@@ -285,5 +286,52 @@ def test_los_portales_estan_en_las_fuentes_y_tienen_nombre():
         assert s in config.SITIOS and s in config.NOMBRE_FUENTE and s in config.MAX_DETALLES
     assert "linkedin" in config.SITIOS and "linkedin" in config.NOMBRE_FUENTE
     assert "ocupacion:7643" in config.TERMINOS_BNE
+
+
+# ---- portales en pausa (2026-10-19): selectores sin verificar contra el sitio real
+EN_PAUSA = ("computrabajo", "laborum", "buscojobs", "empleospublicos", "chumi", "empleostech")
+# Tarjeta SINTÉTICA: no valida el sitio real (eso exige un fixture con su HTML), solo que el parser no se cae
+TARJETA = """<html><body><div class="offer">
+  <h2><a href="/oferta/analista-qa-123">Analista QA</a></h2>
+  <p class="company"> Empresa   X </p><p class="location">Providencia</p>
+  <p class="description">Trabajo remoto, pruebas funcionales.</p></div></body></html>"""
+
+
+def test_los_portales_sin_verificar_estan_en_pausa():
+    for s in EN_PAUSA:
+        assert s not in config.SITIOS and s not in buscar.PORTALES
+        assert s in config.NOMBRE_FUENTE                               # las ofertas ya guardadas conservan su nombre
+
+
+@pytest.mark.parametrize("sitio", EN_PAUSA)
+def test_portal_en_pausa_lee_empresa_y_ubicacion_sin_caerse(sitio):
+    mod = __import__(sitio)
+    df = mod.parsear_listado(TARJETA)
+    assert len(df) == 1 and list(df.columns) == mod.COLUMNAS
+    fila = df.iloc[0]
+    assert fila["title"] == "Analista QA" and fila["job_url"] == mod.BASE + "/oferta/analista-qa-123"
+    assert fila["company"] == ("Gobierno de Chile" if sitio == "empleospublicos" else "Empresa X")
+    assert fila["location"] == "Providencia, RM, Chile"
+    assert fila["is_remote"]
+
+
+def test_un_portal_que_falla_no_corta_la_corrida(con, monkeypatch):
+    monkeypatch.setitem(sys.modules, "jobspy", type(sys)("jobspy"))    # sin consultas JobSpy: solo portales
+    sys.modules["jobspy"].scrape_jobs = None
+    monkeypatch.setattr(config, "SITIOS", ["bne", "chiletrabajos"])
+    llamados = []
+    def falso(con, sitio, st, avisos, *a, **k):
+        llamados.append(sitio)
+        if sitio == "bne":
+            raise TypeError("expected string or bytes-like object, got 'Tag'")
+        return 2
+    monkeypatch.setattr(buscar, "_buscar_portal", falso)
+    monkeypatch.setattr(buscar, "_say", lambda m: None)
+    assert buscar.buscar_ofertas(con) == 2
+    assert llamados == ["bne", "chiletrabajos"]                        # siguió con el portal siguiente
+    detalle = json.loads(con.execute("SELECT detalle FROM corridas").fetchone()[0])   # la corrida quedó registrada
+    bne_st = next(f for f in detalle["fuentes"] if f["fuente"] == "BNE")
+    assert bne_st["errores"] == 1
+    assert any("BNE falló: TypeError" in a for a in detalle["avisos"])
 
 

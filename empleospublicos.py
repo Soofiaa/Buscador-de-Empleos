@@ -75,7 +75,8 @@ def parsear_listado(html: str) -> pd.DataFrame:
         
         titulo = _limpio(a.get_text())
         empresa = "Gobierno de Chile"  # Empleos públicos son del gobierno
-        ubicacion = _limpio(tarjeta.select_one("p.location") or tarjeta.select_one("span.location") or "").get_text() if tarjeta.select_one("p.location") or tarjeta.select_one("span.location") else ""
+        ubicacion_elem = tarjeta.select_one("p.location") or tarjeta.select_one("span.location")
+        ubicacion = _limpio(ubicacion_elem.get_text()) if ubicacion_elem else ""
         fecha_elem = tarjeta.select_one("span.date") or tarjeta.select_one("p.date")
         fecha = _fecha(fecha_elem.get_text()) if fecha_elem else ""
         desc_elem = tarjeta.select_one("p.description") or tarjeta.select_one("div.description")

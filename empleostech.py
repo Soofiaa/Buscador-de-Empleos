@@ -74,8 +74,10 @@ def parsear_listado(html: str) -> pd.DataFrame:
         vistos.add(url)
         
         titulo = _limpio(a.get_text())
-        empresa = _limpio(tarjeta.select_one("p.company") or tarjeta.select_one("span.company") or "").get_text() if tarjeta.select_one("p.company") or tarjeta.select_one("span.company") else ""
-        ubicacion = _limpio(tarjeta.select_one("p.location") or tarjeta.select_one("span.location") or "").get_text() if tarjeta.select_one("p.location") or tarjeta.select_one("span.location") else ""
+        empresa_elem = tarjeta.select_one("p.company") or tarjeta.select_one("span.company")
+        empresa = _limpio(empresa_elem.get_text()) if empresa_elem else ""
+        ubicacion_elem = tarjeta.select_one("p.location") or tarjeta.select_one("span.location")
+        ubicacion = _limpio(ubicacion_elem.get_text()) if ubicacion_elem else ""
         fecha_elem = tarjeta.select_one("span.date") or tarjeta.select_one("p.date")
         fecha = _fecha(fecha_elem.get_text()) if fecha_elem else ""
         desc_elem = tarjeta.select_one("p.description") or tarjeta.select_one("div.description")

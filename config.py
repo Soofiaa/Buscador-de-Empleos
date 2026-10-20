@@ -11,11 +11,11 @@ TERMINOS_A = [  # roles TI
     "desarrollador backend", "desarrollador junior", "desarrollador jr", "desarrollador frontend",
     "analista de sistemas", "analista de datos junior", "analista de datos jr", "reportería BI",
     "informático junior", "informático jr",
-    "data engineer junior", "ETL junior", "analista BI junior",
-    "scrum master junior", "product owner junior",
-    "devops junior", "cloud junior",
-    "analista de ciberseguridad junior",
-    "desarrollador full stack junior",
+    "data engineer junior", "data engineer jr", "ETL junior", "ETL jr", "analista BI junior", "analista BI jr",
+    "scrum master junior", "scrum master jr", "product owner junior", "product owner jr",
+    "devops junior", "devops jr", "cloud junior", "cloud jr",
+    "analista de ciberseguridad junior", "analista de ciberseguridad jr",
+    "desarrollador full stack junior", "desarrollador full stack jr",
 ]
 # Nota: "BPMN UML" (0 resultados en todas las zonas) se reemplazó por "BPMN";
 # los términos con "junior" + varias palabras técnicas no devuelven nada en Indeed.
@@ -25,10 +25,10 @@ TERMINOS_B = [  # roles puente (no TI)
     "analista SAP", "analista de implementación",
     "analista de operaciones", "PMO", "asistente de proyectos",
     "analista de calidad", "analista de mejora",
-    "coordinador de proyectos junior", "gestor de proyectos junior",
-    "analista de transformación digital junior",
-    "consultor funcional junior",
-    "analista de requerimientos junior",
+    "coordinador de proyectos junior", "coordinador de proyectos jr", "gestor de proyectos junior", "gestor de proyectos jr",
+    "analista de transformación digital junior", "analista de transformación digital jr",
+    "consultor funcional junior", "consultor funcional jr",
+    "analista de requerimientos junior", "analista de requerimientos jr",
 ]
 # Fuentes. Indeed busca con todos los términos; Google y Glassdoor con la lista
 # corta (TERMINOS_SECUNDARIOS) para limitar peticiones y riesgo de bloqueo.
@@ -36,7 +36,10 @@ TERMINOS_B = [  # roles puente (no TI)
 # con la ubicación escrita ("Santiago, Chile"). Es un rodeo: ver probar_fuentes.py.
 # Google está desactivado: JobSpy recibe "Google returned no job data" (probado 2026-10-10).
 # Para reintentarlo, agrégalo a la lista: SITIOS = ["indeed", "glassdoor", "google"]
-SITIOS = ["indeed", "glassdoor", "getonboard", "bne", "trabajando", "chiletrabajos", "computrabajo", "laborum", "buscojobs", "empleospublicos", "chumi", "empleostech", "linkedin"]
+SITIOS = ["indeed", "glassdoor", "getonboard", "bne", "trabajando", "chiletrabajos", "linkedin"]
+# En pausa (2026-10-20): computrabajo, laborum, buscojobs, empleospublicos, chumi y empleostech. Sus módulos y términos
+# quedan, pero los selectores y URLs no están verificados contra el sitio real (ver NOTAS.md, exploración del 16-10).
+# Se reactiva uno a la vez: HTML real en tests/fixtures, un test de parseo, y agregarlo aquí y en buscar.PORTALES.
 # getonboard: API oficial (ver getonboard.py). bne / trabajando / chiletrabajos: portales chilenos leídos sin JobSpy
 # (módulos bne.py, trabajando.py, chiletrabajos.py), con las mismas reglas de la app "Busca Empleo": robots.txt,
 # pausa de 3 a 5 s, y detención del sitio ante 401/403/429 o CAPTCHA (nunca se esquiva).
@@ -45,10 +48,10 @@ TERMINOS_SECUNDARIOS = [
     "desarrollador python", "desarrollador backend", "analista de procesos",
     "datos maestros", "analista de datos junior", "analista de datos jr",
     "informático junior", "informático jr",
-    "data engineer junior", "analista BI junior",
-    "devops junior",
+    "data engineer junior", "data engineer jr", "analista BI junior", "analista BI jr",
+    "devops junior", "devops jr",
     "analista de calidad", "analista de mejora",
-    "analista de requerimientos junior",
+    "analista de requerimientos junior", "analista de requerimientos jr",
 ]
 NOMBRE_FUENTE = {"indeed": "Indeed", "google": "Google", "glassdoor": "Glassdoor", "getonboard": "Get on Board",
                  "bne": "BNE", "trabajando": "Trabajando", "chiletrabajos": "Chiletrabajos", "computrabajo": "Computrabajo",
@@ -88,9 +91,9 @@ TERMINOS_CHUMI = ["analista-funcional", "analista-de-procesos", "analista-qa", "
                   "desarrollador-python", "desarrollador-backend", "desarrollador-junior",
                   "analista-de-datos", "data-engineer", "analista-bi"]
 # EmpleosTech: términos sin tildes para URL (portal IT)
-TERMINOS_EMPLOSTECH = ["analista-funcional", "analista-de-procesos", "analista-qa", "tester",
-                       "desarrollador-python", "desarrollador-backend", "desarrollador-junior",
-                       "analista-de-datos", "data-engineer", "analista-bi"]
+TERMINOS_EMPLEOSTECH = ["analista-funcional", "analista-de-procesos", "analista-qa", "tester",
+                        "desarrollador-python", "desarrollador-backend", "desarrollador-junior",
+                        "analista-de-datos", "data-engineer", "analista-bi"]
 # Los listados de estos portales vienen recortados: el detalle de cada aviso se abre SOLO para ofertas nuevas que
 # podrían servir (las más recientes primero), con este tope por corrida. Las que no alcanzan no se guardan: quedan
 # para la próxima corrida.

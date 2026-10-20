@@ -476,3 +476,24 @@ estaba centrado en prácticas.
   Región de Valparaíso. La regla documentada/configurada hasta ahora es Santiago, Viña del Mar y Valparaíso; no se
   amplió con esta exploración.
 - Esta nota registra una investigación exploratoria, no una autorización de implementación, despliegue o push.
+
+## Portales del 19-10 en pausa (20-10-2026; commit local, sin desplegar)
+
+- Los commits fc2ec30, 326f427 y f3c1510 (19-10) integraron Computrabajo, Laborum, Buscojobs, Empleos Públicos,
+  Chumi y EmpleosTech sin aprobación, sin tests y con selectores y URLs supuestos («requiere verificación»), contra
+  la decisión del 16-10. Además, los seis parsers lanzaban `TypeError` con cualquier tarjeta que trajera empresa o
+  ubicación (`_limpio` recibía el elemento HTML), y como nada lo capturaba, abortaban la corrida entera sin registrarla.
+- Aprobado por Sofia (opción B de la revisión del 20-10):
+  - los seis salen de `config.SITIOS` y `buscar.PORTALES`; sus módulos y términos quedan en el repositorio;
+  - se corrige el error de `_limpio` en los seis (probado solo con una tarjeta sintética, NO con el sitio real);
+  - `buscar_ofertas` captura el fallo inesperado de un portal: anota el error y un aviso, sigue con los demás
+    y la corrida se registra igual;
+  - se completan las variantes «jr» de los términos «junior» agregados el 19-10 (test en rojo);
+  - typo `TERMINOS_EMPLOSTECH` -> `TERMINOS_EMPLEOSTECH`.
+- LinkedIn no cambia: va por JobSpy desde 229f120 (16-10) por el `Disallow: /` de su `robots.txt`; `linkedin.py`
+  queda solo con sus tests de parseo.
+- Para reactivar un portal, uno a la vez y con aprobación: confirmar que su `robots.txt` y sus condiciones lo
+  permiten (Laborum y Computrabajo tenían restricciones), guardar HTML real en `tests/fixtures`, ajustar selectores
+  y URL, y escribir su test de parseo y de flujo.
+- Pendiente: los términos de estos portales son slugs con guion (`analista-funcional`) aunque varios buscan por
+  parámetro; revisarlo al reactivarlos. `CLAUDE.md` y `README.md` todavía no mencionan `linkedin.py` ni estos módulos.

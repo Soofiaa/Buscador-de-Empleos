@@ -21,15 +21,9 @@ from urllib.parse import urlsplit
 import pandas as pd
 
 import bne
-import buscojobs
 import chiletrabajos
-import chumi
-import computrabajo
 import config
-import empleospublicos
-import empleostech
 import getonboard
-import laborum
 import telemetria
 import trabajando
 from red import Bloqueo, ClienteHTTP, ErrorFuente, NoEncontrada, USER_AGENT_HTTP
@@ -45,7 +39,7 @@ def _say(mensaje: str):
     salida(mensaje)
 
 
-PORTALES = {"bne": bne, "trabajando": trabajando, "chiletrabajos": chiletrabajos, "computrabajo": computrabajo, "laborum": laborum, "buscojobs": buscojobs, "empleospublicos": empleospublicos, "chumi": chumi, "empleostech": empleostech}
+PORTALES = {"bne": bne, "trabajando": trabajando, "chiletrabajos": chiletrabajos}   # en pausa: ver config.SITIOS
 ESTADOS = ["nueva", "revisada", "postulada", "entrevista", "descartada"]
 ESTADOS_CERRADOS = {"postulada", "entrevista", "descartada"}
 LIMITE_DESCARTADAS = 300   # la página muestra las descartadas más recientes (con su motivo)
@@ -517,7 +511,7 @@ def _terminos_portal(sitio):
             "chiletrabajos": config.TERMINOS_CHILETRABAJOS, "computrabajo": config.TERMINOS_COMPUTRABAJO,
             "laborum": config.TERMINOS_LABORUM, "buscojobs": config.TERMINOS_BUSCOJOBS,
             "empleospublicos": config.TERMINOS_EMPLEOSPUBLICOS, "chumi": config.TERMINOS_CHUMI,
-            "empleostech": config.TERMINOS_EMPLOSTECH}[sitio]
+            "empleostech": config.TERMINOS_EMPLEOSTECH}[sitio]
 
 
 def _es_candidata(raw: dict) -> bool:
@@ -683,8 +677,13 @@ def buscar_ofertas(con) -> int:
         for sitio in activos:
             anotar = (lambda status, t=tele[sitio]: telemetria.anotar_status(t, status))
             cliente.al_responder = robots.al_responder = anotar       # el robots.txt de cada sitio cuenta para él
-            total += _buscar_portal(con, sitio, stats[sitio], avisos, cliente, robots, ahora, ventanas[sitio],
-                                    tele=tele[sitio])
+            try:                          # un fallo inesperado de un portal no corta la corrida ni deja de registrarla
+                total += _buscar_portal(con, sitio, stats[sitio], avisos, cliente, robots, ahora, ventanas[sitio],
+                                        tele=tele[sitio])
+            except Exception as e:
+                stats[sitio]["errores"] += 1
+                avisos.append(f"⚠ {config.NOMBRE_FUENTE[sitio]} falló: {type(e).__name__}: {e}. Se siguió con las demás.")
+                _say(f"  ! [{sitio}] {type(e).__name__}: {e}")
 
     _say("\nPor fuente (encontradas / relevantes nuevas / descartadas por no ser Chile / errores / antiguas omitidas):")
     for sitio, st in stats.items():
