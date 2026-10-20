@@ -87,18 +87,18 @@
   `job-tracker:137` (`ff5a2615…`), `job-tracker:c2` (`f1943914…`), `:c1`, `:respaldo`, `:B1`, `:genero`, `:soporte`,
   `:faseA`, `:fase0`.
 - **Candidata y reversión (20-10):** la candidata `jt_revision_laborum` (8766), sus volúmenes y la reversión en 8767
-  se borraron después del despliegue. La imagen `job-tracker:laborum-candidata` queda, con las demás candidatas
-  antiguas, esperando aprobación para limpiarla.
+  se borraron después del despliegue.
+- **Limpieza aprobada y hecha (20-10):** las 10 etiquetas `*-candidata`, los contenedores `jt_revision_c2`, `_137`,
+  `_137r`, `_telemetria`, `_telemetria_rev` y sus 9 volúmenes. Se borró por etiqueta: las imágenes de reversión que
+  compartían id (`telemetria`, `137`, `c2`) siguen. No quedan candidatas ni contenedores de revisión.
+- **Sin desplegar (20-10):** `3c98064`, pausa aleatoria entre consultas JobSpy (LinkedIn 6-10 s, Glassdoor 3-5 s) y,
+  si una fuente responde 429, se deja por el resto de la corrida. Suma ~8 min por corrida.
 - **Candidata y reversión (16-10):** la candidata `jt_revision_linkedin_senior_experto` (8766) y su volumen se eliminaron
   después del despliegue; la reversión sobre copia en 8767 también quedó healthy y se limpió. No quedan recursos
   temporales de este despliegue.
 - **Decisiones aprobadas:** LinkedIn descarta Senior y Experto/Expert, mantiene Associate, y descarta requisitos cuyo
   máximo supera 2 años. Ubicación, remoto y exclusión de BairesDev siguen como antes. Despliegue autorizado y hecho;
   sin preguntas abiertas. Sin push.
-- **Candidatas antiguas que esperan aprobación para limpieza:** `:historial-candidata`, `:respaldo-candidata`,
-  `:faseB1-candidata`, `:faseA-candidata` y `:137-candidata` (`f9b15255…`).
-- **Contenedores detenidos que esperan aprobación para limpieza:** `jt_revision_c2` (255, apagado del 14-10),
-  `jt_revision_137`, `jt_revision_137r`, `jt_revision_telemetria` y `jt_revision_telemetria_rev` (0), con sus volúmenes.
 - **Nombres de respaldo fuera de formato** (`481aab7`, desplegado el 15-10): los nombres que no
   calzan con `ofertas_(auto|manual)_AAAAMMDD-HHMMSS.db` se ignoran: no cuentan como «Último respaldo», no cuentan para
   la retención y nunca se borran.
