@@ -1,6 +1,6 @@
 # Búsqueda de empleo (job-tracker)
 
-Busca ofertas en Indeed, Glassdoor, LinkedIn, Get on Board, BNE, Trabajando, Chiletrabajos y Chumi; las clasifica según tu perfil y las
+Busca ofertas en Indeed, Glassdoor, LinkedIn, Get on Board, BNE, Trabajando, Chiletrabajos, Chumi y Laborum; las clasifica según tu perfil y las
 muestra en una página local, con estados de seguimiento (nueva, revisada, postulada, entrevista, descartada).
 
 ## Con Docker (siempre encendida)
@@ -36,5 +36,6 @@ Todo se ajusta en `config.py`.
   (`python-jobspy`), software de código abierto bajo licencia MIT, © 2023 Cullen Watson. Se usa como dependencia,
   sin modificar su código.
 - Get on Board se consulta con su API oficial. BNE, Trabajando, Chiletrabajos y Chumi se leen con código propio, respetando
-  robots.txt.
+  robots.txt. Laborum se abre con [Playwright](https://playwright.dev) (Apache 2.0) porque su búsqueda exige
+  JavaScript; sin Docker, instalarlo con `pip install -r requirements.txt` y `python -m playwright install chromium`.
 - El texto completo de la licencia MIT se instala junto con el paquete (python_jobspy-1.3.0.dist-info).

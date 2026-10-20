@@ -62,11 +62,15 @@ class ClienteHTTP:
         self.peticiones = 0
         self.al_responder: Optional[Callable[[int], None]] = None   # telemetría pasiva: recibe solo el status
 
-    def get(self, url: str) -> Respuesta:
+    def esperar_turno(self):
+        """La pausa entre peticiones (no antes de la primera). La usa también Laborum, que pide con Playwright."""
         if not self._primera:
             self._dormir(self._azar(*self.pausa))
         self._primera = False
         self.peticiones += 1
+
+    def get(self, url: str) -> Respuesta:
+        self.esperar_turno()
         respuesta = self._get(url)
         if self.al_responder:
             try:

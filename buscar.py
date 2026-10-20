@@ -24,6 +24,7 @@ import bne
 import chiletrabajos
 import chumi
 import config
+import laborum
 import getonboard
 import telemetria
 import trabajando
@@ -40,7 +41,7 @@ def _say(mensaje: str):
     salida(mensaje)
 
 
-PORTALES = {"bne": bne, "trabajando": trabajando, "chiletrabajos": chiletrabajos, "chumi": chumi}   # en pausa: ver config.SITIOS
+PORTALES = {"bne": bne, "trabajando": trabajando, "chiletrabajos": chiletrabajos, "chumi": chumi, "laborum": laborum}
 ESTADOS = ["nueva", "revisada", "postulada", "entrevista", "descartada"]
 ESTADOS_CERRADOS = {"postulada", "entrevista", "descartada"}
 LIMITE_DESCARTADAS = 300   # la página muestra las descartadas más recientes (con su motivo)
@@ -509,10 +510,8 @@ def _recordar_404(con, sitio, termino):
 
 def _terminos_portal(sitio):
     return {"bne": config.TERMINOS_BNE, "trabajando": config.TERMINOS_TRABAJANDO,
-            "chiletrabajos": config.TERMINOS_CHILETRABAJOS, "computrabajo": config.TERMINOS_COMPUTRABAJO,
-            "laborum": config.TERMINOS_LABORUM, "buscojobs": config.TERMINOS_BUSCOJOBS,
-            "empleospublicos": config.TERMINOS_EMPLEOSPUBLICOS, "chumi": config.TERMINOS_CHUMI,
-            "empleostech": config.TERMINOS_EMPLEOSTECH}[sitio]
+            "chiletrabajos": config.TERMINOS_CHILETRABAJOS, "laborum": config.TERMINOS_LABORUM,
+            "chumi": config.TERMINOS_CHUMI}[sitio]
 
 
 def _es_candidata(raw: dict) -> bool:
@@ -578,7 +577,8 @@ def _buscar_portal(con, sitio, st, avisos, cliente, robots, ahora: datetime | No
     nuevas = [r for u, r in filas.items() if u not in conocidas]
     # una candidata que resultó antigua al abrir su detalle (Chumi: la fecha solo viene ahí) no se vuelve a abrir
     excluir = {r["job_url"] for r in nuevas if _termino_recordado_404(con, sitio, r["job_url"])}
-    candidatas = [r for r in nuevas if r["job_url"] not in excluir and _es_candidata(a_raw(r, sitio))]
+    candidatas = [] if getattr(mod, "SIN_DETALLE", False) else [   # Laborum: el listado ya trae el texto completo
+        r for r in nuevas if r["job_url"] not in excluir and _es_candidata(a_raw(r, sitio))]
     candidatas.sort(key=lambda r: texto(r.get("date_posted")), reverse=True)
 
     # detalle de las que alcanzan; las demás candidatas no se guardan (quedan para la próxima corrida)

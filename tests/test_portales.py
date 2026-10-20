@@ -15,10 +15,12 @@ import chiletrabajos
 import chumi
 import config
 import geo
+import laborum
 import linkedin
 import trabajando
 from filtros import ZONA, clasificar, extraer_experiencia, extraer_sueldo, normalizar
 from red import Bloqueo, ClienteHTTP, ErrorFuente, NoEncontrada, Respuesta, pedir
+from robots import Robots
 
 FIX = Path(__file__).parent / "fixtures"
 
@@ -289,31 +291,99 @@ def test_los_portales_estan_en_las_fuentes_y_tienen_nombre():
     assert "ocupacion:7643" in config.TERMINOS_BNE
 
 
-# ---- portales en pausa (2026-10-19): selectores sin verificar contra el sitio real
-EN_PAUSA = ("computrabajo", "laborum", "buscojobs", "empleospublicos", "empleostech")
-# Tarjeta SINTÉTICA: no valida el sitio real (eso exige un fixture con su HTML), solo que el parser no se cae
-TARJETA = """<html><body><div class="offer">
-  <h2><a href="/oferta/analista-qa-123">Analista QA</a></h2>
-  <p class="company"> Empresa   X </p><p class="location">Providencia</p>
-  <p class="description">Trabajo remoto, pruebas funcionales.</p></div></body></html>"""
+# ---- portales del 19-10 que rechazan a la app (403 incluso con navegador real, 20-10): fuera del proyecto
+@pytest.mark.parametrize("sitio", ["computrabajo", "buscojobs", "empleospublicos", "empleostech"])
+def test_los_portales_que_rechazan_a_la_app_no_estan(sitio):
+    assert sitio not in config.SITIOS and sitio not in buscar.PORTALES and sitio not in config.NOMBRE_FUENTE
+    assert not (Path(__file__).resolve().parent.parent / f"{sitio}.py").exists()
 
 
-def test_los_portales_sin_verificar_estan_en_pausa():
-    for s in EN_PAUSA:
-        assert s not in config.SITIOS and s not in buscar.PORTALES
-        assert s in config.NOMBRE_FUENTE                               # las ofertas ya guardadas conservan su nombre
+# ---- Laborum (respuesta real de searchV2 del 20-10-2026; el navegador se reemplaza por una función falsa)
+ROBOTS_LABORUM = """User-agent: *
+Disallow: /*recientes=true
+Disallow: /*relevantes=true
+Disallow: /empleos-busquedaext-
+Disallow: /*?localidades=*
+"""
 
 
-@pytest.mark.parametrize("sitio", EN_PAUSA)
-def test_portal_en_pausa_lee_empresa_y_ubicacion_sin_caerse(sitio):
-    mod = __import__(sitio)
-    df = mod.parsear_listado(TARJETA)
-    assert len(df) == 1 and list(df.columns) == mod.COLUMNAS
-    fila = df.iloc[0]
-    assert fila["title"] == "Analista QA" and fila["job_url"] == mod.BASE + "/oferta/analista-qa-123"
-    assert fila["company"] == ("Gobierno de Chile" if sitio == "empleospublicos" else "Empresa X")
-    assert fila["location"] == "Providencia, RM, Chile"
-    assert fila["is_remote"]
+def test_laborum_url_y_robots():
+    assert laborum.url_busqueda("Análisis de Datos") == "https://www.laborum.cl/empleos-busqueda-analisis-de-datos.html"
+    rob = Robots(ROBOTS_LABORUM)
+    assert all(rob.permitido(laborum.url_busqueda(t)) for t in config.TERMINOS_LABORUM)
+    assert not rob.permitido("https://www.laborum.cl/empleos-busqueda-qa.html?recientes=true")
+    assert "laborum" in config.SITIOS and "laborum" in buscar.PORTALES and laborum.SIN_DETALLE
+
+
+def test_laborum_parsea_la_busqueda():
+    df = laborum.parsear_busqueda(leer("laborum_busqueda.json"))
+    assert len(df) == 20 and list(df.columns) == laborum.COLUMNAS
+    assert df["job_url"].str.fullmatch(r"https://www\.laborum\.cl/empleos/[^/]+-\d{6,}\.html").all()
+    assert df["date_posted"].str.fullmatch(r"\d{4}-\d{2}-\d{2}").all()
+    assert df["location"].str.endswith(", Chile").all()
+    primera = df.iloc[0]
+    assert primera["location"] == "Providencia, RM, Chile" and primera["company"] == ""     # aviso confidencial
+    assert primera["description"].startswith("Modalidad: Presencial.") and "🚀" in primera["description"]
+    with pytest.raises(ErrorFuente):
+        laborum.parsear_busqueda('{"otra": 1}')
+
+
+def test_laborum_usa_el_enlace_del_html_si_esta():
+    df = laborum.parsear_busqueda(leer("laborum_busqueda.json"), {"1118486638": "https://www.laborum.cl/empleos/x-1118486638.html"})
+    assert df["job_url"].iloc[0] == "https://www.laborum.cl/empleos/x-1118486638.html"
+
+
+class ClienteFalso:
+    def __init__(self):
+        self.turnos, self.status = 0, []
+        self.al_responder = self.status.append
+    def esperar_turno(self):
+        self.turnos += 1
+
+
+def test_laborum_listar_respeta_reglas():
+    datos = json.loads(leer("laborum_busqueda.json"))
+    cli = ClienteFalso()
+    df = laborum.listar("analista de datos", cli, RobotsLibre(), abrir=lambda url: (200, 200, datos, {}))
+    assert len(df) == 20 and cli.turnos == 1 and cli.status == [200, 200]   # pausa y telemetría como cualquier petición
+    for s in (403, 429):
+        with pytest.raises(Bloqueo):
+            laborum.listar("x", ClienteFalso(), RobotsLibre(), abrir=lambda url, s=s: (s, 0, None, {}))
+    with pytest.raises(Bloqueo):                                              # la API de la página rechaza
+        laborum.listar("x", ClienteFalso(), RobotsLibre(), abrir=lambda url: (200, 403, None, {}))
+    abiertas = []
+    class Prohibe(RobotsLibre):
+        def permitido(self, u): return False
+    with pytest.raises(ErrorFuente):
+        laborum.listar("x", ClienteFalso(), Prohibe(), abrir=lambda url: abiertas.append(url))
+    assert abiertas == []                                                     # sin permiso no se abre el navegador
+
+
+def test_laborum_sin_playwright_se_detiene(monkeypatch):
+    monkeypatch.setitem(sys.modules, "playwright", None)
+    monkeypatch.setitem(sys.modules, "playwright.sync_api", None)
+    with pytest.raises(Bloqueo, match="Playwright"):
+        laborum._abrir_busqueda("https://www.laborum.cl/empleos-busqueda-qa.html")
+
+
+def test_laborum_flujo_sin_detalles_y_solo_recientes(con, monkeypatch):
+    datos = json.loads(leer("laborum_busqueda.json"))
+    monkeypatch.setattr(config, "TERMINOS_LABORUM", ["analista de datos"])
+    monkeypatch.setattr(laborum, "_abrir_busqueda", lambda url: (200, 200, datos, {}))
+    st = {"encontradas": 0, "relevantes": 0, "sin_chile": 0, "errores": 0}
+    avisos = []
+    buscar._buscar_portal(con, "laborum", st, avisos, ClienteFalso(), RobotsLibre(), datetime(2026, 10, 20, 12, 0, tzinfo=ZONA), 1)
+    assert (st["encontradas"], st["antiguas"], st["errores"]) == (3, 17, 0)   # 19 y 20-10: hoy y ayer
+    filas = con.execute("SELECT fuente, publicada FROM ofertas").fetchall()
+    assert len(filas) == 3 and all(f["fuente"] == "laborum" and f["publicada"] >= "2026-10-19" for f in filas)
+    assert not avisos                                                          # sin "candidatas esperan": no hay detalles
+
+
+def test_cliente_http_esperar_turno():
+    dormidas = []
+    c = ClienteHTTP(dormir=dormidas.append, azar=lambda a, b: 3.5)
+    c.esperar_turno(); c.esperar_turno()
+    assert dormidas == [3.5] and c.peticiones == 2
 
 
 # ---- Chumi (fixtures reales del 20-10-2026)

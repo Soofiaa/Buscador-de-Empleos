@@ -36,11 +36,10 @@ TERMINOS_B = [  # roles puente (no TI)
 # con la ubicación escrita ("Santiago, Chile"). Es un rodeo: ver probar_fuentes.py.
 # Google está desactivado: JobSpy recibe "Google returned no job data" (probado 2026-10-10).
 # Para reintentarlo, agrégalo a la lista: SITIOS = ["indeed", "glassdoor", "google"]
-SITIOS = ["indeed", "glassdoor", "getonboard", "bne", "trabajando", "chiletrabajos", "chumi", "linkedin"]
-# chumi: rehecho y verificado contra el sitio real el 2026-10-20 (ver chumi.py).
-# En pausa (2026-10-20): computrabajo, laborum, buscojobs, empleospublicos y empleostech. Sus módulos y términos
-# quedan, pero los selectores y URLs no están verificados contra el sitio real (ver NOTAS.md, exploración del 16-10).
-# Se reactiva uno a la vez: HTML real en tests/fixtures, un test de parseo, y agregarlo aquí y en buscar.PORTALES.
+SITIOS = ["indeed", "glassdoor", "getonboard", "bne", "trabajando", "chiletrabajos", "chumi", "laborum", "linkedin"]
+# chumi y laborum: verificados contra el sitio real el 2026-10-20 (ver chumi.py y laborum.py; Laborum usa Playwright).
+# Computrabajo, Buscojobs y Empleos Públicos rechazan (403) a la app aunque vaya en un navegador real: se buscan a
+# mano desde la página (ver NOTAS.md, 20-10).
 # getonboard: API oficial (ver getonboard.py). bne / trabajando / chiletrabajos: portales chilenos leídos sin JobSpy
 # (módulos bne.py, trabajando.py, chiletrabajos.py), con las mismas reglas de la app "Busca Empleo": robots.txt,
 # pausa de 3 a 5 s, y detención del sitio ante 401/403/429 o CAPTCHA (nunca se esquiva).
@@ -55,9 +54,8 @@ TERMINOS_SECUNDARIOS = [
     "analista de requerimientos junior", "analista de requerimientos jr",
 ]
 NOMBRE_FUENTE = {"indeed": "Indeed", "google": "Google", "glassdoor": "Glassdoor", "getonboard": "Get on Board",
-                 "bne": "BNE", "trabajando": "Trabajando", "chiletrabajos": "Chiletrabajos", "computrabajo": "Computrabajo",
-                 "laborum": "Laborum", "buscojobs": "Buscojobs", "empleospublicos": "Empleos Públicos",
-                 "chumi": "Chumi", "empleostech": "EmpleosTech", "linkedin": "LinkedIn"}
+                 "bne": "BNE", "trabajando": "Trabajando", "chiletrabajos": "Chiletrabajos", "laborum": "Laborum",
+                 "chumi": "Chumi", "linkedin": "LinkedIn"}
 
 # ---- Portales chilenos (términos validados por la app anterior; sin tildes porque van en la URL) ----
 # BNE: "ocupacion:7643" = grupo TI "Desarrolladores y analistas de sistemas". Palabras de menos de 3 letras dan 0 ("qa").
@@ -71,33 +69,18 @@ TERMINOS_CHILETRABAJOS = ["analista funcional", "analista de procesos", "analist
                           "analista programador", "desarrollador junior", "desarrollador jr", "analista de datos",
                           "analista de reporteria", "control de gestion", "analista de operaciones", "datos maestros",
                           "informatico junior", "informatico jr"]
-# Computrabajo: términos sin tildes para URL (similar a Trabajando)
-TERMINOS_COMPUTRABAJO = ["analista-funcional", "analista-de-procesos", "analista-qa", "tester",
-                         "desarrollador-python", "desarrollador-backend", "desarrollador-junior",
-                         "analista-de-datos", "data-engineer", "analista-bi"]
-# Laborum: términos sin tildes para URL
-TERMINOS_LABORUM = ["analista-funcional", "analista-de-procesos", "analista-qa", "tester",
-                    "desarrollador-python", "desarrollador-backend", "desarrollador-junior",
-                    "analista-de-datos", "data-engineer", "analista-bi"]
-# Buscojobs: términos sin tildes para URL
-TERMINOS_BUSCOJOBS = ["analista-funcional", "analista-de-procesos", "analista-qa", "tester",
-                      "desarrollador-python", "desarrollador-backend", "desarrollador-junior",
-                      "analista-de-datos", "data-engineer", "analista-bi"]
-# Empleos Públicos: términos sin tildes para URL
-TERMINOS_EMPLEOSPUBLICOS = ["analista-funcional", "analista-de-procesos", "analista-qa", "tester",
-                             "desarrollador-python", "desarrollador-backend", "desarrollador-junior",
-                             "analista-de-datos", "data-engineer", "analista-bi"]
+# Laborum: cada término abre un navegador sin ventana (~5 s) y trae los 20 más relevantes; van a la URL como slug
+# (laborum.url_busqueda). Lista corta a propósito.
+TERMINOS_LABORUM = ["analista funcional", "analista de procesos", "analista qa", "tester", "analista de sistemas",
+                    "desarrollador python", "desarrollador backend", "desarrollador junior", "analista de datos",
+                    "analista bi", "control de gestion", "datos maestros", "informatico junior"]
 # Chumi: no tiene búsqueda en HTML; se leen las primeras páginas de su listado general (/trabajos?page=N, ~25 cada una)
 # y el clasificador filtra como siempre.
 TERMINOS_CHUMI = ["página 1", "página 2", "página 3"]
-# EmpleosTech: términos sin tildes para URL (portal IT)
-TERMINOS_EMPLEOSTECH = ["analista-funcional", "analista-de-procesos", "analista-qa", "tester",
-                        "desarrollador-python", "desarrollador-backend", "desarrollador-junior",
-                        "analista-de-datos", "data-engineer", "analista-bi"]
 # Los listados de estos portales vienen recortados: el detalle de cada aviso se abre SOLO para ofertas nuevas que
 # podrían servir (las más recientes primero), con este tope por corrida. Las que no alcanzan no se guardan: quedan
 # para la próxima corrida.
-MAX_DETALLES = {"bne": 5, "trabajando": 5, "chiletrabajos": 10, "computrabajo": 10, "laborum": 10, "buscojobs": 10, "empleospublicos": 10, "chumi": 10, "empleostech": 10}
+MAX_DETALLES = {"bne": 5, "trabajando": 5, "chiletrabajos": 10, "chumi": 10, "laborum": 0}   # Laborum no abre detalles
 DIAS_RECORDAR_404 = 30
 ERRORES_SEGUIDOS_PARA_ABORTAR = 3
 # Fuentes que no son Indeed no traen código de región fiable: la ubicación debe
@@ -116,7 +99,7 @@ PAUSA_ENTRE_BUSQUEDAS = 1.5       # segundos, para no gatillar bloqueos
 # ---- Antigüedad: solo se recolectan ofertas recientes (las más antiguas no se guardan ni cuentan) ----
 # Días hacia atrás por fuente: 1 = "hoy y ayer". Fuentes con hora (Get on Board, Trabajando, y el filtro de Indeed)
 # usan un corte exacto de 24 h por día. BNE publica con desfase, por eso 3. Las ofertas sin fecha pasan siempre.
-MAX_ANTIGUEDAD_DIAS = {"indeed": 1, "glassdoor": 1, "getonboard": 1, "bne": 3, "trabajando": 1, "chiletrabajos": 1, "computrabajo": 1, "laborum": 1, "buscojobs": 1, "empleospublicos": 1, "chumi": 1, "empleostech": 1, "linkedin": 1}
+MAX_ANTIGUEDAD_DIAS = {"indeed": 1, "glassdoor": 1, "getonboard": 1, "bne": 3, "trabajando": 1, "chiletrabajos": 1, "laborum": 1, "chumi": 1, "linkedin": 1}
 # Si pasan días sin buscar, la ventana crece sola (días desde el fin de la última búsqueda + 1), hasta este tope.
 DIAS_MAXIMOS = 14
 ZONA_HORARIA = "America/Santiago"   # "hoy" se calcula en hora de Chile, no con la hora del equipo o contenedor

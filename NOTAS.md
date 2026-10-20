@@ -547,3 +547,26 @@ quedaron fuera del repositorio (en %TEMP%\jt-sondeo).
   interna (no documentada).
 - Empleos Públicos: existe un espejo de terceros con API (Governance_Lab, govlab.cl, en una Raspberry Pi); no es
   oficial.
+
+### Playwright: Laborum integrado; los demás, a mano (20-10-2026; commit local, sin desplegar)
+
+- Aprobado por Sofia: instalar Playwright (1.64.0 + Chromium headless shell en el venv), integrar Laborum, botones de
+  búsqueda manual y probar los demás con Playwright.
+- Prueba con Playwright y el MISMO User-Agent de la app (`BuscaEmpleo/0.1`): Computrabajo (robots.txt y búsqueda),
+  Buscojobs y Empleos Públicos (robots.txt y convocatorias) responden **403 Forbidden** también con navegador real.
+  Rechazan al visitante que se declara bot; solo pasarían con un User-Agent de navegador, y eso no se hace. Los
+  módulos `computrabajo.py`, `buscojobs.py`, `empleospublicos.py` y `empleostech.py` se borraron (quedan en git,
+  commit 537367c y anteriores).
+- Laborum (`laborum.py`): con Playwright la página responde 200 y pide `POST /api/avisos/searchV2`; se lee esa
+  respuesta (la de la propia página, no una llamada aparte), que trae la descripción completa: no se abren detalles
+  (`SIN_DETALLE`, `MAX_DETALLES["laborum"] = 0`). Se cortan los recursos de otros dominios (rastreadores), las
+  imágenes y las tipografías. Respeta robots.txt, la pausa de `ClienteHTTP.esperar_turno()` y se detiene ante
+  401/403/429. Orden por relevancia (ordenar por fecha usa `recientes=true`, prohibido por su robots.txt), así que
+  muchas de las 20 de cada término son antiguas y se omiten.
+- Corrida real (base temporal): 3 términos en 17 s, todas las respuestas 200, 3 recientes guardadas (descartadas por
+  experiencia o señales), 28 antiguas omitidas. Con los 13 términos de `TERMINOS_LABORUM`: ~75 s más por corrida.
+- Docker: `requirements.txt` incluye playwright y el `Dockerfile` instala Chromium con sus librerías
+  (`playwright install --with-deps --only-shell chromium`). **Imagen sin construir ni probar**; crecerá varios
+  cientos de MB. Va en el próximo despliegue, con su candidata.
+- Página: sección «🔎 Buscar a mano» bajo el botón Buscar, con enlaces a Computrabajo (6 términos,
+  `trabajo-de-<término>`, formato comprobado) y a las convocatorias de Empleos Públicos.

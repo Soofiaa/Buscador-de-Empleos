@@ -339,3 +339,12 @@ def test_linea_de_estado_del_respaldo():
         {"texto": "Aún no hay respaldos válidos · ⚠️ 2 respaldos incompletos (sin huella .sha256)", "clase": "error"},
         {"texto": "Último respaldo: hoy 09:30 ✓", "clase": "ok"},              # con un respaldo en curso: null, sin aviso
         {"texto": "Aún no hay respaldos", "clase": ""}]
+
+def test_busquedas_manuales_arman_urls_reales():
+    r = correr_js("return busquedasManuales();")
+    assert [b["sitio"] for b in r] == ["Computrabajo", "Empleos Públicos"]
+    urls = [e["url"] for e in r[0]["enlaces"]]
+    assert "https://cl.computrabajo.com/trabajo-de-analista-funcional" in urls
+    assert "https://cl.computrabajo.com/trabajo-de-control-de-gestion" in urls          # sin tilde ni espacios
+    assert all(re.fullmatch(r"https://cl\.computrabajo\.com/trabajo-de-[a-z0-9-]+", u) for u in urls)
+    assert r[1]["enlaces"][0]["url"].startswith("https://www.empleospublicos.cl/")

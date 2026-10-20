@@ -470,6 +470,9 @@
       <p class="nota">Búsqueda completa (~5 min) en Indeed, LinkedIn, Chiletrabajos, BNE, etc.</p>
       <div class="progreso" id="progreso" role="status" aria-live="polite"></div>
       <div class="barra" id="barra" role="progressbar" aria-label="Avance de la búsqueda" aria-valuemin="0" hidden><div class="barra-relleno" id="barra-relleno"></div></div>
+      <details class="busquedas-manuales" id="busquedas-manuales" style="margin-top:8px; font-size:.8rem;">
+        <summary title="Estos sitios no aceptan búsquedas automáticas: se abren en tu navegador">🔎 Buscar a mano</summary>
+      </details>
     </div>
 
     <div class="seccion-lateral-titulo">Gestión de Datos</div>
@@ -582,13 +585,13 @@ function tituloSeleccion(sel, corridas) {
   return "Todas las ofertas";
 }
 const NOMBRE_FUENTE = { indeed: "Indeed", google: "Google", glassdoor: "Glassdoor", getonboard: "Get on Board",
-  bne: "BNE", trabajando: "Trabajando", chiletrabajos: "Chiletrabajos", chumi: "Chumi", linkedin: "LinkedIn", manual: "✍️ Manual" };
+  bne: "BNE", trabajando: "Trabajando", chiletrabajos: "Chiletrabajos", chumi: "Chumi", laborum: "Laborum", linkedin: "LinkedIn", manual: "✍️ Manual" };
 const nombreFuente = f => NOMBRE_FUENTE[f] || f || "sin fuente";
 function textoProgreso(mensaje) {                // "[3/40] indeed | qa tester | …" -> "Buscando en Indeed · qa tester · 3 de 40"
   const m = /^\s*\[(\d+)\/(\d+)\]\s*([^|\[\]]+?)\s*\|\s*([^|:]+?)\s*(?:[|:]|$)/.exec(mensaje || "");
   return m ? "Buscando en " + nombreFuente(m[3]) + " · " + m[4] + " · " + m[1] + " de " + m[2] : (mensaje || "");
 }
-const norm = s => (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+const norm = s => (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 function coincideTexto(o, texto) {             // cada palabra buscada debe estar en título, empresa, lugar, motivo o notas
   const t = norm([o.titulo, o.empresa, o.ubicacion, o.motivo, o.notas].join(" "));
   return (texto || "").split(/\s+/).every(w => t.includes(norm(w)));
@@ -781,6 +784,19 @@ function senalesTablero(o, hoy) {
   if (r && r.desde === "etapa") etapa = { texto: r.dias === 0 ? "🕒 En esta etapa desde hoy" : "🕒 " + TXT.dias(r.dias) + " en esta etapa", clase: "" };
   else if (r && !seguimiento) etapa = { texto: r.dias === 0 ? "🕒 Postulada hoy" : "🕒 Postulada hace " + TXT.dias(r.dias), clase: "" };
   return { etapa, seguimiento };
+}
+// Búsquedas a mano: Computrabajo y Empleos Públicos rechazan a la app (403, ver NOTAS.md del 20-10). La página solo
+// arma los enlaces; se abren en el navegador de Sofia y lo que sirva se agrega con «Agregar manual».
+const TERMINOS_MANUALES = ["analista funcional", "analista qa", "analista de procesos", "desarrollador junior",
+                           "analista de datos", "control de gestión"];
+function slugBusqueda(t) {
+  return String(t).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+function busquedasManuales() {
+  return [
+    { sitio: "Computrabajo", enlaces: TERMINOS_MANUALES.map(t => ({ texto: t, url: "https://cl.computrabajo.com/trabajo-de-" + slugBusqueda(t) })) },
+    { sitio: "Empleos Públicos", enlaces: [{ texto: "convocatorias abiertas", url: "https://www.empleospublicos.cl/pub/convocatorias/convocatorias.aspx" }] },
+  ];
 }
 // </puras>
 
@@ -1035,7 +1051,7 @@ function pintarFiltros() {
   if (PESTANAS_PRINCIPAL.has(S.pestana)) {
     partes.push(selector("prioridad", "Prioridad", ["Alta", "Media", "Baja"]), selector("modalidad", "Modalidad", unicos("modalidad")), selector("tipo", "Tipo", unicos("tipo")));
   }
-  const fuentesConocidas = ["indeed", "linkedin", "chiletrabajos", "bne", "trabajando", "chumi", "getonboard", "glassdoor"];
+  const fuentesConocidas = ["indeed", "linkedin", "chiletrabajos", "bne", "trabajando", "chumi", "laborum", "getonboard", "glassdoor"];
   const fuentesOpciones = [...new Set([...fuentesConocidas, ...unicos("fuente")])].sort((a, b) => nombreFuente(a).localeCompare(nombreFuente(b)));
   partes.push(selector("fuente", "Fuente", fuentesOpciones, null, nombreFuente));
   if (S.pestana === "ofertas") {
@@ -1511,6 +1527,12 @@ window.addEventListener("keydown", e => {
     if (buscador) { buscador.focus(); buscador.select(); }
   }
 });
+
+for (const b of busquedasManuales()) {
+  $("busquedas-manuales").append(h("div", { style: "margin:6px 0 2px; font-weight:600;" }, b.sitio),
+    h("div", { style: "display:flex; flex-wrap:wrap; gap:4px;" },
+      b.enlaces.map(e => h("a", { class: "chip", href: e.url, target: "_blank", rel: "noopener noreferrer" }, "↗ " + e.texto))));
+}
 
 cargar();
 </script>

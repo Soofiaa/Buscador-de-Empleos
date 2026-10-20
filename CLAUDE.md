@@ -25,10 +25,11 @@ en producción, lo aprobado y lo pendiente.
 - `servidor.py`: HTTP (ThreadingHTTPServer), rutas /api/*, Host/Origin locales, límites de cuerpo por ruta.
 - `web/pagina.html`: la página (informe.PAGINA la lee). Funciones puras entre `// <puras>` y `// </puras>`.
 - `respaldo.py`: respaldos (API de backup, sha256, retención 30). `unir_bases.py`: unión de una vez (exenta).
-- Portales: `bne.py`, `trabajando.py`, `chiletrabajos.py`, `chumi.py`, `getonboard.py`; red: `red.py`, `robots.py`, `geo.py`.
+- Portales: `bne.py`, `trabajando.py`, `chiletrabajos.py`, `chumi.py`, `laborum.py` (Playwright, Chromium sin
+  ventana, mismo User-Agent honesto), `getonboard.py`; red: `red.py`, `robots.py`, `geo.py`.
   LinkedIn va por JobSpy (`config.SITIOS`); `linkedin.py` (endpoint de invitados) no está conectado, solo tiene tests.
-- En pausa, fuera de `SITIOS` y `PORTALES` (ver NOTAS.md, 20-10): `computrabajo.py`, `laborum.py`, `buscojobs.py`,
-  `empleospublicos.py`, `empleostech.py`. Ninguno funciona contra el sitio real.
+- Computrabajo y Empleos Públicos rechazan a la app (403 incluso con navegador real): solo enlaces «Buscar a mano» en la
+  página. Nunca se usa un User-Agent de navegador para pasar un bloqueo.
 - `tests/`: pytest (incluye funciones puras de la página corridas con Node).
 - Notas: `NOTAS.md` (estado actual, decisiones y hallazgos), `REVERSION_FASE_A.md` (cómo volver atrás de cada
   despliegue). Skill de despliegue: `.claude/skills/desplegar/`.
