@@ -495,5 +495,28 @@ estaba centrado en prácticas.
 - Para reactivar un portal, uno a la vez y con aprobación: confirmar que su `robots.txt` y sus condiciones lo
   permiten (Laborum y Computrabajo tenían restricciones), guardar HTML real en `tests/fixtures`, ajustar selectores
   y URL, y escribir su test de parseo y de flujo.
-- Pendiente: los términos de estos portales son slugs con guion (`analista-funcional`) aunque varios buscan por
-  parámetro; revisarlo al reactivarlos. `CLAUDE.md` y `README.md` todavía no mencionan `linkedin.py` ni estos módulos.
+- Hecho después: imports sin uso eliminados (los seis y `linkedin.py`); `CLAUDE.md` y `README.md` al día.
+- Los términos con guion de estos portales no se corrigieron: las URLs de búsqueda que usan son inventadas, así
+  que corregir el formato no arregla nada. Se rehacen junto con el módulo, si alguno se aprueba.
+
+### ¿Se pueden implementar? (sondeo del 20-10-2026)
+
+Método: una lectura de `robots.txt` y de una o dos páginas por sitio con `red.ClienteHTTP` y `robots.GestorRobots`,
+es decir, el mismo User-Agent, las mismas pausas y la misma regla de detenerse ante 401/403/429 que usa la app. Sin
+sesión, sin navegador, sin reintentos. También se leyeron las condiciones de uso cuando se encontraron. Los HTML
+quedaron fuera del repositorio (en %TEMP%\jt-sondeo).
+
+| Fuente | Resultado | ¿Implementable? |
+|---|---|---|
+| Computrabajo | `robots.txt` responde 403 → `GestorRobots` lo trata como bloqueo | No, con las reglas actuales |
+| Empleos Públicos | dominio real `www.empleospublicos.cl` (el módulo usa `.gob.cl`); `robots.txt` responde 403 | No; queda para consulta manual |
+| Buscojobs | `robots.txt` se lee, la portada responde 403 | No, con las reglas actuales |
+| Laborum | `robots.txt` permite `/empleos-busqueda-*.html`, pero la página solo dice «You need to enable JavaScript» | No sin navegador o sin la API interna (no documentada) |
+| EmpleosTech | el dominio `empleostech.cl` no existe (DNS) | No: el sitio no existe |
+| Chumi (chumi-it.com) | `robots.txt` permite todo salvo áreas privadas. `/jobs?q=` no trae ofertas en el HTML, pero `/trabajos?page=1..5` lista ~25 ofertas por página con enlace `/trabajos/<slug>` (23 de 25 en Chile), y el detalle trae JSON-LD `JobPosting` con `datePosted`, `validThrough`, empresa, sueldo y descripción completa | Sí técnicamente, reescribiendo el módulo. Sus Condiciones de Uso (punto 2) prohíben «copiar, descargar, distribuir… por completo o en parte» el sitio: decide Sofia |
+| Talent.com (en observación desde el 16-10) | `/jobs?k=…&l=…` y `/view?id=` permitidos por `robots.txt` y con tarjetas en el HTML | No: sus Terms of Service prohíben el «scraping» «for any purpose» |
+
+- Chumi también lista avisos ajenos (de LinkedIn, empleosit.com.ar) en sus páginas por categoría; en `/trabajos`
+  los enlaces son propios. Si se implementa, solo se abrirían detalles de `chumi-it.com`.
+- **Pendiente de decisión:** si se implementa Chumi (pese al punto 2 de sus condiciones) y si se borran los cinco
+  módulos que no pueden funcionar (computrabajo, laborum, buscojobs, empleospublicos, empleostech).

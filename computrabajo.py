@@ -2,11 +2,12 @@
 
 Estructura basada en patrones típicos de portales de empleo. Requiere verificación
 de la estructura actual del sitio (2026-10-19).
+Comprobado el 2026-10-20 con red.py/robots.py: el sitio responde 403 al robots.txt, así que el gestor
+lo trata como bloqueo y no visita nada. No implementable con las reglas del proyecto (ver NOTAS.md).
 """
-import html as html_mod
 import re
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Dict
 from urllib.parse import quote_plus
 
 import pandas as pd

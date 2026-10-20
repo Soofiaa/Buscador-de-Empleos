@@ -2,11 +2,12 @@
 
 Estructura basada en patrones típicos de portales de empleo. Requiere verificación
 de la estructura actual del sitio (2026-10-19).
+Comprobado el 2026-10-20: la búsqueda (/empleos-busqueda-<término>.html) es una app que exige JavaScript;
+el HTML no trae ofertas. No implementable sin navegador ni API pública (ver NOTAS.md).
 """
-import html as html_mod
 import re
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Dict
 from urllib.parse import quote_plus
 
 import pandas as pd

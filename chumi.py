@@ -2,11 +2,13 @@
 
 Estructura basada en patrones típicos de portales de empleo. Requiere verificación
 de la estructura actual del sitio (2026-10-19).
+Comprobado el 2026-10-20: /jobs?q= no trae ofertas en el HTML y estos selectores no corresponden al sitio.
+La vía real sería /trabajos?page=N (tarjetas con /trabajos/<slug>) y el JSON-LD JobPosting del detalle;
+falta reescribir este módulo y decidir por sus Condiciones de Uso (ver NOTAS.md).
 """
-import html as html_mod
 import re
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Dict
 from urllib.parse import quote_plus
 
 import pandas as pd
