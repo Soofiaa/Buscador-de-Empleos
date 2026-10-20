@@ -95,6 +95,9 @@ REGIONES_VALIDAS = {"RM", "VS"}   # presencial/híbrido solo en estas regiones
 
 RESULTADOS_POR_BUSQUEDA = 30
 PAUSA_ENTRE_BUSQUEDAS = 1.5       # segundos, para no gatillar bloqueos
+# Pausa aleatoria (mínimo, máximo en segundos) entre consultas JobSpy de las fuentes que limitan más: LinkedIn
+# respondió 429 el 19-10 con 1,5 s. Si igual responde 429, esa fuente se deja por el resto de la corrida.
+PAUSA_JOBSPY = {"linkedin": (6.0, 10.0), "glassdoor": (3.0, 5.0)}
 
 # ---- Antigüedad: solo se recolectan ofertas recientes (las más antiguas no se guardan ni cuentan) ----
 # Días hacia atrás por fuente: 1 = "hoy y ayer". Fuentes con hora (Get on Board, Trabajando, y el filtro de Indeed)

@@ -8,7 +8,9 @@ import argparse
 import csv
 import io
 import json
+import logging
 import os
+import random
 import re
 import sqlite3
 import sys
@@ -623,8 +625,38 @@ def _buscar_portal(con, sitio, st, avisos, cliente, robots, ahora: datetime | No
     return nuevas_rel
 
 
+class _Vigia429(logging.Handler):
+    """JobSpy no lanza error ante un 429: solo lo registra en su logger ("LinkedIn response status code 429"). Aquí se
+    anota, para dejar esa fuente el resto de la corrida (como los portales: ante 429 no se insiste)."""
+    def __init__(self):
+        super().__init__(logging.ERROR)
+        self.frenadas = set()
+
+    def emit(self, registro):
+        if re.search(r"\b429\b", registro.getMessage()):
+            self.frenadas.add(registro.name.split(":", 1)[-1].lower())
+
+
+_VIGIA_429 = _Vigia429()
+
+
+def _vigilar_429():
+    """Después de importar jobspy (sus loggers ya tienen el handler de consola, que sigue escribiendo en docker logs)."""
+    _VIGIA_429.frenadas.clear()
+    for nombre in ("LinkedIn", "Glassdoor", "Indeed"):
+        registro = logging.getLogger(f"JobSpy:{nombre}")
+        if _VIGIA_429 not in registro.handlers:
+            registro.addHandler(_VIGIA_429)
+
+
+def _pausa_jobspy(sitio: str) -> float:
+    rango = config.PAUSA_JOBSPY.get(sitio)
+    return random.uniform(*rango) if rango else config.PAUSA_ENTRE_BUSQUEDAS
+
+
 def buscar_ofertas(con) -> int:
     from jobspy import scrape_jobs  # import aquí: los tests no lo necesitan
+    _vigilar_429()
 
     lugares = list(config.UBICACIONES) + ([REMOTO] if config.INCLUIR_REMOTO else [])
     plan = [(s, t, l) for s in config.SITIOS if s not in PORTALES
@@ -643,10 +675,19 @@ def buscar_ofertas(con) -> int:
     if ampliadas:
         avisos.append(f"Pasaron días sin buscar: ventana ampliada a {plural(max(ventanas.values()), 'día', 'días')} "
                       f"({', '.join(ampliadas)}) para no perder ofertas de ese hueco.")
+    frenadas = set()
     for n, (sitio, termino, lugar) in enumerate(plan, start=1):
         etiqueta = f"{termino} | {lugar}"
         st = stats[sitio]
         t = tele[sitio]
+        if sitio in _VIGIA_429.frenadas:
+            if sitio not in frenadas:
+                frenadas.add(sitio)
+                st["errores"] += 1
+                avisos.append(f"⚠ {config.NOMBRE_FUENTE[sitio]} respondió 429 (demasiadas consultas): se dejó por el "
+                              "resto de esta corrida. No se insiste.")
+                _say(f"  ! [{sitio}] 429: se deja por esta corrida")
+            continue
         try:
             if sitio == "getonboard":
                 df = getonboard.buscar(termino, config.RESULTADOS_POR_BUSQUEDA,
@@ -676,7 +717,7 @@ def buscar_ofertas(con) -> int:
         _say(f"  [{n}/{len(plan)}] {sitio} | {etiqueta}: {plural(len(df), 'encontrada', 'encontradas')}, "
              f"{plural(nuevas, 'nueva relevante', 'nuevas relevantes')}"
              + (f", {plural(antiguas, 'antigua omitida', 'antiguas omitidas')}" if antiguas else ""))
-        time.sleep(config.PAUSA_ENTRE_BUSQUEDAS)
+        time.sleep(_pausa_jobspy(sitio))
 
     activos = [s for s in config.SITIOS if s in PORTALES]
     if activos:

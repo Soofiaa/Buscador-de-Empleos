@@ -464,6 +464,33 @@ def test_chumi_detalle_antiguo_no_se_guarda_ni_se_vuelve_a_pedir(con, monkeypatc
     assert not set(abiertas) & set(cli2.pedidas)                               # no se gastan detalles en ellas otra vez
 
 
+def test_jobspy_pausa_por_fuente_y_se_detiene_ante_429(con, monkeypatch):
+    import logging
+    import pandas as pd
+    llamadas, pausas = [], []
+    def scrape_jobs(**kw):
+        sitio = kw["site_name"][0]
+        llamadas.append(sitio)
+        if sitio == "linkedin":                            # como JobSpy: no lanza error, solo lo registra en su logger
+            logging.getLogger("JobSpy:LinkedIn").error("LinkedIn response status code 429")
+        return pd.DataFrame()
+    monkeypatch.setitem(sys.modules, "jobspy", type(sys)("jobspy"))
+    sys.modules["jobspy"].scrape_jobs = scrape_jobs
+    monkeypatch.setattr(config, "SITIOS", ["linkedin", "glassdoor"])
+    monkeypatch.setattr(config, "TERMINOS_SECUNDARIOS", ["qa", "tester"])
+    monkeypatch.setattr(config, "UBICACIONES", ["Santiago, Chile"])
+    monkeypatch.setattr(config, "INCLUIR_REMOTO", False)
+    monkeypatch.setattr(buscar.time, "sleep", pausas.append)
+    monkeypatch.setattr(buscar, "_say", lambda m: None)
+    buscar.buscar_ofertas(con)
+    assert llamadas == ["linkedin", "glassdoor", "glassdoor"]        # tras el 429, LinkedIn no se vuelve a consultar
+    assert 6.0 <= pausas[0] <= 10.0 and all(3.0 <= p <= 5.0 for p in pausas[1:])
+    detalle = json.loads(con.execute("SELECT detalle FROM corridas").fetchone()[0])
+    assert any("LinkedIn respondió 429" in a for a in detalle["avisos"])
+    assert next(f for f in detalle["fuentes"] if f["fuente"] == "LinkedIn")["errores"] == 1
+    assert buscar._pausa_jobspy("indeed") == config.PAUSA_ENTRE_BUSQUEDAS
+
+
 def test_un_portal_que_falla_no_corta_la_corrida(con, monkeypatch):
     monkeypatch.setitem(sys.modules, "jobspy", type(sys)("jobspy"))    # sin consultas JobSpy: solo portales
     sys.modules["jobspy"].scrape_jobs = None
