@@ -1085,3 +1085,20 @@ def test_los_textos_de_python_no_arman_plurales_a_mano():
     for archivo in ("buscar.py", "servidor.py", "filtros.py", "bne.py", "trabajando.py", "chiletrabajos.py", "getonboard.py"):
         codigo = (raiz / archivo).read_text(encoding="utf-8")
         assert not re.search(r"\{[^{}]+\} " + palabras + r"\b", codigo), archivo
+
+# Regla de experiencia de Sofia (20-10-2026), igual en todas las fuentes: un rango cuyo máximo es 2 o menos se muestra
+# ("0 a 2", "0-2", "1 a 2", "hasta 2"); un número solo, como mucho 1 año; lo que pida más se descarta.
+@pytest.mark.parametrize("fuente, ubicacion", [("indeed", "Providencia, RM, Chile"), ("chiletrabajos", "Providencia, RM, Chile"),
+                                               ("linkedin", "Santiago, Región Metropolitana, Chile")])
+@pytest.mark.parametrize("texto, se_muestra", [
+    ("Experiencia: 0 a 2 años", True), ("experiencia de 0-2 años", True), ("0 – 2 años de experiencia", True),
+    ("entre 0 y 2 años de experiencia", True), ("1 a 2 años de experiencia", True), ("1-2 years of experience", True),
+    ("hasta 2 años de experiencia", True), ("máximo 2 años de experiencia", True), ("menos de 2 años de experiencia", True),
+    ("1 año de experiencia", True), ("1+ años de experiencia", True), ("sin experiencia", True),
+    ("2 años de experiencia", False), ("2+ años de experiencia", False), ("mínimo 2 años de experiencia", False),
+    ("1 a 3 años de experiencia", False), ("0 a 3 años de experiencia", False), ("hasta 3 años de experiencia", False),
+    ("3 years of experience", False)])
+def test_regla_de_experiencia_en_todas_las_fuentes(fuente, ubicacion, texto, se_muestra):
+    c = clasificar({"title": "Analista QA", "company": "X", "location": ubicacion, "fuente": fuente,
+                    "description": texto + ". Pruebas funcionales."})
+    assert (c["categoria"] == "principal") == se_muestra, c["razon"]

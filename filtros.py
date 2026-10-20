@@ -179,6 +179,8 @@ def _requisito_experiencia(d: str):
         if not re.search(r"experiencia|experience", d[max(0, m.start() - 40): m.end() + 40]):
             continue
         hi = int(m.group(2)) if m.group(2) else lo
+        if not m.group(2) and re.search(r"(hasta|maximo|menos de|no mas de|up to)\s*$", d[max(0, m.start() - 15): m.start()]):
+            lo = 0                    # "hasta 2 años" = "0 a 2": el tope es N, el mínimo es 0
         texto_requisito = texto_anios(m.group(0)) if m.group(4).startswith("ano") else m.group(0)
         return lo, hi, texto_requisito
     if re.search(r"sin experiencia|recien (titulad|egresad)|poca experiencia", d):
