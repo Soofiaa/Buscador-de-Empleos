@@ -514,3 +514,27 @@ El contenedor y el volumen temporales se borraron.
 **Qué se pierde mientras corra la imagen anterior:** Chumi, Laborum, la sección «Buscar a mano», el aislamiento de un
 portal que falla y la regla «hasta N años». Vuelven los intentos contra Computrabajo, Laborum y Buscojobs (se detienen
 solos por 403 o por errores). No se pierden ni se reclasifican ofertas guardadas.
+
+# Pausa entre consultas JobSpy y sin insistir tras un 429 (despliegue del 20-10-2026; commit `3c98064`)
+
+Qué cambia: pausa aleatoria entre consultas JobSpy de LinkedIn (6-10 s) y Glassdoor (3-5 s); si una fuente de JobSpy
+responde 429, se deja por el resto de la corrida, con aviso. Sin cambios de esquema ni reclasificación: para volver
+atrás basta con usar la imagen anterior y **no restaurar la base**.
+
+| Pieza | Valor |
+|---|---|
+| Imagen anterior | `job-tracker:pre-pausa-20261020` = `job-tracker:laborum` (`sha256:39378b0be7aaf453732037cb27fa6caad93ae7d9f6c99d5d739cc7e05315a5d3`) |
+| Imagen desplegada | `job-tracker:pausa-jobspy` = `job-tracker-jobtracker:latest` (`sha256:d40d7a992fc3aab51dc3cfb41a6777c671cef3df9483c64fbbe2a58c33b61fe4`) |
+| Referencia de la base | `ofertas_pre_pausa_20261020.db` (volumen y `C:\Users\sofia\Respaldos\job-tracker-referencias\`), sha256 `c40c50f5a99b1450f86bc260e7a2c33b7ba5f28f64b891cfd3edd5909130b472` (igual a `ofertas_pre_laborum_20261020.db`: no hubo corridas entre ambos), integrity_check `ok` |
+
+```
+docker compose stop jobtracker
+docker tag job-tracker:pre-pausa-20261020 job-tracker-jobtracker:latest
+docker compose up -d --no-build
+```
+
+Probado sobre una copia de la referencia en un volumen temporal (8767): healthy, GET 200 y huellas completas iguales
+a la referencia. El contenedor y el volumen temporales se borraron.
+
+**Qué se pierde mientras corra la imagen anterior:** las pausas largas de LinkedIn y Glassdoor (vuelve 1,5 s) y la
+detención ante 429; las corridas vuelven a ser ~8 min más cortas. No se pierden ni se reclasifican ofertas guardadas.

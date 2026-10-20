@@ -3,6 +3,19 @@
 ## Estado actual (se actualiza en cada despliegue; leer al empezar cada sesión)
 
 ### Producción y base
+- **Despliegue de la pausa JobSpy (20-10-2026, 19:4x; vigente):** commit `3c98064`, imagen `job-tracker:pausa-jobspy`
+  = `job-tracker-jobtracker:latest` (`sha256:d40d7a992fc3aab51dc3cfb41a6777c671cef3df9483c64fbbe2a58c33b61fe4`),
+  healthy en `127.0.0.1:8765`. Imagen anterior inmediata: `job-tracker:pre-pausa-20261020` = `job-tracker:laborum`
+  (`39378b0b…`). Referencia `ofertas_pre_pausa_20261020.db`, sha256
+  `c40c50f5a99b1450f86bc260e7a2c33b7ba5f28f64b891cfd3edd5909130b472` en las dos copias (igual a la de Laborum: sin
+  corridas entre ambos), integrity_check ok, contenedor detenido con salida 0. La línea base de abajo sigue siendo la
+  vigente: huellas idénticas antes, después y tras las comprobaciones HTTP (mismas respuestas 200/403/400/413). La
+  candidata `jt_revision_pausa` hizo 2 consultas reales a LinkedIn (37 s, sin 429) y respaldó bien. Los 81 respaldos y
+  referencias anteriores conservaron su sha256. Reversión probada en copia (8767) y documentada en `REVERSION_FASE_A.md`.
+  - **Corrección del despliegue de Laborum:** el archivo `/datos/=ro` vino de `'file:/datos/$ref?mode=ro'` en una
+    cadena de PowerShell (`$ref?mode` se leyó como una variable vacía), así que el `integrity_check` que se mostró en
+    su paso 3 fue el de ese archivo vacío. La referencia sí quedó verificada: `huellas.py` dio integrity_check ok
+    sobre la copia externa y el sha256 coincidió. En este despliegue se usó `${ref}` y se verificó el archivo correcto.
 - **Base real — línea base OFICIAL (20-10-2026, despliegue de Chumi, Laborum y regla de experiencia; vigente):** v7,
   integrity_check ok, 3150 ofertas, 34 corridas, 163 filas en `historial_estados`, 25 postuladas, 6 POR VERIFICAR;
   estados descartada/nueva 2902 · principal/descartada 196 · principal/nueva 27 · principal/postulada 25.
@@ -20,7 +33,7 @@
   `C:\Users\sofia\Respaldos\job-tracker-referencias\`), sha256
   `c40c50f5a99b1450f86bc260e7a2c33b7ba5f28f64b891cfd3edd5909130b472` en las dos copias, integrity_check ok, journal
   delete. Tomada con el contenedor detenido (salida 0).
-- **En producción (20-10-2026):** commit local `e8abeee` (rama `feat/contadores-ubicacion`, sin push); imagen
+- **Desplegado el 20-10-2026 (Chumi y Laborum; reemplazado ese mismo día por la pausa JobSpy):** commit `e8abeee` (rama `feat/contadores-ubicacion`, sin push); imagen
   `job-tracker-jobtracker:latest` = `job-tracker:laborum`
   (`sha256:39378b0be7aaf453732037cb27fa6caad93ae7d9f6c99d5d739cc7e05315a5d3`, ~1,6 GB por Chromium); healthy en
   `127.0.0.1:8765`. Imagen anterior inmediata: `job-tracker:pre-laborum-20261020` (`6353e0b5…`).
@@ -76,8 +89,8 @@
   - Filtro LinkedIn: descarta Senior y Experto/Expert; Associate sigue aceptándose. Se mantiene el descarte si el
     máximo requerido supera 2 años. No reclasifica ofertas guardadas ni altera datos/esquema. Reversión a la imagen
     anterior probada en copia, healthy y con huellas idénticas; ver `REVERSION_FASE_A.md`.
-- **Imágenes para volver atrás:** `job-tracker:laborum` (`39378b0b…`; producción actual),
-  `job-tracker:pre-laborum-20261020` (`6353e0b5…`; reversión inmediata, la versión del 19-10),
+- **Imágenes para volver atrás:** `job-tracker:pausa-jobspy` (`d40d7a99…`; producción actual),
+  `job-tracker:laborum` = `:pre-pausa-20261020` (`39378b0b…`; reversión inmediata), `job-tracker:pre-laborum-20261020` (`6353e0b5…`; la versión del 19-10),
   `job-tracker:linkedin-senior-experto` (`da102440…`; la última desplegada por procedimiento antes del 19-10), `job-tracker:linkedin-senior-anterior-20261016`
   (`915bc9fd…`; reversión inmediata), `job-tracker:linkedin-mid-senior` (`915bc9fd…`),
   `job-tracker:linkedin-filtros-23241` (`d4d6b534…`; anterior a esos filtros),
@@ -91,8 +104,10 @@
 - **Limpieza aprobada y hecha (20-10):** las 10 etiquetas `*-candidata`, los contenedores `jt_revision_c2`, `_137`,
   `_137r`, `_telemetria`, `_telemetria_rev` y sus 9 volúmenes. Se borró por etiqueta: las imágenes de reversión que
   compartían id (`telemetria`, `137`, `c2`) siguen. No quedan candidatas ni contenedores de revisión.
-- **Sin desplegar (20-10):** `3c98064`, pausa aleatoria entre consultas JobSpy (LinkedIn 6-10 s, Glassdoor 3-5 s) y,
-  si una fuente responde 429, se deja por el resto de la corrida. Suma ~8 min por corrida.
+- **Pausa JobSpy (desplegada el 20-10):** LinkedIn 6-10 s, Glassdoor 3-5 s; ante un 429 la fuente se deja por el
+  resto de la corrida. Suma ~8 min por corrida.
+- **Push autorizado por Sofia el 20-10** (rama `feat/contadores-ubicacion`, sin forzar; `main` no se tocó). La regla
+  permanente sigue siendo «sin push» salvo que ella lo pida.
 - **Candidata y reversión (16-10):** la candidata `jt_revision_linkedin_senior_experto` (8766) y su volumen se eliminaron
   después del despliegue; la reversión sobre copia en 8767 también quedó healthy y se limpió. No quedan recursos
   temporales de este despliegue.
