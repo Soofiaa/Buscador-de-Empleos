@@ -214,6 +214,7 @@
 
   .historial { margin-top:14px; border-top:1px solid var(--borde); padding-top:12px; }
   .historial h2 { font-size:1rem; color:var(--suave); margin:4px 10px 8px; }
+  .acciones-encabezado { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
   .guia-lista { padding-left:1.2em; display:flex; flex-direction:column; gap:10px; font-size:.92rem; }
   .guia-lista li { line-height:1.5; }
   .historial-toggle { display:none; margin-top:12px; }   /* solo en pantallas angostas: en escritorio el historial siempre se ve */
@@ -509,7 +510,6 @@
       <div class="sub" id="estado-respaldo" role="status" style="margin:6px 2px 0; font-size:.78rem;"></div>
     </div>
 
-    <button class="boton sec ancho" id="btn-tutorial" type="button" aria-haspopup="dialog" style="margin-top:8px;">❓ Cómo usar esta app</button>
     <button class="boton sec ancho historial-toggle" id="historial-toggle" type="button" aria-expanded="false" aria-controls="historial">📜 Ver historial de búsquedas</button>
     <nav class="historial" id="historial" aria-label="Historial de búsquedas" data-plegado></nav>
     <div class="badge-db-status" id="estado-db" role="status"><span class="dot-online"></span> <span id="texto-db">Conectando…</span></div>
@@ -521,7 +521,10 @@
           <h2 class="titulo-sel" id="titulo-sel">Todas las ofertas</h2>
           <div class="sub" id="sub-sel"></div>
         </div>
-        <button class="btn-manual-header" id="btn-manual" type="button" aria-haspopup="dialog">➕ Agregar postulación manual</button>
+        <div class="acciones-encabezado">
+          <button class="boton sec" id="btn-ayuda" type="button" aria-haspopup="dialog" title="Qué hay en esta pantalla y cómo usarla">❓ Ayuda de esta pantalla</button>
+          <button class="btn-manual-header" id="btn-manual" type="button" aria-haspopup="dialog">➕ Agregar postulación manual</button>
+        </div>
       </div>
       <div class="fuentes-sel" id="fuentes-sel" hidden></div>
       <details class="panel" id="panel-corrida" hidden><summary>Resultado de la última búsqueda por fuente</summary><div id="corrida"></div></details>
@@ -1358,29 +1361,35 @@ function abrirManual(origen) {
 }
 $("btn-manual").addEventListener("click", e => abrirManual(e.currentTarget));
 
-// ---------- guía de uso (mismo diálogo que los demás: Esc cierra, el foco no sale)
-const GUIA = [
-  ["Buscar empleos", "Pulsa «Buscar empleos». Tarda unos 15 a 20 minutos; la barra muestra en qué portal va. Las ofertas nuevas aparecen en Ofertas."],
-  ["Revisar una oferta", "Abre el aviso con el título o con ↗. Cambia su estado en la tarjeta (Nueva, Revisada, Postulada, En entrevista o Descartada)."],
-  ["Gestionar el proceso", "«⚡ Gestionar proceso» abre el detalle: fecha de postulación, notas, fase del proceso, sueldo y prioridad."],
-  ["Sin texto", "Algunas fuentes no entregan la descripción. Abre el aviso, copia la descripción completa y pégala en su tarjeta. La app la revisa y, si cumple, la pasa a Ofertas."],
-  ["Seguimiento", "Arrastra una tarjeta entre las columnas para cambiar su etapa, o usa «Mover a…». Cada movimiento tiene «Deshacer»."],
-  ["Postulación manual", "«➕ Agregar postulación manual» sirve para una oferta que la búsqueda no trajo. Si ya la tienes, te avisa."],
+// ---------- ayuda por pantalla: cambia según la pestaña activa (mismo diálogo que los demás: Esc cierra, el foco no sale)
+const AYUDA_PESTANA = {
+  ofertas: { titulo: "Ofertas", texto: "Las ofertas que la app considera relevantes y que aún no decidiste. Revisa cada una: abre el aviso con el título o con ↗, y cambia su estado desde la tarjeta. Si no te interesa, márcala como Descartada: sale de esta lista y queda en Descartadas." },
+  seguimiento: { titulo: "Seguimiento", texto: "Las ofertas en proceso (revisadas, postuladas o en entrevista). En Tablero, arrastra cada tarjeta a su etapa, o usa «Mover a…». Cada movimiento tiene «Deshacer». Con «⚡ Gestionar proceso» anotas la fecha de postulación, la fase, las notas y el sueldo." },
+  sin_descripcion: { titulo: "Sin texto", texto: "Ofertas que llegaron sin descripción (hoy, LinkedIn): la app no puede revisar su experiencia ni su nivel. Abre el aviso con ↗, copia la descripción completa y pégala en su tarjeta con «Guardar descripción». Si cumple, pasa a Ofertas; si no, queda descartada." },
+  fuera_perfil: { titulo: "Fuera de perfil", texto: "Ofertas que la app apartó por no encajar con tu perfil, por ejemplo soporte o mesa de ayuda. Revísalas por si alguna te sirve; la razón de cada una aparece en su tarjeta. El interruptor «Incluir soporte TI» decide si se ven también en Ofertas." },
+  sospechosas: { titulo: "Sospechosas", texto: "Ofertas con señales de posible estafa: piden un pago, datos bancarios o contacto solo por WhatsApp. No postules a ninguna sin verificar la empresa por otro medio." },
+  descartadas_usuario: { titulo: "Descartadas", texto: "Ofertas que tú descartaste. Para recuperar una, abre su tarjeta y cambia su estado a otro (Nueva, Revisada, etc.)." },
+  descartadas: { titulo: "Descartadas por filtros", texto: "Ofertas que la app descartó sola (por experiencia, nivel, ubicación, práctica u otra regla). Sirven para comprobar que los filtros no están dejando fuera algo que sí te interesa. Si ves un patrón, avísame para ajustar la regla." }
+};
+const AYUDA_GENERAL = [
+  ["Buscar empleos", "Pulsa «Buscar empleos». Tarda unos 15 a 20 minutos; la barra muestra en qué portal va."],
   ["Respaldos", "«Respaldar ahora» copia la base. Hay un respaldo automático por día y se guardan los últimos 30."],
-  ["Adaptar a tu perfil", "La búsqueda viene configurada para un perfil de TI junior en Chile. Para otro perfil, cambia config.py (cargos, ciudades, experiencia). Guía completa en TUTORIAL.md."],
+  ["Adaptar a tu perfil", "La búsqueda viene configurada para un perfil de TI junior en Chile. Para otro perfil, cambia config.py. Guía completa en TUTORIAL.md."]
 ];
-function abrirGuia(origen) {
-  const lista = h("ol", { class: "guia-lista" }, GUIA.map(([titulo, texto]) => h("li", {}, h("strong", {}, titulo + ". "), texto)));
-  const tarjeta = h("div", { class: "modal-tarjeta", role: "dialog", "aria-modal": "true", "aria-labelledby": "guia-titulo" },
+function abrirAyuda(origen) {
+  const info = AYUDA_PESTANA[S.pestana] || AYUDA_PESTANA.ofertas;
+  const tarjeta = h("div", { class: "modal-tarjeta", role: "dialog", "aria-modal": "true", "aria-labelledby": "ayuda-titulo" },
     h("div", { class: "modal-cabecera" },
-      h("h2", { id: "guia-titulo" }, "Cómo usar esta app"),
+      h("h2", { id: "ayuda-titulo" }, "Ayuda: " + info.titulo),
       h("button", { type: "button", class: "btn-cerrar", "aria-label": "Cerrar", onclick: cerrarDetalle }, "✕")),
-    lista,
-    h("p", { class: "sub", style: "margin:12px 0 0;" }, "Guía completa en TUTORIAL.md (en el repositorio)."),
+    h("p", { style: "margin:0 0 12px;" }, info.texto),
+    h("h3", { style: "font-size:.95rem; margin:14px 0 6px;" }, "Lo que sirve en toda la app"),
+    h("ul", { class: "guia-lista" }, AYUDA_GENERAL.map(([t, x]) => h("li", {}, h("strong", {}, t + ". "), x))),
+    h("p", { class: "sub", style: "margin:12px 0 0;" }, "Guía completa: TUTORIAL.md, en el repositorio."),
     h("div", { class: "modal-acciones" }, h("button", { type: "button", class: "boton", onclick: cerrarDetalle }, "Entendido")));
   montarDialogo(tarjeta, origen, tarjeta.querySelector(".btn-cerrar"));
 }
-$("btn-tutorial").addEventListener("click", e => abrirGuia(e.currentTarget));
+$("btn-ayuda").addEventListener("click", e => abrirAyuda(e.currentTarget));
 
 // ---------- exportar (descarga: el servidor responde con Content-Disposition: attachment)
 function descargar(formato, alcance) {
