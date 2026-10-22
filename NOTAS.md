@@ -204,6 +204,20 @@ descartada por la regla nueva** y ningún texto de experiencia cambia: los aviso
 escritos de la forma que la regla vieja reconocía. En la página: Ofertas 22 → 8, «Sin descripción» 0 → 16 (las 16 de
 LinkedIn, todas nuevas), Seguimiento 23 → 23.
 
+**Arreglos de la revisión de la candidata (21-10, pedidos por Sofia).**
+- La pestaña se llama **«Sin texto»**, no «Sin descripción»: el aviso SÍ tiene descripción en LinkedIn; lo vacío es
+  lo que recibe la app (`description = ''` en las 16 de la cola). El nombre describía el aviso y se leía al revés.
+- **El tope se dice:** «hasta 2 años» en vez de «2 años». El chip de «recién titulado o con hasta 2 años» se leía
+  como si el aviso exigiera 2 años. Al hacerlo salió un error anterior: `al menos de 1 año` entraba por `menos de`
+  y se leía como tope; ahora `_TOPE` lo excluye (3 avisos de Chiletrabajos lo decían así).
+- **La marca de remoto nombra a su fuente:** una oferta de LinkedIn decía «marcada remota por Indeed». La constante
+  pasó a ser `EVIDENCIA_MARCA_FUENTE` (la lógica de `remoto_firme` la sigue comparando igual) y el nombre se pone al
+  mostrarla. En la base: 17 de LinkedIn y 5 de Chiletrabajos; **ninguna de las 22 era de Indeed**.
+- **Avisos en inglés** (75 de 1795 con texto; 73 ya se descartaban): se agregó `similar role/position`,
+  `in the field/industry` al contexto de los años, y al contrato `fixed-term`, `N months` y `temporary`. Efecto en
+  la base: 2 ofertas de LinkedIn «Python Full Stack Engineer (3 month-long)» pasan a Plazo fijo / temporal; ninguna
+  oferta nueva se descarta.
+
 **Pendiente de este cambio:** no está desplegado. El despliegue necesita `reclasificar` para que las ofertas de
 LinkedIn/Glassdoor ya guardadas que hoy están como `principal` pasen a `sin_descripcion` (169 de las 1240 de esas dos
 fuentes; el resto ya estaba descartado por título, zona o empresa), y hay que fijarse en que

@@ -16,7 +16,7 @@ def plural(n, uno: str, varios: str) -> str:
     return f"{n} {uno if n == 1 else varios}"
 
 ORDEN_PRIORIDAD = {"Alta": 0, "Media": 1, "Baja": 2}
-EVIDENCIA_INDEED = "marcada remota por Indeed"
+EVIDENCIA_MARCA_FUENTE = "marcada remota por la fuente"   # el nombre de la fuente se pone al mostrarlo (ver clasificar)
 ORDEN_MODALIDAD = {"Remoto": 0, "Híbrido": 1, "Presencial": 2, "No indicada": 2}
 
 
@@ -137,7 +137,7 @@ def detectar_modalidad(t: str, d: str, es_remoto: bool):
     if m:
         return "Remoto", m.group(0)
     if es_remoto:
-        return "Remoto", EVIDENCIA_INDEED
+        return "Remoto", EVIDENCIA_MARCA_FUENTE
     m = re.search(r"presencial", f"{t} {d}")
     if m:
         return "Presencial", m.group(0)
@@ -171,12 +171,15 @@ _NUMEROS_ESCRITOS = {"un": 1, "uno": 1, "una": 1, "dos": 2, "tres": 3, "cuatro":
                      "seis": 6, "siete": 7, "ocho": 8, "nueve": 9, "diez": 10}
 # El número cuenta como requisito solo si alrededor se habla del cargo ("3 años en cargos similares" también lo es)
 _CONTEXTO_REQUISITO = (r"experiencia|experience|\bexp\b|cargos? similares|puestos? similares|funciones similares"
-                       r"|en el cargo|en el rubro|en el area|en la industria|desempenand|trabajando en")
+                       r"|en el cargo|en el rubro|en el area|en la industria|desempenand|trabajando en"
+                       r"|similar (role|position)|same (role|position)|equivalent (role|position)|in the (field|industry)")
 # ...y no de la edad de la empresa ("12 años en el mercado" no es un requisito, aunque diga "experiencia" al lado)
 _CONTEXTO_EMPRESA = r"trayectoria|en el mercado|fundad|de presencia|de vida|aniversario|celebra"
 # "deseable: 5 años" no descarta: manda lo que el aviso exige, no lo que le gustaría
 _REQUISITO_BLANDO = r"deseable|valorable|valorad|idealmente|\bplus\b|opcional|no excluyente|bonus|se valorara"
 _FIN_DE_FRASE = re.compile(r"[.;\n•]")
+# tope ("hasta 2 años" = de 0 a 2). "al menos de 1 año" NO es un tope: es un mínimo que trae "menos de" adentro
+_TOPE = re.compile(r"(?<!al )\b(hasta|maximo|menos de|no mas de|up to)\s*$")
 
 
 def _para_buscar_anios(d: str) -> str:
@@ -200,9 +203,10 @@ def _menciones_anios(d: str):
         if not re.search(_CONTEXTO_REQUISITO, cerca) or re.search(_CONTEXTO_EMPRESA, cerca):
             continue
         hi = int(m.group(2)) if m.group(2) else lo
-        if not m.group(2) and re.search(r"(hasta|maximo|menos de|no mas de|up to)\s*$", d[max(0, m.start() - 15): m.start()]):
-            lo = 0                    # "hasta 2 años" = "0 a 2": el tope es N, el mínimo es 0
         texto_mencion = texto_anios(m.group(0)) if m.group(4).startswith("ano") else m.group(0)
+        if not m.group(2) and _TOPE.search(d[max(0, m.start() - 25): m.start()]):
+            lo = 0                    # "hasta 2 años" = "0 a 2": el tope es N, el mínimo es 0
+            texto_mencion = f"hasta {texto_mencion}"   # si no, el chip diría "2 años", como si los exigiera
         yield lo, hi, texto_mencion, bool(re.search(_REQUISITO_BLANDO, antes))
 
 
@@ -381,7 +385,7 @@ def clasificar(o: dict) -> dict:
     region = _region(ubic)
     fuente = texto(o.get("fuente")) or "indeed"
     remoto_firme = modalidad == "Remoto" and (
-        ev_modalidad != EVIDENCIA_INDEED or (fuente == "linkedin" and bool(o.get("is_remote")))
+        ev_modalidad != EVIDENCIA_MARCA_FUENTE or (fuente == "linkedin" and bool(o.get("is_remote")))
     )
     if fuente == "linkedin" and not remoto_firme and not _ubicacion_linkedin_valida(ubic, d):
         return fin("descartada", "ubicación fuera del perfil LinkedIn")
@@ -451,7 +455,9 @@ def clasificar(o: dict) -> dict:
     if fuente != "indeed" and not region and not ciudad_de(ubic) and modalidad != "Remoto":
         partes.append("ubicación imprecisa (solo 'Chile'): verificar zona")
     if ev_modalidad:
-        partes.append(f"modalidad: {modalidad} por '{ev_modalidad}'")
+        evidencia = (f"marcada remota por {config.NOMBRE_FUENTE.get(fuente, fuente)}"
+                     if ev_modalidad == EVIDENCIA_MARCA_FUENTE else f"'{ev_modalidad}'")
+        partes.append(f"modalidad: {modalidad} por {evidencia}")
     if ev_contrato:
         partes.append(f"contrato: plazo fijo por {ev_contrato}")
 

@@ -244,10 +244,13 @@ SENIORITY_DESC = r"(perfil|nivel|cargo|rol|posicion) (de )?(semi[ -]?)?senior|(s
 EXPERIENCIA_DESCARTA_DESDE = 2    # si el mínimo exigido es este (o más), se descarta ("2 años", "2 a 4")
 EXPERIENCIA_MAXIMA = 2            # si el rango supera este máximo, se descarta ("1 a 3", "3 años")
                                   # se mantienen "1 año", "0 a 2", "1 a 2" y sin experiencia
-PLAZO_TITULO = [r"reemplazo", r"temporal", r"\d+ meses", r"pre y post natal"]
+PLAZO_TITULO = [r"reemplazo", r"temporal", r"\d+ meses", r"pre y post natal",
+                r"\btemporary\b", r"\d+ months?"]                      # avisos en inglés (Indeed los trae)
 PLAZO_DESC = [r"plazo fijo", r"por obra", r"faena", r"temporada", r"contrato temporal",
               r"vacante temporal", r"pre y post natal|prenatal|postnatal",
-              r"(proyecto|contrato|duracion)[^.]{0,25}\b\d+ meses", r"reemplazo de (licencia|vacaciones|permiso)"]
+              r"(proyecto|contrato|duracion)[^.]{0,25}\b\d+ meses", r"reemplazo de (licencia|vacaciones|permiso)",
+              r"fixed[ -]term", r"(project|contract|duration|assignment)[^.]{0,25}\b\d+ months?",
+              r"\b\d+[ -]months? (contract|project|assignment)"]
 SUELDO_ALERTA = 800000
 # Remoto: una mención suelta de "remoto" no basta (puede ser "monitoreo remoto").
 REMOTO_EN_TITULO = r"remot[oa]|teletrabajo|home office"

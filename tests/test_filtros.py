@@ -295,7 +295,31 @@ def test_la_mencion_mas_exigente_manda_en_el_texto_mostrado():
     assert extraer_experiencia("1 año de experiencia y 5 años de experiencia en redes") == (5, "5 años")
     assert extraer_experiencia("3 años en cargos similares")[0] == 3
     assert extraer_experiencia("experiencia de tres años")[1] == "3 años"
-    assert extraer_experiencia("hasta 2 años de experiencia") == (0, "2 años")
+    assert extraer_experiencia("hasta 2 años de experiencia") == (0, "hasta 2 años")
+
+
+@pytest.mark.parametrize("desc, texto", [
+    # el tope se dice, si no el chip "2 años" se lee como si el aviso exigiera 2 (21-10)
+    ("hasta 2 años de experiencia", "hasta 2 años"),
+    ("máximo 2 años de experiencia", "hasta 2 años"),
+    ("menos de 2 años de experiencia", "hasta 2 años"),
+    ("up to 2 years of experience", "hasta 2 years"),
+    ("recién titulado o con hasta 2 años de experiencia laboral", "hasta 2 años"),
+    # sin tope, el texto no cambia
+    ("2 años de experiencia", "2 años"),
+    ("0 a 2 años de experiencia", "0 a 2 años"),
+])
+def test_el_tope_se_muestra_como_hasta(desc, texto):
+    assert extraer_experiencia(desc)[1] == texto
+
+
+@pytest.mark.parametrize("desc", [
+    "con experiencia al menos de 1 años en el cargo",      # tal cual lo escribe el aviso de Chiletrabajos
+    "se requiere al menos de 1 año de experiencia",
+])
+def test_al_menos_de_no_es_un_tope(desc):
+    """'al menos de 1 año' es un mínimo, aunque lleve 'menos de' adentro: no es 'hasta 1 año'."""
+    assert extraer_experiencia(desc) == (1, "1 año")
 
 
 @pytest.mark.parametrize("desc, texto", [
@@ -313,10 +337,38 @@ def test_texto_de_experiencia_singular_y_plural(desc, texto):
     assert extraer_experiencia(desc)[1] == texto
 
 
+@pytest.mark.parametrize("fuente, nombre", [("linkedin", "LinkedIn"), ("indeed", "Indeed"), ("glassdoor", "Glassdoor")])
+def test_la_marca_de_remoto_nombra_a_su_propia_fuente(fuente, nombre):
+    """Una oferta de LinkedIn decía 'marcada remota por Indeed' (21-10)."""
+    r = clasificar(oferta("Analista Funcional", "Buscamos analista funcional.", fuente=fuente, is_remote=True))
+    assert f"modalidad: Remoto por marcada remota por {nombre}" in r["motivo"]
+
+
+# ------------------------------------------------------------ avisos en inglés (21-10)
+@pytest.mark.parametrize("desc, razon", [
+    ("Requirements: 4 years in a similar role.", "exige 4+ años de experiencia"),
+    ("We need 3 years in a similar position.", "exige 3+ años de experiencia"),
+    ("At least 5 years in the industry.", "exige 5+ años de experiencia"),
+])
+def test_los_anios_en_ingles_sin_la_palabra_experience(desc, razon):
+    assert (clasificar(oferta("QA Analyst", desc))["razon"]) == razon
+
+
+@pytest.mark.parametrize("titulo, desc", [
+    ("QA Analyst", "Fixed-term contract for 6 months, extendable."),
+    ("QA Analyst", "This is a 6-month contract with possible extension."),
+    ("QA Analyst", "Project duration: 8 months."),
+    ("QA Analyst (6 months)", "Great team."),
+    ("Temporary QA Analyst", "Great team."),
+])
+def test_plazo_fijo_en_ingles(titulo, desc):
+    assert clasificar(oferta(titulo, desc))["contrato"] == "Plazo fijo / temporal"
+
+
 def test_modalidad():
     assert detectar_modalidad("", "trabajo hibrido 3 dias", False)[0] == "Híbrido"
     assert detectar_modalidad("", "100% remoto", False)[0] == "Remoto"
-    assert detectar_modalidad("", "", True) == ("Remoto", "marcada remota por Indeed")
+    assert detectar_modalidad("", "", True) == ("Remoto", filtros.EVIDENCIA_MARCA_FUENTE)
     assert detectar_modalidad("", "modalidad presencial", False)[0] == "Presencial"
     assert detectar_modalidad("", "", False)[0] == "No indicada"
     assert detectar_modalidad("", "hibrido con dias remotos", False)[0] == "Híbrido"
