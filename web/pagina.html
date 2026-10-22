@@ -214,6 +214,8 @@
 
   .historial { margin-top:14px; border-top:1px solid var(--borde); padding-top:12px; }
   .historial h2 { font-size:1rem; color:var(--suave); margin:4px 10px 8px; }
+  .guia-lista { padding-left:1.2em; display:flex; flex-direction:column; gap:10px; font-size:.92rem; }
+  .guia-lista li { line-height:1.5; }
   .historial-toggle { display:none; margin-top:12px; }   /* solo en pantallas angostas: en escritorio el historial siempre se ve */
   @media (max-width:860px) {
     .historial-toggle { display:block; }
@@ -507,6 +509,7 @@
       <div class="sub" id="estado-respaldo" role="status" style="margin:6px 2px 0; font-size:.78rem;"></div>
     </div>
 
+    <button class="boton sec ancho" id="btn-tutorial" type="button" aria-haspopup="dialog" style="margin-top:8px;">❓ Cómo usar esta app</button>
     <button class="boton sec ancho historial-toggle" id="historial-toggle" type="button" aria-expanded="false" aria-controls="historial">📜 Ver historial de búsquedas</button>
     <nav class="historial" id="historial" aria-label="Historial de búsquedas" data-plegado></nav>
     <div class="badge-db-status" id="estado-db" role="status"><span class="dot-online"></span> <span id="texto-db">Conectando…</span></div>
@@ -1354,6 +1357,30 @@ function abrirManual(origen) {
   montarDialogo(tarjeta, origen, titulo);
 }
 $("btn-manual").addEventListener("click", e => abrirManual(e.currentTarget));
+
+// ---------- guía de uso (mismo diálogo que los demás: Esc cierra, el foco no sale)
+const GUIA = [
+  ["Buscar empleos", "Pulsa «Buscar empleos». Tarda unos 15 a 20 minutos; la barra muestra en qué portal va. Las ofertas nuevas aparecen en Ofertas."],
+  ["Revisar una oferta", "Abre el aviso con el título o con ↗. Cambia su estado en la tarjeta (Nueva, Revisada, Postulada, En entrevista o Descartada)."],
+  ["Gestionar el proceso", "«⚡ Gestionar proceso» abre el detalle: fecha de postulación, notas, fase del proceso, sueldo y prioridad."],
+  ["Sin texto", "Algunas fuentes no entregan la descripción. Abre el aviso, copia la descripción completa y pégala en su tarjeta. La app la revisa y, si cumple, la pasa a Ofertas."],
+  ["Seguimiento", "Arrastra una tarjeta entre las columnas para cambiar su etapa, o usa «Mover a…». Cada movimiento tiene «Deshacer»."],
+  ["Postulación manual", "«➕ Agregar postulación manual» sirve para una oferta que la búsqueda no trajo. Si ya la tienes, te avisa."],
+  ["Respaldos", "«Respaldar ahora» copia la base. Hay un respaldo automático por día y se guardan los últimos 30."],
+  ["Adaptar a tu perfil", "La búsqueda viene configurada para un perfil de TI junior en Chile. Para otro perfil, cambia config.py (cargos, ciudades, experiencia). Guía completa en TUTORIAL.md."],
+];
+function abrirGuia(origen) {
+  const lista = h("ol", { class: "guia-lista" }, GUIA.map(([titulo, texto]) => h("li", {}, h("strong", {}, titulo + ". "), texto)));
+  const tarjeta = h("div", { class: "modal-tarjeta", role: "dialog", "aria-modal": "true", "aria-labelledby": "guia-titulo" },
+    h("div", { class: "modal-cabecera" },
+      h("h2", { id: "guia-titulo" }, "Cómo usar esta app"),
+      h("button", { type: "button", class: "btn-cerrar", "aria-label": "Cerrar", onclick: cerrarDetalle }, "✕")),
+    lista,
+    h("p", { class: "sub", style: "margin:12px 0 0;" }, "Guía completa en TUTORIAL.md (en el repositorio)."),
+    h("div", { class: "modal-acciones" }, h("button", { type: "button", class: "boton", onclick: cerrarDetalle }, "Entendido")));
+  montarDialogo(tarjeta, origen, tarjeta.querySelector(".btn-cerrar"));
+}
+$("btn-tutorial").addEventListener("click", e => abrirGuia(e.currentTarget));
 
 // ---------- exportar (descarga: el servidor responde con Content-Disposition: attachment)
 function descargar(formato, alcance) {

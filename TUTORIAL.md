@@ -1,0 +1,166 @@
+# Tutorial: cómo usar job-tracker
+
+job-tracker es una aplicación local para buscar ofertas de empleo, revisarlas y hacerles seguimiento hasta la entrevista o la oferta. Corre en tu propio computador: tus datos no salen de tu equipo.
+
+> **Antes de empezar:** la configuración viene hecha para un perfil concreto (TI junior en Chile, con búsqueda en Santiago y Viña del Mar). Si tu perfil es otro, lee la sección [Adaptar la búsqueda a tu perfil](#adaptar-la-búsqueda-a-tu-perfil) antes de buscar. Si no, verás ofertas que no te sirven.
+
+---
+
+## 1. Requisitos
+
+Hay dos formas de correrlo:
+
+- **Con Docker (recomendada).** Necesitas Docker Desktop. Es la forma en que se usa en producción.
+- **Con Python.** Necesitas Python 3.12 o superior y las dependencias de `requirements.txt`.
+
+## 2. Instalación con Docker
+
+1. Descarga el proyecto y entra a su carpeta.
+2. Abre una terminal en esa carpeta y ejecuta:
+
+   ```
+   docker compose up -d
+   ```
+
+3. Espera a que el contenedor quede sano:
+
+   ```
+   docker inspect jobtracker --format "{{.State.Health.Status}}"
+   ```
+
+   Debe responder `healthy`.
+
+4. Abre **http://127.0.0.1:8765/** en tu navegador.
+
+La base de datos vive en un volumen de Docker, así que no se borra al reiniciar el contenedor.
+
+## 3. Instalación con Python
+
+```
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+playwright install chromium
+python servidor.py
+```
+
+Luego abre **http://127.0.0.1:8765/**. La base se guarda en `ofertas.db`, en la carpeta del proyecto.
+
+## 4. Recorrido de la pantalla
+
+La pantalla tiene dos columnas.
+
+**Columna izquierda**
+- **Buscar empleos:** lanza una búsqueda en los portales. Tarda unos 15 a 20 minutos. Mientras corre, la barra muestra el avance.
+- **Historial:** las búsquedas anteriores, agrupadas por día. Elige una para ver solo lo que trajo.
+- **Gestión de datos:** exportar a CSV o Excel, descargar un respaldo en JSON y hacer un respaldo de la base.
+- **Buscar a mano:** enlaces a sitios que no admiten búsquedas automáticas (Computrabajo y Empleos Públicos). Se abren en tu navegador.
+- **Contraste reforzado:** colores de texto más legibles. Viene activado; puedes apagarlo.
+- **Tema:** seis combinaciones de color. Se recuerdan en tu navegador.
+
+**Columna principal**
+- **Pestañas:** Ofertas, Seguimiento, Sin texto, Fuera de perfil, Sospechosas, Descartadas y Descartadas por filtros.
+- **Filtros:** búsqueda por texto y estado. Los filtros de prioridad, modalidad, tipo y fuente están en **«Más filtros»**.
+- **Vista:** Tarjetas (con detalle) o Compacta (una línea por oferta).
+
+## 5. Buscar empleos
+
+1. Pulsa **«Buscar empleos»**.
+2. Espera. La barra avanza y el texto dice en qué portal va.
+3. Al terminar, las ofertas nuevas aparecen en **Ofertas**, y la búsqueda queda en el historial.
+
+Una búsqueda registra cuántas ofertas encontró cada portal y cuántas son nuevas y relevantes. Si un portal falla, el resultado lo muestra en el panel **«Resultado de la última búsqueda por fuente»**.
+
+## 6. Revisar una oferta
+
+Cada tarjeta muestra el cargo, la empresa, la ubicación, la fuente, la prioridad, el tipo de contrato, la experiencia pedida y el sueldo, si se indica.
+
+- **Título:** abre el aviso original en una pestaña nueva.
+- **↗:** lo mismo, con un icono más pequeño.
+- **Estado:** elige en la tarjeta entre *Nueva*, *Revisada*, *Postulada*, *En entrevista* o *Descartada*.
+- **⚡ Gestionar proceso:** abre el detalle de la oferta, donde puedes fijar la fecha de postulación, escribir notas, marcar la fase del proceso, poner un sueldo propio o cambiar la prioridad.
+
+Las ofertas de **Ofertas** son las que la app considera relevantes. Si una te interesa y no te convence, márcala como descartada: sale de la lista y queda en **Descartadas**, donde puedes recuperarla.
+
+### Sin texto
+
+Algunas fuentes (hoy, LinkedIn) no entregan la descripción del aviso. La app no puede revisar su experiencia ni su nivel, así que las pone en **Sin texto**.
+
+Para decidirlas:
+1. Abre el aviso con ↗.
+2. Copia la descripción completa.
+3. Pégala en el cuadro de la tarjeta y pulsa **«Guardar descripción»**.
+
+La app la revisa y, si cumple, la pasa a **Ofertas**. Si no cumple, queda descartada.
+
+## 7. Seguimiento de postulaciones
+
+La pestaña **Seguimiento** muestra las ofertas que ya postulaste o en las que vas en proceso.
+
+- **Tablero:** cuatro columnas: *Por postular*, *CV enviado*, *Entrevistas* y *Oferta / Cierre*. Arrastra una tarjeta a otra columna para cambiar su etapa. Si no puedes arrastrar (pantalla táctil o teclado), usa el selector **«Mover a…»** de la tarjeta.
+- **Lista:** la misma información en filas, útil para buscar.
+- **Resumen:** arriba aparece cuántas ofertas hay en cada columna.
+
+Cada movimiento muestra un aviso con **«Deshacer»**, que vuelve exactamente al estado anterior.
+
+Las tarjetas muestran cuántos días llevan desde la postulación. Hasta 3 días aparece en verde; de 4 a 5, un aviso para revisar; desde 6 días, un aviso de seguimiento.
+
+> La fase de un proceso no retrocede desde el tablero. Para bajarla, usa **«Gestionar proceso»**.
+
+## 8. Agregar una postulación manual
+
+Si postulaste a una oferta que la búsqueda no trajo, pulsa **«➕ Agregar postulación manual»**. Pide el cargo y la empresa como obligatorios; el enlace, la ubicación y el resto son opcionales.
+
+Si ya tienes esa oferta registrada (mismo cargo, empresa y ciudad, o el mismo enlace), la app te avisa en vez de duplicarla.
+
+## 9. Respaldos y exportación
+
+- **Respaldar ahora:** copia la base completa a la carpeta de respaldos. Se puede usar cada minuto como máximo.
+- **Respaldo automático:** la app guarda una copia por día y conserva las últimas 30.
+- **CSV / Excel:** exporta la pestaña que estás mirando.
+- **Respaldo JSON:** exporta todas las ofertas en un archivo legible.
+
+Con Docker, la carpeta de respaldos se define en `docker-compose.yml`. Conviene elegir una carpeta **fuera de OneDrive** o de cualquier servicio que sincronice archivos, para que la base no se copie a medias.
+
+## 10. Adaptar la búsqueda a tu perfil
+
+Todo lo que define qué ofertas aparecen está en **`config.py`**. Los cambios más importantes:
+
+| Qué cambiar | Dónde | Qué hace |
+|---|---|---|
+| Cargos que buscas | `TERMINOS_A` (roles TI) y `TERMINOS_B` (roles puente) | Las frases que se buscan en cada portal |
+| Ciudades | `UBICACIONES` y `REGIONES_VALIDAS` | Dónde se considera válida una oferta presencial |
+| Remoto | `INCLUIR_REMOTO` | Si se aceptan ofertas remotas |
+| Experiencia | `EXPERIENCIA_DESCARTA_DESDE` y `EXPERIENCIA_MAXIMA` | Desde qué años de experiencia se descarta una oferta |
+| Empresas excluidas | `EXCLUIR_EMPRESAS` | Empresas que nunca aparecen |
+| Prácticas y estudiantes | `EXCLUIR_PRACTICA_TITULO` y `EXCLUIR_PRACTICA_DESC` | Se descartan automáticamente |
+| Portales | `SITIOS` | Qué portales se consultan |
+
+Después de cambiar `config.py`, corre las pruebas para comprobar que nada se rompió:
+
+```
+venv\Scripts\python.exe -m pytest -q
+```
+
+> Los valores actuales son de un perfil de TI junior en Chile. Si los dejas tal cual, tendrás resultados de ese perfil, no del tuyo.
+
+## 11. Preguntas frecuentes
+
+**¿La app manda mis datos a algún servidor?**
+No. La base vive en tu equipo. Solo se consultan los portales de empleo, para buscar las ofertas.
+
+**¿Por qué la búsqueda tarda tanto?**
+Las pausas entre consultas son deliberadas, para no ser bloqueado por los portales. Una búsqueda completa toma unos 15 a 20 minutos.
+
+**Un portal aparece con errores en la búsqueda. ¿Qué hago?**
+Es normal que algún portal falle de vez en cuando. La búsqueda sigue con los demás. Si falla siempre, revisa el panel de resultados por fuente: el detalle dice qué pasó.
+
+**¿Cómo vuelvo a una versión anterior?**
+Si actualizas el proyecto y algo no te gusta, la carpeta `REVERSION_INTERFAZ.md` (y los demás `REVERSION_*.md`) explica cómo volver a la imagen anterior sin perder datos.
+
+**Borré algo por error.**
+Las ofertas descartadas se pueden recuperar: aparecen en **Descartadas**, y desde su tarjeta cambias el estado a otro. Si borraste la base, restaura el último respaldo desde tu carpeta de respaldos.
+
+---
+
+Si tienes dudas o encuentras un error, revisa `NOTAS.md`, que documenta las decisiones y los hallazgos del proyecto.
