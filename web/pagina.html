@@ -423,6 +423,9 @@
   /* ---------- mejoras audit ui/ux ---------- */
   .skill-pill { font-size:0.73rem; font-weight:600; padding:2px 8px; border-radius:6px; background:var(--panel2); border:1px solid var(--borde); color:var(--tinta); display:inline-flex; align-items:center; }
   .skill-pill:hover { border-color:var(--accion); }
+  .chip.chip-dato:not(.sueldo-destacado) { background:transparent; border:1px solid var(--borde); color:var(--suave); font-weight:500; }   /* dato secundario: tenue, para que no compita con prioridad y estado */
+  .habilidades-pie { display:flex; flex-wrap:wrap; gap:4px; margin-top:8px; }
+  .habilidades-pie .skill-pill { font-weight:500; color:var(--suave); }
   .chip.sueldo-destacado { background:rgba(16, 185, 129, 0.12); color:#047857; border:1px solid rgba(16, 185, 129, 0.3); font-weight:700; }
   :root[data-tema="girly-oscuro"] .chip.sueldo-destacado, :root[data-tema="hombre-oscuro"] .chip.sueldo-destacado, :root[data-tema="neutro-oscuro"] .chip.sueldo-destacado { color:#34D399; background:rgba(52, 211, 153, 0.15); border-color:rgba(52, 211, 153, 0.35); }
   .btn-enlace-externo { display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:7px; background:var(--panel2); border:1px solid var(--borde); color:var(--suave); text-decoration:none; font-size:.85rem; transition:all .15s ease; flex-shrink:0; }
@@ -1380,13 +1383,13 @@ function tarjeta(o, completa) {
     for (const v of [o.tipo, o.modalidad, o.contrato, o.sueldo && o.sueldo !== "No indicado" ? o.sueldo : "", o.experiencia && o.experiencia !== "No indicada" ? o.experiencia : ""]) {
       if (!v) continue;
       const esSueldo = v === o.sueldo && esSueldoDestacado(o.sueldo);
-      chips.push(h("span", { class: "chip" + (/plazo|sin verificar/i.test(v) ? " aviso" : "") + (esSueldo ? " sueldo-destacado" : "") }, esSueldo ? "💵 " + v : v));
+      chips.push(h("span", { class: "chip chip-dato" + (/plazo|sin verificar/i.test(v) ? " aviso" : "") + (esSueldo ? " sueldo-destacado" : "") }, esSueldo ? "💵 " + v : v));
     }
     if (o.estado === "descartada" && o.fecha_postulacion) {
       chips.push(h("span", { class: "chip tenia-postulacion", title: "Esta oferta estuvo postulada antes de descartarla" }, "📌 Tenía postulación (" + fechaCL(o.fecha_postulacion) + ")"));
     }
-    for (const sk of extraerSkills(o)) chips.push(h("span", { class: "skill-pill" }, sk));
   }
+  const habilidades = completa ? extraerSkills(o) : [];
   const seg = completa ? avisoSeguimiento(o, hoy()) : null;
 
   return h("article", { class: "tarjeta " + clasePrio(o) + (CERRADOS.has(o.estado) ? " cerrada" : "") },
@@ -1402,6 +1405,7 @@ function tarjeta(o, completa) {
     chips.length ? h("div", { class: "chips" }, chips) : null,
     seg ? h("div", { style: "display:flex; gap:6px; align-items:center; margin-top:4px;" }, h("span", { class: "chip " + seg.clase, style: "font-size:.76rem;" }, seg.texto)) : null,
     completa && o.motivo ? h("div", { class: "motivo" }, o.motivo) : null,
+    habilidades.length ? h("div", { class: "habilidades-pie", "aria-label": "Tecnologías mencionadas" }, habilidades.map(sk => h("span", { class: "skill-pill" }, sk))) : null,
     !completa && o.razon ? h("div", { class: "razon" }, "Motivo: " + o.razon) : null,
     completa && o.categoria === "sin_descripcion" ? formularioDescripcion(o) : null,
     h("div", { style: "display:flex; flex-direction:column; gap:6px; margin-top:6px;" },
