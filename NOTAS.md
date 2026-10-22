@@ -3,7 +3,13 @@
 ## Estado actual (se actualiza en cada despliegue; leer al empezar cada sesión)
 
 ### Producción y base
-- **Despliegue del tutorial (22-10-2026; vigente):** commit `b5d4f98` (`main`; `TUTORIAL.md` y el botón «❓ Cómo usar esta app»).
+- **Despliegue de la ayuda por pantalla (22-10-2026; vigente):** commit `200e021` (`main`; botón «❓ Ayuda de esta pantalla» junto a «Agregar postulación manual», con texto según la pestaña).
+  Imagen `job-tracker-jobtracker:latest` = `sha256:4ad9e68fd0797a80cd02390cec8dd197bc4af0831c0d15a6ba9e0c475b0d0e7d`, healthy en `127.0.0.1:8765`. Imagen anterior inmediata: `job-tracker:pre-ayuda-20261022` (`e0069601…`).
+  Referencia `ofertas_pre_ayuda_20261022.db`, sha256 `54CAF78E…849EE`, integrity_check ok.
+  - Antes de desplegar, la base había cambiado desde la referencia del tutorial: una oferta de LinkedIn se descartó a mano a las 20:04 (hora de Chile). Se tomó una referencia nueva de la base real y se comparó contra ella: RESULTADO OK. El contenedor se había dejado detenido mientras se revisaba; se levantó antes de seguir.
+  - Huellas antes y después idénticas; 66 archivos de respaldo y referencia conservan su sha256; `error_auto` vacío.
+  - Reversión probada en copia (8767), healthy con huellas idénticas; luego borrada. Detalle en `REVERSION_AYUDA.md`.
+- **Despliegue del tutorial (22-10-2026; anterior):** commit `b5d4f98` (`main`; `TUTORIAL.md` y el botón «❓ Cómo usar esta app»).
   Imagen `job-tracker-jobtracker:latest` = `sha256:e0069601e6486041b1974cea62acfb1241a1becdaa80ab8a6a46a6e688c501b4`,
   healthy en `127.0.0.1:8765`. Imagen anterior inmediata: `job-tracker:pre-tutorial-20261022` (`7edd2576…`).
   Referencia `ofertas_pre_tutorial_20261022.db`, integrity_check ok (mismo contenido que la de la interfaz: la base no cambió).
