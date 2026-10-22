@@ -181,7 +181,7 @@ parecido) encontró **4 gemelas en 182**, una de ellas falso positivo: las ofert
 las otras fuentes.
 
 **Cambios hechos (tres, aprobados por Sofia el 21-10).**
-1. **Categoría `sin_descripcion`** (pestaña «Sin descripción»): la oferta pasa todo lo que se puede revisar con el
+1. **Categoría `sin_descripcion`** (pestaña «Sin texto»): la oferta pasa todo lo que se puede revisar con el
    título (empresa excluida, práctica, rol, zona, seniority del título) y queda en su propia lista, con
    `experiencia = "Sin verificar"` y el aviso `config.AVISO_SIN_TEXTO` en el motivo. Se gestiona igual que Ofertas
    (estado, fases, notas); «❌ Descartada» la saca de la cola y la oferta ya no vuelve a entrar como nueva.

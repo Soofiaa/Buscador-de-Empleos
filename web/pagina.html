@@ -806,7 +806,7 @@ function busquedasManuales() {
 const ESTADOS = ["nueva", "revisada", "postulada", "entrevista", "descartada"];
 const ETIQUETAS_ESTADO = { nueva: "🌱 Nueva", revisada: "🔍 Revisada", postulada: "✉️ Postulada", entrevista: "🎯 En Entrevista", descartada: "❌ Descartada" };
 const PESTANAS = [
-  ["ofertas", "Ofertas"], ["seguimiento", "Seguimiento"], ["sin_descripcion", "Sin descripción"],
+  ["ofertas", "Ofertas"], ["seguimiento", "Seguimiento"], ["sin_descripcion", "Sin texto"],
   ["fuera_perfil", "Fuera de perfil"],
   ["sospechosas", "Sospechosas"], ["descartadas_usuario", "Descartadas"], ["descartadas", "Descartadas por filtros"]
 ];
@@ -1493,7 +1493,7 @@ function pintarLista() {
     const msj = S.sel.tipo !== "todas" && !SIN_FILTRO_HISTORIAL.has(S.pestana) ? "No hay ofertas de esta selección en esta pestaña."
       : S.pestana === "ofertas" ? "No hay ofertas con estos filtros. Prueba «Buscar empleos» o relaja los filtros."
       : S.pestana === "descartadas_usuario" ? "No tienes ofertas descartadas manualmente."
-      : S.pestana === "sin_descripcion" ? "No hay ofertas sin descripción. Las de LinkedIn llegan sin texto: aparecen aquí para que las abras tú."
+      : S.pestana === "sin_descripcion" ? "Nada pendiente. Aquí llegan las ofertas cuyo texto la app no recibe (LinkedIn), para que las abras tú."
       : "Nada que mostrar aquí.";
     cont.replaceChildren(...cabecera, h("div", { class: "vacio" }, msj)); return;
   }
@@ -1515,8 +1515,9 @@ function pintarLista() {
   }
   let nota = null;
   if (S.pestana === "sin_descripcion")
-    nota = h("p", { class: "sub" }, "Llegaron sin descripción, así que no se pudo revisar experiencia ni nivel: "
-      + "los filtros solo alcanzaron al título. Abre el aviso con ↗ y márcala; «❌ Descartada» no vuelve a aparecer.");
+    nota = h("p", { class: "sub" }, "El aviso sí tiene descripción en LinkedIn, pero LinkedIn no se la entrega a la app: "
+      + "por eso aquí nadie pudo revisar experiencia ni nivel y los filtros solo alcanzaron al título. "
+      + "Ábrelo con ↗ y márcalo; «❌ Descartada» no vuelve a aparecer.");
   if (S.pestana === "descartadas" && S.datos.total_descartadas > S.datos.descartadas.length)
     nota = h("p", { class: "sub" }, S.sel.tipo === "todas"
       ? "Mostrando " + TXT.masRecientes(S.datos.descartadas.length) + " de " + S.datos.total_descartadas + "."

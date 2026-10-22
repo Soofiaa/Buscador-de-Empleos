@@ -62,7 +62,7 @@ NOMBRE_FUENTE = {"indeed": "Indeed", "google": "Google", "glassdoor": "Glassdoor
 # todo el mundo, así que la app no pide el detalle (ver NOTAS.md, 21-10). Glassdoor sí lo trae desde el 21-10
 # (fetch_description), pero sigue aquí por las ofertas guardadas antes de ese cambio.
 FUENTES_SIN_TEXTO = ("linkedin", "glassdoor")
-AVISO_SIN_TEXTO = "⚠ sin descripción: experiencia y nivel sin verificar"
+AVISO_SIN_TEXTO = "⚠ el texto del aviso no llegó a la app: experiencia y nivel sin verificar"
 EXPERIENCIA_SIN_VERIFICAR = "Sin verificar"
 
 # ---- Portales chilenos (términos validados por la app anterior; sin tildes porque van en la URL) ----
