@@ -448,7 +448,7 @@
   .seccion-lateral-titulo { font-size:.74rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--suave); margin:14px 2px 6px; }
   .badge-db-status { margin-top:20px; padding:10px 12px; background:var(--panel2); border:1px solid var(--borde); border-radius:10px; font-size:.78rem; color:var(--suave); display:flex; align-items:center; gap:8px; }
   .dot-online { width:8px; height:8px; border-radius:50%; background:#10B981; box-shadow:0 0 6px #10B981; flex-shrink:0; }
-  /* ---------- corrección de contraste WCAG AA (PREPARADA, SIN APLICAR): se activa con data-contraste="aa" en <html> */
+  /* ---------- corrección de contraste WCAG AA: activa con data-contraste="aa" en <html> (interruptor «Contraste reforzado») */
   :root[data-contraste="aa"][data-tema="girly-claro"] { --accion:#DA2A64; --alta:#BB3560; --baja:#875E70; --nueva:#C11856; --aviso:#A25904; --rojo:#CF1B42; }
   :root[data-contraste="aa"][data-tema="girly-oscuro"] { --accion:#E80D33; --media:#DD59F1; --baja:#B2819F; --rojo:#F65C76; }
   :root[data-contraste="aa"][data-tema="hombre-claro"] { --alta:#0270A9; --baja:#5B6A7F; --nueva:#1759EA; --aviso:#A25904; --rojo:#CD2121; }
@@ -482,6 +482,9 @@
         </optgroup>
       </select>
     </div>
+    <label class="interruptor-soporte" style="margin:6px 0 0;" title="Colores de texto y acento más oscuros o más claros, según el tema, para cumplir contraste WCAG AA">
+      <input type="checkbox" id="contraste-aa"> Contraste reforzado
+    </label>
     <div class="sub" id="ultima">Cargando…</div>
 
     <div class="seccion-lateral">
@@ -942,6 +945,17 @@ function aplicarTema(t) {
 }
 $("tema").addEventListener("change", e => aplicarTema(e.target.value));
 try { aplicarTema(localStorage.getItem("tema")); } catch (e) { aplicarTema(null); }
+
+// contraste reforzado: encendido por defecto; se recuerda en este navegador
+function aplicarContraste(on) {
+  if (on) document.documentElement.setAttribute("data-contraste", "aa"); else document.documentElement.removeAttribute("data-contraste");
+  $("contraste-aa").checked = on;
+  try { localStorage.setItem("contraste", on ? "aa" : "normal"); } catch (e) {}
+}
+$("contraste-aa").addEventListener("change", e => aplicarContraste(e.target.checked));
+let contrasteGuardado = null;
+try { contrasteGuardado = localStorage.getItem("contraste"); } catch (e) {}
+aplicarContraste(contrasteGuardado !== "normal");
 
 // ---------- columna izquierda: historial
 function elegir(sel) { S.sel = sel; pintar(); }
