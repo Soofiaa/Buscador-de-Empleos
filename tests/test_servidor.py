@@ -149,9 +149,10 @@ def test_el_detalle_es_un_dialogo_accesible_y_las_notas_son_texto():
     assert '"descartadas_usuario", "Descartadas"' in PAGINA and '"descartadas", "Descartadas por filtros"' in PAGINA
 
 
-def test_la_correccion_de_contraste_esta_preparada_pero_no_aplicada():
+def test_la_correccion_de_contraste_tiene_interruptor_y_viene_encendida():
     assert PAGINA.count(':root[data-contraste="aa"][data-tema="') == 6
-    assert "data-contraste" not in PAGINA.split("</style>")[1]                 # nada en el HTML ni en el JS la activa
+    assert 'id="contraste-aa"' in PAGINA                                       # el interruptor «Contraste reforzado»
+    assert 'aplicarContraste(contrasteGuardado !== "normal")' in PAGINA         # encendido salvo que el usuario lo apague
     assert "--accion: #E04D7D;" in PAGINA                                      # colores originales del tema Girly Claro
 
 

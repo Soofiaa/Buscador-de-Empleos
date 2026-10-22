@@ -8,8 +8,14 @@ TERMINOS_A = [  # roles TI
     "analista funcional", "QA", "testing", "tester", "analista de pruebas",
     "business analyst", "análisis de requerimientos", "BPMN",
     "automatización de procesos", "desarrollador python",
-    "desarrollador backend", "desarrollador junior", "desarrollador frontend",
-    "analista de sistemas", "analista de datos junior", "reportería BI", "informático junior",
+    "desarrollador backend", "desarrollador junior", "desarrollador jr", "desarrollador frontend",
+    "analista de sistemas", "analista de datos junior", "analista de datos jr", "reportería BI",
+    "informático junior", "informático jr",
+    "data engineer junior", "data engineer jr", "ETL junior", "ETL jr", "analista BI junior", "analista BI jr",
+    "scrum master junior", "scrum master jr", "product owner junior", "product owner jr",
+    "devops junior", "devops jr", "cloud junior", "cloud jr",
+    "analista de ciberseguridad junior", "analista de ciberseguridad jr",
+    "desarrollador full stack junior", "desarrollador full stack jr",
 ]
 # Nota: "BPMN UML" (0 resultados en todas las zonas) se reemplazó por "BPMN";
 # los términos con "junior" + varias palabras técnicas no devuelven nada en Indeed.
@@ -18,6 +24,11 @@ TERMINOS_B = [  # roles puente (no TI)
     "analista de reportería", "control de gestión", "usuario clave", "key user",
     "analista SAP", "analista de implementación",
     "analista de operaciones", "PMO", "asistente de proyectos",
+    "analista de calidad", "analista de mejora",
+    "coordinador de proyectos junior", "coordinador de proyectos jr", "gestor de proyectos junior", "gestor de proyectos jr",
+    "analista de transformación digital junior", "analista de transformación digital jr",
+    "consultor funcional junior", "consultor funcional jr",
+    "analista de requerimientos junior", "analista de requerimientos jr",
 ]
 # Fuentes. Indeed busca con todos los términos; Google y Glassdoor con la lista
 # corta (TERMINOS_SECUNDARIOS) para limitar peticiones y riesgo de bloqueo.
@@ -25,17 +36,34 @@ TERMINOS_B = [  # roles puente (no TI)
 # con la ubicación escrita ("Santiago, Chile"). Es un rodeo: ver probar_fuentes.py.
 # Google está desactivado: JobSpy recibe "Google returned no job data" (probado 2026-10-10).
 # Para reintentarlo, agrégalo a la lista: SITIOS = ["indeed", "glassdoor", "google"]
-SITIOS = ["indeed", "glassdoor", "getonboard", "bne", "trabajando", "chiletrabajos", "linkedin"]
+SITIOS = ["indeed", "glassdoor", "getonboard", "bne", "trabajando", "chiletrabajos", "chumi", "laborum", "linkedin"]
+# chumi y laborum: verificados contra el sitio real el 2026-10-20 (ver chumi.py y laborum.py; Laborum usa Playwright).
+# Computrabajo, Buscojobs y Empleos Públicos rechazan (403) a la app aunque vaya en un navegador real: se buscan a
+# mano desde la página (ver NOTAS.md, 20-10).
 # getonboard: API oficial (ver getonboard.py). bne / trabajando / chiletrabajos: portales chilenos leídos sin JobSpy
 # (módulos bne.py, trabajando.py, chiletrabajos.py), con las mismas reglas de la app "Busca Empleo": robots.txt,
 # pausa de 3 a 5 s, y detención del sitio ante 401/403/429 o CAPTCHA (nunca se esquiva).
 TERMINOS_SECUNDARIOS = [
     "analista funcional", "QA", "tester", "business analyst", "analista de sistemas",
     "desarrollador python", "desarrollador backend", "analista de procesos",
-    "datos maestros", "analista de datos junior", "informático junior",
+    "datos maestros", "analista de datos junior", "analista de datos jr",
+    "informático junior", "informático jr",
+    "data engineer junior", "data engineer jr", "analista BI junior", "analista BI jr",
+    "devops junior", "devops jr",
+    "analista de calidad", "analista de mejora",
+    "analista de requerimientos junior", "analista de requerimientos jr",
 ]
 NOMBRE_FUENTE = {"indeed": "Indeed", "google": "Google", "glassdoor": "Glassdoor", "getonboard": "Get on Board",
-                 "bne": "BNE", "trabajando": "Trabajando", "chiletrabajos": "Chiletrabajos", "linkedin": "LinkedIn"}
+                 "bne": "BNE", "trabajando": "Trabajando", "chiletrabajos": "Chiletrabajos", "laborum": "Laborum",
+                 "chumi": "Chumi", "linkedin": "LinkedIn"}
+# Fuentes cuyo listado puede llegar SIN descripción. Sin texto no hay nada que revisar: ni experiencia, ni nivel, ni
+# contrato, ni sueldo, ni señales. Esas ofertas van a "sin_descripcion" (las revisa Sofia abriendo el aviso), nunca se
+# muestran como si hubieran pasado los filtros. LinkedIn nunca trae descripción: su robots.txt dice "Disallow: /" a
+# todo el mundo, así que la app no pide el detalle (ver NOTAS.md, 21-10). Glassdoor sí lo trae desde el 21-10
+# (fetch_description), pero sigue aquí por las ofertas guardadas antes de ese cambio.
+FUENTES_SIN_TEXTO = ("linkedin", "glassdoor")
+AVISO_SIN_TEXTO = "⚠ el texto del aviso no llegó a la app: experiencia y nivel sin verificar"
+EXPERIENCIA_SIN_VERIFICAR = "Sin verificar"
 
 # ---- Portales chilenos (términos validados por la app anterior; sin tildes porque van en la URL) ----
 # BNE: "ocupacion:7643" = grupo TI "Desarrolladores y analistas de sistemas". Palabras de menos de 3 letras dan 0 ("qa").
@@ -46,17 +74,21 @@ TERMINOS_BNE = ["ocupacion:7643", "analista funcional", "analista de procesos", 
 TERMINOS_TRABAJANDO = ["analista-funcional", "analista-de-procesos", "analista-qa", "analista-programador",
                        "desarrollador-backend", "programador", "desarrollador-python"]   # los 3 últimos, sin verificar
 TERMINOS_CHILETRABAJOS = ["analista funcional", "analista de procesos", "analista qa", "tester",
-                          "analista programador", "desarrollador junior", "analista de datos",
+                          "analista programador", "desarrollador junior", "desarrollador jr", "analista de datos",
                           "analista de reporteria", "control de gestion", "analista de operaciones", "datos maestros",
-                          "informatico junior"]
-# LinkedIn: endpoint público para invitados (sin cuenta). Ver linkedin.py.
-TERMINOS_LINKEDIN = ["analista funcional", "QA", "tester", "analista de procesos",
-                     "desarrollador python", "desarrollador backend", "analista de sistemas",
-                     "analista de datos junior", "informatico junior"]
+                          "informatico junior", "informatico jr"]
+# Laborum: cada término abre un navegador sin ventana (~5 s) y trae los 20 más relevantes; van a la URL como slug
+# (laborum.url_busqueda). Lista corta a propósito.
+TERMINOS_LABORUM = ["analista funcional", "analista de procesos", "analista qa", "tester", "analista de sistemas",
+                    "desarrollador python", "desarrollador backend", "desarrollador junior", "analista de datos",
+                    "analista bi", "control de gestion", "datos maestros", "informatico junior"]
+# Chumi: no tiene búsqueda en HTML; se leen las primeras páginas de su listado general (/trabajos?page=N, ~25 cada una)
+# y el clasificador filtra como siempre.
+TERMINOS_CHUMI = ["página 1", "página 2", "página 3"]
 # Los listados de estos portales vienen recortados: el detalle de cada aviso se abre SOLO para ofertas nuevas que
 # podrían servir (las más recientes primero), con este tope por corrida. Las que no alcanzan no se guardan: quedan
 # para la próxima corrida.
-MAX_DETALLES = {"bne": 5, "trabajando": 5, "chiletrabajos": 10, "linkedin": 5}
+MAX_DETALLES = {"bne": 5, "trabajando": 5, "chiletrabajos": 10, "chumi": 10, "laborum": 0}   # Laborum no abre detalles
 DIAS_RECORDAR_404 = 30
 ERRORES_SEGUIDOS_PARA_ABORTAR = 3
 # Fuentes que no son Indeed no traen código de región fiable: la ubicación debe
@@ -71,11 +103,14 @@ REGIONES_VALIDAS = {"RM", "VS"}   # presencial/híbrido solo en estas regiones
 
 RESULTADOS_POR_BUSQUEDA = 30
 PAUSA_ENTRE_BUSQUEDAS = 1.5       # segundos, para no gatillar bloqueos
+# Pausa aleatoria (mínimo, máximo en segundos) entre consultas JobSpy de las fuentes que limitan más: LinkedIn
+# respondió 429 el 19-10 con 1,5 s. Si igual responde 429, esa fuente se deja por el resto de la corrida.
+PAUSA_JOBSPY = {"linkedin": (6.0, 10.0), "glassdoor": (3.0, 5.0)}
 
 # ---- Antigüedad: solo se recolectan ofertas recientes (las más antiguas no se guardan ni cuentan) ----
 # Días hacia atrás por fuente: 1 = "hoy y ayer". Fuentes con hora (Get on Board, Trabajando, y el filtro de Indeed)
 # usan un corte exacto de 24 h por día. BNE publica con desfase, por eso 3. Las ofertas sin fecha pasan siempre.
-MAX_ANTIGUEDAD_DIAS = {"indeed": 1, "glassdoor": 1, "getonboard": 1, "bne": 3, "trabajando": 1, "chiletrabajos": 1, "linkedin": 1}
+MAX_ANTIGUEDAD_DIAS = {"indeed": 1, "glassdoor": 1, "getonboard": 1, "bne": 3, "trabajando": 1, "chiletrabajos": 1, "laborum": 1, "chumi": 1, "linkedin": 1}
 # Si pasan días sin buscar, la ventana crece sola (días desde el fin de la última búsqueda + 1), hasta este tope.
 DIAS_MAXIMOS = 14
 ZONA_HORARIA = "America/Santiago"   # "hoy" se calcula en hora de Chile, no con la hora del equipo o contenedor
@@ -90,7 +125,7 @@ PUERTO = int(os.environ.get("JT_PUERTO", "8765"))
 HOST = os.environ.get("JT_HOST", "127.0.0.1")        # en Docker: 0.0.0.0 dentro del contenedor (el puerto se publica solo en 127.0.0.1)
 
 # ============================================================== Exclusiones absolutas
-EXCLUIR_EMPRESAS = ["accenture"]
+EXCLUIR_EMPRESAS = ["accenture", "bairesdev", "baires dev"]
 EXCLUIR_PRACTICA_TITULO = [r"practic", r"pasant", r"\bintern\b", r"estudiante",
                            r"memorista", r"alumno"]
 EXCLUIR_PRACTICA_DESC = [r"practica profesional", r"practicante", r"memorista",
@@ -157,6 +192,10 @@ CONTEXTO_MIN = 2
 # la descripción mencione Python o SQL ("Analista de Calidad, Gerencia SAC"). Solo se
 # salva si el título trae una palabra claramente técnica.
 NO_TI_TITULO = r"\bsac\b|servicio al cliente|atencion (al|de) cliente|experiencia (de|del) cliente|recursos humanos|\brrhh\b|gestion de personas|seleccion de personal|capital humano|talento"
+# Si la DESCRIPCIÓN describe un oficio técnico no TI, el cargo no es TI aunque el título calce un rol A (p. ej.
+# "Analista Funcional" de un técnico eléctrico). Solo oficios concretos: "tableros de control" de BI no cuenta.
+NO_TI_DESC = (r"tecnico (electric|mecanic|en electricidad|de mantenimiento industrial)|electricista|mecanico (de|industrial)"
+              r"|soldador|maquinaria pesada|instalaciones electricas|tableros? electric|montaje electromecanico")
 TI_EN_TITULO = r"\bqa\b|tester|testing|software|desarrollador|programador|developer|python|\bsql\b|\bti\b|sistemas|\bdatos\b.*\b(bi|etl)\b"
 CONTEXTO_TI = {
     "software": r"software", "bases de datos": r"bases? de datos",
@@ -206,12 +245,16 @@ APORTA = {  # qué habilidad de TI suma cada señal
 # Se DESCARTAN las ofertas de nivel semi senior o superior (título o descripción).
 SENIORITY_TITULO = r"semi[ -]?senior|\bssr\b|\bsemi ?sr\b|\bsenior\b|\bsr\b|\blead\b|\blider\b|\bjefe\b|\bgerente\b|\barquitecto\b|\bmanager\b|\bsupervisor\b|\bcoordinador"
 SENIORITY_DESC = r"(perfil|nivel|cargo|rol|posicion) (de )?(semi[ -]?)?senior|(semi[ -]?senior|senior) (developer|engineer|analyst|desarrollador|ingeniero|analista)"
-EXPERIENCIA_DESCARTA_DESDE = 2    # si exige este mínimo de años (o más), la oferta se descarta
-                                  # ("1 a 2 años" se mantiene: el mínimo es 1)
-PLAZO_TITULO = [r"reemplazo", r"temporal", r"\d+ meses", r"pre y post natal"]
+EXPERIENCIA_DESCARTA_DESDE = 2    # si el mínimo exigido es este (o más), se descarta ("2 años", "2 a 4")
+EXPERIENCIA_MAXIMA = 2            # si el rango supera este máximo, se descarta ("1 a 3", "3 años")
+                                  # se mantienen "1 año", "0 a 2", "1 a 2" y sin experiencia
+PLAZO_TITULO = [r"reemplazo", r"temporal", r"\d+ meses", r"pre y post natal",
+                r"\btemporary\b", r"\d+ months?"]                      # avisos en inglés (Indeed los trae)
 PLAZO_DESC = [r"plazo fijo", r"por obra", r"faena", r"temporada", r"contrato temporal",
               r"vacante temporal", r"pre y post natal|prenatal|postnatal",
-              r"(proyecto|contrato|duracion)[^.]{0,25}\b\d+ meses", r"reemplazo de (licencia|vacaciones|permiso)"]
+              r"(proyecto|contrato|duracion)[^.]{0,25}\b\d+ meses", r"reemplazo de (licencia|vacaciones|permiso)",
+              r"fixed[ -]term", r"(project|contract|duration|assignment)[^.]{0,25}\b\d+ months?",
+              r"\b\d+[ -]months? (contract|project|assignment)"]
 SUELDO_ALERTA = 800000
 # Remoto: una mención suelta de "remoto" no basta (puede ser "monitoreo remoto").
 REMOTO_EN_TITULO = r"remot[oa]|teletrabajo|home office"

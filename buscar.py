@@ -8,7 +8,9 @@ import argparse
 import csv
 import io
 import json
+import logging
 import os
+import random
 import re
 import sqlite3
 import sys
@@ -22,9 +24,10 @@ import pandas as pd
 
 import bne
 import chiletrabajos
+import chumi
 import config
+import laborum
 import getonboard
-import linkedin
 import telemetria
 import trabajando
 from red import Bloqueo, ClienteHTTP, ErrorFuente, NoEncontrada, USER_AGENT_HTTP
@@ -40,7 +43,7 @@ def _say(mensaje: str):
     salida(mensaje)
 
 
-PORTALES = {"bne": bne, "trabajando": trabajando, "chiletrabajos": chiletrabajos, "linkedin": linkedin}
+PORTALES = {"bne": bne, "trabajando": trabajando, "chiletrabajos": chiletrabajos, "chumi": chumi, "laborum": laborum}
 ESTADOS = ["nueva", "revisada", "postulada", "entrevista", "descartada"]
 ESTADOS_CERRADOS = {"postulada", "entrevista", "descartada"}
 LIMITE_DESCARTADAS = 300   # la página muestra las descartadas más recientes (con su motivo)
@@ -492,6 +495,11 @@ def consulta(sitio: str, termino: str, lugar: str, resultados: int | None = None
         kw["country_indeed"] = "Chile"
     elif sitio == "glassdoor":
         kw["country_indeed"] = "usa"   # JobSpy no tiene dominio Glassdoor para Chile: rodeo vía glassdoor.com
+        # sin esto el listado llega SIN descripción y no se puede revisar experiencia ni nivel (ver NOTAS.md, 21-10).
+        # En Glassdoor el detalle va por el mismo endpoint /graph del listado y pide uno por cada 25 ofertas.
+        # LinkedIn NO lleva este parámetro: ahí sería una solicitud por oferta a /jobs-guest/, que su robots.txt
+        # prohíbe ("Disallow: /" para todos). Sus ofertas quedan en 'sin_descripcion'.
+        kw["fetch_description"] = True
     return kw
 
 
@@ -509,7 +517,8 @@ def _recordar_404(con, sitio, termino):
 
 def _terminos_portal(sitio):
     return {"bne": config.TERMINOS_BNE, "trabajando": config.TERMINOS_TRABAJANDO,
-            "chiletrabajos": config.TERMINOS_CHILETRABAJOS, "linkedin": config.TERMINOS_LINKEDIN}[sitio]
+            "chiletrabajos": config.TERMINOS_CHILETRABAJOS, "laborum": config.TERMINOS_LABORUM,
+            "chumi": config.TERMINOS_CHUMI}[sitio]
 
 
 def _es_candidata(raw: dict) -> bool:
@@ -573,11 +582,14 @@ def _buscar_portal(con, sitio, st, avisos, cliente, robots, ahora: datetime | No
             filas.setdefault(r["job_url"], r)
     conocidas = {u for (u,) in con.execute("SELECT url FROM ofertas")}
     nuevas = [r for u, r in filas.items() if u not in conocidas]
-    candidatas = [r for r in nuevas if _es_candidata(a_raw(r, sitio))]
+    # una candidata que resultó antigua al abrir su detalle (Chumi: la fecha solo viene ahí) no se vuelve a abrir
+    excluir = {r["job_url"] for r in nuevas if _termino_recordado_404(con, sitio, r["job_url"])}
+    candidatas = [] if getattr(mod, "SIN_DETALLE", False) else [   # Laborum: el listado ya trae el texto completo
+        r for r in nuevas if r["job_url"] not in excluir and _es_candidata(a_raw(r, sitio))]
     candidatas.sort(key=lambda r: texto(r.get("date_posted")), reverse=True)
 
     # detalle de las que alcanzan; las demás candidatas no se guardan (quedan para la próxima corrida)
-    excluir, pendientes, cerradas, detenido = set(), 0, 0, False
+    pendientes, cerradas, detenido = 0, 0, False
     for n, r in enumerate(candidatas):
         if detenido or n >= config.MAX_DETALLES[sitio]:
             excluir.add(r["job_url"])
@@ -600,6 +612,10 @@ def _buscar_portal(con, sitio, st, avisos, cliente, robots, ahora: datetime | No
         if not mod.completar(r, det):      # el sitio dice que ya no está vigente
             excluir.add(r["job_url"])
             cerradas += 1
+        elif antiguedad(a_raw(r, sitio), ahora, dias) == "antigua":     # la fecha llegó con el detalle
+            excluir.add(r["job_url"])
+            st["antiguas"] = st.get("antiguas", 0) + 1
+            _recordar_404(con, sitio, r["job_url"])
     if pendientes:
         avisos.append(f"{nombre}: {plural(pendientes, 'candidata espera', 'candidatas esperan')} a la próxima corrida "
                       "(tope de detalles por corrida)")
@@ -614,8 +630,38 @@ def _buscar_portal(con, sitio, st, avisos, cliente, robots, ahora: datetime | No
     return nuevas_rel
 
 
+class _Vigia429(logging.Handler):
+    """JobSpy no lanza error ante un 429: solo lo registra en su logger ("LinkedIn response status code 429"). Aquí se
+    anota, para dejar esa fuente el resto de la corrida (como los portales: ante 429 no se insiste)."""
+    def __init__(self):
+        super().__init__(logging.ERROR)
+        self.frenadas = set()
+
+    def emit(self, registro):
+        if re.search(r"\b429\b", registro.getMessage()):
+            self.frenadas.add(registro.name.split(":", 1)[-1].lower())
+
+
+_VIGIA_429 = _Vigia429()
+
+
+def _vigilar_429():
+    """Después de importar jobspy (sus loggers ya tienen el handler de consola, que sigue escribiendo en docker logs)."""
+    _VIGIA_429.frenadas.clear()
+    for nombre in ("LinkedIn", "Glassdoor", "Indeed"):
+        registro = logging.getLogger(f"JobSpy:{nombre}")
+        if _VIGIA_429 not in registro.handlers:
+            registro.addHandler(_VIGIA_429)
+
+
+def _pausa_jobspy(sitio: str) -> float:
+    rango = config.PAUSA_JOBSPY.get(sitio)
+    return random.uniform(*rango) if rango else config.PAUSA_ENTRE_BUSQUEDAS
+
+
 def buscar_ofertas(con) -> int:
     from jobspy import scrape_jobs  # import aquí: los tests no lo necesitan
+    _vigilar_429()
 
     lugares = list(config.UBICACIONES) + ([REMOTO] if config.INCLUIR_REMOTO else [])
     plan = [(s, t, l) for s in config.SITIOS if s not in PORTALES
@@ -634,10 +680,19 @@ def buscar_ofertas(con) -> int:
     if ampliadas:
         avisos.append(f"Pasaron días sin buscar: ventana ampliada a {plural(max(ventanas.values()), 'día', 'días')} "
                       f"({', '.join(ampliadas)}) para no perder ofertas de ese hueco.")
+    frenadas = set()
     for n, (sitio, termino, lugar) in enumerate(plan, start=1):
         etiqueta = f"{termino} | {lugar}"
         st = stats[sitio]
         t = tele[sitio]
+        if sitio in _VIGIA_429.frenadas:
+            if sitio not in frenadas:
+                frenadas.add(sitio)
+                st["errores"] += 1
+                avisos.append(f"⚠ {config.NOMBRE_FUENTE[sitio]} respondió 429 (demasiadas consultas): se dejó por el "
+                              "resto de esta corrida. No se insiste.")
+                _say(f"  ! [{sitio}] 429: se deja por esta corrida")
+            continue
         try:
             if sitio == "getonboard":
                 df = getonboard.buscar(termino, config.RESULTADOS_POR_BUSQUEDA,
@@ -667,7 +722,7 @@ def buscar_ofertas(con) -> int:
         _say(f"  [{n}/{len(plan)}] {sitio} | {etiqueta}: {plural(len(df), 'encontrada', 'encontradas')}, "
              f"{plural(nuevas, 'nueva relevante', 'nuevas relevantes')}"
              + (f", {plural(antiguas, 'antigua omitida', 'antiguas omitidas')}" if antiguas else ""))
-        time.sleep(config.PAUSA_ENTRE_BUSQUEDAS)
+        time.sleep(_pausa_jobspy(sitio))
 
     activos = [s for s in config.SITIOS if s in PORTALES]
     if activos:
@@ -675,8 +730,13 @@ def buscar_ofertas(con) -> int:
         for sitio in activos:
             anotar = (lambda status, t=tele[sitio]: telemetria.anotar_status(t, status))
             cliente.al_responder = robots.al_responder = anotar       # el robots.txt de cada sitio cuenta para él
-            total += _buscar_portal(con, sitio, stats[sitio], avisos, cliente, robots, ahora, ventanas[sitio],
-                                    tele=tele[sitio])
+            try:                          # un fallo inesperado de un portal no corta la corrida ni deja de registrarla
+                total += _buscar_portal(con, sitio, stats[sitio], avisos, cliente, robots, ahora, ventanas[sitio],
+                                        tele=tele[sitio])
+            except Exception as e:
+                stats[sitio]["errores"] += 1
+                avisos.append(f"⚠ {config.NOMBRE_FUENTE[sitio]} falló: {type(e).__name__}: {e}. Se siguió con las demás.")
+                _say(f"  ! [{sitio}] {type(e).__name__}: {e}")
 
     _say("\nPor fuente (encontradas / relevantes nuevas / descartadas por no ser Chile / errores / antiguas omitidas):")
     for sitio, st in stats.items():
@@ -704,21 +764,30 @@ def buscar_ofertas(con) -> int:
 
 # ------------------------------------------------------------------ datos para la página
 def ofertas_para_pagina(con) -> dict:
-    """Lo que muestra la página: ofertas principales (ordenadas), fuera de perfil, sospechosas y descartadas recientes."""
+    """Lo que muestra la página: ofertas principales (ordenadas), sin descripción, fuera de perfil, sospechosas y
+    descartadas recientes."""
     def filas(sql, args=()):
         return [dict(r) for r in con.execute(sql, args)]
 
-    # una postulación en curso se ve siempre en Seguimiento, aunque una reclasificación la saque de 'principal'
-    seguimiento = "estado IN ('postulada', 'entrevista')"
-    principal = [_con_prioridad_mostrada(f) for f in filas(f"SELECT * FROM ofertas WHERE categoria = 'principal' OR {seguimiento}")]
-    principal.sort(key=lambda f: f["publicada"] or "", reverse=True)   # más recientes primero
-    principal.sort(key=lambda f: (f["estado"] in ESTADOS_CERRADOS,
+    def ordenadas(lista):
+        lista.sort(key=lambda f: f["publicada"] or "", reverse=True)   # más recientes primero
+        lista.sort(key=lambda f: (f["estado"] in ESTADOS_CERRADOS,
                                   ORDEN_PRIORIDAD.get(f["prioridad"], 9),
                                   ORDEN_MODALIDAD.get(f["modalidad"], 9)))
+        return lista
+
+    # una postulación en curso se ve siempre en Seguimiento, aunque una reclasificación la saque de 'principal'
+    seguimiento = "estado IN ('postulada', 'entrevista')"
+    principal = ordenadas([_con_prioridad_mostrada(f) for f in
+                           filas(f"SELECT * FROM ofertas WHERE categoria = 'principal' OR {seguimiento}")])
     campos = "url, titulo, empresa, ubicacion, publicada, fuente, estado, detectada_en, razon, motivo"
     otra = f"NOT ({seguimiento})"              # las que ya están en principal no se repiten en otra lista
+    # "Sin descripción" se trabaja igual que Ofertas (mismos campos y acciones): son ofertas que solo tú puedes revisar
+    sin_descripcion = ordenadas([_con_prioridad_mostrada(f) for f in
+                               filas(f"SELECT * FROM ofertas WHERE categoria = 'sin_descripcion' AND {otra}")])
     datos = {
         "principal": principal,
+        "sin_descripcion": sin_descripcion,
         "fuera_perfil": filas(f"SELECT {campos} FROM ofertas WHERE categoria = 'fuera_perfil' AND {otra} "
                               "ORDER BY detectada_en DESC"),
         "sospechosas": filas(f"SELECT {campos} FROM ofertas WHERE categoria = 'sospechosa' AND {otra} "
@@ -739,7 +808,7 @@ def ofertas_para_pagina(con) -> dict:
     historial = {}
     for r in con.execute("SELECT * FROM historial_estados ORDER BY id"):     # por id: nunca por la hora en texto
         historial.setdefault(r["url"], []).append(dict(r))
-    for o in datos["principal"]:
+    for o in datos["principal"] + datos["sin_descripcion"]:   # las dos se gestionan con estado y fases
         o["en_fase_desde"] = en_fase_desde(historial.get(o["url"], []), o["estado"], o.get("fase") or "")
     datos["total_descartadas"] = con.execute(
         f"SELECT COUNT(*) FROM ofertas WHERE categoria = 'descartada' AND {otra}").fetchone()[0]
@@ -908,6 +977,39 @@ def actualizar_seguimiento(con, url: str, cambios: dict) -> dict:
         fila = con.execute("SELECT url, estado, notas, fecha_postulacion, fase, sueldo_manual, prioridad_manual, "
                            "prioridad FROM ofertas WHERE url = ?", (url,)).fetchone()
     return _con_prioridad_mostrada(dict(fila))
+
+
+# Descripción pegada a mano en una oferta de «Sin texto» (POST /api/descripcion). Solo cambia el texto de esa oferta y
+# su clasificación; nunca estado, fase ni fecha, que van por _cambiar_seguimiento.
+LIMITE_DESCRIPCION = 10_000
+
+
+def pegar_descripcion(con, url: str, descripcion: str) -> dict:
+    """Guarda el texto del aviso que Sofia copió a mano y reclasifica SOLO esa oferta con él. Si el texto cambia la
+    decisión (p. ej. pide 3+ años), la oferta sale de «Sin texto» sola; si no, pasa a Ofertas."""
+    if not isinstance(url, str) or not url:
+        raise ErrorDatos(400, "falta la oferta")
+    if not isinstance(descripcion, str):
+        raise ErrorDatos(400, "la descripción debe ser texto")
+    texto_ = descripcion.strip()
+    if not texto_:
+        raise ErrorDatos(400, "la descripción está vacía")
+    if len(texto_) > LIMITE_DESCRIPCION:
+        raise ErrorDatos(400, f"la descripción tiene más de {LIMITE_DESCRIPCION} caracteres")
+    with transaccion(con):
+        fila = con.execute("SELECT url, raw, categoria, fuente FROM ofertas WHERE url = ?", (url,)).fetchone()
+        if not fila:
+            raise ErrorDatos(404, "no existe la oferta")
+        if fila["categoria"] != "sin_descripcion" or fila["fuente"] not in config.FUENTES_SIN_TEXTO:
+            raise ErrorDatos(400, "esta oferta no está en «Sin texto»")
+        raw = json.loads(fila["raw"])
+        raw["description"] = texto_
+        cl = clasificar(raw)
+        con.execute("""UPDATE ofertas SET raw = :raw, categoria = :categoria, razon = :razon, tipo = :tipo,
+                       prioridad = :prioridad, modalidad = :modalidad, contrato = :contrato, sueldo = :sueldo,
+                       experiencia = :experiencia, motivo = :motivo WHERE url = :url""",
+                    {**cl, "raw": json.dumps(raw, ensure_ascii=False), "url": url})
+    return {"categoria": cl["categoria"], "razon": cl["razon"], "experiencia": cl["experiencia"]}
 
 
 TIPO_MANUAL = "M: Manual"

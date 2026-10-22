@@ -1,40 +1,46 @@
-# Búsqueda de empleo (job-tracker)
+# Búsqueda de empleo · job-tracker
 
-Busca ofertas en Indeed, Glassdoor, Get on Board, BNE, Trabajando y Chiletrabajos; las clasifica según tu perfil y las
-muestra en una página local, con estados de seguimiento (nueva, revisada, postulada, entrevista, descartada).
+El perfil de trabajo de Sofía (nombre del proyecto: `job-tracker`) es una aplicación de seguimiento de ofertas laborales hecha en Python + SQLite + una página local (`web/pagina.html`). Responde siempre en español.
 
-## Con Docker (siempre encendida)
-Requisito: Docker Desktop (gratis para uso personal) y, en sus ajustes, "Start Docker Desktop when you sign in".
+## Cómo está organizado
 
-    docker compose up -d --build        # construye y deja la página encendida
-    # abre http://127.0.0.1:8765
+- `web/pagina.html`: la interfaz completa (un solo archivo con CSS y JavaScript).
+- `servidor.py`: la API local y la página. Escucha solo en `127.0.0.1`.
+- `buscar.py`, `filtros.py`, `red.py`: búsqueda, clasificación y conexión a la base.
+- `tests/`: pruebas. Se ejecutan con `venv\Scripts\python.exe -m pytest -q`.
+- `NOTAS.md`: decisiones, hallazgos y estado de producción. Leer al empezar cada sesión.
+- `.claude/skills/desplegar/SKILL.md`: procedimiento estándar para desplegar a producción. Requiere aprobación explícita.
 
-- La página queda disponible aunque reinicies el PC (`restart: unless-stopped`). La búsqueda NO corre sola: se lanza con el botón «Buscar empleos».
-- El puerto se publica solo en tu PC (127.0.0.1); no es accesible desde la red.
-- La base de datos vive en un volumen de Docker (`jt_datos`), no dentro del contenedor, así que sobrevive a actualizaciones.
-- Ver el registro: `docker compose logs -f`. Apagar: `docker compose down` (no borra tus datos).
-- Actualizar tras cambiar código: `docker compose up -d --build`.
+## Ofertas sin texto
 
-### Traer tu base de datos actual (ofertas.db) al volumen — una sola vez
-    docker compose create
-    docker compose cp ofertas.db jobtracker:/datos/ofertas.db
-    docker compose up -d
+A partir del 21 de octubre de 2026, la aplicación distingue dos grupos principales de ofertas:
 
-### Copia de seguridad
-    docker compose cp jobtracker:/datos/ofertas.db ./ofertas_respaldo.db
+1. **Ofertas revisadas con texto**: se clasifican automáticamente según experiencia, nivel, contrato, zona y reglas de seniority.
+   - Vienen de los portales (BNE, Trabajando, Chiletrabajos, Chumi, Laborum), de Indeed y de Get on Board.
+   - Las que pasan los filtros se muestran en la pestaña **«Ofertas»**.
 
-## Sin Docker
-    python servidor.py        # abre http://127.0.0.1:8765
-    python buscar.py          # búsqueda por consola (sin la página)
-    python buscar.py --reclasificar
-    python -m pytest -q
+2. **Ofertas sin texto**: llegan sin descripción (hoy, LinkedIn).
+   - Se muestran en la pestaña **«Sin texto»**.
+   - La app solo puede decidir con base en el título y la empresa.
+   - Para decidirlas, abre el aviso con ↗ y pega su descripción en la tarjeta. Así el servidor la reclasifica solo a esa oferta.
 
-Todo se ajusta en `config.py`.
+### Qué no cambia
 
-## Créditos y licencias
-- Las ofertas de Indeed y Glassdoor se obtienen con [JobSpy](https://github.com/speedyapply/JobSpy)
-  (`python-jobspy`), software de código abierto bajo licencia MIT, © 2023 Cullen Watson. Se usa como dependencia,
-  sin modificar su código.
-- Get on Board se consulta con su API oficial. BNE, Trabajando y Chiletrabajos se leen con código propio, respetando
-  robots.txt.
-- El texto completo de la licencia MIT se instala junto con el paquete (python_jobspy-1.3.0.dist-info).
+- Las ofertas de Indeed, los portales chilenos y Get on Board siguen trayendo texto completo.
+- El registro de estados (nueva, revisada, postulada, entrevista, descartada) funciona igual para las ofertas sin texto.
+- Las demás funciones (seguimiento, notas, tablero, criterios de SAP/ERP, soporte TI, seniority, exclusiones y reglas de experiencia) siguen igual.
+- Las listas «Ofertas» y «Sin texto» usan los mismos filtros.
+
+## Pruebas
+
+Las pruebas del proyecto se ejecutan con:
+
+```
+venv\Scripts\python.exe -m pytest -q
+```
+
+Las pruebas que leen `web/pagina.html` comprueban su estructura, así que conviene correrlas después de cualquier cambio en la interfaz.
+
+## Despliegue
+
+El despliegue a producción no se hace a mano. Sigue el procedimiento de `.claude/skills/desplegar/SKILL.md`: referencia de la base con sha256, huellas antes y después, comprobaciones HTTP y reversión documentada. Nunca se despliega sin aprobación explícita.

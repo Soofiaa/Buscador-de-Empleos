@@ -31,6 +31,13 @@ def test_accenture_se_excluye_siempre():
     assert r["categoria"] == "descartada"
 
 
+@pytest.mark.parametrize("empresa", ["BairesDev", "Baires Dev", "BairesDev LLC"])
+def test_bairesdev_se_excluye_siempre(empresa):
+    r = clasificar(oferta("Analista Funcional", empresa=empresa, fuente="linkedin"))
+    assert r["categoria"] == "descartada"
+    assert r["razon"] == "empresa excluida"
+
+
 @pytest.mark.parametrize("titulo", ["Práctica QA", "Practicante Desarrollo", "Memorista TI",
                                     "Pasantía Analista de Sistemas"])
 def test_practicas_excluidas(titulo):
@@ -189,15 +196,17 @@ def test_analista_generico_no_entra():
 @pytest.mark.parametrize("desc", [
     "Se requieren 2 años de experiencia en el cargo.", "Mínimo 3 años de experiencia.",
     "Experiencia de 2 a 4 años en testing.", "5 años de experiencia demostrable.",
+    "1 a 3 años de experiencia", "3 a 5 años de experiencia",
 ])
 def test_dos_o_mas_anos_de_experiencia_se_descarta(desc):
     r = clasificar(oferta("Analista Funcional", desc))
-    assert r["categoria"] == "descartada" and "años de experiencia" in r["razon"]
+    assert r["categoria"] == "descartada" and "años" in r["razon"]
 
 
 @pytest.mark.parametrize("desc", ["1 año de experiencia", "0 a 2 años de experiencia",
-                                  "1 a 2 años de experiencia", "sin experiencia previa", ""])
-def test_hasta_un_ano_o_rango_que_parte_en_menos_de_2_se_mantiene(desc):
+                                  "1 a 2 años de experiencia", "0–2 años de experiencia",
+                                  "1–2 años de experiencia", "sin experiencia previa", ""])
+def test_hasta_un_ano_o_rango_hasta_dos_se_mantiene(desc):
     assert clasificar(oferta("Analista Funcional", desc))["categoria"] == "principal"
 
 
@@ -222,8 +231,95 @@ def test_es_senior():
 def test_extraer_experiencia():
     assert extraer_experiencia("minimo 2 años de experiencia")[0] == 2
     assert extraer_experiencia("1 a 2 años de experiencia")[0] == 1
+    assert extraer_experiencia("1–2 años de experiencia")[0] == 1
     assert extraer_experiencia("sin experiencia previa")[0] == 0
     assert extraer_experiencia("empresa con 20 años en el mercado")[0] is None
+
+
+# ------------------------------------------------------------ formas de escribir los años (21-10)
+@pytest.mark.parametrize("desc, razon", [
+    # manda la mención más exigente, no la primera que aparece
+    ("1 año de experiencia en mesa de ayuda y 5 años de experiencia en redes", "exige 5+ años de experiencia"),
+    ("Experiencia: 1 año. Deseable 4 años en el cargo. Requiere 3 años de experiencia en SQL",
+     "exige 3+ años de experiencia"),
+    # el requisito no siempre trae la palabra "experiencia"
+    ("Requisitos: título profesional, 3 años en cargos similares", "exige 3+ años de experiencia"),
+    ("Mínimo 4 años en el rubro", "exige 4+ años de experiencia"),
+    ("Se requieren 3 años desempeñándose en roles equivalentes", "exige 3+ años de experiencia"),
+    # el número escrito con palabras, o repetido entre paréntesis
+    ("Experiencia mínima de tres años en soporte informático", "exige 3+ años de experiencia"),
+    ("Experiencia: cinco (5) años en administración de servidores", "exige 5+ años de experiencia"),
+    ("Se requiere experiencia de dos años", "exige 2+ años de experiencia"),
+    # abreviaturas
+    ("Requerimos 4 años de exp. en desarrollo backend", "exige 4+ años de experiencia"),
+    ("Minimum 3 yrs of experience in IT support", "exige 3+ años de experiencia"),
+])
+def test_formas_de_pedir_anios_de_experiencia_se_descartan(desc, razon):
+    r = clasificar(oferta("Analista Funcional", desc))
+    assert (r["categoria"], r["razon"]) == ("descartada", razon)
+
+
+@pytest.mark.parametrize("desc", [
+    # lo deseable no es un requisito
+    "1 año de experiencia. Deseable 5 años en el rubro.",
+    "Experiencia de 1 año. Será un plus 3 años en SAP.",
+    "1 año de experiencia; se valorará experiencia de 4 años en testing.",
+    # la edad de la empresa no es un requisito del cargo
+    "Somos una empresa con 12 años en el mercado. Buscamos analista con 1 año de experiencia.",
+    "Compañía con 8 años de trayectoria y experiencia en retail. Requiere 1 año en el cargo.",
+    "Celebramos 10 años de experiencia en el sector. Se pide 1 año en cargos similares.",
+])
+def test_lo_deseable_y_los_anios_de_la_empresa_no_descartan(desc):
+    assert clasificar(oferta("Analista Funcional", desc))["categoria"] == "principal"
+
+
+@pytest.mark.parametrize("desc, aviso", [
+    ("1 año de experiencia. Deseable 5 años en el rubro.", "5 años"),
+    ("Se valorará experiencia de 5 años o más en infraestructura.", "5 años"),
+    ("Experiencia deseable de 1 a 3 años en funciones similares.", "1 a 3 años"),
+])
+def test_la_experiencia_deseable_se_avisa_en_el_motivo(desc, aviso):
+    """No descarta (no la exige), pero no se esconde: la oferta queda a la vista con el aviso."""
+    r = clasificar(oferta("Analista Funcional", desc))
+    assert r["categoria"] == "principal"
+    assert f"⚠ experiencia deseable (no exigida): {aviso}" in r["motivo"]
+
+
+@pytest.mark.parametrize("desc", ["Deseable 1 año de experiencia.", "1 año de experiencia en el cargo.",
+                                  "Deseable experiencia de 0 a 2 años."])
+def test_no_se_avisa_lo_deseable_que_cabe_en_tu_perfil(desc):
+    assert "deseable (no exigida)" not in clasificar(oferta("Analista Funcional", desc))["motivo"]
+
+
+def test_la_mencion_mas_exigente_manda_en_el_texto_mostrado():
+    assert extraer_experiencia("1 año de experiencia y 5 años de experiencia en redes") == (5, "5 años")
+    assert extraer_experiencia("3 años en cargos similares")[0] == 3
+    assert extraer_experiencia("experiencia de tres años")[1] == "3 años"
+    assert extraer_experiencia("hasta 2 años de experiencia") == (0, "hasta 2 años")
+
+
+@pytest.mark.parametrize("desc, texto", [
+    # el tope se dice, si no el chip "2 años" se lee como si el aviso exigiera 2 (21-10)
+    ("hasta 2 años de experiencia", "hasta 2 años"),
+    ("máximo 2 años de experiencia", "hasta 2 años"),
+    ("menos de 2 años de experiencia", "hasta 2 años"),
+    ("up to 2 years of experience", "hasta 2 years"),
+    ("recién titulado o con hasta 2 años de experiencia laboral", "hasta 2 años"),
+    # sin tope, el texto no cambia
+    ("2 años de experiencia", "2 años"),
+    ("0 a 2 años de experiencia", "0 a 2 años"),
+])
+def test_el_tope_se_muestra_como_hasta(desc, texto):
+    assert extraer_experiencia(desc)[1] == texto
+
+
+@pytest.mark.parametrize("desc", [
+    "con experiencia al menos de 1 años en el cargo",      # tal cual lo escribe el aviso de Chiletrabajos
+    "se requiere al menos de 1 año de experiencia",
+])
+def test_al_menos_de_no_es_un_tope(desc):
+    """'al menos de 1 año' es un mínimo, aunque lleve 'menos de' adentro: no es 'hasta 1 año'."""
+    assert extraer_experiencia(desc) == (1, "1 año")
 
 
 @pytest.mark.parametrize("desc, texto", [
@@ -241,10 +337,38 @@ def test_texto_de_experiencia_singular_y_plural(desc, texto):
     assert extraer_experiencia(desc)[1] == texto
 
 
+@pytest.mark.parametrize("fuente, nombre", [("linkedin", "LinkedIn"), ("indeed", "Indeed"), ("glassdoor", "Glassdoor")])
+def test_la_marca_de_remoto_nombra_a_su_propia_fuente(fuente, nombre):
+    """Una oferta de LinkedIn decía 'marcada remota por Indeed' (21-10)."""
+    r = clasificar(oferta("Analista Funcional", "Buscamos analista funcional.", fuente=fuente, is_remote=True))
+    assert f"modalidad: Remoto por marcada remota por {nombre}" in r["motivo"]
+
+
+# ------------------------------------------------------------ avisos en inglés (21-10)
+@pytest.mark.parametrize("desc, razon", [
+    ("Requirements: 4 years in a similar role.", "exige 4+ años de experiencia"),
+    ("We need 3 years in a similar position.", "exige 3+ años de experiencia"),
+    ("At least 5 years in the industry.", "exige 5+ años de experiencia"),
+])
+def test_los_anios_en_ingles_sin_la_palabra_experience(desc, razon):
+    assert (clasificar(oferta("QA Analyst", desc))["razon"]) == razon
+
+
+@pytest.mark.parametrize("titulo, desc", [
+    ("QA Analyst", "Fixed-term contract for 6 months, extendable."),
+    ("QA Analyst", "This is a 6-month contract with possible extension."),
+    ("QA Analyst", "Project duration: 8 months."),
+    ("QA Analyst (6 months)", "Great team."),
+    ("Temporary QA Analyst", "Great team."),
+])
+def test_plazo_fijo_en_ingles(titulo, desc):
+    assert clasificar(oferta(titulo, desc))["contrato"] == "Plazo fijo / temporal"
+
+
 def test_modalidad():
     assert detectar_modalidad("", "trabajo hibrido 3 dias", False)[0] == "Híbrido"
     assert detectar_modalidad("", "100% remoto", False)[0] == "Remoto"
-    assert detectar_modalidad("", "", True) == ("Remoto", "marcada remota por Indeed")
+    assert detectar_modalidad("", "", True) == ("Remoto", filtros.EVIDENCIA_MARCA_FUENTE)
     assert detectar_modalidad("", "modalidad presencial", False)[0] == "Presencial"
     assert detectar_modalidad("", "", False)[0] == "No indicada"
     assert detectar_modalidad("", "hibrido con dias remotos", False)[0] == "Híbrido"
@@ -260,6 +384,134 @@ def test_fuera_de_zona_se_descarta_salvo_remoto():
     assert clasificar(oferta("QA", ubic=lejos))["categoria"] == "descartada"
     assert clasificar(oferta("QA", "100% remoto", ubic=lejos))["categoria"] == "principal"
     assert clasificar(oferta("QA", ubic="Viña del Mar, VS, Chile"))["categoria"] == "principal"
+
+
+@pytest.mark.parametrize("ubic", [
+    "Santiago, Chile",
+    "Santiago, Región Metropolitana de Santiago, Chile",
+    "Viña del Mar, Valparaíso, Chile",
+    "Valparaíso, Chile",
+])
+def test_linkedin_acepta_solo_ubicaciones_objetivo_en_chile(ubic):
+    r = clasificar(oferta("Analista Funcional", ubic=ubic, fuente="linkedin"))
+    assert r["categoria"] == "sin_descripcion"      # pasa la zona; sin descripción no se puede decir más (ver abajo)
+
+
+@pytest.mark.parametrize("ubic", ["Chile", "Antofagasta, Antofagasta, Chile"])
+def test_linkedin_descarta_chile_sin_ciudad_objetivo(ubic):
+    r = clasificar(oferta("Analista Funcional", ubic=ubic, fuente="linkedin"))
+    assert r["categoria"] == "descartada"
+    assert r["razon"] == "ubicación fuera del perfil LinkedIn"
+
+
+@pytest.mark.parametrize("ubic, desc", [
+    ("Chile", "Trabajo presencial en Santiago, Chile."),
+    ("Chile", "Trabajo presencial en Valparaíso."),
+    ("", "Trabajo presencial en Viña del Mar, Chile."),
+])
+def test_linkedin_usa_descripcion_si_ubicacion_no_indica_ciudad(ubic, desc):
+    r = clasificar(oferta("Analista Funcional", desc, ubic=ubic, fuente="linkedin"))
+    assert r["categoria"] == "principal"
+
+
+def test_linkedin_no_usa_ciudad_mencionada_en_descripcion_si_ubicacion_es_otra_ciudad():
+    r = clasificar(oferta("Analista Funcional", "Tenemos oficinas en Santiago, Chile.",
+                          ubic="Lima, Perú", fuente="linkedin"))
+    assert r["categoria"] == "descartada"
+
+
+def test_linkedin_acepta_remoto_internacional():
+    r = clasificar(oferta("Analista Funcional", ubic="Remoto, Argentina",
+                          desc="Trabajo 100% remoto.", fuente="linkedin"))
+    assert r["categoria"] == "principal"
+    assert r["modalidad"] == "Remoto"
+
+
+def test_linkedin_nivel_associate_no_se_descarta():
+    r = clasificar(oferta("Analista Funcional", "Nivel: Associate.", fuente="linkedin"))
+    assert r["categoria"] == "principal"
+
+
+@pytest.mark.parametrize("nivel", ["Nivel: Mid-Senior.", "Nivel: Mid Senior level."])
+def test_linkedin_nivel_mid_senior_se_descarta(nivel):
+    r = clasificar(oferta("Analista Funcional", nivel, fuente="linkedin"))
+    assert r["categoria"] == "descartada"
+    assert r["razon"] == "nivel Mid-Senior de LinkedIn"
+
+
+@pytest.mark.parametrize("titulo, desc", [
+    ("Analista Funcional Experto", ""),
+    ("Analista Funcional", "Nivel: Experto."),
+    ("Analista Funcional", "Nivel: Expert."),
+    ("Analista Funcional", "Nivel: Experta."),
+])
+def test_linkedin_experto_se_descarta(titulo, desc):
+    r = clasificar(oferta(titulo, desc, fuente="linkedin"))
+    assert r["categoria"] == "descartada"
+    assert r["razon"] == "nivel experto de LinkedIn"
+
+
+@pytest.mark.parametrize("titulo, desc", [
+    ("Senior Analista Funcional", ""),
+    ("Analista Funcional", "Nivel: Senior."),
+])
+def test_linkedin_senior_se_descarta(titulo, desc):
+    r = clasificar(oferta(titulo, desc, fuente="linkedin"))
+    assert r["categoria"] == "descartada"
+
+
+@pytest.mark.parametrize("desc", [
+    "0 años de experiencia",
+    "1 año de experiencia",
+    "0 a 2 años de experiencia",
+    "1–2 años de experiencia",
+    "1 to 2 years of experience",
+    "1+ years of experience",
+    "sin experiencia previa",
+])
+def test_linkedin_acepta_hasta_un_ano_o_rango_de_0_a_2(desc):
+    r = clasificar(oferta("Analista Funcional", desc, fuente="linkedin"))
+    assert r["categoria"] == "principal"
+
+
+@pytest.mark.parametrize("desc, razon", [
+    ("2 años de experiencia", "exige 2+ años de experiencia"),
+    ("3 años de experiencia", "exige 3+ años de experiencia"),
+    ("1 a 3 años de experiencia", "exige más de 2 años (requisito: 1 a 3 años)"),
+    ("2+ años de experiencia", "exige 2+ años de experiencia"),
+    ("1 to 3 years of experience", "exige más de 2 años (requisito: 1 to 3 years)"),
+])
+def test_linkedin_descarta_dos_anos_o_un_rango_que_supera_dos(desc, razon):
+    r = clasificar(oferta("Analista Funcional", desc, fuente="linkedin"))
+    assert r["categoria"] == "descartada"
+    assert r["razon"] == razon
+
+
+# ------------------------------------------------------------ sin descripción no se puede revisar (21-10)
+@pytest.mark.parametrize("fuente", config.FUENTES_SIN_TEXTO)
+def test_sin_descripcion_la_oferta_queda_sin_descripcion(fuente):
+    r = clasificar(oferta("Analista Funcional", "", fuente=fuente))
+    assert r["categoria"] == "sin_descripcion"
+    assert r["experiencia"] == config.EXPERIENCIA_SIN_VERIFICAR == "Sin verificar"
+    assert config.AVISO_SIN_TEXTO in r["motivo"] and "rol: " in r["motivo"]
+
+
+def test_sin_descripcion_solo_cuando_no_hay_texto_que_revisar():
+    """Con descripción, LinkedIn se clasifica como cualquier otra fuente; sin ella, las demás no cambian."""
+    con_texto = clasificar(oferta("Analista Funcional", "Buscamos analista. 1 año de experiencia.", fuente="linkedin"))
+    assert con_texto["categoria"] == "principal" and con_texto["experiencia"] == "1 año"
+    # indeed y los portales siempre traen texto: una descripción vacía ahí no cambia nada (se revisó el 21-10)
+    assert clasificar(oferta("Analista Funcional", "", fuente="indeed"))["categoria"] == "principal"
+    assert clasificar(oferta("Analista Funcional", "", fuente="chiletrabajos"))["categoria"] == "principal"
+
+
+def test_sin_texto_no_salva_lo_que_el_titulo_ya_descarta():
+    """Lo que se puede decidir con el título se decide igual: 'sin descripción' no es un salvoconducto."""
+    for titulo, razon in [("Analista Funcional Senior", "nivel semi senior / senior"),
+                          ("Práctica Analista Funcional", "práctica / estudiante")]:
+        r = clasificar(oferta(titulo, "", fuente="linkedin"))
+        assert (r["categoria"], r["razon"]) == ("descartada", razon)
+    assert clasificar(oferta("Chofer de Reparto", "", fuente="linkedin"))["categoria"] == "descartada"
 
 
 def test_sueldo_desde_columnas_y_alerta_en_b():
@@ -400,6 +652,44 @@ def test_postulacion_en_curso_sigue_en_principal_aunque_cambie_su_categoria(tmp_
     assert [f["url"] for f in d[lista]] == ["http://otra"]          # sin repetirla en su lista
     if lista == "descartadas":
         assert d["total_descartadas"] == 1
+
+
+def test_sin_descripcion_es_su_propia_lista_en_la_pagina(tmp_path):
+    """Las ofertas sin descripción no se mezclan con las filtradas, pero se gestionan igual (estado y fases)."""
+    con = buscar.conectar(str(tmp_path / "t.db"))
+    buscar.guardar(con, buscar.procesar(df_de({"job_url": "http://li", "title": "Analista Funcional"},
+                                              {"job_url": "http://li2", "title": "QA Tester"}), "t", "linkedin"))
+    # otra empresa: si no, la de LinkedIn (guardada antes) la tapa por clave_base, como cualquier duplicada
+    buscar.guardar(con, buscar.procesar(df_de({"job_url": "http://ind", "title": "Analista Funcional",
+                                               "company": "Y"}), "t"))
+    d = buscar.ofertas_para_pagina(con)
+    assert [f["url"] for f in d["principal"]] == ["http://ind"]
+    assert sorted(f["url"] for f in d["sin_descripcion"]) == ["http://li", "http://li2"]
+    assert all(f["experiencia"] == config.EXPERIENCIA_SIN_VERIFICAR for f in d["sin_descripcion"])
+    assert all("en_fase_desde" in f and "prioridad" in f for f in d["sin_descripcion"])
+
+    # descartarla es definitivo: la cola la deja de mostrar (lo hace listaDe, ver test_historial.py) y, sobre todo,
+    # la oferta no vuelve a entrar como nueva cuando la búsqueda la encuentra otra vez
+    assert buscar.marcar_estado(con, "http://li", "descartada", origen="lista")
+    assert buscar.guardar(con, buscar.procesar(df_de({"job_url": "http://li", "title": "Analista Funcional"}),
+                                               "t", "linkedin")) == 0
+    d = buscar.ofertas_para_pagina(con)
+    assert {f["url"]: f["estado"] for f in d["sin_descripcion"]} == {"http://li": "descartada", "http://li2": "nueva"}
+
+
+def test_sin_descripcion_postulada_pasa_a_seguimiento_sin_repetirse(tmp_path):
+    con = buscar.conectar(str(tmp_path / "t.db"))
+    buscar.guardar(con, buscar.procesar(df_de({"job_url": "http://li", "title": "Analista Funcional"}), "t", "linkedin"))
+    assert buscar.marcar_estado(con, "http://li", "postulada", origen="lista")
+    d = buscar.ofertas_para_pagina(con)
+    assert [f["url"] for f in d["principal"]] == ["http://li"] and d["sin_descripcion"] == []
+
+
+def test_glassdoor_pide_la_descripcion_y_linkedin_no():
+    """Glassdoor trae el detalle por el mismo endpoint del listado; LinkedIn no se le pide (robots: Disallow /)."""
+    assert buscar.consulta("glassdoor", "qa", "Santiago, Chile")["fetch_description"] is True
+    for sitio in ("linkedin", "indeed"):
+        assert "fetch_description" not in buscar.consulta(sitio, "qa", "Santiago, Chile")
 
 
 def test_descartada_por_la_usuaria_no_se_cuela_en_principal(tmp_path):
@@ -626,6 +916,17 @@ def test_ventana_efectiva_crece_si_se_salta_dias(tmp_path):
     assert buscar.ventanas_efectivas(con, AHORA)["indeed"] == config.DIAS_MAXIMOS   # la última por id; con tope
 
 
+# ------------------------------------------------------------ título TI con descripción de otro oficio (22-10)
+def test_titulo_ti_con_descripcion_de_oficio_tecnico_se_descarta():
+    r = clasificar(oferta("Analista Funcional", "Se busca técnico eléctrico para mantenimiento de tableros industriales."))
+    assert r["categoria"] == "descartada" and r["razon"] == "descripción de otro oficio (no TI)"
+
+
+def test_tableros_de_control_de_bi_sigue_siendo_ti():
+    r = clasificar(oferta("Analista Funcional", "Diseño de tableros de control en Power BI y pruebas funcionales con SQL."))
+    assert r["categoria"] == "principal"
+
+
 def test_hours_old_por_fuente():
     assert buscar.consulta("indeed", "QA", "Santiago, Chile")["hours_old"] == 24
     assert buscar.consulta("glassdoor", "QA", "Santiago, Chile")["hours_old"] == 48   # días enteros: incluye "ayer"
@@ -736,7 +1037,8 @@ def test_ciudad_de():
 
 
 def test_ubicacion_imprecisa_de_glassdoor_se_marca():
-    r = clasificar(oferta("QA Tester", ubic="Chile", fuente="glassdoor"))
+    # con descripción (Glassdoor la trae desde que se le pide fetch_description) la oferta se clasifica normal
+    r = clasificar(oferta("QA Tester", "Buscamos QA Tester para pruebas funcionales.", ubic="Chile", fuente="glassdoor"))
     assert r["categoria"] == "principal" and "ubicación imprecisa" in r["motivo"]
     assert "ubicación imprecisa" not in clasificar(oferta("QA Tester", ubic="Providencia, Chile",
                                                           fuente="glassdoor"))["motivo"]
@@ -973,3 +1275,20 @@ def test_los_textos_de_python_no_arman_plurales_a_mano():
     for archivo in ("buscar.py", "servidor.py", "filtros.py", "bne.py", "trabajando.py", "chiletrabajos.py", "getonboard.py"):
         codigo = (raiz / archivo).read_text(encoding="utf-8")
         assert not re.search(r"\{[^{}]+\} " + palabras + r"\b", codigo), archivo
+
+# Regla de experiencia de Sofia (20-10-2026), igual en todas las fuentes: un rango cuyo máximo es 2 o menos se muestra
+# ("0 a 2", "0-2", "1 a 2", "hasta 2"); un número solo, como mucho 1 año; lo que pida más se descarta.
+@pytest.mark.parametrize("fuente, ubicacion", [("indeed", "Providencia, RM, Chile"), ("chiletrabajos", "Providencia, RM, Chile"),
+                                               ("linkedin", "Santiago, Región Metropolitana, Chile")])
+@pytest.mark.parametrize("texto, se_muestra", [
+    ("Experiencia: 0 a 2 años", True), ("experiencia de 0-2 años", True), ("0 – 2 años de experiencia", True),
+    ("entre 0 y 2 años de experiencia", True), ("1 a 2 años de experiencia", True), ("1-2 years of experience", True),
+    ("hasta 2 años de experiencia", True), ("máximo 2 años de experiencia", True), ("menos de 2 años de experiencia", True),
+    ("1 año de experiencia", True), ("1+ años de experiencia", True), ("sin experiencia", True),
+    ("2 años de experiencia", False), ("2+ años de experiencia", False), ("mínimo 2 años de experiencia", False),
+    ("1 a 3 años de experiencia", False), ("0 a 3 años de experiencia", False), ("hasta 3 años de experiencia", False),
+    ("3 years of experience", False)])
+def test_regla_de_experiencia_en_todas_las_fuentes(fuente, ubicacion, texto, se_muestra):
+    c = clasificar({"title": "Analista QA", "company": "X", "location": ubicacion, "fuente": fuente,
+                    "description": texto + ". Pruebas funcionales."})
+    assert (c["categoria"] == "principal") == se_muestra, c["razon"]

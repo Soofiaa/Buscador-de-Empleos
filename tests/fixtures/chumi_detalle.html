@@ -1,0 +1,696 @@
+﻿<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <!-- Google tag (gtag.js) - GA4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-E0D9EG0CPK"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-E0D9EG0CPK', {
+        'anonymize_ip': true,
+        'cookie_flags': 'SameSite=None;Secure'
+    });
+
+    // ===== EVENTOS DE CONVERSIÓN CENTRALIZADOS =====
+    // Evento: Postulación a empleo
+    window.trackPostulation = function(jobId, jobTitle) {
+        gtag('event', 'postulate', {
+            'job_id': jobId,
+            'job_title': jobTitle,
+            'event_category': 'engagement',
+            'event_label': jobTitle
+        });
+    };
+
+    // Evento: Registro completado
+    window.trackRegistration = function(userType) {
+        gtag('event', 'registro_completado', {
+            'user_type': userType,
+            'event_category': 'conversion'
+        });
+    };
+
+    // Evento: Descarga de CV
+    window.trackCvDownload = function(candidateName) {
+        gtag('event', 'descarga_cv', {
+            'candidate': candidateName,
+            'event_category': 'engagement'
+        });
+    };
+
+    // Evento: Contacto enviado
+    window.trackContact = function(formName) {
+        gtag('event', 'contacto_enviado', {
+            'form_name': formName,
+            'event_category': 'conversion'
+        });
+    };
+
+    // Evento: Vista de empleo
+    window.trackJobView = function(jobId, jobTitle) {
+        gtag('event', 'view_job', {
+            'job_id': jobId,
+            'job_title': jobTitle,
+            'event_category': 'engagement'
+        });
+    };
+
+    // Evento: Búsqueda de empleos
+    window.trackJobSearch = function(query, results) {
+        gtag('event', 'search_jobs', {
+            'search_query': query,
+            'results_count': results,
+            'event_category': 'engagement'
+        });
+    };
+
+    // Evento: Click en empleo externo
+    window.trackExternalJobClick = function(jobTitle, url) {
+        gtag('event', 'external_job_click', {
+            'job_title': jobTitle,
+            'url': url,
+            'event_category': 'outbound'
+        });
+    };
+</script>    <!-- ===== META TAGS BÁSICOS ===== -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RRN1002 - Administrador de Plataformas e Infraestructura | Empleo en IT-Talent - Chumi IT</title>
+<meta name="description" content="Empleo de RRN1002 - Administrador de Plataformas e Infraestructura en IT-Talent. Postula ahora en Chumi IT y encuentra miles de oportunidades laborales en LATAM.">
+<meta name="keywords" content="empleo, RRN1002 - Administrador de Plataformas e Infraestructura, IT-Talent, LATAM, tecnología, trabajo">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://chumi-it.com/trabajos/rrn1002-administrador-de-plataformas-e-infraestructura">
+<meta name="author" content="CHUMI-IT · Talento Tecnológico en LATAM">
+<meta name="theme-color" content="#0B1220">
+
+<!-- ===== FAVICON ===== -->
+<link rel="icon" type="image/x-icon" href="https://chumi-it.com/resources/assets/img/chumiitlogo.png" />
+<link rel="apple-touch-icon" href="https://chumi-it.com/resources/assets/img/chumiitlogo.png">
+
+<!-- ===== OPEN GRAPH (Facebook, WhatsApp, LinkedIn) ===== -->
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="CHUMI-IT · Talento Tecnológico en LATAM">
+<meta property="og:title" content="RRN1002 - Administrador de Plataformas e Infraestructura | Empleo en IT-Talent - Chumi IT">
+<meta property="og:description" content="Empleo de RRN1002 - Administrador de Plataformas e Infraestructura en IT-Talent. Postula ahora en Chumi IT y encuentra miles de oportunidades laborales en LATAM.">
+<meta property="og:url" content="https://chumi-it.com/trabajos/rrn1002-administrador-de-plataformas-e-infraestructura">
+<meta property="og:image" content="https://chumijobs-cvs.s3.amazonaws.com/shares/jobs/rrn1002-administrador-de-plataformas-e-infraestructura.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="es_LA">
+<meta property="og:locale:alternate" content="es_ES">
+
+<!-- ===== TWITTER CARDS ===== -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="RRN1002 - Administrador de Plataformas e Infraestructura | Empleo en IT-Talent - Chumi IT">
+<meta name="twitter:description" content="Empleo de RRN1002 - Administrador de Plataformas e Infraestructura en IT-Talent. Postula ahora en Chumi IT y encuentra miles de oportunidades laborales en LATAM.">
+<meta name="twitter:image" content="https://chumijobs-cvs.s3.amazonaws.com/shares/jobs/rrn1002-administrador-de-plataformas-e-infraestructura.png">
+
+<!-- ===== JSON-LD SCHEMA.ORG ===== -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "CHUMI-IT · Talento Tecnológico en LATAM",
+    "url": "https://chumi-it.com",
+    "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://chumi-it.com/trabajos?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+    }
+}
+</script>
+
+            <script type="application/ld+json">
+        {
+    "@context": "https://schema.org",
+    "@type": "JobPosting",
+    "title": "RRN1002 - Administrador de Plataformas e Infraestructura",
+    "description": "En IT-TALENT | Tech Headhunting & Outsourcing estamos en búsqueda de un Administrador de Plataformas e Infraestructura, para sumarse a importante cliente.\r\n\r\n🎯 Requisitos:\r\n\r\nFormación en Ingeniería en Informática, Telecomunicaciones, Redes o trayectoria equivalente.\r\n\r\nMínimo 3 a 5 años de experiencia efectiva en administración de infraestructura TI, continuidad operativa y gestión de servidores.\r\n\r\nExperiencia avanzada en administración de Windows Server (Active Directory, GPO, DNS, DHCP) y Linux (RHEL, Ubuntu).\r\n\r\nManejo sólido de plataformas de virtualización (VMware vSphere/ESXi, Hyper-V o Proxmox).\r\n\r\nExperiencia comprobable en gestión de respaldos corporativos (Veeam, Commvault) y ejecución de planes de continuidad/DRP.\r\n\r\nConocimientos en administración de almacenamiento (SAN/NAS, RAID) y herramientas de monitoreo (Zabbix, Nagios, PRTG, Datadog).\r\n\r\nDeseable: Certificaciones vigentes (VMware VCP, AWS Certified Solutions Architect, Azure Administrator AZ-104, MCSA/MCSE).\r\n\r\n🖥️ Modalidad: Presencial. Santiago.\r\n💰 Renta líquida: $2.000.000 - $2.500.000 CLP (de acuerdo a experiencia y certificaciones).\r\n📄 Tipo de contrato: Directo con cliente.",
+    "datePosted": "2026-10-19T17:44:48+00:00",
+    "validThrough": "2026-11-20T19:35:28+00:00",
+    "employmentType": "FULL_TIME",
+    "hiringOrganization": {
+        "@type": "Organization",
+        "name": "IT-Talent",
+        "sameAs": "https://chumi-it.com"
+    },
+    "jobLocation": {
+        "@type": "Place",
+        "address": {
+            "@type": "PostalAddress",
+            "addressCountry": "CHILE",
+            "addressLocality": "Chile"
+        }
+    },
+    "identifier": {
+        "@type": "PropertyValue",
+        "name": "Chumi IT",
+        "value": "408019"
+    },
+    "directApply": true,
+    "url": "https://chumi-it.com/trabajos/rrn1002-administrador-de-plataformas-e-infraestructura",
+    "baseSalary": {
+        "@type": "MonetaryAmount",
+        "currency": "USD",
+        "value": {
+            "@type": "QuantitativeValue",
+            "minValue": 2000,
+            "maxValue": 2500,
+            "unitText": "MONTH"
+        }
+    }
+}
+        </script>
+    
+<!-- ===== JSON-LD ORGANIZATION ===== -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "CHUMI-IT",
+    "alternateName": "Chumi IT",
+    "url": "https://chumi-it.com",
+    "logo": "https://chumi-it.com/resources/assets/img/chumiitlogo.png",
+    "description": "Plataforma de talento tecnológico y digital en Latinoamérica con inteligencia artificial.",
+    "foundingDate": "2024",
+    "sameAs": [
+        "https://www.linkedin.com/company/chumi-it"
+    ],
+    "knowsAbout": ["Desarrollo de Software", "Inteligencia Artificial", "Ciberseguridad", "Cloud Computing", "Data Science", "SAP", "Producto Digital", "Talento Tech LATAM"],
+    "areaServed": ["Chile", "Argentina", "Colombia", "Perú", "México", "Ecuador", "Uruguay", "Latinoamérica"],
+    "employmentType": ["REMOTE", "HYBRID", "ONSITE"]
+}
+</script>
+
+<!-- ===== JSON-LD WEB APPLICATION ===== -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "CHUMI-IT",
+    "url": "https://chumi-it.com",
+    "applicationCategory": "Employment",
+    "operatingSystem": "Web",
+    "browserRequirements": "Requires JavaScript",
+    "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/InStock"
+    }
+}
+</script>
+  <!-- Tailwind CSS — Paleta Meridiano (NÓMADA) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            midnight: '#0B1220',
+            abyss: '#1E293B',
+            current: '#38BDF8',
+            'current-deep': '#0284C7',
+            mist: '#F1F5F9',
+            parchment: '#FFFFFF',
+            ink: '#1E293B',
+            seafoam: '#10B981',
+            ember: '#F59E0B',
+            coral: '#EF4444',
+            fog: '#64748B',
+          },
+          fontFamily: {
+            display: ['Space Grotesk', 'system-ui', 'sans-serif'],
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.6s ease-out',
+            'slide-up': 'slideUp 0.7s ease-out',
+          },
+          keyframes: {
+            fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+            slideUp: { '0%': { transform: 'translateY(24px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } },
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Fonts: Space Grotesk + Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Boxicons -->
+  <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
+
+  <style>
+    body { font-family: 'Inter', system-ui, sans-serif; }
+    .title-display { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
+    .gradient-text {
+      background: linear-gradient(135deg, #38BDF8 0%, #0284C7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-gradient { background: linear-gradient(135deg, #0B1220 0%, #1E293B 100%); }
+    .card-hover { transition: all 0.3s ease; }
+    .card-hover:hover {
+      border-color: #94a3b8;
+      box-shadow: 0 4px 20px rgba(15,23,42,0.06);
+      transform: translateY(-2px);
+    }
+    .badge-current { background: rgba(56, 189, 248, 0.1); color: #0284C7; }
+    .prose-job p { margin-bottom: 0.85rem; line-height: 1.7; color: #475569; }
+    .prose-job strong { color: #1E293B; font-weight: 600; }
+    .prose-job ul { margin: 1rem 0; padding-left: 0; list-style: none; }
+    .prose-job ul li { position: relative; padding-left: 1.5rem; margin-bottom: 0.5rem; line-height: 1.6; color: #475569; }
+    .prose-job ul li::before { content: "▸"; position: absolute; left: 0; color: #38BDF8; font-weight: 700; }
+    .prose-job h1, .prose-job h2, .prose-job h3 { color: #1E293B; font-weight: 700; margin: 1.25rem 0 0.75rem; }
+    .prose-job h2 { font-size: 1.25rem; }
+    .prose-job h3 { font-size: 1.1rem; }
+    .mobile-menu { display: none; }
+    .mobile-menu.open { display: flex; }
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-mist text-ink antialiased flex flex-col min-h-screen">
+
+<!-- ===== NAVBAR CHUMI-V2 ===== -->
+<nav class="bg-parchment/95 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-50" role="navigation" aria-label="Menú principal">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      <a href="/" class="flex items-center gap-2 sm:gap-3" aria-label="CHUMI-IT Inicio">
+        <img src="https://chumi-it.com/resources/assets/img/logochumiold.png" alt="CHUMI-IT" class="h-7 sm:h-8 w-auto" width="32" height="32" loading="eager">
+        <span class="title-display text-lg sm:text-xl font-bold text-ink">CHUMI<span class="text-current">-IT</span></span>
+      </a>
+      <div class="hidden md:flex items-center gap-8">
+        <a href="/jobs" class="text-sm font-medium text-fog hover:text-ink transition-colors">Empleos TI</a>
+        <a href="/for-business" class="text-sm font-medium text-fog hover:text-ink transition-colors">Para empresas</a>
+      </div>
+      <div class="hidden md:flex items-center gap-3">
+                  <a href="/professional/login" class="text-sm font-medium text-fog hover:text-ink transition-colors px-4 py-2">Iniciar Sesión</a>
+          <a href="/professional/register" class="text-sm font-semibold bg-current text-midnight px-5 py-2.5 rounded-xl hover:bg-current-deep transition-all shadow-sm whitespace-nowrap">Crear perfil gratis</a>
+              </div>
+      <button id="menu-toggle" class="md:hidden flex items-center p-2 rounded-lg hover:bg-mist transition-colors" aria-label="Abrir menú" aria-expanded="false">
+        <i class='bx bx-menu text-2xl text-ink'></i>
+      </button>
+    </div>
+    <!-- Mobile menu -->
+    <div id="mobile-menu" class="mobile-menu md:hidden flex-col pb-4 gap-2">
+      <a href="/jobs" class="text-sm font-medium text-ink py-2">Empleos TI</a>
+      <a href="/for-business" class="text-sm font-medium text-ink py-2">Para empresas</a>
+      <div class="border-t border-slate-200 pt-3 mt-2 flex flex-col gap-2">
+                  <a href="/professional/login" class="text-sm font-medium text-ink py-2">Iniciar sesión</a>
+          <a href="/professional/register" class="text-sm font-semibold bg-current text-midnight px-5 py-2.5 rounded-xl text-center">Crear perfil gratis</a>
+              </div>
+    </div>
+  </div>
+</nav>
+
+  <!-- ===== HERO SECTION ===== -->
+  <section class="pt-6 sm:pt-8 pb-8 sm:pb-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Breadcrumb -->
+      <nav aria-label="Breadcrumb" class="mb-6">
+        <ol class="flex items-center gap-1.5 text-xs sm:text-sm text-fog">
+          <li><a href="/" class="hover:text-ink transition-colors">Home</a></li>
+          <i class='bx bx-chevron-right text-xs'></i>
+          <li><a href="/jobs" class="hover:text-ink transition-colors">Empleos TI</a></li>
+          <i class='bx bx-chevron-right text-xs'></i>
+          <li class="text-ink font-medium truncate max-w-[200px]">RRN1002 - Administrador de Plataformas e Infraestructura</li>
+        </ol>
+      </nav>
+
+  <div class="flex flex-col lg:flex-row lg:items-start gap-5 sm:gap-8">
+    <div class="w-16 sm:w-20 h-16 sm:h-20 bg-mist rounded-2xl flex items-center justify-center flex-shrink-0 ring-2 ring-slate-100 mx-auto lg:mx-0">
+      <img src="/resources/assets/img/itthhgroup_logo.jpg" class="w-12 sm:w-14 h-12 sm:h-14 object-contain" alt="Logo IT-Talent" onerror="this.onerror=null; this.src='https://chumi-it.com/resources/assets/img/logochumiold.png';">
+    </div>
+    <div class="flex-1 min-w-0 text-center lg:text-left">
+      <h1 class="title-display text-2xl sm:text-3xl lg:text-4xl font-bold text-ink leading-tight mb-2">RRN1002 - Administrador de Plataformas e Infraestructura</h1>
+      <p class="text-base sm:text-lg text-fog font-medium mb-4">IT-Talent</p>
+      <div class="flex flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-4 text-sm text-fog mb-5">
+        <span class="inline-flex items-center gap-1.5"><i class='bx bx-map-pin text-current'></i>Chile</span>
+        <span class="inline-flex items-center gap-1.5"><i class='bx bx-time text-current'></i>1 day ago</span>
+                <span class="inline-flex items-center gap-1.5 text-seafoam font-semibold"><i class='bx bx-dollar'></i>2,000 - 2,500/mes</span>
+              </div>
+      <div class="flex flex-wrap items-center justify-center lg:justify-start gap-2 mb-6">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-current/10 text-current text-xs font-semibold rounded-full"><i class='bx bx-laptop'></i>Presencial</span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-ink/5 text-ink text-xs font-medium rounded-full"><i class='bx bx-badge-check text-current'></i>Verificado</span>
+      </div>
+      <div class="flex flex-wrap items-center justify-center lg:justify-start gap-3">
+                  <a href="/professional/login" class="inline-flex items-center gap-2 bg-current text-midnight font-semibold px-6 py-3 rounded-xl hover:bg-current-deep transition-all shadow-lg text-sm"><i class='bx bx-log-in-circle text-lg'></i>Postular ahora</a>
+                        <div class="relative" id="share-menu-root">
+          <button type="button" id="share-toggle" aria-expanded="false" aria-controls="share-menu" class="inline-flex items-center gap-2 px-4 py-3 text-fog bg-mist border border-slate-200 font-medium rounded-xl hover:border-current hover:text-current transition-all text-sm"><i class='bx bx-share-alt text-lg'></i><span class="hidden sm:inline">Compartir</span></button>
+          <div id="share-menu" class="hidden absolute right-0 z-30 mt-2 w-72 bg-parchment border border-slate-200 rounded-xl shadow-lg p-2">
+            
+            <a href="mailto:?subject=RRN1002%20-%20Administrador%20de%20Plataformas%20e%20Infraestructura%20en%20IT-Talent&amp;body=https%3A%2F%2Fchumi-it.com%2Ftrabajos%2Frrn1002-administrador-de-plataformas-e-infraestructura" class="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm text-fog hover:bg-mist transition-colors"><i class='bx bx-envelope text-lg'></i>E-mail</a>
+            <a href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fchumi-it.com%2Ftrabajos%2Frrn1002-administrador-de-plataformas-e-infraestructura" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm text-fog hover:bg-mist transition-colors"><i class='bx bxl-linkedin text-lg'></i>LinkedIn</a>
+            <a href="https://wa.me/?text=RRN1002%20-%20Administrador%20de%20Plataformas%20e%20Infraestructura%20en%20IT-Talent%20-%20https%3A%2F%2Fchumi-it.com%2Ftrabajos%2Frrn1002-administrador-de-plataformas-e-infraestructura" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm text-fog hover:bg-mist transition-colors"><i class='bx bxl-whatsapp text-lg'></i>WhatsApp</a>
+            <button type="button" class="copy-link-btn flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm text-fog hover:bg-mist transition-colors"><i class='bx bx-link text-lg'></i>Copiar enlace</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+<!-- MAIN CONTENT -->
+<section class="pb-12 sm:pb-20">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+      <!-- LEFT -->
+      <div class="lg:col-span-2 space-y-6 order-2 lg:order-1">
+        <article class="bg-parchment border border-slate-200 rounded-2xl p-5 sm:p-8">
+          <div class="flex items-center gap-3 mb-5">
+            <div class="w-10 h-10 bg-current/10 rounded-xl flex items-center justify-center"><i class='bx bx-file-blank text-current text-lg'></i></div>
+            <h2 class="title-display text-xl sm:text-2xl font-bold text-ink">Descripción del empleo</h2>
+          </div>
+          <div class="prose-job text-sm sm:text-base">
+            <p>En IT-TALENT | Tech Headhunting &amp; Outsourcing estamos en búsqueda de un Administrador de Plataformas e Infraestructura, para sumarse a importante cliente.</p>
+<p>🎯 Requisitos:</p>
+<p>Formación en Ingeniería en Informática, Telecomunicaciones, Redes o trayectoria equivalente.</p>
+<p>Mínimo 3 a 5 años de experiencia efectiva en administración de infraestructura TI, continuidad operativa y gestión de servidores.</p>
+<p>Experiencia avanzada en administración de Windows Server (Active Directory, GPO, DNS, DHCP) y Linux (RHEL, Ubuntu).</p>
+<p>Manejo sólido de plataformas de virtualización (VMware vSphere/ESXi, Hyper-V o Proxmox).</p>
+<p>Experiencia comprobable en gestión de respaldos corporativos (Veeam, Commvault) y ejecución de planes de continuidad/DRP.</p>
+<p>Conocimientos en administración de almacenamiento (SAN/NAS, RAID) y herramientas de monitoreo (Zabbix, Nagios, PRTG, Datadog).</p>
+<p>Deseable: Certificaciones vigentes (VMware VCP, AWS Certified Solutions Architect, Azure Administrator AZ-104, MCSA/MCSE).</p>
+<p>🖥️ Modalidad: Presencial. Santiago.</p>
+<p>💰 Renta líquida: $2.000.000 - $2.500.000 CLP (de acuerdo a experiencia y certificaciones).</p>
+<p>📄 Tipo de contrato: Directo con cliente.</p>
+              </div>
+        </article>
+                        <article class="bg-parchment border border-slate-200 rounded-2xl p-5 sm:p-8">
+          <div class="flex items-center gap-3 mb-5">
+            <div class="w-10 h-10 bg-current/10 rounded-xl flex items-center justify-center"><i class='bx bx-buildings text-current text-lg'></i></div>
+            <h2 class="title-display text-xl sm:text-2xl font-bold text-ink">Sobre la empresa</h2>
+          </div>
+          <div class="flex items-start gap-4">
+            <img src="/resources/assets/img/itthhgroup_logo.jpg" class="w-14 h-14 object-contain rounded-xl bg-mist p-2 flex-shrink-0" alt="Logo empresa" onerror="this.onerror=null; this.src='https://chumi-it.com/resources/assets/img/logochumiold.png';">
+            <div class="min-w-0">
+              <h3 class="text-base sm:text-lg font-semibold text-ink">IT-Talent</h3>
+              <p class="text-fog text-sm mt-1">INFORMÁTICOS BUSCANDO INFORMÁTICOS El especialista en Hunting IT más importante de LATAM</p>
+            </div>
+          </div>
+        </article>
+      </div>
+      <!-- RIGHT SIDEBAR -->
+      <aside class="lg:col-span-1 order-1 lg:order-2">
+        <div class="lg:sticky lg:top-20 space-y-6">
+          <div class="bg-parchment border border-slate-200 rounded-2xl p-5 sm:p-6">
+            <h3 class="title-display text-base font-bold text-ink mb-4 uppercase tracking-wide text-xs text-fog">Resumen del empleo</h3>
+            <ul class="space-y-3 text-sm">
+                            <li class="flex items-start gap-3"><i class='bx bx-dollar text-current text-lg flex-shrink-0 mt-0.5'></i><div><span class="text-fog text-xs block">Salario</span><span class="text-ink font-semibold">$2,000 - $2,500/mes</span></div></li>
+                                          <li class="flex items-start gap-3"><i class='bx bx-laptop text-current text-lg flex-shrink-0 mt-0.5'></i><div><span class="text-fog text-xs block">Modalidad</span><span class="text-ink font-semibold">Presencial</span></div></li>
+                            <li class="flex items-start gap-3"><i class='bx bx-map text-current text-lg flex-shrink-0 mt-0.5'></i><div><span class="text-fog text-xs block">Ubicación</span><span class="text-ink font-semibold">Chile</span></div></li>
+              <li class="flex items-start gap-3"><i class='bx bx-time-five text-current text-lg flex-shrink-0 mt-0.5'></i><div><span class="text-fog text-xs block">Publicado</span><span class="text-ink font-semibold">1 day ago</span></div></li>
+                          </ul>
+          </div>
+          <div class="bg-midnight rounded-2xl p-5 sm:p-6 text-parchment">
+            <h3 class="title-display text-lg font-bold mb-2">¿Listo para aplicar?</h3>
+            <p class="text-parchment/70 text-sm mb-4">Postula en menos de 1 minuto con tu perfil de Chumi IT.</p>
+                          <a href="/professional/login" class="w-full inline-flex items-center justify-center gap-2 bg-current text-midnight font-semibold py-3 rounded-xl hover:bg-current-deep transition-all text-sm"><i class='bx bx-log-in-circle text-lg'></i>Inicia sesión para aplicar</a>
+                                              </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+<!-- SIMILAR JOBS -->
+<section class="py-12 sm:py-16 bg-parchment border-t border-slate-200">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-end justify-between mb-6">
+      <div>
+        <span class="inline-flex items-center gap-2 px-3 py-1 bg-current/10 text-current text-xs font-semibold rounded-full uppercase tracking-wide">Mas oportunidades</span>
+        <h2 class="title-display text-2xl sm:text-3xl font-bold text-ink mt-3">Empleos <span class="text-current">similares</span></h2>
+      </div>
+      <a href="/jobs" class="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-current hover:text-current-deep transition-colors">Ver todos <i class='bx bx-right-arrow-alt'></i></a>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              <a href="https://chumi-it.com/professional/login" target="_self" rel="nofollow" class="block bg-parchment border border-slate-200 rounded-xl px-4 py-3 card-hover hover:border-current/30 group">
+  <div class="flex items-center gap-3">
+    <div class="w-8 h-8 bg-mist rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+      <img src="https://media.licdn.com/dms/image/v2/C560BAQHlPfn70SZD6Q/company-logo_100_100/company-logo_100_100/0/1631319612295?e=2147483647&amp;v=beta&amp;t=AI3Tbv--afwYgs3TQZq3VsfB4bocSnVt-swtyHE_ZGE" alt="" class="w-6 h-6 object-contain" onerror="this.src='/resources/assets/img/logochumiold.png'" loading="lazy">
+    </div>
+    <div class="min-w-0 flex-1">
+      <div class="flex items-center gap-2">
+        <h4 class="text-sm font-semibold text-ink group-hover:text-current transition-colors truncate">Tecnico Estimaciones Queretaro</h4>
+                  <span class="inline-flex items-center px-1.5 py-0.5 bg-current/10 text-current text-[9px] font-semibold rounded-full uppercase flex-shrink-0">Nuevo</span>
+              
+      </div>
+      <div class="flex items-center gap-1.5 text-xs text-fog mt-0.5 flex-wrap">
+        <span class="font-medium text-ink/70 truncate">
+                    
+                  
+        
+        </span>
+                 <span class="inline-flex items-center gap-1 px-1.5 py-0.5 bg-mist/70 text-fog/80 text-[10px] font-medium rounded-md"><i class='bx bx-map text-[10px]'></i>Mexico (México)</span>          <span class="inline-flex items-center gap-1 px-1.5 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-medium rounded-md"><i class='bx bx-world text-[10px]'></i>Hibrida</span>       </div>
+    </div>
+    <i class='bx bx-chevron-right text-fog/50 text-lg flex-shrink-0'></i>
+  </div>
+</a>              <a href="https://chumi-it.com/professional/login" target="_self" rel="nofollow" class="block bg-parchment border border-slate-200 rounded-xl px-4 py-3 card-hover hover:border-current/30 group">
+  <div class="flex items-center gap-3">
+    <div class="w-8 h-8 bg-mist rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+      <img src="/resources/assets/img/itthhgroup_logo.jpg" alt="" class="w-6 h-6 object-contain" onerror="this.src='/resources/assets/img/logochumiold.png'" loading="lazy">
+    </div>
+    <div class="min-w-0 flex-1">
+      <div class="flex items-center gap-2">
+        <h4 class="text-sm font-semibold text-ink group-hover:text-current transition-colors truncate">Desarrollador/a Backend / Fullstack (especialización En Erp Académico)</h4>
+                  <span class="inline-flex items-center px-1.5 py-0.5 bg-current/10 text-current text-[9px] font-semibold rounded-full uppercase flex-shrink-0">Nuevo</span>
+              
+      </div>
+      <div class="flex items-center gap-1.5 text-xs text-fog mt-0.5 flex-wrap">
+        <span class="font-medium text-ink/70 truncate">
+                      IT-Talent
+                  
+        
+        </span>
+         <span class="text-seafoam font-medium">  $1,500 - $2,000/mes</span>          <span class="inline-flex items-center gap-1 px-1.5 py-0.5 bg-mist/70 text-fog/80 text-[10px] font-medium rounded-md"><i class='bx bx-map text-[10px]'></i>Chile</span>          <span class="inline-flex items-center gap-1 px-1.5 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-medium rounded-md"><i class='bx bx-world text-[10px]'></i>Presencial</span>       </div>
+    </div>
+    <i class='bx bx-chevron-right text-fog/50 text-lg flex-shrink-0'></i>
+  </div>
+</a>              <a href="https://chumi-it.com/professional/login" target="_self" rel="nofollow" class="block bg-parchment border border-slate-200 rounded-xl px-4 py-3 card-hover hover:border-current/30 group">
+  <div class="flex items-center gap-3">
+    <div class="w-8 h-8 bg-mist rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+      <img src="https://media.licdn.com/dms/image/v2/D4E0BAQHoSnrSAu8k4w/company-logo_100_100/B4EaESGkNkIwAI-/0/1791305073798/tetakawisonora_logo?e=2147483647&amp;v=beta&amp;t=-tW_ngLi8n99-zSoPbfszC4Xwytz0W7BsQm37cCDJcw" alt="" class="w-6 h-6 object-contain" onerror="this.src='/resources/assets/img/logochumiold.png'" loading="lazy">
+    </div>
+    <div class="min-w-0 flex-1">
+      <div class="flex items-center gap-2">
+        <h4 class="text-sm font-semibold text-ink group-hover:text-current transition-colors truncate">Corporate Controller</h4>
+                  <span class="inline-flex items-center px-1.5 py-0.5 bg-current/10 text-current text-[9px] font-semibold rounded-full uppercase flex-shrink-0">Nuevo</span>
+              
+      </div>
+      <div class="flex items-center gap-1.5 text-xs text-fog mt-0.5 flex-wrap">
+        <span class="font-medium text-ink/70 truncate">
+                    
+                  
+        
+        </span>
+                 <span class="inline-flex items-center gap-1 px-1.5 py-0.5 bg-mist/70 text-fog/80 text-[10px] font-medium rounded-md"><i class='bx bx-map text-[10px]'></i>Mexico (México)</span>          <span class="inline-flex items-center gap-1 px-1.5 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-medium rounded-md"><i class='bx bx-world text-[10px]'></i>Hibrida</span>       </div>
+    </div>
+    <i class='bx bx-chevron-right text-fog/50 text-lg flex-shrink-0'></i>
+  </div>
+</a>              <a href="https://chumi-it.com/professional/login" target="_self" rel="nofollow" class="block bg-parchment border border-slate-200 rounded-xl px-4 py-3 card-hover hover:border-current/30 group">
+  <div class="flex items-center gap-3">
+    <div class="w-8 h-8 bg-mist rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+      <img src="https://media.licdn.com/dms/image/v2/D560BAQGC2zZlKsWUgQ/company-logo_100_100/company-logo_100_100/0/1720681969432/teck_resources_limited_logo?e=2147483647&amp;v=beta&amp;t=42Jm4jC2qgJBFnPEgGKwQ0nAlVz9V_FIC5E_hZ9CLXM" alt="" class="w-6 h-6 object-contain" onerror="this.src='/resources/assets/img/logochumiold.png'" loading="lazy">
+    </div>
+    <div class="min-w-0 flex-1">
+      <div class="flex items-center gap-2">
+        <h4 class="text-sm font-semibold text-ink group-hover:text-current transition-colors truncate">Especialista Sala Control Mina</h4>
+                  <span class="inline-flex items-center px-1.5 py-0.5 bg-current/10 text-current text-[9px] font-semibold rounded-full uppercase flex-shrink-0">Nuevo</span>
+              
+      </div>
+      <div class="flex items-center gap-1.5 text-xs text-fog mt-0.5 flex-wrap">
+        <span class="font-medium text-ink/70 truncate">
+                    
+                  
+        
+        </span>
+                 <span class="inline-flex items-center gap-1 px-1.5 py-0.5 bg-mist/70 text-fog/80 text-[10px] font-medium rounded-md"><i class='bx bx-map text-[10px]'></i>Chile</span>          <span class="inline-flex items-center gap-1 px-1.5 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-medium rounded-md"><i class='bx bx-world text-[10px]'></i>Hibrida</span>       </div>
+    </div>
+    <i class='bx bx-chevron-right text-fog/50 text-lg flex-shrink-0'></i>
+  </div>
+</a>              <a href="https://chumi-it.com/professional/login" target="_self" rel="nofollow" class="block bg-parchment border border-slate-200 rounded-xl px-4 py-3 card-hover hover:border-current/30 group">
+  <div class="flex items-center gap-3">
+    <div class="w-8 h-8 bg-mist rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+      <img src="https://media.licdn.com/dms/image/v2/D4D0BAQGsGR9p4ikS5w/company-logo_100_100/company-logo_100_100/0/1708946550425/tata_consultancy_services_logo?e=2147483647&amp;v=beta&amp;t=P-PkUMh7Ks1GQY0_l7GhzQiwfyLfQpvKWwX8Tq18Yc4" alt="" class="w-6 h-6 object-contain" onerror="this.src='/resources/assets/img/logochumiold.png'" loading="lazy">
+    </div>
+    <div class="min-w-0 flex-1">
+      <div class="flex items-center gap-2">
+        <h4 class="text-sm font-semibold text-ink group-hover:text-current transition-colors truncate">Sharepoint Administrator</h4>
+                  <span class="inline-flex items-center px-1.5 py-0.5 bg-current/10 text-current text-[9px] font-semibold rounded-full uppercase flex-shrink-0">Nuevo</span>
+              
+      </div>
+      <div class="flex items-center gap-1.5 text-xs text-fog mt-0.5 flex-wrap">
+        <span class="font-medium text-ink/70 truncate">
+                    
+                  
+        
+        </span>
+                 <span class="inline-flex items-center gap-1 px-1.5 py-0.5 bg-mist/70 text-fog/80 text-[10px] font-medium rounded-md"><i class='bx bx-map text-[10px]'></i>Mexico (México)</span>          <span class="inline-flex items-center gap-1 px-1.5 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-medium rounded-md"><i class='bx bx-world text-[10px]'></i>Hibrida</span>       </div>
+    </div>
+    <i class='bx bx-chevron-right text-fog/50 text-lg flex-shrink-0'></i>
+  </div>
+</a>          </div>
+  </div>
+</section>
+
+<!-- MAGIC LINK RAPIDO (solo visitantes no logueados) -->
+<div id="magic-banner" class="fixed bottom-0 inset-x-0 z-40 bg-midnight text-parchment shadow-2xl border-t border-slate-700">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
+    <p class="text-sm sm:text-base font-medium text-center sm:text-left flex items-center gap-2">
+      <i class='bx bx-bolt text-current text-xl'></i>
+      <span><span class="font-bold text-current">Postulate rápido</span> solamente ingresando tu correo.</span>
+    </p>
+    <button type="button" id="magic-open" class="flex-shrink-0 inline-flex items-center gap-2 bg-current text-midnight font-semibold py-2.5 px-5 rounded-xl hover:bg-current-deep transition-all text-sm whitespace-nowrap">
+      <i class='bx bx-mail-send text-lg'></i>Registrate con tu email
+    </button>
+  </div>
+</div>
+<div class="h-16 sm:h-14"></div>
+
+<!-- MODAL MAGIC LINK -->
+<div id="magic-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/70" id="magic-overlay"></div>
+  <div class="relative w-full max-w-md bg-white rounded-2xl overflow-hidden shadow-2xl">
+    <div class="bg-midnight px-6 py-5 flex items-center justify-between">
+      <h3 class="title-display text-lg font-bold text-parchment flex items-center gap-2"><i class='bx bx-mail-send text-current'></i>Entrar con tu email</h3>
+      <button type="button" id="magic-close" class="text-parchment/60 hover:text-parchment transition-colors text-2xl leading-none">&times;</button>
+    </div>
+    <div class="p-6">
+                  <p class="text-sm text-fog mb-4">Ingresa tu correo. Te enviamos un enlace magic para entrar sin contraseña. Si no tienes cuenta, la creamos al instante.</p>
+      <form method="POST" action="https://chumi-it.com/magic-link/send">
+        <input type="hidden" name="_token" value="n3APcCZ6sQ2Mbwuu4W3PxH3hGyWP7hrrv25zRjeZ" autocomplete="off">        <label class="block text-xs font-semibold text-ink mb-1.5" for="magic-email">Correo electrónico</label>
+        <input type="email" name="email" id="magic-email" required autocomplete="email" placeholder="tucorreo@ejemplo.com" class="w-full p-3 border border-slate-300 rounded-xl text-sm text-ink focus:outline-none focus:ring-2 focus:ring-current/40 mb-4" value="">
+        <button type="submit" class="w-full inline-flex items-center justify-center gap-2 bg-current text-midnight font-semibold py-3 rounded-xl hover:bg-current-deep transition-all text-sm">
+          <i class='bx bx-send text-lg'></i>Enviarme enlace
+        </button>
+      </form>
+      <p class="text-xs text-fog mt-4 text-center">Ya tienes cuenta? Este enlace solo inicia sesión.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  var open = document.getElementById("magic-open");
+  var modal = document.getElementById("magic-modal");
+  var closeBtn = document.getElementById("magic-close");
+  var overlay = document.getElementById("magic-overlay");
+  function openModal() {
+    if (modal) {
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+      document.body.style.overflow = "hidden";
+      var input = document.getElementById("magic-email");
+      if (input) input.focus();
+    }
+  }
+  if (open) open.addEventListener("click", openModal);
+  if (closeBtn) closeBtn.addEventListener("click", function() {
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+    document.body.style.overflow = "";
+  });
+  if (overlay) overlay.addEventListener("click", function() {
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+    document.body.style.overflow = "";
+  });
+  if (modal && "" === "1") openModal();
+});
+</script>
+
+<!-- FOOTER -->
+<footer class="bg-midnight text-parchment/70 pt-12 sm:pt-16 pb-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 sm:gap-10">
+      <div class="col-span-2 md:col-span-1">
+        <a href="/" class="flex items-center gap-2 mb-4">
+          <img src="https://chumi-it.com/resources/assets/img/logochumiold.png" alt="CHUMI-IT" class="h-7 w-auto">
+          <span class="title-display text-lg font-bold text-parchment">CHUMI<span class="text-current">-IT</span></span>
+        </a>
+        <p class="text-sm leading-relaxed max-w-xs">Talento tecnológico en Latinoamérica. +1M profesionales IT.</p>
+      </div>
+      <div>
+        <h4 class="text-parchment font-semibold text-sm mb-4 uppercase tracking-wide">Para candidatos</h4>
+        <ul class="space-y-2.5 text-sm">
+          <li><a href="/jobs" class="hover:text-parchment transition-colors flex items-center gap-2"><i class='bx bx-search-alt text-current text-xs'></i>Buscar empleos TI</a></li>
+          <li><a href="/professional/register" class="hover:text-parchment transition-colors flex items-center gap-2"><i class='bx bx-user-plus text-current text-xs'></i>Crear perfil gratis</a></li>
+          <li><a href="/my/dashboard" class="hover:text-parchment transition-colors flex items-center gap-2"><i class='bx bx-user-circle text-current text-xs'></i>Mi cuenta</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-parchment font-semibold text-sm mb-4 uppercase tracking-wide">Para empresas</h4>
+        <ul class="space-y-2.5 text-sm">
+          <li><a href="/for-business" class="hover:text-parchment transition-colors flex items-center gap-2"><i class='bx bx-bot text-current text-xs'></i>CHUMI Recruiter AI</a></li>
+          <li><a href="/for-business" class="hover:text-parchment transition-colors flex items-center gap-2"><i class='bx bx-briefcase text-current text-xs'></i>publicar empleos</a></li>
+          <li><a href="https://chumi-it.com/contact" class="hover:text-parchment transition-colors flex items-center gap-2"><i class='bx bx-phone text-current text-xs'></i>Solicitar Demo</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-parchment font-semibold text-sm mb-4 uppercase tracking-wide">Síguenos</h4>
+        <div class="flex items-center gap-3">
+          <a href="https://www.linkedin.com/company/chumi-it" target="_blank" rel="noopener noreferrer" class="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center hover:bg-slate-600 transition-colors" aria-label="LinkedIn">
+            <i class='bx bxl-linkedin text-parchment text-lg'></i>
+          </a>
+        </div>
+        <p class="text-xs mt-4 leading-relaxed">+1M profesionales tecnológicos.<br>Comunidad #1 en LATAM.</p>
+      </div>
+    </div>
+    <div class="border-t border-slate-700/50 mt-8 sm:mt-10 pt-6 text-xs text-center flex flex-col sm:flex-row items-center justify-between gap-2">
+      <span>&copy; 2026 CHUMI-IT. Todos los derechos reservados.</span>
+      <span>Plataforma desarrollada por <a href="https://it-talent.cl" target="_blank" rel="noopener noreferrer" class="text-current hover:underline">IT-Talent</a>.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  var toggle = document.getElementById("menu-toggle");
+  var menu = document.getElementById("mobile-menu");
+  if (toggle && menu) {
+    toggle.addEventListener("click", function() {
+      var isOpen = menu.classList.toggle("open");
+      toggle.setAttribute("aria-expanded", isOpen);
+      toggle.innerHTML = isOpen ? "<i class='bx bx-x text-2xl text-ink'></i>" : "<i class='bx bx-menu text-2xl text-ink'></i>";
+    });
+  }
+  document.querySelectorAll(".copy-link-btn").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      navigator.clipboard.writeText(window.location.href);
+      var originalHTML = btn.innerHTML;
+      btn.innerHTML = "<i class='bx bx-check text-lg'></i><span class=\"hidden sm:inline\">Copiado</span>";
+      setTimeout(function() { btn.innerHTML = originalHTML; }, 1500);
+    });
+  });
+  var shareRoot = document.getElementById("share-menu-root");
+  if (shareRoot) {
+    var shareToggle = document.getElementById("share-toggle");
+    var shareMenu = document.getElementById("share-menu");
+    shareToggle.addEventListener("click", function(event) {
+      event.stopPropagation();
+      var isOpen = !shareMenu.classList.contains("hidden");
+      shareMenu.classList.toggle("hidden");
+      shareToggle.setAttribute("aria-expanded", !isOpen);
+    });
+    document.addEventListener("click", function() {
+      if (!shareMenu.classList.contains("hidden")) {
+        shareMenu.classList.add("hidden");
+        shareToggle.setAttribute("aria-expanded", "false");
+      }
+    });
+    document.addEventListener("keydown", function(event) {
+      if (event.key === "Escape" && !shareMenu.classList.contains("hidden")) {
+        shareMenu.classList.add("hidden");
+        shareToggle.setAttribute("aria-expanded", "false");
+      }
+    });
+  }
+});
+</script>
+</body>
+</html>

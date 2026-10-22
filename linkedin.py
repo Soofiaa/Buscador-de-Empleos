@@ -17,7 +17,7 @@ No autenticada: sin cuenta, sin credenciales, sin cookies.
 """
 import html as html_mod
 import re
-from typing import Dict, Optional
+from typing import Dict
 from urllib.parse import urlsplit
 
 import pandas as pd

@@ -26,6 +26,7 @@
     --suave: #8F5972;
     --accion: #E04D7D;
     --accion-tinta: #FFFFFF;
+    --accion-texto: #DA2A64;   /* texto sobre fondo claro (contraste); el botón sigue en --accion */
     --sel: rgba(224, 77, 125, 0.12);
     --alta: #C73866;
     --alta-fondo: rgba(224, 77, 125, 0.14);
@@ -52,6 +53,7 @@
     --suave: #C492B1;
     --accion: #F43F5E;
     --accion-tinta: #FFFFFF;
+    --accion-texto: #F4395A;
     --sel: rgba(244, 63, 94, 0.18);
     --alta: #FB7185;
     --alta-fondo: rgba(251, 113, 133, 0.16);
@@ -78,6 +80,7 @@
     --suave: #475569;
     --accion: #1D4ED8;
     --accion-tinta: #FFFFFF;
+    --accion-texto: #1D4ED8;
     --sel: rgba(29, 78, 216, 0.12);
     --alta: #0284C7;
     --alta-fondo: rgba(2, 132, 199, 0.12);
@@ -104,6 +107,7 @@
     --suave: #94A3B8;
     --accion: #3B82F6;
     --accion-tinta: #FFFFFF;
+    --accion-texto: #4085F6;
     --sel: rgba(59, 130, 246, 0.18);
     --alta: #38BDF8;
     --alta-fondo: rgba(56, 189, 248, 0.16);
@@ -130,6 +134,7 @@
     --suave: #64748B;
     --accion: #0EA5E9;
     --accion-tinta: #FFFFFF;
+    --accion-texto: #0B7CAF;
     --sel: rgba(14, 165, 233, 0.12);
     --alta: #B45309;
     --alta-fondo: rgba(245, 158, 11, 0.12);
@@ -156,6 +161,7 @@
     --suave: #9CA3AF;
     --accion: #8B5CF6;
     --accion-tinta: #FFFFFF;
+    --accion-texto: #996FF7;
     --sel: rgba(139, 92, 246, 0.16);
     --alta: #FBBF24;
     --alta-fondo: rgba(251, 191, 36, 0.14);
@@ -184,7 +190,7 @@
   .app { display:grid; grid-template-columns:304px minmax(0,1fr); min-height:100vh; }
   .lateral { background:var(--panel); border-right:1px solid var(--borde); padding:22px 16px 28px;
              position:sticky; top:0; height:100vh; overflow-y:auto; }
-  .principal { padding:26px 36px 48px; width:100%; max-width:1600px; margin:0; box-sizing:border-box; min-width:0; }
+  .principal { padding:26px 36px 48px; width:100%; max-width:1280px; margin:0; box-sizing:border-box; min-width:0; }
   @media (max-width:860px) {
     .app { grid-template-columns:minmax(0,1fr); }
     .lateral { position:static; height:auto; border-right:0; border-bottom:1px solid var(--borde); }
@@ -199,7 +205,7 @@
   .boton:hover { filter:brightness(1.06); }
   .boton:disabled { opacity:.55; cursor:progress; }
   .boton.ancho { width:100%; }
-  .boton.sec { background:transparent; color:var(--accion); border:1px solid var(--borde); font-weight:500; padding:5px 11px; font-size:.85rem; }
+  .boton.sec { background:transparent; color:var(--accion-texto); border:1px solid var(--borde); font-weight:500; padding:5px 11px; font-size:.85rem; }
   .nota { color:var(--suave); font-size:.8rem; margin:6px 2px 10px; }
   .progreso { font-size:.84rem; color:var(--suave); min-height:1.2em; margin:0 2px 4px; overflow-wrap:anywhere; }
   .progreso.error { color:var(--rojo); }
@@ -208,6 +214,11 @@
 
   .historial { margin-top:14px; border-top:1px solid var(--borde); padding-top:12px; }
   .historial h2 { font-size:1rem; color:var(--suave); margin:4px 10px 8px; }
+  .historial-toggle { display:none; margin-top:12px; }   /* solo en pantallas angostas: en escritorio el historial siempre se ve */
+  @media (max-width:860px) {
+    .historial-toggle { display:block; }
+    .historial[data-plegado] { display:none; }
+  }
   .item { display:flex; align-items:baseline; gap:8px; width:100%; text-align:left; background:none; border:0;
           border-radius:10px; padding:7px 10px; cursor:pointer; color:var(--tinta); }
   .item:hover { background:var(--panel2); }
@@ -236,7 +247,7 @@
   .fuente-mini { background:var(--panel); border:1px solid var(--borde); border-radius:12px; padding:10px 12px; }
   .fuente-mini .nombre { font-size:.82rem; color:var(--suave); }
   .fuente-mini .cifras { font-size:.9rem; font-variant-numeric:tabular-nums; margin-top:2px; white-space:nowrap; }
-  .fuente-mini .cifras .rel { color:var(--accion); font-weight:650; }
+  .fuente-mini .cifras .rel { color:var(--accion-texto); font-weight:650; }
   .fuente-mini .cifras .err { color:var(--aviso); }
   .fuente-mini .antiguas { font-size:.78rem; color:var(--suave); margin-top:1px; }
   details.panel { background:var(--panel); border:1px solid var(--borde); border-radius:12px; padding:9px 14px; margin-top:14px; }
@@ -256,6 +267,11 @@
   .filtros input[type=search] { grid-column:1 / -1; }
   .filtros input, .filtros select { width:100%; background:var(--panel); border:1px solid var(--borde); border-radius:10px; padding:8px 11px; }
   .filtros select { font-size:.9rem; padding:8px 6px 8px 10px; text-overflow:ellipsis; }
+  .filtros-extra { grid-column:1 / -1; }
+  .filtros-extra summary { cursor:pointer; color:var(--suave); font-size:.86rem; font-weight:600; padding:4px 2px; list-style:none; }
+  .filtros-extra summary::-webkit-details-marker { display:none; }
+  .filtros-extra summary:hover { color:var(--tinta); }
+  .filtros-extra-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:8px; margin-top:8px; }
   h3.grupo { font-size:1.08rem; margin:24px 0 10px; display:flex; align-items:center; gap:4px; }
 
   .tarjeta { background:var(--panel); border:1px solid var(--borde); border-radius:16px; padding:16px 20px; margin-bottom:12px; box-sizing:border-box; overflow:hidden; }
@@ -264,7 +280,7 @@
   .selector-tema { background:var(--panel2); color:var(--tinta); border:1px solid var(--borde); border-radius:10px; padding:6px 10px; font-size:0.83rem; font-weight:600; cursor:pointer; outline:none; transition:border-color .15s ease, box-shadow .15s ease; }
   .selector-tema:hover, .selector-tema:focus-visible { border-color:var(--accion); }
   .titulo { flex:1 1 auto; min-width:0; font-family:var(--display); font-weight:650; font-size:1.12rem; line-height:1.35; color:var(--tinta); text-decoration:none; word-break:break-word; overflow-wrap:break-word; }
-  .titulo:hover { color:var(--accion); text-decoration:underline; text-underline-offset:3px; }
+  .titulo:hover { color:var(--accion-texto); text-decoration:underline; text-underline-offset:3px; }
   .meta { color:var(--suave); font-size:.86rem; margin:4px 0 8px; }
   .chips { display:flex; flex-wrap:wrap; gap:6px; margin:6px 0 2px; }
   .chip { font-size:.78rem; border-radius:99px; padding:2px 10px; background:var(--panel2); color:var(--tinta); }
@@ -351,7 +367,7 @@
   }
   .kanban-vacio { font-size:.82rem; color:var(--suave); text-align:center; padding:28px 8px; font-style:italic; border:1px dashed var(--borde); border-radius:10px; }
   .btn-exportar { font-size:.82rem; padding:6px 12px; white-space:nowrap; border-radius:10px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; height:100%; }
-  .btn-exportar:hover { border-color:var(--accion); color:var(--accion); }
+  .btn-exportar:hover { border-color:var(--accion); color:var(--accion-texto); }
   .chip.alerta { background:var(--rojo-fondo); color:var(--rojo); font-weight:600; }
   .chip.ok { background:var(--nueva-fondo); color:var(--nueva); font-weight:600; }
 
@@ -360,12 +376,12 @@
   .tarjeta.prio-media { border-left:4px solid var(--media) !important; }
   .tarjeta.prio-baja { border-left:4px solid var(--baja) !important; }
   .tarjeta-header { display:flex; align-items:center; gap:10px; margin-bottom:4px; }
-  .avatar-empresa { width:32px; height:32px; border-radius:9px; background:var(--panel2); border:1px solid var(--borde); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:.85rem; color:var(--accion); flex-shrink:0; }
+  .avatar-empresa { width:32px; height:32px; border-radius:9px; background:var(--panel2); border:1px solid var(--borde); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:.85rem; color:var(--accion-texto); flex-shrink:0; }
   .tarjeta-titulos { display:flex; flex-direction:column; flex:1; min-width:0; }
   .meta-limpia { font-size:.82rem; color:var(--suave); display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin:4px 0; }
   .meta-sep { color:var(--borde); font-weight:700; }
   .btn-gestionar-oferta { font-size:.82rem; font-weight:600; padding:6px 12px; border-radius:8px; background:var(--panel2); border:1px solid var(--borde); color:var(--tinta); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:6px; transition:all .15s ease; width:100%; margin-top:6px; }
-  .btn-gestionar-oferta:hover { background:var(--sel); border-color:var(--accion); color:var(--accion); }
+  .btn-gestionar-oferta:hover { background:var(--sel); border-color:var(--accion); color:var(--accion-texto); }
 
   /* ---------- toast flotante con deshacer (undo) ---------- */
   .toast-container { position:fixed; bottom:24px; right:24px; z-index:10000; display:flex; flex-direction:column; gap:8px; pointer-events:none; }
@@ -407,10 +423,13 @@
   /* ---------- mejoras audit ui/ux ---------- */
   .skill-pill { font-size:0.73rem; font-weight:600; padding:2px 8px; border-radius:6px; background:var(--panel2); border:1px solid var(--borde); color:var(--tinta); display:inline-flex; align-items:center; }
   .skill-pill:hover { border-color:var(--accion); }
+  .chip.chip-dato:not(.sueldo-destacado) { background:transparent; border:1px solid var(--borde); color:var(--suave); font-weight:500; }   /* dato secundario: tenue, para que no compita con prioridad y estado */
+  .habilidades-pie { display:flex; flex-wrap:wrap; gap:4px; margin-top:8px; }
+  .habilidades-pie .skill-pill { font-weight:500; color:var(--suave); }
   .chip.sueldo-destacado { background:rgba(16, 185, 129, 0.12); color:#047857; border:1px solid rgba(16, 185, 129, 0.3); font-weight:700; }
   :root[data-tema="girly-oscuro"] .chip.sueldo-destacado, :root[data-tema="hombre-oscuro"] .chip.sueldo-destacado, :root[data-tema="neutro-oscuro"] .chip.sueldo-destacado { color:#34D399; background:rgba(52, 211, 153, 0.15); border-color:rgba(52, 211, 153, 0.35); }
   .btn-enlace-externo { display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:7px; background:var(--panel2); border:1px solid var(--borde); color:var(--suave); text-decoration:none; font-size:.85rem; transition:all .15s ease; flex-shrink:0; }
-  .btn-enlace-externo:hover { color:var(--accion); border-color:var(--accion); background:var(--sel); transform:translate(1px, -1px); }
+  .btn-enlace-externo:hover { color:var(--accion-texto); border-color:var(--accion); background:var(--sel); transform:translate(1px, -1px); }
   .btn-limpiar-filtros { background:var(--rojo-fondo); color:var(--rojo); border:1px solid rgba(225, 29, 72, 0.25); border-radius:10px; padding:7px 12px; font-size:.83rem; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:5px; transition:all .15s ease; white-space:nowrap; }
   .btn-limpiar-filtros:hover { background:var(--rojo); color:#fff; }
   .tabla-compacta { display:flex; flex-direction:column; gap:6px; width:100%; }
@@ -418,7 +437,7 @@
   .fila-compacta:hover { border-color:var(--accion); transform:translateY(-1px); }
   .fila-compacta .cargo-box { display:flex; flex-direction:column; min-width:0; }
   .fila-compacta .cargo-titulo { font-weight:700; font-size:.92rem; color:var(--tinta); text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .fila-compacta .cargo-titulo:hover { color:var(--accion); }
+  .fila-compacta .cargo-titulo:hover { color:var(--accion-texto); }
   .fila-compacta .cargo-empresa { font-size:.8rem; color:var(--suave); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .fila-compacta select.estado { font-size:.78rem; padding:4px 6px; }
   @media (max-width:980px) {
@@ -429,7 +448,7 @@
   .seccion-lateral-titulo { font-size:.74rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--suave); margin:14px 2px 6px; }
   .badge-db-status { margin-top:20px; padding:10px 12px; background:var(--panel2); border:1px solid var(--borde); border-radius:10px; font-size:.78rem; color:var(--suave); display:flex; align-items:center; gap:8px; }
   .dot-online { width:8px; height:8px; border-radius:50%; background:#10B981; box-shadow:0 0 6px #10B981; flex-shrink:0; }
-  /* ---------- corrección de contraste WCAG AA (PREPARADA, SIN APLICAR): se activa con data-contraste="aa" en <html> */
+  /* ---------- corrección de contraste WCAG AA: activa con data-contraste="aa" en <html> (interruptor «Contraste reforzado») */
   :root[data-contraste="aa"][data-tema="girly-claro"] { --accion:#DA2A64; --alta:#BB3560; --baja:#875E70; --nueva:#C11856; --aviso:#A25904; --rojo:#CF1B42; }
   :root[data-contraste="aa"][data-tema="girly-oscuro"] { --accion:#E80D33; --media:#DD59F1; --baja:#B2819F; --rojo:#F65C76; }
   :root[data-contraste="aa"][data-tema="hombre-claro"] { --alta:#0270A9; --baja:#5B6A7F; --nueva:#1759EA; --aviso:#A25904; --rojo:#CD2121; }
@@ -463,13 +482,19 @@
         </optgroup>
       </select>
     </div>
+    <label class="interruptor-soporte" style="margin:6px 0 0;" title="Colores de texto y acento más oscuros o más claros, según el tema, para cumplir contraste WCAG AA">
+      <input type="checkbox" id="contraste-aa"> Contraste reforzado
+    </label>
     <div class="sub" id="ultima">Cargando…</div>
 
     <div class="seccion-lateral">
       <button class="boton ancho" id="buscar" type="button">Buscar empleos</button>
-      <p class="nota">Búsqueda completa (~5 min) en Indeed, Chiletrabajos, BNE, etc.</p>
+      <p class="nota">Búsqueda completa (~15 a 20 min) en Indeed, LinkedIn, Chiletrabajos, BNE, etc.</p>
       <div class="progreso" id="progreso" role="status" aria-live="polite"></div>
       <div class="barra" id="barra" role="progressbar" aria-label="Avance de la búsqueda" aria-valuemin="0" hidden><div class="barra-relleno" id="barra-relleno"></div></div>
+      <details class="busquedas-manuales" id="busquedas-manuales" style="margin-top:8px; font-size:.8rem;">
+        <summary title="Estos sitios no aceptan búsquedas automáticas: se abren en tu navegador">🔎 Buscar a mano</summary>
+      </details>
     </div>
 
     <div class="seccion-lateral-titulo">Gestión de Datos</div>
@@ -482,7 +507,8 @@
       <div class="sub" id="estado-respaldo" role="status" style="margin:6px 2px 0; font-size:.78rem;"></div>
     </div>
 
-    <nav class="historial" id="historial" aria-label="Historial de búsquedas"></nav>
+    <button class="boton sec ancho historial-toggle" id="historial-toggle" type="button" aria-expanded="false" aria-controls="historial">📜 Ver historial de búsquedas</button>
+    <nav class="historial" id="historial" aria-label="Historial de búsquedas" data-plegado></nav>
     <div class="badge-db-status" id="estado-db" role="status"><span class="dot-online"></span> <span id="texto-db">Conectando…</span></div>
   </aside>
   <main class="principal">
@@ -561,11 +587,14 @@ function filtrarSeleccion(lista, pestana, sel, corridas) {
   const ids = idsSeleccion(sel, corridas);
   return ids ? lista.filter(o => ids.has(o.corrida_id === undefined ? null : o.corrida_id)) : lista;
 }
+// Ofertas y Sin descripción son las dos listas que se gestionan con estado y fases: tus decisiones salen de ambas
+const gestionadas = datos => [...(datos.principal || []), ...(datos.sin_descripcion || [])];
 function listaDe(datos, pestana, sel) {
   if (!datos) return [];
   const base = pestana === "ofertas" ? datos.principal.filter(o => !CERRADOS.has(o.estado))
-    : pestana === "seguimiento" ? datos.principal.filter(o => o.estado === "revisada" || o.estado === "postulada" || o.estado === "entrevista")
-    : pestana === "descartadas_usuario" ? datos.principal.filter(o => o.estado === "descartada")
+    : pestana === "sin_descripcion" ? (datos.sin_descripcion || []).filter(o => !CERRADOS.has(o.estado))
+    : pestana === "seguimiento" ? gestionadas(datos).filter(o => o.estado === "revisada" || o.estado === "postulada" || o.estado === "entrevista")
+    : pestana === "descartadas_usuario" ? gestionadas(datos).filter(o => o.estado === "descartada")
     : (datos[pestana] || []);
   return filtrarSeleccion(base, pestana, sel, datos.corridas);
 }
@@ -582,13 +611,13 @@ function tituloSeleccion(sel, corridas) {
   return "Todas las ofertas";
 }
 const NOMBRE_FUENTE = { indeed: "Indeed", google: "Google", glassdoor: "Glassdoor", getonboard: "Get on Board",
-  bne: "BNE", trabajando: "Trabajando", chiletrabajos: "Chiletrabajos", linkedin: "LinkedIn", manual: "✍️ Manual" };
+  bne: "BNE", trabajando: "Trabajando", chiletrabajos: "Chiletrabajos", chumi: "Chumi", laborum: "Laborum", linkedin: "LinkedIn", manual: "✍️ Manual" };
 const nombreFuente = f => NOMBRE_FUENTE[f] || f || "sin fuente";
 function textoProgreso(mensaje) {                // "[3/40] indeed | qa tester | …" -> "Buscando en Indeed · qa tester · 3 de 40"
   const m = /^\s*\[(\d+)\/(\d+)\]\s*([^|\[\]]+?)\s*\|\s*([^|:]+?)\s*(?:[|:]|$)/.exec(mensaje || "");
   return m ? "Buscando en " + nombreFuente(m[3]) + " · " + m[4] + " · " + m[1] + " de " + m[2] : (mensaje || "");
 }
-const norm = s => (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+const norm = s => (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 function coincideTexto(o, texto) {             // cada palabra buscada debe estar en título, empresa, lugar, motivo o notas
   const t = norm([o.titulo, o.empresa, o.ubicacion, o.motivo, o.notas].join(" "));
   return (texto || "").split(/\s+/).every(w => t.includes(norm(w)));
@@ -782,16 +811,30 @@ function senalesTablero(o, hoy) {
   else if (r && !seguimiento) etapa = { texto: r.dias === 0 ? "🕒 Postulada hoy" : "🕒 Postulada hace " + TXT.dias(r.dias), clase: "" };
   return { etapa, seguimiento };
 }
+// Búsquedas a mano: Computrabajo y Empleos Públicos rechazan a la app (403, ver NOTAS.md del 20-10). La página solo
+// arma los enlaces; se abren en el navegador de Sofia y lo que sirva se agrega con «Agregar manual».
+const TERMINOS_MANUALES = ["analista funcional", "analista qa", "analista de procesos", "desarrollador junior",
+                           "analista de datos", "control de gestión"];
+function slugBusqueda(t) {
+  return String(t).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+function busquedasManuales() {
+  return [
+    { sitio: "Computrabajo", enlaces: TERMINOS_MANUALES.map(t => ({ texto: t, url: "https://cl.computrabajo.com/trabajo-de-" + slugBusqueda(t) })) },
+    { sitio: "Empleos Públicos", enlaces: [{ texto: "convocatorias abiertas", url: "https://www.empleospublicos.cl/pub/convocatorias/convocatorias.aspx" }] },
+  ];
+}
 // </puras>
 
 const ESTADOS = ["nueva", "revisada", "postulada", "entrevista", "descartada"];
 const ETIQUETAS_ESTADO = { nueva: "🌱 Nueva", revisada: "🔍 Revisada", postulada: "✉️ Postulada", entrevista: "🎯 En Entrevista", descartada: "❌ Descartada" };
 const PESTANAS = [
-  ["ofertas", "Ofertas"], ["seguimiento", "Seguimiento"], ["fuera_perfil", "Fuera de perfil"],
+  ["ofertas", "Ofertas"], ["seguimiento", "Seguimiento"], ["sin_descripcion", "Sin texto"],
+  ["fuera_perfil", "Fuera de perfil"],
   ["sospechosas", "Sospechosas"], ["descartadas_usuario", "Descartadas"], ["descartadas", "Descartadas por filtros"]
 ];
 const FILTROS_VACIOS = () => ({ texto: "", estado: "activas", prioridad: "", modalidad: "", fuente: "", tipo: "" });
-const S = { datos: null, pestana: "ofertas", sel: { tipo: "todas" }, ultima: null, f: FILTROS_VACIOS(), agrupar: "prioridad", densidad: "detallada" };
+const S = { datos: null, pestana: "ofertas", sel: { tipo: "todas" }, ultima: null, f: FILTROS_VACIOS(), agrupar: "prioridad", densidad: "detallada", masFiltros: false };
 try { if (localStorage.getItem("densidad") === "compacta") S.densidad = "compacta"; } catch (e) {}
 S.vistaSeg = "tablero";                           // la primera vez, Tablero; después, lo que se guardó
 try { if (localStorage.getItem("vistaSeguimiento") === "lista") S.vistaSeg = "lista"; } catch (e) {}
@@ -903,8 +946,27 @@ function aplicarTema(t) {
 $("tema").addEventListener("change", e => aplicarTema(e.target.value));
 try { aplicarTema(localStorage.getItem("tema")); } catch (e) { aplicarTema(null); }
 
+// contraste reforzado: encendido por defecto; se recuerda en este navegador
+function aplicarContraste(on) {
+  if (on) document.documentElement.setAttribute("data-contraste", "aa"); else document.documentElement.removeAttribute("data-contraste");
+  $("contraste-aa").checked = on;
+  try { localStorage.setItem("contraste", on ? "aa" : "normal"); } catch (e) {}
+}
+$("contraste-aa").addEventListener("change", e => aplicarContraste(e.target.checked));
+let contrasteGuardado = null;
+try { contrasteGuardado = localStorage.getItem("contraste"); } catch (e) {}
+aplicarContraste(contrasteGuardado !== "normal");
+
 // ---------- columna izquierda: historial
 function elegir(sel) { S.sel = sel; pintar(); }
+
+// en móvil el historial empieza plegado; el botón lo abre y lo cierra (aria-expanded refleja el estado)
+$("historial-toggle").addEventListener("click", e => {
+  const nav = $("historial"), estabaPlegado = nav.hasAttribute("data-plegado");
+  if (estabaPlegado) nav.removeAttribute("data-plegado"); else nav.setAttribute("data-plegado", "");
+  e.currentTarget.setAttribute("aria-expanded", String(estabaPlegado));
+  e.currentTarget.textContent = estabaPlegado ? "📜 Ocultar historial de búsquedas" : "📜 Ver historial de búsquedas";
+});
 
 function botonSel(sel, clase, etiqueta, hijos) {
   const activo = claveSel(S.sel) === claveSel(sel);
@@ -1025,17 +1087,28 @@ function selector(clave, etiqueta, opciones, extra, nombre) {
 }
 
 const PESTANAS_PRINCIPAL = new Set(["ofertas", "seguimiento", "descartadas_usuario"]);
+// "Sin descripción" trae su propia lista, pero se ve y se trabaja como Ofertas: tarjeta completa y los mismos filtros
+const PESTANAS_COMPLETAS = new Set([...PESTANAS_PRINCIPAL, "sin_descripcion"]);
 function pintarFiltros() {
-  const base = PESTANAS_PRINCIPAL.has(S.pestana) ? S.datos.principal : (S.datos[S.pestana] || []);
+  const base = PESTANAS_PRINCIPAL.has(S.pestana) ? gestionadas(S.datos) : (S.datos[S.pestana] || []);
   const unicos = campo => [...new Set(base.map(o => o[campo]).filter(Boolean))].sort();
   const txt = h("input", { type: "search", placeholder: "Buscar por cargo, empresa, stack o notas… (Pulsa / para buscar)", "aria-label": "Buscar", value: S.f.texto,
     oninput: e => { S.f.texto = e.target.value; pintarLista(); } });
   const partes = [txt];
   if (S.pestana === "ofertas") partes.push(selector("estado", "Estado", ["nueva", "revisada"], [h("option", { value: "activas" }, "Estado: activas"), h("option", { value: "" }, "Estado: todas")]));
-  if (PESTANAS_PRINCIPAL.has(S.pestana)) {
-    partes.push(selector("prioridad", "Prioridad", ["Alta", "Media", "Baja"]), selector("modalidad", "Modalidad", unicos("modalidad")), selector("tipo", "Tipo", unicos("tipo")));
+  // secundarios (prioridad, modalidad, tipo, fuente) van plegados en «Más filtros»; se abre solo si hay alguno activo
+  const secundarios = [];
+  if (PESTANAS_COMPLETAS.has(S.pestana)) {
+    secundarios.push(selector("prioridad", "Prioridad", ["Alta", "Media", "Baja"]), selector("modalidad", "Modalidad", unicos("modalidad")), selector("tipo", "Tipo", unicos("tipo")));
   }
-  partes.push(selector("fuente", "Fuente", unicos("fuente"), null, nombreFuente));
+  const fuentesConocidas = ["indeed", "linkedin", "chiletrabajos", "bne", "trabajando", "chumi", "laborum", "getonboard", "glassdoor"];
+  const fuentesOpciones = [...new Set([...fuentesConocidas, ...unicos("fuente")])].sort((a, b) => nombreFuente(a).localeCompare(nombreFuente(b)));
+  secundarios.push(selector("fuente", "Fuente", fuentesOpciones, null, nombreFuente));
+  const activos = ["prioridad", "modalidad", "tipo", "fuente"].filter(k => S.f[k]).length;
+  partes.push(h("details", { class: "filtros-extra", open: S.masFiltros || activos > 0 ? true : null,
+      ontoggle: e => { S.masFiltros = e.target.open; } },
+    h("summary", {}, "Más filtros" + (activos ? " · " + activos + (activos === 1 ? " activo" : " activos") : "")),
+    h("div", { class: "filtros-extra-grid" }, secundarios)));
   if (S.pestana === "ofertas") {
     const g = h("select", { "aria-label": "Agrupar", onchange: e => { S.agrupar = e.target.value; pintarLista(); } },
       h("option", { value: "prioridad" }, "Agrupar: prioridad"), h("option", { value: "fuente" }, "Agrupar: fuente"));
@@ -1324,13 +1397,13 @@ function tarjeta(o, completa) {
     for (const v of [o.tipo, o.modalidad, o.contrato, o.sueldo && o.sueldo !== "No indicado" ? o.sueldo : "", o.experiencia && o.experiencia !== "No indicada" ? o.experiencia : ""]) {
       if (!v) continue;
       const esSueldo = v === o.sueldo && esSueldoDestacado(o.sueldo);
-      chips.push(h("span", { class: "chip" + (/plazo/i.test(v) ? " aviso" : "") + (esSueldo ? " sueldo-destacado" : "") }, esSueldo ? "💵 " + v : v));
+      chips.push(h("span", { class: "chip chip-dato" + (/plazo|sin verificar/i.test(v) ? " aviso" : "") + (esSueldo ? " sueldo-destacado" : "") }, esSueldo ? "💵 " + v : v));
     }
     if (o.estado === "descartada" && o.fecha_postulacion) {
       chips.push(h("span", { class: "chip tenia-postulacion", title: "Esta oferta estuvo postulada antes de descartarla" }, "📌 Tenía postulación (" + fechaCL(o.fecha_postulacion) + ")"));
     }
-    for (const sk of extraerSkills(o)) chips.push(h("span", { class: "skill-pill" }, sk));
   }
+  const habilidades = completa ? extraerSkills(o) : [];
   const seg = completa ? avisoSeguimiento(o, hoy()) : null;
 
   return h("article", { class: "tarjeta " + clasePrio(o) + (CERRADOS.has(o.estado) ? " cerrada" : "") },
@@ -1346,11 +1419,38 @@ function tarjeta(o, completa) {
     chips.length ? h("div", { class: "chips" }, chips) : null,
     seg ? h("div", { style: "display:flex; gap:6px; align-items:center; margin-top:4px;" }, h("span", { class: "chip " + seg.clase, style: "font-size:.76rem;" }, seg.texto)) : null,
     completa && o.motivo ? h("div", { class: "motivo" }, o.motivo) : null,
+    habilidades.length ? h("div", { class: "habilidades-pie", "aria-label": "Tecnologías mencionadas" }, habilidades.map(sk => h("span", { class: "skill-pill" }, sk))) : null,
     !completa && o.razon ? h("div", { class: "razon" }, "Motivo: " + o.razon) : null,
+    completa && o.categoria === "sin_descripcion" ? formularioDescripcion(o) : null,
     h("div", { style: "display:flex; flex-direction:column; gap:6px; margin-top:6px;" },
       selectorEstado(o, "Estado de seguimiento de " + (o.titulo || "la oferta")),
       completa ? h("button", { type: "button", class: "btn-gestionar-oferta", "aria-haspopup": "dialog",
         onclick: e => abrirDetalle(o, e.currentTarget) }, "⚡ Gestionar proceso & Fases" + (o.notas ? " (con notas)" : "")) : null));
+}
+
+// «Sin texto»: pegar la descripción que copiaste del aviso. El servidor la reclasifica solo a esta oferta.
+function formularioDescripcion(o) {
+  const error = h("div", { class: "razon", role: "alert", hidden: true });
+  const area = h("textarea", { "aria-label": "Descripción del aviso", maxlength: "10000", rows: "4",
+    placeholder: "Abre el aviso con ↗, copia su descripción y pégala aquí." });
+  const guardar = h("button", { type: "submit", class: "boton sec" }, "Guardar descripción");
+  const form = h("form", { class: "modal-form", novalidate: true, style: "margin-top:6px;", onsubmit: async e => {
+      e.preventDefault();
+      error.hidden = true;
+      if (!area.value.trim()) { error.textContent = "Pega la descripción antes de guardar."; error.hidden = false; area.focus(); return; }
+      guardar.disabled = true;
+      const r = await api("/api/descripcion", { url: o.url, descripcion: area.value });
+      guardar.disabled = false;
+      if (!r.ok) { error.textContent = mensajeError(r.status, r.json); error.hidden = false; return; }
+      const estado = r.json.categoria === "principal" ? "pasa a Ofertas" : "queda descartada por el texto";
+      Object.assign(o, { categoria: r.json.categoria, razon: r.json.razon, experiencia: r.json.experiencia });
+      await cargar();
+      mostrarAviso("Descripción guardada: la oferta " + estado + ".");
+    } },
+    h("div", { class: "form-grupo" }, area),
+    error,
+    h("div", { class: "modal-acciones" }, guardar));
+  return h("div", { class: "pegar-descripcion" }, form);
 }
 
 function filaCompacta(o) {
@@ -1460,7 +1560,7 @@ function pintarLista() {
   const cont = $("lista");
   if (!S.datos) { cont.replaceChildren(h("div", { class: "vacio" }, "Cargando…")); return; }
   const filas = listaDe(S.datos, S.pestana, S.sel).filter(pasa);
-  const completa = PESTANAS_PRINCIPAL.has(S.pestana);
+  const completa = PESTANAS_COMPLETAS.has(S.pestana);
   const pintarItems = lista => S.densidad === "compacta"
     ? [h("div", { class: "tabla-compacta" }, ...lista.map(filaCompacta))] : lista.map(o => tarjeta(o, completa));
   const cabecera = S.pestana === "seguimiento" ? [selectorVista(), kpisSeguimiento()] : [];
@@ -1469,6 +1569,7 @@ function pintarLista() {
     const msj = S.sel.tipo !== "todas" && !SIN_FILTRO_HISTORIAL.has(S.pestana) ? "No hay ofertas de esta selección en esta pestaña."
       : S.pestana === "ofertas" ? "No hay ofertas con estos filtros. Prueba «Buscar empleos» o relaja los filtros."
       : S.pestana === "descartadas_usuario" ? "No tienes ofertas descartadas manualmente."
+      : S.pestana === "sin_descripcion" ? "Nada pendiente. Aquí llegan las ofertas cuyo texto la app no recibe (LinkedIn), para que las abras tú."
       : "Nada que mostrar aquí.";
     cont.replaceChildren(...cabecera, h("div", { class: "vacio" }, msj)); return;
   }
@@ -1489,6 +1590,10 @@ function pintarLista() {
     return;
   }
   let nota = null;
+  if (S.pestana === "sin_descripcion")
+    nota = h("p", { class: "sub" }, "El aviso sí tiene descripción en LinkedIn, pero LinkedIn no se la entrega a la app: "
+      + "por eso aquí nadie pudo revisar experiencia ni nivel y los filtros solo alcanzaron al título. "
+      + "Ábrelo con ↗ y márcalo; «❌ Descartada» no vuelve a aparecer.");
   if (S.pestana === "descartadas" && S.datos.total_descartadas > S.datos.descartadas.length)
     nota = h("p", { class: "sub" }, S.sel.tipo === "todas"
       ? "Mostrando " + TXT.masRecientes(S.datos.descartadas.length) + " de " + S.datos.total_descartadas + "."
@@ -1509,6 +1614,12 @@ window.addEventListener("keydown", e => {
     if (buscador) { buscador.focus(); buscador.select(); }
   }
 });
+
+for (const b of busquedasManuales()) {
+  $("busquedas-manuales").append(h("div", { style: "margin:6px 0 2px; font-weight:600;" }, b.sitio),
+    h("div", { style: "display:flex; flex-wrap:wrap; gap:4px;" },
+      b.enlaces.map(e => h("a", { class: "chip", href: e.url, target: "_blank", rel: "noopener noreferrer" }, "↗ " + e.texto))));
+}
 
 cargar();
 </script>

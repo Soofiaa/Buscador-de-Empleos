@@ -1,3 +1,40 @@
+# Reversión del filtro LinkedIn Senior/Experto (volver a Mid-Senior)
+
+Despliegue del 16-10-2026, commit local `eb3a33e`. No cambia el esquema ni reclasifica ofertas guardadas.
+
+| Pieza | Valor |
+|---|---|
+| Imagen desplegada | `job-tracker:linkedin-senior-experto`, `sha256:da1024401f2cd33609bf5934a2293ce56873872b633d69c335d0234b9ca31369` |
+| Imagen anterior | `job-tracker:linkedin-senior-anterior-20261016`, `sha256:915bc9fd6217faac57431091bf4804844f5119592c15e52c5f989cc677ad6694` |
+| Base de referencia | `ofertas_pre_linkedin_senior_experto_20261016.db`, en el volumen y en `C:\Users\sofia\Respaldos\job-tracker-referencias\` |
+| SHA-256 de la referencia | `6a43f4cddac9fddbdf66d75a40738f629b9b28457049c4822e87188a83152a83` en ambas copias; `integrity_check=ok` |
+| Línea base | SQLite v7; 2046 ofertas, 18 corridas, 77 filas en `historial_estados`, 18 postuladas y 6 POR VERIFICAR |
+
+## Procedimiento
+
+No restaurar la base: este despliegue no la modificó. Para volver a la imagen anterior:
+
+```powershell
+docker compose stop jobtracker
+docker tag job-tracker:linkedin-senior-anterior-20261016 job-tracker-jobtracker:latest
+docker compose up -d --no-build
+docker inspect jobtracker --format "{{.State.Health.Status}}"
+```
+
+Comprobar GET `/api/estado` y comparar las huellas de `/datos/ofertas.db` con la referencia de la tabla. La base v7
+debe conservar todos sus datos, estados, notas y postulaciones. Se pierde únicamente el filtro nuevo para el nivel
+LinkedIn `Nivel: Senior` y `Expert/Experto`; los filtros previos permanecen. Un cargo con «Senior» en el título puede
+seguir siendo descartado por la regla senior que ya existía.
+
+## Prueba de reversión
+
+Probada con la imagen anterior sobre una copia de la referencia en el volumen temporal
+`jt_revision_reversion_linkedin_senior_experto_20261016`, puerto `127.0.0.1:8767`: health `healthy`, GET
+`/api/estado` 200, SQLite v7 e `integrity_check=ok`. Las ocho tablas, sus conteos y SHA-256, las postuladas, POR
+VERIFICAR y estados coincidieron con la referencia. El contenedor y volumen temporales se eliminaron.
+
+---
+
 # Reversión de la Fase A (volver a la Fase 0)
 
 La Fase A migra la base de la versión 6 a la 7 al arrancar. **El código de la Fase 0 trata una base v7 como "versión
@@ -394,3 +431,110 @@ docker compose up -d --no-build
 
 **Qué se pierde mientras corra la imagen anterior:** la recopilación de ofertas de LinkedIn y los contadores por ubicación.
 
+# Filtro de LinkedIn y exclusión de BairesDev (despliegue del 16-10-2026; commit `23241ba`)
+
+La base no cambia de esquema ni se reclasifica durante el despliegue; para volver atrás basta con usar la imagen
+anterior y **no restaurar la base**.
+
+| Pieza | Valor |
+|---|---|
+| Imagen anterior | `job-tracker:linkedin-229f` (`sha256:d4529c349a47a830c421a161b64dd58cf31ce47486e7f9104e4eb7d16d5f5c1a`) |
+| Imagen desplegada | `job-tracker:linkedin-filtros` = `job-tracker-jobtracker:latest` (`sha256:d4d6b5347f13f5ced733f060f8ba3dad81f6ce2830f53714b4359eac6f8a45d9`) |
+| Referencia de la base | `ofertas_pre_linkedin_filtros_20261016.db` (volumen y `C:\Users\sofia\Respaldos\job-tracker-referencias\`), sha256 `e3856c8346f07a065c8bc65213d2aa674049012d38d01e78c65ba2e35ebc0dd3`, integrity_check `ok` |
+
+```
+docker compose stop jobtracker
+docker tag job-tracker:linkedin-229f job-tracker-jobtracker:latest
+docker compose up -d --no-build
+```
+
+Probado con la imagen anterior en `jt_revision_linkedin_reversion` (127.0.0.1:8767), sobre una copia de la referencia:
+quedó healthy; `/api/estado`, `/api/ofertas` y `/api/respaldo` respondieron 200; la versión, integrity_check, postuladas,
+POR VERIFICAR, objetos del esquema y las huellas de las ocho tablas coincidieron con la referencia.
+
+**Qué se pierde mientras corra la imagen anterior:** la restricción de LinkedIn a Santiago, Viña del Mar y Valparaíso
+(o remoto internacional), el límite de hasta 2 años, el criterio de antigüedad (Associate se acepta y Mid-Senior se
+descarta) y la exclusión de BairesDev. No se pierden ni se reclasifican ofertas ya guardadas; futuras búsquedas
+vuelven a usar los filtros de la imagen anterior.
+
+# Rechazar nivel Mid-Senior en LinkedIn (despliegue del 16-10-2026; commit `a245ece`)
+
+Qué cambia: se descartan ofertas de LinkedIn que indiquen nivel Mid-Senior; Associate sigue aceptándose. Sin cambios
+de esquema ni reclasificación de ofertas existentes: para volver atrás basta con usar la imagen anterior y **no
+restaurar la base**.
+
+| Pieza | Valor |
+|---|---|
+| Imagen anterior | `job-tracker:linkedin-filtros-23241` (`sha256:d4d6b5347f13f5ced733f060f8ba3dad81f6ce2830f53714b4359eac6f8a45d9`) |
+| Imagen desplegada | `job-tracker:linkedin-mid-senior` = `job-tracker-jobtracker:latest` (`sha256:915bc9fd6217faac57431091bf4804844f5119592c15e52c5f989cc677ad6694`) |
+| Referencia de la base | `ofertas_pre_mid_senior_20261016.db` (volumen y `C:\Users\sofia\Respaldos\job-tracker-referencias\`), sha256 `e3856c8346f07a065c8bc65213d2aa674049012d38d01e78c65ba2e35ebc0dd3`, integrity_check `ok` |
+
+```
+docker compose stop jobtracker
+docker tag job-tracker:linkedin-filtros-23241 job-tracker-jobtracker:latest
+docker compose up -d --no-build
+```
+
+Probado sobre una copia de la referencia en un volumen temporal: la imagen anterior quedó healthy; `/`,
+`/api/estado`, `/api/ofertas` y `/api/respaldo` respondieron 200; las huellas de las ocho tablas y los conteos
+coincidieron con la referencia. El contenedor y volumen temporales se borraron.
+
+**Qué se pierde mientras corra la imagen anterior:** la regla que descarta explícitamente nivel Mid-Senior. No se
+pierden ni se reclasifican ofertas guardadas; Associate y los demás filtros de LinkedIn de la imagen anterior
+permanecen.
+
+# Chumi, Laborum (Playwright) y regla de experiencia (despliegue del 20-10-2026; commit `e8abeee`)
+
+Qué cambia: Chumi y Laborum entran a `SITIOS` (Laborum con Chromium sin ventana: la imagen pasa de 484 MB a ~1,6 GB);
+se borran Computrabajo, Buscojobs, Empleos Públicos y EmpleosTech (rechazan a la app o no existen); un portal que falla
+ya no corta la corrida; las antiguas cuya fecha llega con el detalle no se guardan; regla de experiencia en todas las
+fuentes («hasta N» = 0 a N); sección «Buscar a mano» en la página. Sin cambios de esquema ni reclasificación: para
+volver atrás basta con usar la imagen anterior y **no restaurar la base**.
+
+La imagen anterior NO es la de `linkedin-senior-experto`: el 19-10 a las 20:45 se reconstruyó y desplegó fuera del
+procedimiento una versión intermedia (hasta `326f427`, con Computrabajo, Laborum y Buscojobs rotos). Es la que se
+etiquetó aquí.
+
+| Pieza | Valor |
+|---|---|
+| Imagen anterior | `job-tracker:pre-laborum-20261020` (`sha256:6353e0b5950fb12634c0dc720d6d315c922e01591c99a44273111872ad27b707`; desplegada el 19-10 sin registro) |
+| Imagen desplegada | `job-tracker:laborum` = `job-tracker-jobtracker:latest` (`sha256:39378b0be7aaf453732037cb27fa6caad93ae7d9f6c99d5d739cc7e05315a5d3`) |
+| Referencia de la base | `ofertas_pre_laborum_20261020.db` (volumen y `C:\Users\sofia\Respaldos\job-tracker-referencias\`), sha256 `c40c50f5a99b1450f86bc260e7a2c33b7ba5f28f64b891cfd3edd5909130b472`, integrity_check `ok` |
+
+```
+docker compose stop jobtracker
+docker tag job-tracker:pre-laborum-20261020 job-tracker-jobtracker:latest
+docker compose up -d --no-build
+```
+
+Probado sobre una copia de la referencia en un volumen temporal (8767): la imagen anterior quedó healthy; `/`,
+`/api/estado`, `/api/ofertas` y `/api/respaldo` respondieron 200; las huellas completas coincidieron con la referencia.
+El contenedor y el volumen temporales se borraron.
+
+**Qué se pierde mientras corra la imagen anterior:** Chumi, Laborum, la sección «Buscar a mano», el aislamiento de un
+portal que falla y la regla «hasta N años». Vuelven los intentos contra Computrabajo, Laborum y Buscojobs (se detienen
+solos por 403 o por errores). No se pierden ni se reclasifican ofertas guardadas.
+
+# Pausa entre consultas JobSpy y sin insistir tras un 429 (despliegue del 20-10-2026; commit `3c98064`)
+
+Qué cambia: pausa aleatoria entre consultas JobSpy de LinkedIn (6-10 s) y Glassdoor (3-5 s); si una fuente de JobSpy
+responde 429, se deja por el resto de la corrida, con aviso. Sin cambios de esquema ni reclasificación: para volver
+atrás basta con usar la imagen anterior y **no restaurar la base**.
+
+| Pieza | Valor |
+|---|---|
+| Imagen anterior | `job-tracker:pre-pausa-20261020` = `job-tracker:laborum` (`sha256:39378b0be7aaf453732037cb27fa6caad93ae7d9f6c99d5d739cc7e05315a5d3`) |
+| Imagen desplegada | `job-tracker:pausa-jobspy` = `job-tracker-jobtracker:latest` (`sha256:d40d7a992fc3aab51dc3cfb41a6777c671cef3df9483c64fbbe2a58c33b61fe4`) |
+| Referencia de la base | `ofertas_pre_pausa_20261020.db` (volumen y `C:\Users\sofia\Respaldos\job-tracker-referencias\`), sha256 `c40c50f5a99b1450f86bc260e7a2c33b7ba5f28f64b891cfd3edd5909130b472` (igual a `ofertas_pre_laborum_20261020.db`: no hubo corridas entre ambos), integrity_check `ok` |
+
+```
+docker compose stop jobtracker
+docker tag job-tracker:pre-pausa-20261020 job-tracker-jobtracker:latest
+docker compose up -d --no-build
+```
+
+Probado sobre una copia de la referencia en un volumen temporal (8767): healthy, GET 200 y huellas completas iguales
+a la referencia. El contenedor y el volumen temporales se borraron.
+
+**Qué se pierde mientras corra la imagen anterior:** las pausas largas de LinkedIn y Glassdoor (vuelve 1,5 s) y la
+detención ante 429; las corridas vuelven a ser ~8 min más cortas. No se pierden ni se reclasifican ofertas guardadas.

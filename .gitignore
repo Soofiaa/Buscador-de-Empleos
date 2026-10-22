@@ -7,3 +7,4 @@ __pycache__/
 respaldos/
 *.db-wal
 *.db-shm
+*.pyc__pycache__*.so*.o*.a*.swp*.swo*~.vscode/node_modules/.env.DS_Store

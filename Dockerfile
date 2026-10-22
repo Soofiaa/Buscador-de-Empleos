@@ -13,6 +13,9 @@ ENV TZ=America/Santiago \
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+# Chromium sin ventana para Laborum (laborum.py), con sus librerías del sistema
+RUN python -m playwright install --with-deps --only-shell chromium \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY *.py ./
 COPY web/ ./web/

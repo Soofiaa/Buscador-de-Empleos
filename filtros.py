@@ -16,7 +16,7 @@ def plural(n, uno: str, varios: str) -> str:
     return f"{n} {uno if n == 1 else varios}"
 
 ORDEN_PRIORIDAD = {"Alta": 0, "Media": 1, "Baja": 2}
-EVIDENCIA_INDEED = "marcada remota por Indeed"
+EVIDENCIA_MARCA_FUENTE = "marcada remota por la fuente"   # el nombre de la fuente se pone al mostrarlo (ver clasificar)
 ORDEN_MODALIDAD = {"Remoto": 0, "Híbrido": 1, "Presencial": 2, "No indicada": 2}
 
 
@@ -137,7 +137,7 @@ def detectar_modalidad(t: str, d: str, es_remoto: bool):
     if m:
         return "Remoto", m.group(0)
     if es_remoto:
-        return "Remoto", EVIDENCIA_INDEED
+        return "Remoto", EVIDENCIA_MARCA_FUENTE
     m = re.search(r"presencial", f"{t} {d}")
     if m:
         return "Presencial", m.group(0)
@@ -166,17 +166,104 @@ def texto_anios(expr: str) -> str:
     return f"{base} {unidad}"
 
 
+_PATRON_ANOS = r"(\d+)(?:\s*(?:a|-|–|—|y|o|to)\s*(\d+))?(\+)?\s*(anos?|years?|yrs?)"
+_NUMEROS_ESCRITOS = {"un": 1, "uno": 1, "una": 1, "dos": 2, "tres": 3, "cuatro": 4, "cinco": 5,
+                     "seis": 6, "siete": 7, "ocho": 8, "nueve": 9, "diez": 10}
+# El número cuenta como requisito solo si alrededor se habla del cargo ("3 años en cargos similares" también lo es)
+_CONTEXTO_REQUISITO = (r"experiencia|experience|\bexp\b|cargos? similares|puestos? similares|funciones similares"
+                       r"|en el cargo|en el rubro|en el area|en la industria|desempenand|trabajando en"
+                       r"|similar (role|position)|same (role|position)|equivalent (role|position)|in the (field|industry)")
+# ...y no de la edad de la empresa ("12 años en el mercado" no es un requisito, aunque diga "experiencia" al lado)
+_CONTEXTO_EMPRESA = r"trayectoria|en el mercado|fundad|de presencia|de vida|aniversario|celebra"
+# "deseable: 5 años" no descarta: manda lo que el aviso exige, no lo que le gustaría
+_REQUISITO_BLANDO = r"deseable|valorable|valorad|idealmente|\bplus\b|opcional|no excluyente|bonus|se valorara"
+_FIN_DE_FRASE = re.compile(r"[.;\n•]")
+# tope ("hasta 2 años" = de 0 a 2). "al menos de 1 año" NO es un tope: es un mínimo que trae "menos de" adentro
+_TOPE = re.compile(r"(?<!al )\b(hasta|maximo|menos de|no mas de|up to)\s*$")
+
+
+def _para_buscar_anios(d: str) -> str:
+    """Normaliza las formas de escribir el número: 'cinco (5) años' -> 'cinco 5 anos', 'tres años' -> '3 anos'."""
+    d = re.sub(r"\((\d+)\)", r" \1 ", normalizar(d))
+    return re.sub(r"\b(" + "|".join(_NUMEROS_ESCRITOS) + r")\b(?=\s+(?:anos?|years?|yrs?)\b)",
+                  lambda m: str(_NUMEROS_ESCRITOS[m.group(1)]), d)
+
+
+def _menciones_anios(d: str):
+    """Cada mención de años que habla del cargo: (mínimo, máximo, texto, blando). Blando = el aviso la valora pero
+    no la exige ("deseable 3 años"); los años de la empresa y los de más de 15 no son menciones del cargo."""
+    d = _para_buscar_anios(d)
+    for m in re.finditer(_PATRON_ANOS, d):
+        lo = int(m.group(1))
+        if lo > 15:   # años de la empresa, no requisito del cargo
+            continue
+        # el contexto es la frase del número, sin cruzar el punto: el "deseable" de la frase anterior no es de esta
+        antes = _FIN_DE_FRASE.split(d[max(0, m.start() - 60): m.start()])[-1]
+        cerca = antes + m.group(0) + _FIN_DE_FRASE.split(d[m.end(): m.end() + 60])[0]
+        if not re.search(_CONTEXTO_REQUISITO, cerca) or re.search(_CONTEXTO_EMPRESA, cerca):
+            continue
+        hi = int(m.group(2)) if m.group(2) else lo
+        texto_mencion = texto_anios(m.group(0)) if m.group(4).startswith("ano") else m.group(0)
+        if not m.group(2) and _TOPE.search(d[max(0, m.start() - 25): m.start()]):
+            lo = 0                    # "hasta 2 años" = "0 a 2": el tope es N, el mínimo es 0
+            texto_mencion = f"hasta {texto_mencion}"   # si no, el chip diría "2 años", como si los exigiera
+        yield lo, hi, texto_mencion, bool(re.search(_REQUISITO_BLANDO, antes))
+
+
+def _mas_exigente(menciones):
+    return max(menciones, key=lambda r: (r[0], r[1])) if menciones else None
+
+
+def _supera_perfil(lo: int, hi: int) -> bool:
+    return lo >= config.EXPERIENCIA_DESCARTA_DESDE or hi > config.EXPERIENCIA_MAXIMA
+
+
+def _requisito_experiencia(d: str):
+    """(mínimo, máximo, texto) de lo que el aviso EXIGE, o None. '2 años' -> (2, 2, ...); '0 a 2' -> (0, 2, ...).
+    Con varias menciones manda la más exigente: '1 año en mesa de ayuda y 5 años en redes' pide 5, no 1."""
+    exigido = _mas_exigente([(lo, hi, t) for lo, hi, t, blando in _menciones_anios(d) if not blando])
+    if exigido:
+        return exigido
+    if re.search(r"sin experiencia|recien (titulad|egresad)|poca experiencia", normalizar(d)):
+        return 0, 0, "Sin experiencia / recién titulado"
+    return None
+
+
+def experiencia_deseable(d: str) -> str:
+    """Texto de la experiencia que el aviso solo valora ('deseable 5 años'). No descarta, pero se muestra cuando
+    supera tu perfil: la oferta sigue a la vista y tú decides si vale la pena."""
+    alta = _mas_exigente([(lo, hi, t) for lo, hi, t, blando in _menciones_anios(d)
+                          if blando and _supera_perfil(lo, hi)])
+    return alta[2] if alta else ""
+
+
 def extraer_experiencia(d: str):
     """Devuelve (años mínimos o None, texto para mostrar)."""
-    d = normalizar(d)
-    for m in re.finditer(r"(\d+)(?:\s*(?:a|-|y|o)\s*\d+)?\s*\+?\s*anos?", d):
-        if int(m.group(1)) > 15:   # años de la empresa, no requisito del cargo
-            continue
-        if "experiencia" in d[max(0, m.start() - 40): m.end() + 40]:
-            return int(m.group(1)), texto_anios(m.group(0))
-    if re.search(r"sin experiencia|recien (titulad|egresad)|poca experiencia", d):
-        return 0, "Sin experiencia / recién titulado"
-    return None, "No indicada"
+    req = _requisito_experiencia(d)
+    if req is None:
+        return None, "No indicada"
+    return req[0], req[2]
+
+
+def experiencia_excede_perfil(d: str):
+    """True si pide 2 años o más de mínimo, o un rango que supera 2 (p. ej. 1 a 3). '0 a 2' y '1 año' no."""
+    req = _requisito_experiencia(d)
+    if req is None:
+        return False, ""
+    lo, hi, texto_requisito = req
+    return _supera_perfil(lo, hi), texto_requisito
+
+
+def _linkedin_nivel_mid_senior(d: str) -> bool:
+    return bool(re.search(r"\bnivel\s*:?\s*mid[ -]?senior\b", normalizar(d)))
+
+
+def _linkedin_nivel_senior(d: str) -> bool:
+    return bool(re.search(r"\b(?:nivel|seniority|level)(?:\s+level)?\s*:?\s*senior\b", normalizar(d)))
+
+
+def _linkedin_experto(t: str, d: str) -> bool:
+    return bool(re.search(r"\bexpert[oa]s?\b|\bexpert\b", normalizar(f"{t} {d}")))
 
 
 def _miles(n: float) -> str:
@@ -205,6 +292,24 @@ def _region(ubicacion: str):
     if len(partes) >= 3 and re.fullmatch(r"[A-Z]{1,3}", partes[-2]):
         return partes[-2]
     return None
+
+
+def _ubicacion_linkedin_valida(ubicacion: str, descripcion: str) -> bool:
+    ubic_normalizada = _limpio(ubicacion)
+    partes = ubic_normalizada.split(",")
+    ciudad = partes[0] if partes else ""
+    patron_ciudad = r"\bsantiago\b|\bvalparaiso\b|\bvina(?: del mar)?\b"
+    cues_ubicacion = re.search(config.CUES_CHILE, normalizar(ubicacion))
+    if re.search(patron_ciudad, ciudad) and cues_ubicacion:
+        return True
+
+    # Si LinkedIn solo da el país o no da ubicación, buscar una ciudad objetivo en la descripción.
+    if ciudad_de(ubicacion):
+        return False
+    return bool(
+        re.search(patron_ciudad, normalizar(descripcion))
+        and (cues_ubicacion or re.search(config.CUES_CHILE, normalizar(descripcion)))
+    )
 
 
 def es_senior(t: str, d: str = "") -> bool:
@@ -247,7 +352,8 @@ def _detectar_rol(t: str, d: str):
 def clasificar(o: dict) -> dict:
     """Recibe los campos crudos de una oferta y devuelve su clasificación.
 
-    categoria: principal | fuera_perfil | sospechosa | descartada (con 'razon').
+    categoria: principal | sin_descripcion | fuera_perfil | sospechosa | descartada (con 'razon').
+    'sin_descripcion' es lo que pasó todo lo que se puede revisar sin descripción (ver config.FUENTES_SIN_TEXTO).
     """
     titulo, empresa, ubic = texto(o.get("title")), texto(o.get("company")), texto(o.get("location"))
     t, e, d = sin_genero(normalizar(titulo)), normalizar(empresa), normalizar(o.get("description"))
@@ -269,6 +375,9 @@ def clasificar(o: dict) -> dict:
     rol = _detectar_rol(t, d)               # el soporte es un cargo más (tipo S): sigue por los filtros de abajo
     if rol is None:
         return fin("descartada", "sin rol objetivo")
+    # el título puede calzar un rol TI y aun así describir otro oficio: la descripción manda sobre ese título
+    if rol["tipo"] == "A" and re.search(config.NO_TI_DESC, d):
+        return fin("descartada", "descripción de otro oficio (no TI)")
 
     for motivo, p in config.SOSPECHOSA_DESC.items():
         if re.search(p, d):
@@ -277,23 +386,39 @@ def clasificar(o: dict) -> dict:
     # zona y modalidad
     modalidad, ev_modalidad = detectar_modalidad(t, d, bool(o.get("is_remote")))
     region = _region(ubic)
-    remoto_firme = modalidad == "Remoto" and ev_modalidad != EVIDENCIA_INDEED
-    if region and region not in config.REGIONES_VALIDAS and not remoto_firme:
+    fuente = texto(o.get("fuente")) or "indeed"
+    remoto_firme = modalidad == "Remoto" and (
+        ev_modalidad != EVIDENCIA_MARCA_FUENTE or (fuente == "linkedin" and bool(o.get("is_remote")))
+    )
+    if fuente == "linkedin" and not remoto_firme and not _ubicacion_linkedin_valida(ubic, d):
+        return fin("descartada", "ubicación fuera del perfil LinkedIn")
+    if fuente != "linkedin" and region and region not in config.REGIONES_VALIDAS and not remoto_firme:
         return fin("descartada", f"fuera de zona ({region})")
 
-    fuente = texto(o.get("fuente")) or "indeed"
-    if fuente != "indeed" and not remoto_firme and not re.search(config.CUES_CHILE, normalizar(ubic)):
+    if fuente not in ("indeed", "linkedin") and not remoto_firme and not re.search(config.CUES_CHILE, normalizar(ubic)):
         return fin("descartada", "ubicación no reconocida como Chile")
 
     contrato, ev_contrato = detectar_contrato(t, d)
     exp_min, exp_txt = extraer_experiencia(d)
+    supera_experiencia, exp_req = experiencia_excede_perfil(d)
+    if exp_req:
+        exp_txt = exp_req
     sueldo, mensual = extraer_sueldo(o, d)
 
-    # nivel: nada de semi senior / senior ni de 2+ años de experiencia
+    # nivel y experiencia máxima dependen del mismo criterio para cada fuente
     if es_senior(t, d):
         return fin("descartada", "nivel semi senior / senior")
-    if exp_min is not None and exp_min >= config.EXPERIENCIA_DESCARTA_DESDE:
-        return fin("descartada", f"exige {exp_min}+ años de experiencia")   # "N+" siempre es plural
+    if fuente == "linkedin":
+        if _linkedin_nivel_mid_senior(d):
+            return fin("descartada", "nivel Mid-Senior de LinkedIn")
+        if _linkedin_nivel_senior(d):
+            return fin("descartada", "nivel semi senior / senior")
+        if _linkedin_experto(t, d):
+            return fin("descartada", "nivel experto de LinkedIn")
+    if supera_experiencia:
+        if exp_min is not None and exp_min >= config.EXPERIENCIA_DESCARTA_DESDE:
+            return fin("descartada", f"exige {exp_min}+ años de experiencia")   # "N+" siempre es plural
+        return fin("descartada", f"exige más de 2 años (requisito: {exp_txt})")
 
     # condiciones del tipo B
     senales = []
@@ -312,8 +437,16 @@ def clasificar(o: dict) -> dict:
 
     prioridad = rol["prioridad"]
 
+    # sin descripción no hay nada que revisar: la oferta queda "sin descripción", no "principal"
+    sin_texto = not d and fuente in config.FUENTES_SIN_TEXTO
+
     # texto de señales / motivo
     partes = [f"rol: {rol['etiqueta']}"]
+    if sin_texto:
+        partes.append(config.AVISO_SIN_TEXTO)
+    deseable = experiencia_deseable(d)
+    if deseable:
+        partes.append(f"⚠ experiencia deseable (no exigida): {deseable}")
     if rol["contexto"]:
         partes.append("contexto TI: " + ", ".join(rol["contexto"][:4]))
     if senales:
@@ -325,12 +458,15 @@ def clasificar(o: dict) -> dict:
     if fuente != "indeed" and not region and not ciudad_de(ubic) and modalidad != "Remoto":
         partes.append("ubicación imprecisa (solo 'Chile'): verificar zona")
     if ev_modalidad:
-        partes.append(f"modalidad: {modalidad} por '{ev_modalidad}'")
+        evidencia = (f"marcada remota por {config.NOMBRE_FUENTE.get(fuente, fuente)}"
+                     if ev_modalidad == EVIDENCIA_MARCA_FUENTE else f"'{ev_modalidad}'")
+        partes.append(f"modalidad: {modalidad} por {evidencia}")
     if ev_contrato:
         partes.append(f"contrato: plazo fijo por {ev_contrato}")
 
     tipos = {"A": "A: TI", "B": "B: Puente", "S": config.SOPORTE_TIPO}
-    res.update(categoria="principal", tipo=tipos[rol["tipo"]],
+    res.update(categoria="sin_descripcion" if sin_texto else "principal", tipo=tipos[rol["tipo"]],
                prioridad=prioridad, modalidad=modalidad, contrato=contrato, sueldo=sueldo,
-               experiencia=exp_txt, motivo=" | ".join(partes))
+               experiencia=config.EXPERIENCIA_SIN_VERIFICAR if sin_texto else exp_txt,
+               motivo=" | ".join(partes))
     return res

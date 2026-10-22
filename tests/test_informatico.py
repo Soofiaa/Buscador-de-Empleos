@@ -20,9 +20,24 @@ def clas(titulo, desc=DESC):
 
 def test_el_termino_va_en_indeed_secundarios_y_chiletrabajos_con_su_convencion_de_tildes():
     assert "informático junior" in config.TERMINOS_A                     # Indeed: con tilde, como el resto
+    assert "informático jr" in config.TERMINOS_A
     assert "informático junior" in config.TERMINOS_SECUNDARIOS           # Glassdoor y Get on Board
+    assert "informático jr" in config.TERMINOS_SECUNDARIOS
     assert "informatico junior" in config.TERMINOS_CHILETRABAJOS         # va en la URL: sin tilde
+    assert "informatico jr" in config.TERMINOS_CHILETRABAJOS
     assert not any("informatic" in t for t in config.TERMINOS_BNE + config.TERMINOS_TRABAJANDO)   # 0 resultados / 404
+
+
+def test_cada_termino_junior_tiene_variante_jr():
+    for lista in (config.TERMINOS_A, config.TERMINOS_B, config.TERMINOS_SECUNDARIOS, config.TERMINOS_CHILETRABAJOS):
+        for t in lista:
+            if "junior" in t:
+                assert t.replace("junior", "jr") in lista
+    assert "desarrollador jr" in config.TERMINOS_A
+    assert "analista de datos jr" in config.TERMINOS_A
+    assert "analista de datos jr" in config.TERMINOS_SECUNDARIOS
+    assert "desarrollador jr" in config.TERMINOS_CHILETRABAJOS
+    assert "desarrollador junior" not in config.TERMINOS_SECUNDARIOS     # no se agrega jr donde no había junior
 
 
 @pytest.mark.parametrize("titulo", ["Informático Junior", "Informática Junior", "Ingeniero Informático Junior",

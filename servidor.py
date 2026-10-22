@@ -1,7 +1,8 @@
 """Servidor local de la página de ofertas (reemplaza al Excel).
 
   GET  /                  la página
-  GET  /api/ofertas       {principal, fuera_perfil, sospechosas, descartadas, total_descartadas, corridas}
+  GET  /api/ofertas       {principal, sin_descripcion, fuera_perfil, sospechosas, descartadas, total_descartadas,
+                          corridas}   (sin_descripcion: llegaron sin descripción; las revisa Sofia, ver filtros.py)
                           corridas = [{id, inicio, fin, nuevas, fuentes}], la más reciente primero; cada oferta
                           lleva corrida_id (la corrida cuyo inicio <= detectada_en <= fin, o null)
   GET  /fuentes/<archivo> las tipografías (solo las de la lista FUENTES; la CSP permite font-src 'self')
@@ -15,6 +16,8 @@
   POST /api/nota          {"url", y solo lo que cambia: notas (<=5000), fecha_postulacion (AAAA-MM-DD o "", no futura;
                           queda en el historial), sueldo_manual (<=100), prioridad_manual ("", Alta, Media, Baja)}
                           -> {ok, oferta}. estado o fase aquí -> 400 (se cambian con /api/marcar)
+  POST /api/descripcion   {"url", "descripcion"} (<=10000): pega el texto de un aviso de «Sin texto» y lo reclasifica
+                          solo a esa oferta -> {ok, categoria, razon, experiencia}. Otra oferta -> 400; no existe -> 404
   GET  /api/ofertas       ... y cada oferta principal trae en_fase_desde (UTC) según su historial, o null
   GET  /api/ajustes/soporte  {incluir}: si la categoría Soporte TI se muestra en Ofertas
   POST /api/ajustes/soporte  {"incluir": true|false} (nada más) -> {ok, incluir}
@@ -55,7 +58,7 @@ from informe import PAGINA
 LOCALES = ("127.0.0.1", "localhost", "[::1]")
 LIMITE_CUERPO = 10_000
 # rutas con textos largos: 5000 caracteres con tildes o emojis ocupan más de 10 KB en UTF-8
-LIMITES_POR_RUTA = {"/api/nota": 64_000, "/api/oferta/manual": 64_000}   # 5000 caracteres x 12 bytes si el cliente los escapa como \uXXXX
+LIMITES_POR_RUTA = {"/api/nota": 64_000, "/api/oferta/manual": 64_000, "/api/descripcion": 64_000}   # 5000 caracteres x 12 bytes si el cliente los escapa como \uXXXX
 MAXIMO_A_DESCARTAR = 1_000_000      # un cuerpo demasiado grande se lee (hasta aquí) y se descarta antes del 413
 CSP = ("default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; font-src 'self'; "
        "connect-src 'self'; form-action 'none'; base-uri 'none'")
@@ -330,6 +333,7 @@ def crear_servidor(app: Aplicacion, puerto: int = None, host: str = None) -> Thr
                     con, d.get("url"), {k: v for k, v in d.items() if k != "url"})},
                 "/api/ajustes/soporte": lambda con, d: buscar.guardar_soporte(con, d),
                 "/api/oferta/manual": lambda con, d: {"oferta": buscar.crear_oferta_manual(con, d)},
+                "/api/descripcion": lambda con, d: buscar.pegar_descripcion(con, d.get("url"), d.get("descripcion")),
             }
             codigo_ok = {"/api/oferta/manual": 201}
             if ruta in escrituras:
