@@ -149,6 +149,67 @@
   empujado (desde `812ccf3`); Sofia lo acepta porque el repositorio es privado y no se usa `--force`. Si el repositorio
   se hace público, se publica una copia limpia (sin ese historial).
 
+### LinkedIn y Glassdoor llegan sin descripción (21-10-2026; commit local, SIN desplegar)
+
+**Hallazgo.** Sofia avisó que seguían apareciendo ofertas que piden años de experiencia. No era la regla de
+experiencia: `clasificar()` lee los años de `description`, y **LinkedIn y Glassdoor llegaban sin descripción**.
+Medido sobre el respaldo `ofertas_manual_20261021-124153.db` (3500 ofertas, solo lectura): LinkedIn 1138 ofertas,
+las 1138 sin texto; Glassdoor 102 de 102; las demás fuentes, 0 sin texto (Indeed trae 3140 caracteres de media).
+De las 286 ofertas visibles, **180 eran de LinkedIn/Glassdoor y las 180 mostraban experiencia «No indicada»**.
+Causa: `consulta()` no le pasaba `fetch_description` a JobSpy, y ese parámetro viene en `False` por omisión
+(`jobspy/linkedin/__init__.py:147`, `jobspy/glassdoor/__init__.py:98`). Sin texto tampoco actuaban `SENIORITY_DESC`,
+`SOSPECHOSA_DESC`, contrato, sueldo, señales del tipo B ni los tres chequeos propios de LinkedIn
+(`_linkedin_nivel_mid_senior`, `_linkedin_nivel_senior`, `_linkedin_experto`: eran código muerto, se escribieron
+para `linkedin.py`, que no está conectado).
+
+**Cuánto se colaba.** Se tomaron las 2258 ofertas que sí traen texto, se les tapó la descripción y se reclasificaron:
+pasan el filtro a ciegas 197, de las cuales **107 (54 %) con el texto se habrían descartado** (31 «exige 2+ años»,
+23 «3+», 22 práctica/estudiante, 13 semi senior/senior, 7 «5+», y hasta 9+ años). Es decir, de las 182 visibles sin
+texto, ~100 no correspondían y ~70 por años de experiencia.
+
+**Por qué LinkedIn no se arregla pidiendo el detalle.** Su `robots.txt` termina en `User-agent: *` / `Disallow: /`
+(y `Disallow: /jobs-guest/` para cada buscador con nombre). Conectar `linkedin.py` lo bloquearía `robots.py`, y
+`fetch_description=True` en JobSpy serían ~2000 solicitudes por corrida a `/jobs-guest/` (una por oferta: 23 términos
+× 3 lugares × hasta 30) en vez de 69. **Nota para decidir:** JobSpy ya pide hoy ese endpoint prohibido para el
+listado (`jobspy/linkedin/__init__.py:75`); al ir dentro de la librería nunca pasó por `robots.py`. Queda abierto si
+LinkedIn se mantiene así o pasa a «Buscar a mano» como Computrabajo y Empleos Públicos.
+
+**Qué no sirvió** (medido, no supuesto): el título no suple al texto. Ninguna señal paga (`full stack` sin «junior»
+corta 9 malas y pierde 8 buenas; `consultor` 5 y 3; `especialista` 1 y 3) y exigir «junior/jr» en el título cortaría
+102 malas perdiendo 71 de las 90 buenas. Cruzar cada oferta ciega con su gemela de otra fuente (misma empresa, título
+parecido) encontró **4 gemelas en 182**, una de ellas falso positivo: las ofertas de LinkedIn casi no se repiten en
+las otras fuentes.
+
+**Cambios hechos (tres, aprobados por Sofia el 21-10).**
+1. **Categoría `sin_descripcion`** (pestaña «Sin descripción»): la oferta pasa todo lo que se puede revisar con el
+   título (empresa excluida, práctica, rol, zona, seniority del título) y queda en su propia lista, con
+   `experiencia = "Sin verificar"` y el aviso `config.AVISO_SIN_TEXTO` en el motivo. Se gestiona igual que Ofertas
+   (estado, fases, notas); «❌ Descartada» la saca de la cola y la oferta ya no vuelve a entrar como nueva.
+   El nombre NO es «por verificar»: esa marca ya existe en `notas` (unión de bases) y `huellas.py` la vigila.
+   Decide por dato, no por fuente: `not description and fuente in config.FUENTES_SIN_TEXTO`.
+2. **Glassdoor pide la descripción** (`fetch_description=True` en `consulta()`): su `robots.txt` no tiene
+   `Disallow: /` general y el detalle va por el mismo endpoint `/graph` del listado, uno por cada 25 ofertas
+   (~80 solicitudes más por corrida). A LinkedIn no se le pasa.
+3. **Regla de experiencia más completa**: manda la mención **más exigente**, no la primera («1 año en mesa de ayuda
+   y 5 años en redes» pide 5); se reconocen «3 años en cargos similares» (sin la palabra experiencia), «tres años»,
+   «cinco (5) años», «exp.» y «yrs»; el contexto es la frase del número, sin cruzar el punto; los años de la empresa
+   («12 años en el mercado») no cuentan; y **lo deseable no descarta** pero se avisa en el motivo con
+   «⚠ experiencia deseable (no exigida): N años».
+
+**Antes/después** (mismo `raw`, código de `HEAD` vs. el nuevo, 3498 ofertas del respaldo): principal 264 → 97,
+`sin_descripcion` 0 → 169 (164 LinkedIn + 5 Glassdoor), descartada 3234 → 3232. Cambian 171: 169
+principal → `sin_descripcion` y 2 descartada → principal (las dos por «deseable»: «se valorará experiencia de 5 años
+o más» en BNE y «experiencia deseable de 1 a 3 años» en Laborum; ahora se ven con el aviso). **Ninguna oferta pasa a
+descartada por la regla nueva** y ningún texto de experiencia cambia: los avisos de las fuentes con texto ya venían
+escritos de la forma que la regla vieja reconocía. En la página: Ofertas 22 → 8, «Sin descripción» 0 → 16 (las 16 de
+LinkedIn, todas nuevas), Seguimiento 23 → 23.
+
+**Pendiente de este cambio:** no está desplegado. El despliegue necesita `reclasificar` para que las ofertas de
+LinkedIn/Glassdoor ya guardadas que hoy están como `principal` pasen a `sin_descripcion` (169 de las 1240 de esas dos
+fuentes; el resto ya estaba descartado por título, zona o empresa), y hay que fijarse en que
+`huellas.py` cuenta `por_verificar` por la marca en `notas` (debe seguir en 6), no por esta categoría nueva.
+El ajuste «Incluir soporte TI» no toca esta pestaña: la cola muestra todo lo que necesita tus ojos.
+
 ### Pendientes
 - **Commit 3: orden de `listar()`** (`09409f3`) — **desplegado el 15-10-2026** con la telemetría. `listar()` ordenaba
   por nombre y dejaba todos los manuales antes que los auto, así que «Último respaldo» mostraba un manual más viejo

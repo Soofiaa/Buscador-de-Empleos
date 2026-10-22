@@ -495,6 +495,11 @@ def consulta(sitio: str, termino: str, lugar: str, resultados: int | None = None
         kw["country_indeed"] = "Chile"
     elif sitio == "glassdoor":
         kw["country_indeed"] = "usa"   # JobSpy no tiene dominio Glassdoor para Chile: rodeo vía glassdoor.com
+        # sin esto el listado llega SIN descripción y no se puede revisar experiencia ni nivel (ver NOTAS.md, 21-10).
+        # En Glassdoor el detalle va por el mismo endpoint /graph del listado y pide uno por cada 25 ofertas.
+        # LinkedIn NO lleva este parámetro: ahí sería una solicitud por oferta a /jobs-guest/, que su robots.txt
+        # prohíbe ("Disallow: /" para todos). Sus ofertas quedan en 'sin_descripcion'.
+        kw["fetch_description"] = True
     return kw
 
 
@@ -759,21 +764,30 @@ def buscar_ofertas(con) -> int:
 
 # ------------------------------------------------------------------ datos para la página
 def ofertas_para_pagina(con) -> dict:
-    """Lo que muestra la página: ofertas principales (ordenadas), fuera de perfil, sospechosas y descartadas recientes."""
+    """Lo que muestra la página: ofertas principales (ordenadas), sin descripción, fuera de perfil, sospechosas y
+    descartadas recientes."""
     def filas(sql, args=()):
         return [dict(r) for r in con.execute(sql, args)]
 
-    # una postulación en curso se ve siempre en Seguimiento, aunque una reclasificación la saque de 'principal'
-    seguimiento = "estado IN ('postulada', 'entrevista')"
-    principal = [_con_prioridad_mostrada(f) for f in filas(f"SELECT * FROM ofertas WHERE categoria = 'principal' OR {seguimiento}")]
-    principal.sort(key=lambda f: f["publicada"] or "", reverse=True)   # más recientes primero
-    principal.sort(key=lambda f: (f["estado"] in ESTADOS_CERRADOS,
+    def ordenadas(lista):
+        lista.sort(key=lambda f: f["publicada"] or "", reverse=True)   # más recientes primero
+        lista.sort(key=lambda f: (f["estado"] in ESTADOS_CERRADOS,
                                   ORDEN_PRIORIDAD.get(f["prioridad"], 9),
                                   ORDEN_MODALIDAD.get(f["modalidad"], 9)))
+        return lista
+
+    # una postulación en curso se ve siempre en Seguimiento, aunque una reclasificación la saque de 'principal'
+    seguimiento = "estado IN ('postulada', 'entrevista')"
+    principal = ordenadas([_con_prioridad_mostrada(f) for f in
+                           filas(f"SELECT * FROM ofertas WHERE categoria = 'principal' OR {seguimiento}")])
     campos = "url, titulo, empresa, ubicacion, publicada, fuente, estado, detectada_en, razon, motivo"
     otra = f"NOT ({seguimiento})"              # las que ya están en principal no se repiten en otra lista
+    # "Sin descripción" se trabaja igual que Ofertas (mismos campos y acciones): son ofertas que solo tú puedes revisar
+    sin_descripcion = ordenadas([_con_prioridad_mostrada(f) for f in
+                               filas(f"SELECT * FROM ofertas WHERE categoria = 'sin_descripcion' AND {otra}")])
     datos = {
         "principal": principal,
+        "sin_descripcion": sin_descripcion,
         "fuera_perfil": filas(f"SELECT {campos} FROM ofertas WHERE categoria = 'fuera_perfil' AND {otra} "
                               "ORDER BY detectada_en DESC"),
         "sospechosas": filas(f"SELECT {campos} FROM ofertas WHERE categoria = 'sospechosa' AND {otra} "
@@ -794,7 +808,7 @@ def ofertas_para_pagina(con) -> dict:
     historial = {}
     for r in con.execute("SELECT * FROM historial_estados ORDER BY id"):     # por id: nunca por la hora en texto
         historial.setdefault(r["url"], []).append(dict(r))
-    for o in datos["principal"]:
+    for o in datos["principal"] + datos["sin_descripcion"]:   # las dos se gestionan con estado y fases
         o["en_fase_desde"] = en_fase_desde(historial.get(o["url"], []), o["estado"], o.get("fase") or "")
     datos["total_descartadas"] = con.execute(
         f"SELECT COUNT(*) FROM ofertas WHERE categoria = 'descartada' AND {otra}").fetchone()[0]

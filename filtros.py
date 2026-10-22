@@ -166,26 +166,71 @@ def texto_anios(expr: str) -> str:
     return f"{base} {unidad}"
 
 
-_PATRON_ANOS = r"(\d+)(?:\s*(?:a|-|–|—|y|o|to)\s*(\d+))?(\+)?\s*(anos?|years?)"
+_PATRON_ANOS = r"(\d+)(?:\s*(?:a|-|–|—|y|o|to)\s*(\d+))?(\+)?\s*(anos?|years?|yrs?)"
+_NUMEROS_ESCRITOS = {"un": 1, "uno": 1, "una": 1, "dos": 2, "tres": 3, "cuatro": 4, "cinco": 5,
+                     "seis": 6, "siete": 7, "ocho": 8, "nueve": 9, "diez": 10}
+# El número cuenta como requisito solo si alrededor se habla del cargo ("3 años en cargos similares" también lo es)
+_CONTEXTO_REQUISITO = (r"experiencia|experience|\bexp\b|cargos? similares|puestos? similares|funciones similares"
+                       r"|en el cargo|en el rubro|en el area|en la industria|desempenand|trabajando en")
+# ...y no de la edad de la empresa ("12 años en el mercado" no es un requisito, aunque diga "experiencia" al lado)
+_CONTEXTO_EMPRESA = r"trayectoria|en el mercado|fundad|de presencia|de vida|aniversario|celebra"
+# "deseable: 5 años" no descarta: manda lo que el aviso exige, no lo que le gustaría
+_REQUISITO_BLANDO = r"deseable|valorable|valorad|idealmente|\bplus\b|opcional|no excluyente|bonus|se valorara"
+_FIN_DE_FRASE = re.compile(r"[.;\n•]")
 
 
-def _requisito_experiencia(d: str):
-    """(mínimo, máximo, texto) del requisito de cargo, o None. '2 años' -> (2, 2, ...); '0 a 2' -> (0, 2, ...)."""
-    d = normalizar(d)
+def _para_buscar_anios(d: str) -> str:
+    """Normaliza las formas de escribir el número: 'cinco (5) años' -> 'cinco 5 anos', 'tres años' -> '3 anos'."""
+    d = re.sub(r"\((\d+)\)", r" \1 ", normalizar(d))
+    return re.sub(r"\b(" + "|".join(_NUMEROS_ESCRITOS) + r")\b(?=\s+(?:anos?|years?|yrs?)\b)",
+                  lambda m: str(_NUMEROS_ESCRITOS[m.group(1)]), d)
+
+
+def _menciones_anios(d: str):
+    """Cada mención de años que habla del cargo: (mínimo, máximo, texto, blando). Blando = el aviso la valora pero
+    no la exige ("deseable 3 años"); los años de la empresa y los de más de 15 no son menciones del cargo."""
+    d = _para_buscar_anios(d)
     for m in re.finditer(_PATRON_ANOS, d):
         lo = int(m.group(1))
         if lo > 15:   # años de la empresa, no requisito del cargo
             continue
-        if not re.search(r"experiencia|experience", d[max(0, m.start() - 40): m.end() + 40]):
+        # el contexto es la frase del número, sin cruzar el punto: el "deseable" de la frase anterior no es de esta
+        antes = _FIN_DE_FRASE.split(d[max(0, m.start() - 60): m.start()])[-1]
+        cerca = antes + m.group(0) + _FIN_DE_FRASE.split(d[m.end(): m.end() + 60])[0]
+        if not re.search(_CONTEXTO_REQUISITO, cerca) or re.search(_CONTEXTO_EMPRESA, cerca):
             continue
         hi = int(m.group(2)) if m.group(2) else lo
         if not m.group(2) and re.search(r"(hasta|maximo|menos de|no mas de|up to)\s*$", d[max(0, m.start() - 15): m.start()]):
             lo = 0                    # "hasta 2 años" = "0 a 2": el tope es N, el mínimo es 0
-        texto_requisito = texto_anios(m.group(0)) if m.group(4).startswith("ano") else m.group(0)
-        return lo, hi, texto_requisito
-    if re.search(r"sin experiencia|recien (titulad|egresad)|poca experiencia", d):
+        texto_mencion = texto_anios(m.group(0)) if m.group(4).startswith("ano") else m.group(0)
+        yield lo, hi, texto_mencion, bool(re.search(_REQUISITO_BLANDO, antes))
+
+
+def _mas_exigente(menciones):
+    return max(menciones, key=lambda r: (r[0], r[1])) if menciones else None
+
+
+def _supera_perfil(lo: int, hi: int) -> bool:
+    return lo >= config.EXPERIENCIA_DESCARTA_DESDE or hi > config.EXPERIENCIA_MAXIMA
+
+
+def _requisito_experiencia(d: str):
+    """(mínimo, máximo, texto) de lo que el aviso EXIGE, o None. '2 años' -> (2, 2, ...); '0 a 2' -> (0, 2, ...).
+    Con varias menciones manda la más exigente: '1 año en mesa de ayuda y 5 años en redes' pide 5, no 1."""
+    exigido = _mas_exigente([(lo, hi, t) for lo, hi, t, blando in _menciones_anios(d) if not blando])
+    if exigido:
+        return exigido
+    if re.search(r"sin experiencia|recien (titulad|egresad)|poca experiencia", normalizar(d)):
         return 0, 0, "Sin experiencia / recién titulado"
     return None
+
+
+def experiencia_deseable(d: str) -> str:
+    """Texto de la experiencia que el aviso solo valora ('deseable 5 años'). No descarta, pero se muestra cuando
+    supera tu perfil: la oferta sigue a la vista y tú decides si vale la pena."""
+    alta = _mas_exigente([(lo, hi, t) for lo, hi, t, blando in _menciones_anios(d)
+                          if blando and _supera_perfil(lo, hi)])
+    return alta[2] if alta else ""
 
 
 def extraer_experiencia(d: str):
@@ -202,9 +247,7 @@ def experiencia_excede_perfil(d: str):
     if req is None:
         return False, ""
     lo, hi, texto_requisito = req
-    if lo >= config.EXPERIENCIA_DESCARTA_DESDE or hi > config.EXPERIENCIA_MAXIMA:
-        return True, texto_requisito
-    return False, texto_requisito
+    return _supera_perfil(lo, hi), texto_requisito
 
 
 def _linkedin_nivel_mid_senior(d: str) -> bool:
@@ -305,7 +348,8 @@ def _detectar_rol(t: str, d: str):
 def clasificar(o: dict) -> dict:
     """Recibe los campos crudos de una oferta y devuelve su clasificación.
 
-    categoria: principal | fuera_perfil | sospechosa | descartada (con 'razon').
+    categoria: principal | sin_descripcion | fuera_perfil | sospechosa | descartada (con 'razon').
+    'sin_descripcion' es lo que pasó todo lo que se puede revisar sin descripción (ver config.FUENTES_SIN_TEXTO).
     """
     titulo, empresa, ubic = texto(o.get("title")), texto(o.get("company")), texto(o.get("location"))
     t, e, d = sin_genero(normalizar(titulo)), normalizar(empresa), normalizar(o.get("description"))
@@ -386,8 +430,16 @@ def clasificar(o: dict) -> dict:
 
     prioridad = rol["prioridad"]
 
+    # sin descripción no hay nada que revisar: la oferta queda "sin descripción", no "principal"
+    sin_texto = not d and fuente in config.FUENTES_SIN_TEXTO
+
     # texto de señales / motivo
     partes = [f"rol: {rol['etiqueta']}"]
+    if sin_texto:
+        partes.append(config.AVISO_SIN_TEXTO)
+    deseable = experiencia_deseable(d)
+    if deseable:
+        partes.append(f"⚠ experiencia deseable (no exigida): {deseable}")
     if rol["contexto"]:
         partes.append("contexto TI: " + ", ".join(rol["contexto"][:4]))
     if senales:
@@ -404,7 +456,8 @@ def clasificar(o: dict) -> dict:
         partes.append(f"contrato: plazo fijo por {ev_contrato}")
 
     tipos = {"A": "A: TI", "B": "B: Puente", "S": config.SOPORTE_TIPO}
-    res.update(categoria="principal", tipo=tipos[rol["tipo"]],
+    res.update(categoria="sin_descripcion" if sin_texto else "principal", tipo=tipos[rol["tipo"]],
                prioridad=prioridad, modalidad=modalidad, contrato=contrato, sueldo=sueldo,
-               experiencia=exp_txt, motivo=" | ".join(partes))
+               experiencia=config.EXPERIENCIA_SIN_VERIFICAR if sin_texto else exp_txt,
+               motivo=" | ".join(partes))
     return res

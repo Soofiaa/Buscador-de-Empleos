@@ -20,7 +20,9 @@ en producción, lo aprobado y lo pendiente.
   historial de estados, exportar. `VERSION_DB = 7`.
 - `telemetria.py`: telemetría pasiva de corridas, solo contadores por fuente en `corridas.detalle` (sin URLs ni
   términos; JobSpy se mide como consultas).
-- `filtros.py`: clasificar (tipos A/B/S/M, SAP/ERP, soporte), sin_genero, plural, ahora_chile.
+- `filtros.py`: clasificar (tipos A/B/S/M, SAP/ERP, soporte), sin_genero, plural, ahora_chile. Categorías:
+  principal | sin_descripcion | fuera_perfil | sospechosa | descartada. `sin_descripcion` = fuente sin texto
+  (LinkedIn: su robots.txt prohíbe pedir el detalle), así que experiencia y nivel los revisa Sofia en la página.
 - `config.py`: perfil, reglas de clasificación, rutas (`JT_DB`, `JT_RESPALDOS`).
 - `servidor.py`: HTTP (ThreadingHTTPServer), rutas /api/*, Host/Origin locales, límites de cuerpo por ruta.
 - `web/pagina.html`: la página (informe.PAGINA la lee). Funciones puras entre `// <puras>` y `// </puras>`.

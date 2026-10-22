@@ -1,7 +1,8 @@
 """Servidor local de la página de ofertas (reemplaza al Excel).
 
   GET  /                  la página
-  GET  /api/ofertas       {principal, fuera_perfil, sospechosas, descartadas, total_descartadas, corridas}
+  GET  /api/ofertas       {principal, sin_descripcion, fuera_perfil, sospechosas, descartadas, total_descartadas,
+                          corridas}   (sin_descripcion: llegaron sin descripción; las revisa Sofia, ver filtros.py)
                           corridas = [{id, inicio, fin, nuevas, fuentes}], la más reciente primero; cada oferta
                           lleva corrida_id (la corrida cuyo inicio <= detectada_en <= fin, o null)
   GET  /fuentes/<archivo> las tipografías (solo las de la lista FUENTES; la CSP permite font-src 'self')

@@ -56,6 +56,14 @@ TERMINOS_SECUNDARIOS = [
 NOMBRE_FUENTE = {"indeed": "Indeed", "google": "Google", "glassdoor": "Glassdoor", "getonboard": "Get on Board",
                  "bne": "BNE", "trabajando": "Trabajando", "chiletrabajos": "Chiletrabajos", "laborum": "Laborum",
                  "chumi": "Chumi", "linkedin": "LinkedIn"}
+# Fuentes cuyo listado puede llegar SIN descripción. Sin texto no hay nada que revisar: ni experiencia, ni nivel, ni
+# contrato, ni sueldo, ni señales. Esas ofertas van a "sin_descripcion" (las revisa Sofia abriendo el aviso), nunca se
+# muestran como si hubieran pasado los filtros. LinkedIn nunca trae descripción: su robots.txt dice "Disallow: /" a
+# todo el mundo, así que la app no pide el detalle (ver NOTAS.md, 21-10). Glassdoor sí lo trae desde el 21-10
+# (fetch_description), pero sigue aquí por las ofertas guardadas antes de ese cambio.
+FUENTES_SIN_TEXTO = ("linkedin", "glassdoor")
+AVISO_SIN_TEXTO = "⚠ sin descripción: experiencia y nivel sin verificar"
+EXPERIENCIA_SIN_VERIFICAR = "Sin verificar"
 
 # ---- Portales chilenos (términos validados por la app anterior; sin tildes porque van en la URL) ----
 # BNE: "ocupacion:7643" = grupo TI "Desarrolladores y analistas de sistemas". Palabras de menos de 3 letras dan 0 ("qa").

@@ -103,6 +103,28 @@ const PEST = ["ofertas", "seguimiento", "fuera_perfil", "sospechosas", "descarta
 const ver = sel => Object.fromEntries(PEST.map(p => [p, listaDe(datos, p, sel).map(o => o.url)]));
 """
 
+# "Sin descripción": ofertas que llegan sin texto (LinkedIn). Se gestionan como las de Ofertas, en su propia lista.
+DATOS_SIN_DESCRIPCION = """
+const datos = {
+  corridas: [{id: 1, inicio: "2026-10-21 09:00", fin: "2026-10-21 09:05", nuevas: 3, fuentes: []}],
+  principal: [{url: "p1", estado: "nueva", corrida_id: 1}],
+  sin_descripcion: [
+    {url: "v1", estado: "nueva", corrida_id: 1}, {url: "v2", estado: "revisada", corrida_id: 1},
+    {url: "v3", estado: "descartada", corrida_id: 1}, {url: "v4", estado: "postulada", corrida_id: 1}],
+};
+const ver = p => listaDe(datos, p, {tipo: "todas"}).map(o => o.url);
+"""
+
+
+def test_sin_descripcion_muestra_las_abiertas_y_no_se_mezcla_con_ofertas():
+    r = correr_js(DATOS_SIN_DESCRIPCION + 'return {pv: ver("sin_descripcion"), of: ver("ofertas")};')
+    assert r["pv"] == ["v1", "v2"] and r["of"] == ["p1"]   # descartada y postulada salen de la cola
+
+
+def test_lo_que_decides_en_sin_descripcion_se_ve_en_seguimiento_y_descartadas():
+    r = correr_js(DATOS_SIN_DESCRIPCION + 'return {seg: ver("seguimiento"), desc: ver("descartadas_usuario")};')
+    assert r["seg"] == ["v2", "v4"] and r["desc"] == ["v3"]
+
 
 def test_filtro_por_hora():
     r = correr_js(DATOS + 'return ver({tipo: "hora", id: 2});')

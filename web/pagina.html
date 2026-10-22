@@ -564,11 +564,14 @@ function filtrarSeleccion(lista, pestana, sel, corridas) {
   const ids = idsSeleccion(sel, corridas);
   return ids ? lista.filter(o => ids.has(o.corrida_id === undefined ? null : o.corrida_id)) : lista;
 }
+// Ofertas y Sin descripción son las dos listas que se gestionan con estado y fases: tus decisiones salen de ambas
+const gestionadas = datos => [...(datos.principal || []), ...(datos.sin_descripcion || [])];
 function listaDe(datos, pestana, sel) {
   if (!datos) return [];
   const base = pestana === "ofertas" ? datos.principal.filter(o => !CERRADOS.has(o.estado))
-    : pestana === "seguimiento" ? datos.principal.filter(o => o.estado === "revisada" || o.estado === "postulada" || o.estado === "entrevista")
-    : pestana === "descartadas_usuario" ? datos.principal.filter(o => o.estado === "descartada")
+    : pestana === "sin_descripcion" ? (datos.sin_descripcion || []).filter(o => !CERRADOS.has(o.estado))
+    : pestana === "seguimiento" ? gestionadas(datos).filter(o => o.estado === "revisada" || o.estado === "postulada" || o.estado === "entrevista")
+    : pestana === "descartadas_usuario" ? gestionadas(datos).filter(o => o.estado === "descartada")
     : (datos[pestana] || []);
   return filtrarSeleccion(base, pestana, sel, datos.corridas);
 }
@@ -803,7 +806,8 @@ function busquedasManuales() {
 const ESTADOS = ["nueva", "revisada", "postulada", "entrevista", "descartada"];
 const ETIQUETAS_ESTADO = { nueva: "🌱 Nueva", revisada: "🔍 Revisada", postulada: "✉️ Postulada", entrevista: "🎯 En Entrevista", descartada: "❌ Descartada" };
 const PESTANAS = [
-  ["ofertas", "Ofertas"], ["seguimiento", "Seguimiento"], ["fuera_perfil", "Fuera de perfil"],
+  ["ofertas", "Ofertas"], ["seguimiento", "Seguimiento"], ["sin_descripcion", "Sin descripción"],
+  ["fuera_perfil", "Fuera de perfil"],
   ["sospechosas", "Sospechosas"], ["descartadas_usuario", "Descartadas"], ["descartadas", "Descartadas por filtros"]
 ];
 const FILTROS_VACIOS = () => ({ texto: "", estado: "activas", prioridad: "", modalidad: "", fuente: "", tipo: "" });
@@ -1041,14 +1045,16 @@ function selector(clave, etiqueta, opciones, extra, nombre) {
 }
 
 const PESTANAS_PRINCIPAL = new Set(["ofertas", "seguimiento", "descartadas_usuario"]);
+// "Sin descripción" trae su propia lista, pero se ve y se trabaja como Ofertas: tarjeta completa y los mismos filtros
+const PESTANAS_COMPLETAS = new Set([...PESTANAS_PRINCIPAL, "sin_descripcion"]);
 function pintarFiltros() {
-  const base = PESTANAS_PRINCIPAL.has(S.pestana) ? S.datos.principal : (S.datos[S.pestana] || []);
+  const base = PESTANAS_PRINCIPAL.has(S.pestana) ? gestionadas(S.datos) : (S.datos[S.pestana] || []);
   const unicos = campo => [...new Set(base.map(o => o[campo]).filter(Boolean))].sort();
   const txt = h("input", { type: "search", placeholder: "Buscar por cargo, empresa, stack o notas… (Pulsa / para buscar)", "aria-label": "Buscar", value: S.f.texto,
     oninput: e => { S.f.texto = e.target.value; pintarLista(); } });
   const partes = [txt];
   if (S.pestana === "ofertas") partes.push(selector("estado", "Estado", ["nueva", "revisada"], [h("option", { value: "activas" }, "Estado: activas"), h("option", { value: "" }, "Estado: todas")]));
-  if (PESTANAS_PRINCIPAL.has(S.pestana)) {
+  if (PESTANAS_COMPLETAS.has(S.pestana)) {
     partes.push(selector("prioridad", "Prioridad", ["Alta", "Media", "Baja"]), selector("modalidad", "Modalidad", unicos("modalidad")), selector("tipo", "Tipo", unicos("tipo")));
   }
   const fuentesConocidas = ["indeed", "linkedin", "chiletrabajos", "bne", "trabajando", "chumi", "laborum", "getonboard", "glassdoor"];
@@ -1342,7 +1348,7 @@ function tarjeta(o, completa) {
     for (const v of [o.tipo, o.modalidad, o.contrato, o.sueldo && o.sueldo !== "No indicado" ? o.sueldo : "", o.experiencia && o.experiencia !== "No indicada" ? o.experiencia : ""]) {
       if (!v) continue;
       const esSueldo = v === o.sueldo && esSueldoDestacado(o.sueldo);
-      chips.push(h("span", { class: "chip" + (/plazo/i.test(v) ? " aviso" : "") + (esSueldo ? " sueldo-destacado" : "") }, esSueldo ? "💵 " + v : v));
+      chips.push(h("span", { class: "chip" + (/plazo|sin verificar/i.test(v) ? " aviso" : "") + (esSueldo ? " sueldo-destacado" : "") }, esSueldo ? "💵 " + v : v));
     }
     if (o.estado === "descartada" && o.fecha_postulacion) {
       chips.push(h("span", { class: "chip tenia-postulacion", title: "Esta oferta estuvo postulada antes de descartarla" }, "📌 Tenía postulación (" + fechaCL(o.fecha_postulacion) + ")"));
@@ -1478,7 +1484,7 @@ function pintarLista() {
   const cont = $("lista");
   if (!S.datos) { cont.replaceChildren(h("div", { class: "vacio" }, "Cargando…")); return; }
   const filas = listaDe(S.datos, S.pestana, S.sel).filter(pasa);
-  const completa = PESTANAS_PRINCIPAL.has(S.pestana);
+  const completa = PESTANAS_COMPLETAS.has(S.pestana);
   const pintarItems = lista => S.densidad === "compacta"
     ? [h("div", { class: "tabla-compacta" }, ...lista.map(filaCompacta))] : lista.map(o => tarjeta(o, completa));
   const cabecera = S.pestana === "seguimiento" ? [selectorVista(), kpisSeguimiento()] : [];
@@ -1487,6 +1493,7 @@ function pintarLista() {
     const msj = S.sel.tipo !== "todas" && !SIN_FILTRO_HISTORIAL.has(S.pestana) ? "No hay ofertas de esta selección en esta pestaña."
       : S.pestana === "ofertas" ? "No hay ofertas con estos filtros. Prueba «Buscar empleos» o relaja los filtros."
       : S.pestana === "descartadas_usuario" ? "No tienes ofertas descartadas manualmente."
+      : S.pestana === "sin_descripcion" ? "No hay ofertas sin descripción. Las de LinkedIn llegan sin texto: aparecen aquí para que las abras tú."
       : "Nada que mostrar aquí.";
     cont.replaceChildren(...cabecera, h("div", { class: "vacio" }, msj)); return;
   }
@@ -1507,6 +1514,9 @@ function pintarLista() {
     return;
   }
   let nota = null;
+  if (S.pestana === "sin_descripcion")
+    nota = h("p", { class: "sub" }, "Llegaron sin descripción, así que no se pudo revisar experiencia ni nivel: "
+      + "los filtros solo alcanzaron al título. Abre el aviso con ↗ y márcala; «❌ Descartada» no vuelve a aparecer.");
   if (S.pestana === "descartadas" && S.datos.total_descartadas > S.datos.descartadas.length)
     nota = h("p", { class: "sub" }, S.sel.tipo === "todas"
       ? "Mostrando " + TXT.masRecientes(S.datos.descartadas.length) + " de " + S.datos.total_descartadas + "."
