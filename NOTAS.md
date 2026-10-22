@@ -3,6 +3,23 @@
 ## Estado actual (se actualiza en cada despliegue; leer al empezar cada sesión)
 
 ### Producción y base
+- **Despliegue «Sin texto: pegar descripción» (22-10-2026; vigente):** commits `9181c66` y `3bad360` (rama
+  `feat/contadores-ubicacion`, subidos a GitHub). Imagen `job-tracker-jobtracker:latest` =
+  `sha256:76bb6cb17d745056b3ae5d70a69ea0037972bdf836a9920edfb2d79ac952a2bf`, healthy en `127.0.0.1:8765`.
+  Imagen anterior inmediata: `job-tracker:pre-pegar-descripcion-20261022` = `sha256:4c165dda…` (la que estaba en
+  producción, ver el hallazgo abajo). Detalle y reversión: `REVERSION_PEGAR_DESCRIPCION.md`.
+  - Referencia `ofertas_pre_pegar_descripcion_20261022.db`, sha256 `16772cbbcb18a88fdf1863288379b54a7ae8e199e28bafa4a3e2a826cb26c8c9`
+    en el volumen y en `C:\Users\sofia\Respaldos\job-tracker-referencias\`; integrity_check ok.
+  - **Línea base (22-10-2026):** v7, integrity_check ok, 4143 ofertas, 40 corridas, 269 filas en `historial_estados`,
+    34 postuladas, 6 POR VERIFICAR. Huellas idénticas antes y después (`huellas.py --comparar`: RESULTADO OK).
+  - Las 61 referencias y respaldos previos conservaron su sha256; la reversión se probó sobre copia (8767) con huellas
+    idénticas y luego se borró.
+  - **Hallazgo:** entre el 21 y el 22-10, producción corrió `job-tracker-jobtracker:latest` = `sha256:4c165dda…`
+    (construida el 22-10 a las 11:55), con el código de «Sin texto» y la regla de experiencia, sin registro en esta
+    sección ni en `REVERSION_FASE_A.md`. Se etiquetó como `job-tracker:pre-pegar-descripcion-20261022` antes de
+    reemplazarla. Es el mismo tipo de error que el del 19-10: un despliegue fuera del procedimiento.
+  - **Pendiente:** reclasificar las ofertas guardadas con la regla nueva de oficio no TI (requiere aprobación aparte;
+    toca la base real).
 - **Despliegue de la pausa JobSpy (20-10-2026, 19:4x; vigente):** commit `3c98064`, imagen `job-tracker:pausa-jobspy`
   = `job-tracker-jobtracker:latest` (`sha256:d40d7a992fc3aab51dc3cfb41a6777c671cef3df9483c64fbbe2a58c33b61fe4`),
   healthy en `127.0.0.1:8765`. Imagen anterior inmediata: `job-tracker:pre-pausa-20261020` = `job-tracker:laborum`
