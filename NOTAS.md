@@ -3,7 +3,15 @@
 ## Estado actual (se actualiza en cada despliegue; leer al empezar cada sesión)
 
 ### Producción y base
-- **Despliegue «Sin texto: pegar descripción» (22-10-2026; vigente):** commits `9181c66` y `3bad360` (rama
+- **Despliegue de la interfaz (22-10-2026; vigente):** commit `00b5312` (`main`, integra `feat/revision-interfaz`).
+  Imagen `job-tracker-jobtracker:latest` = `sha256:7edd2576c6894c2c3f30cfe873eec019b26ebf2e4af57ab8c44187412f8aa40a`,
+  healthy en `127.0.0.1:8765`. Imagen anterior inmediata: `job-tracker:pre-interfaz-20261022` (`76bb6cb1…`).
+  Referencia `ofertas_pre_interfaz_20261022.db`, sha256 `0F226768…5D39C`, integrity_check ok.
+  - Huellas antes y después idénticas (`huellas.py --comparar`: RESULTADO OK); 62 respaldos y referencias previos conservan su sha256.
+  - Comprobaciones HTTP: GET 200; Host/Origin ajenos 403; POST sin Origin 400; campo no permitido 400; cuerpo grande 413.
+  - Reversión probada en copia (8767) con huellas idénticas y luego borrada. Detalle en `REVERSION_INTERFAZ.md`.
+  - Línea base: v7, 4193 ofertas, 41 corridas, 275 filas de `historial_estados`, 34 postuladas, 6 POR VERIFICAR.
+- **Despliegue «Sin texto: pegar descripción» (22-10-2026; anterior a la interfaz):** commits `9181c66` y `3bad360` (rama
   `feat/contadores-ubicacion`, subidos a GitHub). Imagen `job-tracker-jobtracker:latest` =
   `sha256:76bb6cb17d745056b3ae5d70a69ea0037972bdf836a9920edfb2d79ac952a2bf`, healthy en `127.0.0.1:8765`.
   Imagen anterior inmediata: `job-tracker:pre-pegar-descripcion-20261022` = `sha256:4c165dda…` (la que estaba en
