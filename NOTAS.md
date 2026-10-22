@@ -3,7 +3,14 @@
 ## Estado actual (se actualiza en cada despliegue; leer al empezar cada sesión)
 
 ### Producción y base
-- **Despliegue de la interfaz (22-10-2026; vigente):** commit `00b5312` (`main`, integra `feat/revision-interfaz`).
+- **Despliegue del tutorial (22-10-2026; vigente):** commit `b5d4f98` (`main`; `TUTORIAL.md` y el botón «❓ Cómo usar esta app»).
+  Imagen `job-tracker-jobtracker:latest` = `sha256:e0069601e6486041b1974cea62acfb1241a1becdaa80ab8a6a46a6e688c501b4`,
+  healthy en `127.0.0.1:8765`. Imagen anterior inmediata: `job-tracker:pre-tutorial-20261022` (`7edd2576…`).
+  Referencia `ofertas_pre_tutorial_20261022.db`, integrity_check ok (mismo contenido que la de la interfaz: la base no cambió).
+  - Huellas antes y después idénticas (RESULTADO OK); 63 archivos de respaldo y referencia conservan su sha256.
+  - Comprobaciones HTTP como en el despliegue anterior; `error_auto` vacío.
+  - Reversión probada en copia (8767), healthy con huellas idénticas; luego borrada.
+- **Despliegue de la interfaz (22-10-2026; anterior):** commit `00b5312` (`main`, integra `feat/revision-interfaz`).
   Imagen `job-tracker-jobtracker:latest` = `sha256:7edd2576c6894c2c3f30cfe873eec019b26ebf2e4af57ab8c44187412f8aa40a`,
   healthy en `127.0.0.1:8765`. Imagen anterior inmediata: `job-tracker:pre-interfaz-20261022` (`76bb6cb1…`).
   Referencia `ofertas_pre_interfaz_20261022.db`, sha256 `0F226768…5D39C`, integrity_check ok.
