@@ -1371,10 +1371,36 @@ function tarjeta(o, completa) {
     seg ? h("div", { style: "display:flex; gap:6px; align-items:center; margin-top:4px;" }, h("span", { class: "chip " + seg.clase, style: "font-size:.76rem;" }, seg.texto)) : null,
     completa && o.motivo ? h("div", { class: "motivo" }, o.motivo) : null,
     !completa && o.razon ? h("div", { class: "razon" }, "Motivo: " + o.razon) : null,
+    completa && o.categoria === "sin_descripcion" ? formularioDescripcion(o) : null,
     h("div", { style: "display:flex; flex-direction:column; gap:6px; margin-top:6px;" },
       selectorEstado(o, "Estado de seguimiento de " + (o.titulo || "la oferta")),
       completa ? h("button", { type: "button", class: "btn-gestionar-oferta", "aria-haspopup": "dialog",
         onclick: e => abrirDetalle(o, e.currentTarget) }, "⚡ Gestionar proceso & Fases" + (o.notas ? " (con notas)" : "")) : null));
+}
+
+// «Sin texto»: pegar la descripción que copiaste del aviso. El servidor la reclasifica solo a esta oferta.
+function formularioDescripcion(o) {
+  const error = h("div", { class: "razon", role: "alert", hidden: true });
+  const area = h("textarea", { "aria-label": "Descripción del aviso", maxlength: "10000", rows: "4",
+    placeholder: "Abre el aviso con ↗, copia su descripción y pégala aquí." });
+  const guardar = h("button", { type: "submit", class: "boton sec" }, "Guardar descripción");
+  const form = h("form", { class: "modal-form", novalidate: true, style: "margin-top:6px;", onsubmit: async e => {
+      e.preventDefault();
+      error.hidden = true;
+      if (!area.value.trim()) { error.textContent = "Pega la descripción antes de guardar."; error.hidden = false; area.focus(); return; }
+      guardar.disabled = true;
+      const r = await api("/api/descripcion", { url: o.url, descripcion: area.value });
+      guardar.disabled = false;
+      if (!r.ok) { error.textContent = mensajeError(r.status, r.json); error.hidden = false; return; }
+      const estado = r.json.categoria === "principal" ? "pasa a Ofertas" : "queda descartada por el texto";
+      Object.assign(o, { categoria: r.json.categoria, razon: r.json.razon, experiencia: r.json.experiencia });
+      await cargar();
+      mostrarAviso("Descripción guardada: la oferta " + estado + ".");
+    } },
+    h("div", { class: "form-grupo" }, area),
+    error,
+    h("div", { class: "modal-acciones" }, guardar));
+  return h("div", { class: "pegar-descripcion" }, form);
 }
 
 function filaCompacta(o) {

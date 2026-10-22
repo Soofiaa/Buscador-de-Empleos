@@ -979,6 +979,39 @@ def actualizar_seguimiento(con, url: str, cambios: dict) -> dict:
     return _con_prioridad_mostrada(dict(fila))
 
 
+# Descripción pegada a mano en una oferta de «Sin texto» (POST /api/descripcion). Solo cambia el texto de esa oferta y
+# su clasificación; nunca estado, fase ni fecha, que van por _cambiar_seguimiento.
+LIMITE_DESCRIPCION = 10_000
+
+
+def pegar_descripcion(con, url: str, descripcion: str) -> dict:
+    """Guarda el texto del aviso que Sofia copió a mano y reclasifica SOLO esa oferta con él. Si el texto cambia la
+    decisión (p. ej. pide 3+ años), la oferta sale de «Sin texto» sola; si no, pasa a Ofertas."""
+    if not isinstance(url, str) or not url:
+        raise ErrorDatos(400, "falta la oferta")
+    if not isinstance(descripcion, str):
+        raise ErrorDatos(400, "la descripción debe ser texto")
+    texto_ = descripcion.strip()
+    if not texto_:
+        raise ErrorDatos(400, "la descripción está vacía")
+    if len(texto_) > LIMITE_DESCRIPCION:
+        raise ErrorDatos(400, f"la descripción tiene más de {LIMITE_DESCRIPCION} caracteres")
+    with transaccion(con):
+        fila = con.execute("SELECT url, raw, categoria, fuente FROM ofertas WHERE url = ?", (url,)).fetchone()
+        if not fila:
+            raise ErrorDatos(404, "no existe la oferta")
+        if fila["categoria"] != "sin_descripcion" or fila["fuente"] not in config.FUENTES_SIN_TEXTO:
+            raise ErrorDatos(400, "esta oferta no está en «Sin texto»")
+        raw = json.loads(fila["raw"])
+        raw["description"] = texto_
+        cl = clasificar(raw)
+        con.execute("""UPDATE ofertas SET raw = :raw, categoria = :categoria, razon = :razon, tipo = :tipo,
+                       prioridad = :prioridad, modalidad = :modalidad, contrato = :contrato, sueldo = :sueldo,
+                       experiencia = :experiencia, motivo = :motivo WHERE url = :url""",
+                    {**cl, "raw": json.dumps(raw, ensure_ascii=False), "url": url})
+    return {"categoria": cl["categoria"], "razon": cl["razon"], "experiencia": cl["experiencia"]}
+
+
 TIPO_MANUAL = "M: Manual"
 MODALIDADES = ["", "Remoto", "Híbrido", "Presencial"]
 LIMITE_TEXTO_CORTO = 200
