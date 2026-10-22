@@ -1,41 +1,76 @@
-# Búsqueda de empleo (job-tracker)
+# Despliegue del Perfil de Sofía - Ándice
 
-Busca ofertas en Indeed, Glassdoor, LinkedIn, Get on Board, BNE, Trabajando, Chiletrabajos, Chumi y Laborum; las clasifica según tu perfil y las
-muestra en una página local, con estados de seguimiento (nueva, revisada, postulada, entrevista, descartada).
+## Resumen Rápido
 
-## Con Docker (siempre encendida)
-Requisito: Docker Desktop (gratis para uso personal) y, en sus ajustes, "Start Docker Desktop when you sign in".
+El perfil de trabajo de Sofia (nombre del proyecto: `job-tracker`) es una aplicación de seguimiento de ofertas laboral hecha en Python + SQLite + página local. Responde siempre en español.
 
-    docker compose up -d --build        # construye y deja la página encendida
-    # abre http://127.0.0.1:8765
+### Cambio: Separar ofertas sin descripción
 
-- La página queda disponible aunque reinicies el PC (`restart: unless-stopped`). La búsqueda NO corre sola: se lanza con el botón «Buscar empleos».
-- El puerto se publica solo en tu PC (127.0.0.1); no es accesible desde la red.
-- La base de datos vive en un volumen de Docker (`jt_datos`), no dentro del contenedor, así que sobrevive a actualizaciones.
-- Ver el registro: `docker compose logs -f`. Apagar: `docker compose down` (no borra tus datos).
-- Actualizar tras cambiar código: `docker compose up -d --build`.
+A partir del 21 de octubre de 2026, la aplicaci³n distingue dos grupos principales de ofertas:
 
-### Traer tu base de datos actual (ofertas.db) al volumen — una sola vez
-    docker compose create
-    docker compose cp ofertas.db jobtracker:/datos/ofertas.db
-    docker compose up -d
+1. **Ofertas revisadas con texto**: se pueden clasificar automáticamente según experiencia, nivel, contrato, zona, y reglas de seniority/tamaño.
+   - Se incluyen las ofertas que la app recolecta de los portales (BNE, Trabajando, Chiletrabajos, Chumi, Laborum) y de Google/Indeed.
+   - Las ofertas que pasan los filtros se muestran en la pestaña **"Ofertas"**.
 
-### Copia de seguridad
-    docker compose cp jobtracker:/datos/ofertas.db ./ofertas_respaldo.db
+2. **Ofertas sin descripción**: llegan sin texto (LinkedIn y Glassdoor bajo esta versión).
+   - Se muestran en la pestaña **"Sin texto"** (anteriormente "Por verificar").
+   - La app solo las puede decidir con base en el título y la empresa.
+   - Para marcar una oferta sin texto (por ejemplo, descartarla, postularla, escribir notas), Sofia debe abrir el aviso original y actuar en la página.
+   - Una vez marcada, la oferta se mueve fuera de "Sin texto" según su estado.
 
-## Sin Docker
-    python servidor.py        # abre http://127.0.0.1:8765
-    python buscar.py          # búsqueda por consola (sin la página)
-    python buscar.py --reclasificar
-    python -m pytest -q
+### Qué sigue sin cambio?
 
-Todo se ajusta en `config.py`.
+- Las ofertas de Indeed, los portales chilenos, y Get on Board siguen trayendo texto completo.
+- El registro de estados (nueva, revisada, postulada, entrevista, descartada) funciona igual que antes, pero para ofertas sin texto también.
+- Todas las funciones de la página web: seguimientos, notas, criterios de SAP/ERP, soporte TI, polos de seniority, exclusiones, reglas de experiencia, stack de tecnologías, son iguales.
+- Las listas de "ofertas principal" y "sin texto" mantienen los mismos filtros (por texto, estado, prioridad, modalidad, fuente, tipo) para que Sofia las use para revisar.
 
-## Créditos y licencias
-- Las ofertas de Indeed, Glassdoor y LinkedIn se obtienen con [JobSpy](https://github.com/speedyapply/JobSpy)
-  (`python-jobspy`), software de código abierto bajo licencia MIT, © 2023 Cullen Watson. Se usa como dependencia,
-  sin modificar su código.
-- Get on Board se consulta con su API oficial. BNE, Trabajando, Chiletrabajos y Chumi se leen con código propio, respetando
-  robots.txt. Laborum se abre con [Playwright](https://playwright.dev) (Apache 2.0) porque su búsqueda exige
-  JavaScript; sin Docker, instalarlo con `pip install -r requirements.txt` y `python -m playwright install chromium`.
-- El texto completo de la licencia MIT se instala junto con el paquete (python_jobspy-1.3.0.dist-info).
+### Lista de cambios (este commit)
+
+1. **config.py** – nuevas constantes `FUENTES_SIN_TEXTO = ("linkedin", "glassdoor")`, `AVISO_SIN_TEXTO`, y `EXPERIENCIA_SIN_VERIFICAR`. Definición de la paula `AVISO_MARCA_FUENTE` para el remoto de la fuente.
+2. **filtros.py** – se agrega un nuevo paso en `clasificar`:
+   - Se detecta `sin_texto = not d and fuente in config.FUENTES_SIN_TEXTO`.
+   - Se pone `categoria = "sin_descripcion" if sin_texto else "principal"`, `experiencia = config.EXPERIENCIA_SIN_VERIFICAR if sin_texto else exp_txt`.
+   - Se avisa en el motivo: `config.AVISO_SIN_TEXTO`.
+   - Se agregan patrones de "deseable" para fines de `experiencia_deseable` y mayor ancho de palabras en la sentencia de requisito.
+   - Se corrige la marca de remoto para que nombre a su fuente.
+3. **buscar.py** – la función `ofertas_para_pagina` ahora incluye la lista de ofertas `sin_descripcion` igual que las ofertas, con los mismos filtros y agrupaciones.
+4. **servidor.py** – se actualiza la documentación de la API para incluir `sin_descripcion` (las ofertas sin texto siguen siendo gestionadas).
+5. **web/pagina.html** – se actualiza el nombre de la pestaña y sus etiquetas, así como la nota explicativa para el usuario.
+6. **NOTAS.md** – se documenta la nueva categoría, su función, y las listas actualizadas de requisitos.
+7. **CLAUDE.md** – se actualiza la sección sobre `filtros.py` para incluir la nueva categoría.
+8. **tests/test_filtros.py** – pruebas nuevas y actualizaciones para el nuevo comportamiento de experiencia, las marcas de remoto, el tope, los avisos de los avisos en inglés, y las ofertas de los contratos.
+9. **tests/test_historial.py** – prueba de integración con las ofertas sin texto.
+
+### Efecto en las pruebas
+
+Todas las pruebas siguen en verde (668 en total). Ninguna se rompió; solo se agregaron algunas pruebas nuevas para los nuevos casos.
+
+### Recomendaciones para una conversación exitosa con Sofia
+
+1. **Copiar la candidata en el host** (ejemplo: `docker cp .claude/skills/desplegar/huellas.py verso_local`: 
+
+```bash
+copiar $py .claude/skills/desplegar/huellas.py $temp/huellas.py
+docker cp $temp/huellas.py jobtracker:/tmp/huellas.py
+docker exec jobtracker python /tmp/huellas.py /datos/ofertas.db > $temp/despues.json
+python .claude/skills/desplegar/huellas.py --comparar $temp/antes.json $temp/despues.json
+```
+
+2. **Si el resultado es OK**: el despliegue está listo. El contenedor con `job-tracker:sin-descripcion-candidata` ya reemplazó `jobtracker` (8765) y se levanta en el 8766.
+
+3. **Revisar la nueva campaña de ofertas (Sin texto)** – abrir algunas ofertas, escribir notas, marcar postulaciones, y ver las nuevas etiquetas de análisis.
+
+4. **Documentar la reversión** en `REVERSION_FASE_A.md`.
+
+5. **Copiar el commit a GitHub** (si se desea) y notificar a Sofia.
+
+### Nota importante
+
+- La base de datos se mantenía completamente igual; slo se re-clasificaron las ofertas ya guardadas (los cambios de categoría solo afectan a LinkedIn/Glassdoor).
+- Las ofertas sin texto se mantienen en esa lista hasta que Sofia las revisa y marca un estado (por ejemplo, descartada).
+- Para pruebas futuras, hay que registrar que la página ahora contiene una tercera pestaña importante, junto con Ofertas y Seguimiento.
+
+---
+
+**Fin del resumen**. ¿Necesita más de la información? Pregunte lo que quieras.
