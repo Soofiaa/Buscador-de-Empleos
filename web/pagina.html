@@ -214,6 +214,11 @@
 
   .historial { margin-top:14px; border-top:1px solid var(--borde); padding-top:12px; }
   .historial h2 { font-size:1rem; color:var(--suave); margin:4px 10px 8px; }
+  .historial-toggle { display:none; margin-top:12px; }   /* solo en pantallas angostas: en escritorio el historial siempre se ve */
+  @media (max-width:860px) {
+    .historial-toggle { display:block; }
+    .historial[data-plegado] { display:none; }
+  }
   .item { display:flex; align-items:baseline; gap:8px; width:100%; text-align:left; background:none; border:0;
           border-radius:10px; padding:7px 10px; cursor:pointer; color:var(--tinta); }
   .item:hover { background:var(--panel2); }
@@ -491,7 +496,8 @@
       <div class="sub" id="estado-respaldo" role="status" style="margin:6px 2px 0; font-size:.78rem;"></div>
     </div>
 
-    <nav class="historial" id="historial" aria-label="Historial de búsquedas"></nav>
+    <button class="boton sec ancho historial-toggle" id="historial-toggle" type="button" aria-expanded="false" aria-controls="historial">📜 Ver historial de búsquedas</button>
+    <nav class="historial" id="historial" aria-label="Historial de búsquedas" data-plegado></nav>
     <div class="badge-db-status" id="estado-db" role="status"><span class="dot-online"></span> <span id="texto-db">Conectando…</span></div>
   </aside>
   <main class="principal">
@@ -931,6 +937,14 @@ try { aplicarTema(localStorage.getItem("tema")); } catch (e) { aplicarTema(null)
 
 // ---------- columna izquierda: historial
 function elegir(sel) { S.sel = sel; pintar(); }
+
+// en móvil el historial empieza plegado; el botón lo abre y lo cierra (aria-expanded refleja el estado)
+$("historial-toggle").addEventListener("click", e => {
+  const nav = $("historial"), estabaPlegado = nav.hasAttribute("data-plegado");
+  if (estabaPlegado) nav.removeAttribute("data-plegado"); else nav.setAttribute("data-plegado", "");
+  e.currentTarget.setAttribute("aria-expanded", String(estabaPlegado));
+  e.currentTarget.textContent = estabaPlegado ? "📜 Ocultar historial de búsquedas" : "📜 Ver historial de búsquedas";
+});
 
 function botonSel(sel, clase, etiqueta, hijos) {
   const activo = claveSel(S.sel) === claveSel(sel);
