@@ -916,6 +916,17 @@ def test_ventana_efectiva_crece_si_se_salta_dias(tmp_path):
     assert buscar.ventanas_efectivas(con, AHORA)["indeed"] == config.DIAS_MAXIMOS   # la última por id; con tope
 
 
+# ------------------------------------------------------------ título TI con descripción de otro oficio (22-10)
+def test_titulo_ti_con_descripcion_de_oficio_tecnico_se_descarta():
+    r = clasificar(oferta("Analista Funcional", "Se busca técnico eléctrico para mantenimiento de tableros industriales."))
+    assert r["categoria"] == "descartada" and r["razon"] == "descripción de otro oficio (no TI)"
+
+
+def test_tableros_de_control_de_bi_sigue_siendo_ti():
+    r = clasificar(oferta("Analista Funcional", "Diseño de tableros de control en Power BI y pruebas funcionales con SQL."))
+    assert r["categoria"] == "principal"
+
+
 def test_hours_old_por_fuente():
     assert buscar.consulta("indeed", "QA", "Santiago, Chile")["hours_old"] == 24
     assert buscar.consulta("glassdoor", "QA", "Santiago, Chile")["hours_old"] == 48   # días enteros: incluye "ayer"

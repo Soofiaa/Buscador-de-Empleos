@@ -375,6 +375,9 @@ def clasificar(o: dict) -> dict:
     rol = _detectar_rol(t, d)               # el soporte es un cargo más (tipo S): sigue por los filtros de abajo
     if rol is None:
         return fin("descartada", "sin rol objetivo")
+    # el título puede calzar un rol TI y aun así describir otro oficio: la descripción manda sobre ese título
+    if rol["tipo"] == "A" and re.search(config.NO_TI_DESC, d):
+        return fin("descartada", "descripción de otro oficio (no TI)")
 
     for motivo, p in config.SOSPECHOSA_DESC.items():
         if re.search(p, d):

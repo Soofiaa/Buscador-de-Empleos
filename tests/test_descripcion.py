@@ -41,8 +41,6 @@ def test_texto_con_5_anos_en_ingles_descarta_la_oferta(tmp_path):
     assert r["categoria"] == "descartada"
 
 
-@pytest.mark.xfail(strict=True, reason="Hallazgo 22-10: con un título que ya calza un rol TI (Alta), la descripción "
-                   "no se revisa para decidir si el cargo es TI. Corregirlo cambia lo guardado; pendiente de aprobación.")
 def test_texto_no_ti_no_pasa(tmp_path):
     """Un aviso de eléctrico no debe quedar como principal aunque el título diga «analista»."""
     con = _linkedin(tmp_path, "Analista Funcional")

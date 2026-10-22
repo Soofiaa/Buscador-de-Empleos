@@ -192,6 +192,10 @@ CONTEXTO_MIN = 2
 # la descripción mencione Python o SQL ("Analista de Calidad, Gerencia SAC"). Solo se
 # salva si el título trae una palabra claramente técnica.
 NO_TI_TITULO = r"\bsac\b|servicio al cliente|atencion (al|de) cliente|experiencia (de|del) cliente|recursos humanos|\brrhh\b|gestion de personas|seleccion de personal|capital humano|talento"
+# Si la DESCRIPCIÓN describe un oficio técnico no TI, el cargo no es TI aunque el título calce un rol A (p. ej.
+# "Analista Funcional" de un técnico eléctrico). Solo oficios concretos: "tableros de control" de BI no cuenta.
+NO_TI_DESC = (r"tecnico (electric|mecanic|en electricidad|de mantenimiento industrial)|electricista|mecanico (de|industrial)"
+              r"|soldador|maquinaria pesada|instalaciones electricas|tableros? electric|montaje electromecanico")
 TI_EN_TITULO = r"\bqa\b|tester|testing|software|desarrollador|programador|developer|python|\bsql\b|\bti\b|sistemas|\bdatos\b.*\b(bi|etl)\b"
 CONTEXTO_TI = {
     "software": r"software", "bases de datos": r"bases? de datos",
