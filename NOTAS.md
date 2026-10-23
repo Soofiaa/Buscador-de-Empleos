@@ -3,7 +3,19 @@
 ## Estado actual (se actualiza en cada despliegue; leer al empezar cada sesión)
 
 ### Producción y base
-- **Reclasificación de lo guardado, simulada (22-10-2026):** NO aplicada. Con las reglas actuales, la simulación sobre la
+- **Reclasificación de lo guardado, APLICADA (22-10-2026; vigente):** `python buscar.py --reclasificar` sobre la base real.
+  Referencia previa `ofertas_pre_reclasif_20261022.db` (sha256 `da3a88e9…`, integrity ok, 4245 ofertas, 34 postuladas,
+  6 POR VERIFICAR); imagen anterior `job-tracker:pre-reclasif-20261022` (= `sha256:2509d984…`).
+  - Huellas después: RESULTADO OK, idénticas a la referencia en todas las tablas; el estado de ninguna oferta cambió
+    (postuladas 34, POR VERIFICAR 6, historial 280 sin cambios). La reclasificación no cambió nada de estado, según la
+    simulación previa (0 cambios).
+  - **Incidente:** el contenedor quedó con salida 137 (SIGKILL) al detenerlo. Se verificó la base con una copia hecha con
+    la API de respaldo (integrity ok, mismos conteos) y el contenedor se levantó luego: healthy, rutas 200, Host/Origin
+    ajenos 403, huellas RESULTADO OK. Un comando previo dejó el contenedor detenido sin querer; se corrigió levantándolo.
+  - Para volver atrás: `docker compose stop jobtracker`, `docker tag job-tracker:pre-reclasif-20261022
+    job-tracker-jobtracker:latest`, `docker compose up -d --no-build`, y si hace falta la referencia
+    `ofertas_pre_reclasif_20261022.db`.
+- **Reclasificación de lo guardado, simulada (22-10-2026):** la simulación dio 0 cambios. Con las reglas actuales, la simulación sobre la
   referencia `ofertas_pre_redespliegue_20261022.db` dio 0 cambios de 4240 ofertas revisadas (sin las manuales), incluidas
   las de seguimiento. Como no cambia nada, no se hizo la escritura real. Control: el clasificador sí reconoce soporte
   (categoría S, motivo «rol: soporte / helpdesk»).
