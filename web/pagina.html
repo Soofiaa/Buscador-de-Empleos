@@ -835,7 +835,7 @@ function busquedasManuales() {
 const ESTADOS = ["nueva", "revisada", "postulada", "entrevista", "descartada"];
 const ETIQUETAS_ESTADO = { nueva: "🌱 Nueva", revisada: "🔍 Revisada", postulada: "✉️ Postulada", entrevista: "🎯 En Entrevista", descartada: "❌ Descartada" };
 const PESTANAS = [
-  ["ofertas", "Ofertas"], ["seguimiento", "Seguimiento"], ["sin_descripcion", "Sin texto"],
+  ["ofertas", "Ofertas"], ["seguimiento", "Seguimiento"],
   ["fuera_perfil", "Fuera de perfil"],
   ["sospechosas", "Sospechosas"], ["descartadas_usuario", "Descartadas"], ["descartadas", "Descartadas por filtros"]
 ];
@@ -1608,16 +1608,24 @@ function pintarLista() {
     const claves = [...grupos.keys()].sort(porFuente
       ? (a, b) => grupos.get(b).length - grupos.get(a).length || a.localeCompare(b)
       : (a, b) => (orden.indexOf(a) + 1 || 9) - (orden.indexOf(b) + 1 || 9));
-    cont.replaceChildren(...claves.flatMap(k => [
+    
+    const elementos = claves.flatMap(k => [
       h("h3", { class: "grupo" }, porFuente ? k : "Prioridad " + k, h("span", { class: "cuenta" }, grupos.get(k).length)),
-      ...pintarItems(grupos.get(k))]));
+      ...pintarItems(grupos.get(k))]);
+    
+    const sinTextoFilas = (S.datos.sin_descripcion || []).filter(o => !CERRADOS.has(o.estado)).filter(pasa);
+    if (sinTextoFilas.length > 0) {
+        elementos.push(h("h3", { class: "grupo" }, "Sin texto", h("span", { class: "cuenta" }, sinTextoFilas.length)));
+        elementos.push(h("p", { class: "sub" }, "El aviso sí tiene descripción en LinkedIn, pero LinkedIn no se la entrega a la app: "
+          + "por eso aquí nadie pudo revisar experiencia ni nivel y los filtros solo alcanzaron al título. "
+          + "Ábrelo con ↗ y márcalo; «❌ Descartada» no vuelve a aparecer."));
+        elementos.push(...pintarItems(sinTextoFilas));
+    }
+    
+    cont.replaceChildren(...elementos);
     return;
   }
   let nota = null;
-  if (S.pestana === "sin_descripcion")
-    nota = h("p", { class: "sub" }, "El aviso sí tiene descripción en LinkedIn, pero LinkedIn no se la entrega a la app: "
-      + "por eso aquí nadie pudo revisar experiencia ni nivel y los filtros solo alcanzaron al título. "
-      + "Ábrelo con ↗ y márcalo; «❌ Descartada» no vuelve a aparecer.");
   if (S.pestana === "descartadas" && S.datos.total_descartadas > S.datos.descartadas.length)
     nota = h("p", { class: "sub" }, S.sel.tipo === "todas"
       ? "Mostrando " + TXT.masRecientes(S.datos.descartadas.length) + " de " + S.datos.total_descartadas + "."
