@@ -30,6 +30,7 @@ import laborum
 import getonboard
 import himalayas
 import jobicy
+import puestos
 import telemetria
 import trabajando
 from red import Bloqueo, ClienteHTTP, ErrorFuente, NoEncontrada, USER_AGENT_HTTP
@@ -135,6 +136,38 @@ def guardar_soporte(con, datos) -> dict:
     with transaccion(con):
         con.execute("INSERT OR REPLACE INTO ajustes (clave, valor) VALUES ('soporte', ?)", (json.dumps({"incluir": datos["incluir"]}),))
     return {"incluir": datos["incluir"]}
+
+
+def terminos_puestos_default() -> list[str]:
+    """Lo que busca Indeed si Sofia nunca editó la lista: los términos de config (TI + puente)."""
+    return list(config.TERMINOS_A) + list(config.TERMINOS_B)
+
+
+def leer_puestos(con) -> list[str]:
+    """Puestos que busca Indeed: la lista guardada en ajustes (clave 'puestos'), o los de config si no hay ninguna
+    o si lo guardado ya no pasa la validación (así una búsqueda nunca queda sin términos por un dato roto)."""
+    fila = con.execute("SELECT valor FROM ajustes WHERE clave = 'puestos'").fetchone()
+    if fila:
+        try:
+            lista, errores = puestos.validar(json.loads(fila[0]).get("lista"))
+        except (ValueError, AttributeError):
+            lista, errores = [], ["dato no legible"]
+        if lista and not errores:
+            return lista
+    return terminos_puestos_default()
+
+
+def guardar_puestos(con, datos) -> dict:
+    """POST /api/ajustes/puestos: solo {"lista": [...]}. Si algún puesto no pasa la validación, no se guarda nada."""
+    if not isinstance(datos, dict) or set(datos) != {"lista"}:
+        raise ErrorDatos(400, 'se espera {"lista": [...]}')
+    lista, errores = puestos.validar(datos["lista"])
+    if errores:
+        raise ErrorDatos(400, "; ".join(errores))
+    with transaccion(con):
+        con.execute("INSERT OR REPLACE INTO ajustes (clave, valor) VALUES ('puestos', ?)",
+                    (json.dumps({"lista": lista}, ensure_ascii=False),))
+    return {"lista": lista}
 
 
 class BaseOcupada(Exception):
@@ -668,8 +701,9 @@ def buscar_ofertas(con) -> int:
     _vigilar_429()
 
     lugares = list(config.UBICACIONES) + ([REMOTO] if config.INCLUIR_REMOTO else [])
+    terminos_indeed = leer_puestos(con)     # la lista que Sofia editó, o la de config
     plan = [(s, t, l) for s in config.SITIOS if s not in PORTALES
-            for t in (config.TERMINOS_A + config.TERMINOS_B if s == "indeed"
+            for t in (terminos_indeed if s == "indeed"
                       else [""] if s in APIS_REMOTAS else config.TERMINOS_SECUNDARIOS)
             for l in (["Chile"] if s in APIS_REMOTAS else lugares)]   # las APIs no usan ubicación ni término
     stats = {s: {"encontradas": 0, "antiguas": 0, "relevantes": 0, "sin_chile": 0, "errores": 0} for s in config.SITIOS}

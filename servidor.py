@@ -21,6 +21,8 @@
   GET  /api/ofertas       ... y cada oferta principal trae en_fase_desde (UTC) según su historial, o null
   GET  /api/ajustes/soporte  {incluir}: si la categoría Soporte TI se muestra en Ofertas
   POST /api/ajustes/soporte  {"incluir": true|false} (nada más) -> {ok, incluir}
+  GET  /api/ajustes/puestos  {lista}: los puestos que busca Indeed (guardados o los de config)
+  POST /api/ajustes/puestos  {"lista": [...]} (nada más) -> {ok, lista}; validación en puestos.py
   POST /api/oferta/manual  {titulo, empresa (obligatorios), url (http/https), ubicacion, modalidad, estado,
                           fecha_postulacion, notas, fase, sueldo_manual, prioridad_manual} -> 201 {ok, oferta};
                           409 {error, url_existente} si la URL o la misma oferta (cargo+empresa+ciudad) ya existe
@@ -285,6 +287,12 @@ def crear_servidor(app: Aplicacion, puerto: int = None, host: str = None) -> Thr
                     return self._json(200, {"incluir": buscar.leer_ajuste(con, "soporte")["incluir"]})
                 finally:
                     con.close()
+            if ruta == "/api/ajustes/puestos":
+                con = app.conexion()
+                try:
+                    return self._json(200, {"lista": buscar.leer_puestos(con)})
+                finally:
+                    con.close()
             self._json(404, {"error": "no existe"})
 
         def do_POST(self):
@@ -332,6 +340,7 @@ def crear_servidor(app: Aplicacion, puerto: int = None, host: str = None) -> Thr
                 "/api/nota": lambda con, d: {"oferta": buscar.actualizar_seguimiento(
                     con, d.get("url"), {k: v for k, v in d.items() if k != "url"})},
                 "/api/ajustes/soporte": lambda con, d: buscar.guardar_soporte(con, d),
+                "/api/ajustes/puestos": lambda con, d: buscar.guardar_puestos(con, d),
                 "/api/oferta/manual": lambda con, d: {"oferta": buscar.crear_oferta_manual(con, d)},
                 "/api/descripcion": lambda con, d: buscar.pegar_descripcion(con, d.get("url"), d.get("descripcion")),
             }
