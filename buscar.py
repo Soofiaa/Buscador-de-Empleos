@@ -28,6 +28,8 @@ import chumi
 import config
 import laborum
 import getonboard
+import himalayas
+import jobicy
 import telemetria
 import trabajando
 from red import Bloqueo, ClienteHTTP, ErrorFuente, NoEncontrada, USER_AGENT_HTTP
@@ -44,6 +46,8 @@ def _say(mensaje: str):
 
 
 PORTALES = {"bne": bne, "trabajando": trabajando, "chiletrabajos": chiletrabajos, "chumi": chumi, "laborum": laborum}
+# APIs que no buscan por texto: una sola solicitud por corrida, sin ubicación (ver getonboard.py, himalayas.py, jobicy.py)
+APIS_REMOTAS = {"getonboard": getonboard, "himalayas": himalayas, "jobicy": jobicy}
 ESTADOS = ["nueva", "revisada", "postulada", "entrevista", "descartada"]
 ESTADOS_CERRADOS = {"postulada", "entrevista", "descartada"}
 LIMITE_DESCARTADAS = 300   # la página muestra las descartadas más recientes (con su motivo)
@@ -665,11 +669,12 @@ def buscar_ofertas(con) -> int:
 
     lugares = list(config.UBICACIONES) + ([REMOTO] if config.INCLUIR_REMOTO else [])
     plan = [(s, t, l) for s in config.SITIOS if s not in PORTALES
-            for t in (config.TERMINOS_A + config.TERMINOS_B if s == "indeed" else config.TERMINOS_SECUNDARIOS)
-            for l in (["Chile"] if s == "getonboard" else lugares)]   # la API de Get on Board no usa ubicación
+            for t in (config.TERMINOS_A + config.TERMINOS_B if s == "indeed"
+                      else [""] if s in APIS_REMOTAS else config.TERMINOS_SECUNDARIOS)
+            for l in (["Chile"] if s in APIS_REMOTAS else lugares)]   # las APIs no usan ubicación ni término
     stats = {s: {"encontradas": 0, "antiguas": 0, "relevantes": 0, "sin_chile": 0, "errores": 0} for s in config.SITIOS}
     # telemetría pasiva (solo contadores): JobSpy no expone sus solicitudes, se cuentan sus llamadas, también por ubicación
-    tele = {s: (telemetria.contador("http") if s in PORTALES or s == "getonboard"
+    tele = {s: (telemetria.contador("http") if s in PORTALES or s in APIS_REMOTAS
                 else telemetria.contador("consulta", lugares)) for s in config.SITIOS}
     total = 0
     avisos = []
@@ -694,19 +699,19 @@ def buscar_ofertas(con) -> int:
                 _say(f"  ! [{sitio}] 429: se deja por esta corrida")
             continue
         try:
-            if sitio == "getonboard":
-                df = getonboard.buscar(termino, config.RESULTADOS_POR_BUSQUEDA,
-                                       al_responder=lambda status, t=t: telemetria.anotar_status(t, status))
+            if sitio in APIS_REMOTAS:
+                df = APIS_REMOTAS[sitio].buscar(termino, config.RESULTADOS_POR_BUSQUEDA,
+                                                al_responder=lambda status, t=t: telemetria.anotar_status(t, status))
             else:
                 df = scrape_jobs(**consulta(sitio, termino, lugar, dias=ventanas[sitio]))
         except Exception as e:
             st["errores"] += 1
-            if sitio != "getonboard":                 # Get on Board ya anotó cada solicitud con su status
+            if sitio not in APIS_REMOTAS:             # las APIs ya anotaron cada solicitud con su status
                 telemetria.anotar_excepcion(t, e, lugar)
             _say(f"  ! [{sitio}] {etiqueta}: {type(e).__name__}: {e}")
             continue
         vacia = df is None or len(df) == 0
-        if sitio == "getonboard":
+        if sitio in APIS_REMOTAS:
             if vacia:
                 telemetria.anotar_vacia(t)
         else:
