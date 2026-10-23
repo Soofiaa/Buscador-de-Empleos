@@ -228,10 +228,10 @@ def test_mensaje_de_fin_de_busqueda_en_singular_y_plural(tmp_path, n, texto):
     assert app.estado["mensaje"] == "Búsqueda terminada: " + texto + "."
 
 
-def test_la_pagina_tiene_el_interruptor_de_soporte():
+def test_la_pagina_ya_no_tiene_el_interruptor_de_soporte():
+    """El soporte TI se muestra siempre en Ofertas: sin check en la página (la regla de backend queda en la base)."""
     script = PAGINA.split("<script>")[1]
-    assert '"/api/ajustes/soporte", { incluir: e.target.checked }' in script and "🛟 Incluir soporte TI / helpdesk" in script
-    assert 'S.pestana === "ofertas" || S.pestana === "fuera_perfil"' in script        # solo donde tiene efecto
+    assert "🛟 Incluir soporte TI / helpdesk" not in script and "/api/ajustes/soporte" not in script
 
 
 def test_la_pagina_tiene_postulacion_manual_y_exportar_sin_enlace_falso():

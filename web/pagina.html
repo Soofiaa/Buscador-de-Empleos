@@ -1120,18 +1120,6 @@ function pintarFiltros() {
       h("option", { value: "prioridad" }, "Agrupar: prioridad"), h("option", { value: "fuente" }, "Agrupar: fuente"));
     g.value = S.agrupar; partes.push(g);
   }
-  if (S.pestana === "ofertas" || S.pestana === "fuera_perfil") {
-    // ajuste guardado en la base: si se apaga, el soporte sin decisión tuya se ve en "Fuera de perfil"
-    const incluido = S.datos.soporte_incluido !== false;
-    partes.push(h("label", { class: "interruptor-soporte", title: "Mostrar las ofertas de soporte TI / helpdesk (prioridad Baja) en Ofertas" },
-      h("input", { type: "checkbox", checked: incluido, onchange: async e => {
-        e.target.disabled = true;
-        const r = await api("/api/ajustes/soporte", { incluir: e.target.checked });
-        if (!r.ok) { e.target.checked = incluido; e.target.disabled = false; mostrarAviso(mensajeError(r.status, r.json)); return; }
-        await cargar();
-        mostrarAviso(r.json.incluir ? "Soporte TI visible en Ofertas" : "Soporte TI oculto (se ve en «Fuera de perfil»)");
-      } }), "🛟 Incluir soporte TI / helpdesk"));
-  }
   const densidad = (valor, texto, titulo) => h("button", { type: "button", class: "btn-vista", "aria-pressed": String(S.densidad === valor), title: titulo,
     onclick: () => { S.densidad = valor; try { localStorage.setItem("densidad", valor); } catch (e) {} pintarLista(); pintarFiltros(); } }, texto);
   partes.push(h("div", { class: "selector-vista", role: "group", "aria-label": "Densidad de vista" },
