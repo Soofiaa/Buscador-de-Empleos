@@ -3,6 +3,10 @@
 ## Estado actual (se actualiza en cada despliegue; leer al empezar cada sesión)
 
 ### Producción y base
+- **Reclasificación de lo guardado, simulada (22-10-2026):** NO aplicada. Con las reglas actuales, la simulación sobre la
+  referencia `ofertas_pre_redespliegue_20261022.db` dio 0 cambios de 4240 ofertas revisadas (sin las manuales), incluidas
+  las de seguimiento. Como no cambia nada, no se hizo la escritura real. Control: el clasificador sí reconoce soporte
+  (categoría S, motivo «rol: soporte / helpdesk»).
 - **Redespliegue con la misma versión de código (22-10-2026; vigente):** commit `de42a51` (rama `feat/unificar-ofertas`,
   subida a GitHub). Código idéntico al del despliegue de abajo (sha256 de los archivos que entran a la imagen iguales en
   el contenedor y en el árbol de trabajo). Imagen `job-tracker-jobtracker:latest` =
