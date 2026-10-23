@@ -3,7 +3,23 @@
 ## Estado actual (se actualiza en cada despliegue; leer al empezar cada sesión)
 
 ### Producción y base
-- **Despliegue de soporte TI y fuentes remotas (22-10-2026; vigente):** commits `f96c301` (Himalayas y Jobicy, APIs
+- **Despliegue de la sección «Puestos que busco» (22-10-2026; vigente):** commits `866faf3` (validación, paso 1),
+  `dd55d0d` (guardado en ajustes y rutas, paso 2), `775a077` (sección en la barra lateral, paso 3) y `6eed95f` (CSS de
+  filtros, ya en producción). Imagen `job-tracker-jobtracker:latest` = `sha256:ba0cc91630d5f60b9b5f89dd5341b781fb00863e44b366ce43ce3f3af5549d41`,
+  healthy en `127.0.0.1:8765`. Imagen anterior inmediata: `job-tracker:pre-puestos-20261022`
+  (`sha256:acff94b872624420ee6d8fbef127e328bda26e449e505c604b1ac992b033da04`).
+  Referencia `ofertas_pre_puestos_20261022.db`, sha256 `da3a88e9e1d3218dd616de2e641564adc2c39c2f2dabe44af0ca27e52f0c18c9`
+  en `C:\Users\sofia\Respaldos\job-tracker-referencias\` y en el volumen; integrity_check ok; 4245 ofertas, 34 postuladas,
+  6 POR VERIFICAR.
+  - Huellas después: RESULTADO OK sin objetos agregados ni faltantes. Diferencias en `ofertas` y `corridas`: la corrida 42
+    (22:32) terminó después de tomar la referencia (21:57 - 22:32) y dejó 4 ofertas nuevas. No la causó este despliegue.
+    Las 4 nuevas quedaron en «principal/nueva» (3) y «sin_descripcion/nueva» (1). Las postuladas, las POR VERIFICAR y el
+    historial no cambiaron.
+  - Comprobaciones HTTP: `/`, `/api/estado`, `/api/ofertas`, `/api/respaldo` y `GET /api/ajustes/puestos`: 200;
+    Host ajeno y Origin ajeno: 403.
+  - Probado antes en candidata con navegador (agregar, rechazar inválido y repetido, guardar, recargar, quitar).
+  - Reversión: `job-tracker:pre-puestos-20261022`.
+- **Despliegue de soporte TI y fuentes remotas (22-10-2026; anterior):** commits `f96c301` (Himalayas y Jobicy, APIs
   públicas de empleo remoto), `f296a14` (términos «soporte TI» y «help desk») y `76ee255` (se quita el check de soporte
   de la página; el ajuste `soporte` de la base queda sin uso). Imagen `job-tracker-jobtracker:latest` =
   `sha256:acff94b872624420ee6d8fbef127e328bda26e449e505c604b1ac992b033da04`, healthy en `127.0.0.1:8765`.
