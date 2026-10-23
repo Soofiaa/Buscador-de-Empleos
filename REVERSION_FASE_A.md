@@ -575,3 +575,20 @@ docker compose up -d --no-build
 **Qué se pierde al volver:** la sección «Puestos que busco» desaparece y Indeed vuelve a usar la lista fija de
 config.py. Si Sofia ya guardó una lista propia, queda guardada en justes pero deja de usarse. No se pierden
 ofertas ni estados. Probado con la candidata en navegador antes del despliegue.
+
+## Redespliegue con la misma versión (22-10-2026)
+
+Commit de42a51 (código idéntico al de «Puestos que busco»). Imagen anterior: job-tracker:pre-redespliegue-20261022
+(sha256:ba0cc91630d5f60b9b5f89dd5341b781fb00863e44b366ce43ce3f3af5549d41). Imagen desplegada:
+job-tracker-jobtracker:latest = sha256:2509d984b4ada5ecac0df265735f94496f3d4ec58d5ee6650f85802c38fc39b1.
+Referencia: ofertas_pre_redespliegue_20261022.db, sha256 da3a88e9e1d3218dd616de2e641564adc2c39c2f2dabe44af0ca27e52f0c18c9.
+
+Para volver atrás:
+
+`
+docker compose stop jobtracker
+docker tag job-tracker:pre-redespliegue-20261022 job-tracker-jobtracker:latest
+docker compose up -d --no-build
+`
+
+**Qué se pierde al volver:** nada del código; vuelve a la misma versión funcional. No se pierden ofertas ni estados.

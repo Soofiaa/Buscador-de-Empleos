@@ -3,7 +3,19 @@
 ## Estado actual (se actualiza en cada despliegue; leer al empezar cada sesión)
 
 ### Producción y base
-- **Despliegue de la sección «Puestos que busco» (22-10-2026; vigente):** commits `866faf3` (validación, paso 1),
+- **Redespliegue con la misma versión de código (22-10-2026; vigente):** commit `de42a51` (rama `feat/unificar-ofertas`,
+  subida a GitHub). Código idéntico al del despliegue de abajo (sha256 de los archivos que entran a la imagen iguales en
+  el contenedor y en el árbol de trabajo). Imagen `job-tracker-jobtracker:latest` =
+  `sha256:2509d984b4ada5ecac0df265735f94496f3d4ec58d5ee6650f85802c38fc39b1`, healthy en `127.0.0.1:8765`.
+  Imagen anterior inmediata: `job-tracker:pre-redespliegue-20261022` (`sha256:ba0cc916…`, la de «Puestos que busco»).
+  Referencia `ofertas_pre_redespliegue_20261022.db`, sha256 `da3a88e9e1d3218dd616de2e641564adc2c39c2f2dabe44af0ca27e52f0c18c9`
+  en `C:\Users\sofia\Respaldos\job-tracker-referencias\` y en el volumen; integrity_check ok; 4245 ofertas, 34 postuladas,
+  6 POR VERIFICAR.
+  - Huellas antes y después idénticas (`huellas.py --comparar`: RESULTADO OK, sin objetos agregados ni faltantes).
+  - Comprobaciones HTTP: `/`, `/api/estado`, `/api/ofertas`, `/api/respaldo` y `GET /api/ajustes/puestos`: 200;
+    Host ajeno y Origin ajeno: 403.
+  - Reversión: `job-tracker:pre-redespliegue-20261022` (y, para volver aún más atrás, `job-tracker:pre-puestos-20261022`).
+- **Despliegue de la sección «Puestos que busco» (22-10-2026; anterior):** commits `866faf3` (validación, paso 1),
   `dd55d0d` (guardado en ajustes y rutas, paso 2), `775a077` (sección en la barra lateral, paso 3) y `6eed95f` (CSS de
   filtros, ya en producción). Imagen `job-tracker-jobtracker:latest` = `sha256:ba0cc91630d5f60b9b5f89dd5341b781fb00863e44b366ce43ce3f3af5549d41`,
   healthy en `127.0.0.1:8765`. Imagen anterior inmediata: `job-tracker:pre-puestos-20261022`
