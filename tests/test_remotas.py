@@ -134,6 +134,11 @@ def test_remotas_estan_en_las_fuentes_y_nombres():
         assert s in buscar.APIS_REMOTAS
 
 
+def test_soporte_ti_es_termino_de_busqueda():
+    assert "soporte TI" in config.TERMINOS_A and "help desk" in config.TERMINOS_A
+    assert "soporte TI" in config.TERMINOS_SECUNDARIOS and "help desk" in config.TERMINOS_SECUNDARIOS
+
+
 def test_remotas_son_una_consulta_por_corrida(monkeypatch):
     plan = [(s, t, l) for s in config.SITIOS if s not in buscar.PORTALES
             for t in ([""] if s in buscar.APIS_REMOTAS else [config.TERMINOS_SECUNDARIOS[0]])

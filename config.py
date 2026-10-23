@@ -16,6 +16,7 @@ TERMINOS_A = [  # roles TI
     "devops junior", "devops jr", "cloud junior", "cloud jr",
     "analista de ciberseguridad junior", "analista de ciberseguridad jr",
     "desarrollador full stack junior", "desarrollador full stack jr",
+    "soporte TI", "help desk",   # soporte TI: categoría S (prioridad Baja); el interruptor de la página decide si se ve
 ]
 # Nota: "BPMN UML" (0 resultados en todas las zonas) se reemplazó por "BPMN";
 # los términos con "junior" + varias palabras técnicas no devuelven nada en Indeed.
@@ -54,6 +55,7 @@ TERMINOS_SECUNDARIOS = [
     "devops junior", "devops jr",
     "analista de calidad", "analista de mejora",
     "analista de requerimientos junior", "analista de requerimientos jr",
+    "soporte TI", "help desk",
 ]
 NOMBRE_FUENTE = {"indeed": "Indeed", "google": "Google", "glassdoor": "Glassdoor", "getonboard": "Get on Board",
                  "himalayas": "Himalayas", "jobicy": "Jobicy", "bne": "BNE", "trabajando": "Trabajando", "chiletrabajos": "Chiletrabajos", "laborum": "Laborum",
