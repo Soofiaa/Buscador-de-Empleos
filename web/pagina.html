@@ -510,6 +510,11 @@
       <div class="sub" id="estado-respaldo" role="status" style="margin:6px 2px 0; font-size:.78rem;"></div>
     </div>
 
+    <div class="seccion-lateral-titulo">Puestos que busco</div>
+    <div class="seccion-lateral" id="puestos-panel">
+      <p class="nota">Lo que busca Indeed. Los cambios se usan en la próxima búsqueda.</p>
+    </div>
+
     <button class="boton sec ancho historial-toggle" id="historial-toggle" type="button" aria-expanded="false" aria-controls="historial">📜 Ver historial de búsquedas</button>
     <nav class="historial" id="historial" aria-label="Historial de búsquedas" data-plegado></nav>
     <div class="badge-db-status" id="estado-db" role="status"><span class="dot-online"></span> <span id="texto-db">Conectando…</span></div>
@@ -835,7 +840,7 @@ function busquedasManuales() {
 const ESTADOS = ["nueva", "revisada", "postulada", "entrevista", "descartada"];
 const ETIQUETAS_ESTADO = { nueva: "🌱 Nueva", revisada: "🔍 Revisada", postulada: "✉️ Postulada", entrevista: "🎯 En Entrevista", descartada: "❌ Descartada" };
 const PESTANAS = [
-  ["ofertas", "Ofertas"], ["seguimiento", "Seguimiento"], ["sin_descripcion", "Sin texto"],
+  ["ofertas", "Ofertas"], ["seguimiento", "Seguimiento"],
   ["fuera_perfil", "Fuera de perfil"],
   ["sospechosas", "Sospechosas"], ["descartadas_usuario", "Descartadas"], ["descartadas", "Descartadas por filtros"]
 ];
@@ -889,6 +894,55 @@ function pintarEstadoDb(e) {
 }
 
 // ---------- datos
+// ---------- puestos que busca Indeed (lista editable; el servidor valida y responde con los errores)
+const PUESTOS_MAX = 80;
+function pintarPuestos(lista) {
+  const panel = $("puestos-panel");
+  const borrador = [...lista];
+  const campo = h("input", { type: "text", maxlength: "60", placeholder: "Agregar puesto", "aria-label": "Nuevo puesto", autocomplete: "off" });
+  const errores = h("div", { class: "sub", role: "alert", style: "color:var(--rojo); font-size:.78rem; margin-top:4px;" });
+  const listaUl = h("ul", { style: "list-style:none; padding:0; margin:6px 0; max-height:220px; overflow:auto;" });
+  const guardar = h("button", { class: "boton sec ancho", type: "button", style: "font-size:.8rem; padding:7px 8px; justify-content:center;" }, "💾 Guardar puestos");
+  const pintarItems = () => listaUl.replaceChildren(...borrador.map((p, i) =>
+    h("li", { style: "display:flex; align-items:center; justify-content:space-between; gap:6px; padding:3px 0; font-size:.85rem;" },
+      h("span", {}, p),
+      h("button", { type: "button", class: "btn-manual-header", "aria-label": "Quitar " + p, style: "padding:0 6px;",
+        onclick: () => { borrador.splice(i, 1); pintarItems(); errores.textContent = ""; } }, "✕"))));
+  // misma regla que puestos.py: 2 a 60 caracteres, solo letras, números, espacios, guiones y barras, sin repetidos
+  const agregar = () => {
+    const p = campo.value.replace(/\s+/g, " ").trim();
+    if (!p) return;
+    if (borrador.length >= PUESTOS_MAX) { errores.textContent = `Como máximo ${PUESTOS_MAX} puestos.`; return; }
+    if (p.length < 2 || p.length > 60) { errores.textContent = `«${p}»: debe tener entre 2 y 60 caracteres.`; return; }
+    if (!/^[\p{L}\p{N}][\p{L}\p{N} \-/]*$/u.test(p)) { errores.textContent = `«${p}»: solo letras, números, espacios, guiones o barras.`; return; }
+    const clave = p.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    if (borrador.some(x => x.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() === clave)) {
+      errores.textContent = `«${p}»: ya está en la lista.`; return;
+    }
+    borrador.push(p); campo.value = ""; errores.textContent = ""; pintarItems(); campo.focus();
+  };
+  campo.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); agregar(); } });
+  guardar.onclick = async () => {
+    errores.textContent = "";
+    guardar.disabled = true;
+    const r = await api("/api/ajustes/puestos", { lista: borrador });
+    guardar.disabled = false;
+    if (!r.ok) { errores.textContent = mensajeError(r.status, r.json); return; }
+    mostrarAviso("Puestos guardados: se usan en la próxima búsqueda");
+    pintarPuestos(r.json.lista);
+  };
+  pintarItems();
+  panel.replaceChildren(
+    h("p", { class: "nota" }, "Lo que busca Indeed. Los cambios se usan en la próxima búsqueda."),
+    h("div", { style: "display:flex; gap:6px;" }, campo, h("button", { type: "button", class: "boton sec", onclick: agregar }, "Agregar")),
+    errores, listaUl, guardar);
+}
+async function cargarPuestos() {
+  const r = await api("/api/ajustes/puestos");
+  if (r.ok) pintarPuestos(r.json.lista);
+  else $("puestos-panel").replaceChildren(h("p", { class: "nota" }, "No se pudieron cargar los puestos."));
+}
+
 async function cargar() {
   const r = await api("/api/ofertas");
   if (r.ok) {
@@ -1119,18 +1173,6 @@ function pintarFiltros() {
     const g = h("select", { "aria-label": "Agrupar", onchange: e => { S.agrupar = e.target.value; pintarLista(); } },
       h("option", { value: "prioridad" }, "Agrupar: prioridad"), h("option", { value: "fuente" }, "Agrupar: fuente"));
     g.value = S.agrupar; partes.push(g);
-  }
-  if (S.pestana === "ofertas" || S.pestana === "fuera_perfil") {
-    // ajuste guardado en la base: si se apaga, el soporte sin decisión tuya se ve en "Fuera de perfil"
-    const incluido = S.datos.soporte_incluido !== false;
-    partes.push(h("label", { class: "interruptor-soporte", title: "Mostrar las ofertas de soporte TI / helpdesk (prioridad Baja) en Ofertas" },
-      h("input", { type: "checkbox", checked: incluido, onchange: async e => {
-        e.target.disabled = true;
-        const r = await api("/api/ajustes/soporte", { incluir: e.target.checked });
-        if (!r.ok) { e.target.checked = incluido; e.target.disabled = false; mostrarAviso(mensajeError(r.status, r.json)); return; }
-        await cargar();
-        mostrarAviso(r.json.incluir ? "Soporte TI visible en Ofertas" : "Soporte TI oculto (se ve en «Fuera de perfil»)");
-      } }), "🛟 Incluir soporte TI / helpdesk"));
   }
   const densidad = (valor, texto, titulo) => h("button", { type: "button", class: "btn-vista", "aria-pressed": String(S.densidad === valor), title: titulo,
     onclick: () => { S.densidad = valor; try { localStorage.setItem("densidad", valor); } catch (e) {} pintarLista(); pintarFiltros(); } }, texto);
@@ -1620,16 +1662,24 @@ function pintarLista() {
     const claves = [...grupos.keys()].sort(porFuente
       ? (a, b) => grupos.get(b).length - grupos.get(a).length || a.localeCompare(b)
       : (a, b) => (orden.indexOf(a) + 1 || 9) - (orden.indexOf(b) + 1 || 9));
-    cont.replaceChildren(...claves.flatMap(k => [
+    
+    const elementos = claves.flatMap(k => [
       h("h3", { class: "grupo" }, porFuente ? k : "Prioridad " + k, h("span", { class: "cuenta" }, grupos.get(k).length)),
-      ...pintarItems(grupos.get(k))]));
+      ...pintarItems(grupos.get(k))]);
+    
+    const sinTextoFilas = (S.datos.sin_descripcion || []).filter(o => !CERRADOS.has(o.estado)).filter(pasa);
+    if (sinTextoFilas.length > 0) {
+        elementos.push(h("h3", { class: "grupo" }, "Sin texto", h("span", { class: "cuenta" }, sinTextoFilas.length)));
+        elementos.push(h("p", { class: "sub" }, "El aviso sí tiene descripción en LinkedIn, pero LinkedIn no se la entrega a la app: "
+          + "por eso aquí nadie pudo revisar experiencia ni nivel y los filtros solo alcanzaron al título. "
+          + "Ábrelo con ↗ y márcalo; «❌ Descartada» no vuelve a aparecer."));
+        elementos.push(...pintarItems(sinTextoFilas));
+    }
+    
+    cont.replaceChildren(...elementos);
     return;
   }
   let nota = null;
-  if (S.pestana === "sin_descripcion")
-    nota = h("p", { class: "sub" }, "El aviso sí tiene descripción en LinkedIn, pero LinkedIn no se la entrega a la app: "
-      + "por eso aquí nadie pudo revisar experiencia ni nivel y los filtros solo alcanzaron al título. "
-      + "Ábrelo con ↗ y márcalo; «❌ Descartada» no vuelve a aparecer.");
   if (S.pestana === "descartadas" && S.datos.total_descartadas > S.datos.descartadas.length)
     nota = h("p", { class: "sub" }, S.sel.tipo === "todas"
       ? "Mostrando " + TXT.masRecientes(S.datos.descartadas.length) + " de " + S.datos.total_descartadas + "."
@@ -1658,6 +1708,7 @@ for (const b of busquedasManuales()) {
 }
 
 cargar();
+cargarPuestos();
 </script>
 </body>
 </html>

@@ -538,3 +538,40 @@ a la referencia. El contenedor y el volumen temporales se borraron.
 
 **Qué se pierde mientras corra la imagen anterior:** las pausas largas de LinkedIn y Glassdoor (vuelve 1,5 s) y la
 detención ante 429; las corridas vuelven a ser ~8 min más cortas. No se pierden ni se reclasifican ofertas guardadas.
+## Despliegue de soporte TI y fuentes remotas (22-10-2026)
+
+Commits 96c301 (Himalayas y Jobicy), 296a14 (términos soporte TI y help desk) y 76ee255 (sin check de soporte
+en la página). Imagen anterior: job-tracker:pre-soporte-20261022 (sha256:4ad9e68fd0797a80cd02390cec8dd197bc4af0831c0d15a6ba9e0c475b0d0e7d).
+Imagen desplegada: job-tracker-jobtracker:latest = sha256:acff94b872624420ee6d8fbef127e328bda26e449e505c604b1ac992b033da04.
+Referencia: ofertas_pre_soporte_20261022.db, sha256 8949bb8f158b2e6f7e7873e929286e8ceedc9d42c988b3b4754a573aac135583.
+
+Para volver atrás:
+
+`
+docker compose stop jobtracker
+docker tag job-tracker:pre-soporte-20261022 job-tracker-jobtracker:latest
+docker compose up -d --no-build
+`
+
+Probado: la candidata en 8766 quedó healthy y sus huellas fueron iguales a la referencia; se borró después. **Qué se
+pierde al volver:** Himalayas y Jobicy dejan de buscarse, y vuelve el check de soporte en la página. No se pierden ni
+se reclasifican ofertas guardadas.
+
+## Despliegue de la sección «Puestos que busco» (22-10-2026)
+
+Commits 866faf3, dd55d0d, 775a077 y 6eed95f. Imagen anterior: job-tracker:pre-puestos-20261022
+(sha256:acff94b872624420ee6d8fbef127e328bda26e449e505c604b1ac992b033da04). Imagen desplegada:
+job-tracker-jobtracker:latest = sha256:ba0cc91630d5f60b9b5f89dd5341b781fb00863e44b366ce43ce3f3af5549d41.
+Referencia: ofertas_pre_puestos_20261022.db, sha256 da3a88e9e1d3218dd616de2e641564adc2c39c2f2dabe44af0ca27e52f0c18c9.
+
+Para volver atrás:
+
+`
+docker compose stop jobtracker
+docker tag job-tracker:pre-puestos-20261022 job-tracker-jobtracker:latest
+docker compose up -d --no-build
+`
+
+**Qué se pierde al volver:** la sección «Puestos que busco» desaparece y Indeed vuelve a usar la lista fija de
+config.py. Si Sofia ya guardó una lista propia, queda guardada en justes pero deja de usarse. No se pierden
+ofertas ni estados. Probado con la candidata en navegador antes del despliegue.
