@@ -538,3 +538,21 @@ a la referencia. El contenedor y el volumen temporales se borraron.
 
 **Qué se pierde mientras corra la imagen anterior:** las pausas largas de LinkedIn y Glassdoor (vuelve 1,5 s) y la
 detención ante 429; las corridas vuelven a ser ~8 min más cortas. No se pierden ni se reclasifican ofertas guardadas.
+## Despliegue de soporte TI y fuentes remotas (22-10-2026)
+
+Commits 96c301 (Himalayas y Jobicy), 296a14 (términos soporte TI y help desk) y 76ee255 (sin check de soporte
+en la página). Imagen anterior: job-tracker:pre-soporte-20261022 (sha256:4ad9e68fd0797a80cd02390cec8dd197bc4af0831c0d15a6ba9e0c475b0d0e7d).
+Imagen desplegada: job-tracker-jobtracker:latest = sha256:acff94b872624420ee6d8fbef127e328bda26e449e505c604b1ac992b033da04.
+Referencia: ofertas_pre_soporte_20261022.db, sha256 8949bb8f158b2e6f7e7873e929286e8ceedc9d42c988b3b4754a573aac135583.
+
+Para volver atrás:
+
+`
+docker compose stop jobtracker
+docker tag job-tracker:pre-soporte-20261022 job-tracker-jobtracker:latest
+docker compose up -d --no-build
+`
+
+Probado: la candidata en 8766 quedó healthy y sus huellas fueron iguales a la referencia; se borró después. **Qué se
+pierde al volver:** Himalayas y Jobicy dejan de buscarse, y vuelve el check de soporte en la página. No se pierden ni
+se reclasifican ofertas guardadas.

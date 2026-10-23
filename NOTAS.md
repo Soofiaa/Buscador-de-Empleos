@@ -3,7 +3,22 @@
 ## Estado actual (se actualiza en cada despliegue; leer al empezar cada sesión)
 
 ### Producción y base
-- **Despliegue de la ayuda por pantalla (22-10-2026; vigente):** commit `200e021` (`main`; botón «❓ Ayuda de esta pantalla» junto a «Agregar postulación manual», con texto según la pestaña).
+- **Despliegue de soporte TI y fuentes remotas (22-10-2026; vigente):** commits `f96c301` (Himalayas y Jobicy, APIs
+  públicas de empleo remoto), `f296a14` (términos «soporte TI» y «help desk») y `76ee255` (se quita el check de soporte
+  de la página; el ajuste `soporte` de la base queda sin uso). Imagen `job-tracker-jobtracker:latest` =
+  `sha256:acff94b872624420ee6d8fbef127e328bda26e449e505c604b1ac992b033da04`, healthy en `127.0.0.1:8765`.
+  Imagen anterior inmediata: `job-tracker:pre-soporte-20261022` (`sha256:4ad9e68f…`, la de la ayuda).
+  Referencia `ofertas_pre_soporte_20261022.db`, sha256 `8949bb8f158b2e6f7e7873e929286e8ceedc9d42c988b3b4754a573aac135583`
+  en `C:\Users\sofia\Respaldos\job-tracker-referencias\` y en el volumen; integrity_check ok.
+  - Línea base: v7, 4193 ofertas, 41 corridas, 280 filas de `historial_estados`, 34 postuladas, 6 POR VERIFICAR.
+    Huellas antes y después idénticas (`huellas.py --comparar`: RESULTADO OK). Candidata en 8766 verificada antes
+    (healthy; 200 en `/`, `/api/estado`, `/api/ofertas`, `/api/respaldo`; Host y Origin ajenos 403) y borrada después.
+  - Las fuentes nuevas (Himalayas, Jobicy) no se han probado todavía con una corrida real: la primera búsqueda dirá
+    cuántas ofertas entran. Remotive queda pendiente.
+  - Pendiente: el ajuste `soporte` de la base (`ajustes`) ya no tiene efecto; borrarlo toca la base real y necesita
+    aprobación aparte.
+  - Reversión: `job-tracker:pre-soporte-20261022` con `docker tag` + `docker compose up -d --no-build`.
+- **Despliegue de la ayuda por pantalla (22-10-2026; anterior):** commit `200e021` (`main`; botón «❓ Ayuda de esta pantalla» junto a «Agregar postulación manual», con texto según la pestaña).
   Imagen `job-tracker-jobtracker:latest` = `sha256:4ad9e68fd0797a80cd02390cec8dd197bc4af0831c0d15a6ba9e0c475b0d0e7d`, healthy en `127.0.0.1:8765`. Imagen anterior inmediata: `job-tracker:pre-ayuda-20261022` (`e0069601…`).
   Referencia `ofertas_pre_ayuda_20261022.db`, sha256 `54CAF78E…849EE`, integrity_check ok.
   - Antes de desplegar, la base había cambiado desde la referencia del tutorial: una oferta de LinkedIn se descartó a mano a las 20:04 (hora de Chile). Se tomó una referencia nueva de la base real y se comparó contra ella: RESULTADO OK. El contenedor se había dejado detenido mientras se revisaba; se levantó antes de seguir.
