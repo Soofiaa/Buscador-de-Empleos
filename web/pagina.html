@@ -510,6 +510,11 @@
       <div class="sub" id="estado-respaldo" role="status" style="margin:6px 2px 0; font-size:.78rem;"></div>
     </div>
 
+    <div class="seccion-lateral-titulo">Puestos que busco</div>
+    <div class="seccion-lateral" id="puestos-panel">
+      <p class="nota">Lo que busca Indeed. Los cambios se usan en la próxima búsqueda.</p>
+    </div>
+
     <button class="boton sec ancho historial-toggle" id="historial-toggle" type="button" aria-expanded="false" aria-controls="historial">📜 Ver historial de búsquedas</button>
     <nav class="historial" id="historial" aria-label="Historial de búsquedas" data-plegado></nav>
     <div class="badge-db-status" id="estado-db" role="status"><span class="dot-online"></span> <span id="texto-db">Conectando…</span></div>
@@ -889,6 +894,55 @@ function pintarEstadoDb(e) {
 }
 
 // ---------- datos
+// ---------- puestos que busca Indeed (lista editable; el servidor valida y responde con los errores)
+const PUESTOS_MAX = 80;
+function pintarPuestos(lista) {
+  const panel = $("puestos-panel");
+  const borrador = [...lista];
+  const campo = h("input", { type: "text", maxlength: "60", placeholder: "Agregar puesto", "aria-label": "Nuevo puesto", autocomplete: "off" });
+  const errores = h("div", { class: "sub", role: "alert", style: "color:var(--rojo); font-size:.78rem; margin-top:4px;" });
+  const listaUl = h("ul", { style: "list-style:none; padding:0; margin:6px 0; max-height:220px; overflow:auto;" });
+  const guardar = h("button", { class: "boton sec ancho", type: "button", style: "font-size:.8rem; padding:7px 8px; justify-content:center;" }, "💾 Guardar puestos");
+  const pintarItems = () => listaUl.replaceChildren(...borrador.map((p, i) =>
+    h("li", { style: "display:flex; align-items:center; justify-content:space-between; gap:6px; padding:3px 0; font-size:.85rem;" },
+      h("span", {}, p),
+      h("button", { type: "button", class: "btn-manual-header", "aria-label": "Quitar " + p, style: "padding:0 6px;",
+        onclick: () => { borrador.splice(i, 1); pintarItems(); errores.textContent = ""; } }, "✕"))));
+  // misma regla que puestos.py: 2 a 60 caracteres, solo letras, números, espacios, guiones y barras, sin repetidos
+  const agregar = () => {
+    const p = campo.value.replace(/\s+/g, " ").trim();
+    if (!p) return;
+    if (borrador.length >= PUESTOS_MAX) { errores.textContent = `Como máximo ${PUESTOS_MAX} puestos.`; return; }
+    if (p.length < 2 || p.length > 60) { errores.textContent = `«${p}»: debe tener entre 2 y 60 caracteres.`; return; }
+    if (!/^[\p{L}\p{N}][\p{L}\p{N} \-/]*$/u.test(p)) { errores.textContent = `«${p}»: solo letras, números, espacios, guiones o barras.`; return; }
+    const clave = p.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    if (borrador.some(x => x.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() === clave)) {
+      errores.textContent = `«${p}»: ya está en la lista.`; return;
+    }
+    borrador.push(p); campo.value = ""; errores.textContent = ""; pintarItems(); campo.focus();
+  };
+  campo.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); agregar(); } });
+  guardar.onclick = async () => {
+    errores.textContent = "";
+    guardar.disabled = true;
+    const r = await api("/api/ajustes/puestos", { lista: borrador });
+    guardar.disabled = false;
+    if (!r.ok) { errores.textContent = mensajeError(r.status, r.json); return; }
+    mostrarAviso("Puestos guardados: se usan en la próxima búsqueda");
+    pintarPuestos(r.json.lista);
+  };
+  pintarItems();
+  panel.replaceChildren(
+    h("p", { class: "nota" }, "Lo que busca Indeed. Los cambios se usan en la próxima búsqueda."),
+    h("div", { style: "display:flex; gap:6px;" }, campo, h("button", { type: "button", class: "boton sec", onclick: agregar }, "Agregar")),
+    errores, listaUl, guardar);
+}
+async function cargarPuestos() {
+  const r = await api("/api/ajustes/puestos");
+  if (r.ok) pintarPuestos(r.json.lista);
+  else $("puestos-panel").replaceChildren(h("p", { class: "nota" }, "No se pudieron cargar los puestos."));
+}
+
 async function cargar() {
   const r = await api("/api/ofertas");
   if (r.ok) {
@@ -1654,6 +1708,7 @@ for (const b of busquedasManuales()) {
 }
 
 cargar();
+cargarPuestos();
 </script>
 </body>
 </html>
