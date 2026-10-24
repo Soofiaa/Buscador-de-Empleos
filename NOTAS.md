@@ -3,7 +3,13 @@
 ## Estado actual (se actualiza en cada despliegue; leer al empezar cada sesión)
 
 ### Producción y base
-- **Despliegue de temas nuevos, ayudas al día y selector de Seguimiento (24-10-2026; vigente):** commits `e79ace5`,
+- **Despliegue de Remote First Jobs como fuente remota (24-10-2026; vigente):** commit `efbfa23` (conector
+  `remotefirstjobs.py`). Imagen `job-tracker-jobtracker:latest` = `sha256:f36ac2f0…`, healthy en `127.0.0.1:8765`.
+  Imagen anterior: `job-tracker:pre-remotefirstjobs-20261024` (= `sha256:0191a03a…`). Referencia
+  `ofertas_pre_remotefirstjobs_20261024.db`, sha256 `721591c0…` (la misma base que el despliegue anterior: sin cambios
+  en la base). Huellas OK; HTTP igual; reversión probada en copia. Pendiente: la primera corrida real de la nueva fuente
+  se verá en el historial de búsquedas.
+- **Despliegue de temas nuevos, ayudas al día y selector de Seguimiento (24-10-2026; anterior):** commits `e79ace5`,
   `d1440db`, `8e35e23` y `b060819` (fixtures sin correo ni token reales). Imagen `job-tracker-jobtracker:latest` =
   `sha256:0191a03a285eab4b43a46da28ee1ffbfe47a8001374f6ffd6a9256c60c011584`, healthy en `127.0.0.1:8765`. Imagen
   anterior: `job-tracker:pre-ayudas-20261024` (= `sha256:0602873e…`). Referencia `ofertas_pre_ayudas_20261024.db`,

@@ -617,6 +617,27 @@ filtros y agrupación (fase 1). Lo que el navegador guardó (avisos, avisoUltima
 localStorage sin uso. Ningún cambio escribe en la base, así que no se pierden ofertas ni estados.
 Reversión probada en copia (volumen temporal, 8767): healthy, GET / 200 y huellas idénticas a la referencia.
 
+## Remote First Jobs como fuente remota (24-10-2026)
+
+Commit efbfa23: conector `remotefirstjobs.py` (API pública de remotefirstjobs.com), conectado en `config.py`,
+`buscar.py` y la lista de fuentes de la página; 5 pruebas nuevas. Cambia también la búsqueda: una solicitud extra por
+corrida. Imagen anterior: job-tracker:pre-remotefirstjobs-20261024 (sha256:0191a03a285eab4b43a46da28ee1ffbfe47a8001374f6ffd6a9256c60c011584).
+Imagen desplegada: job-tracker-jobtracker:latest = sha256:f36ac2f07c6d47852748b3ef86a1722fc8e75e4f9de55d474a6432454de227a5.
+Referencia: ofertas_pre_remotefirstjobs_20261024.db (volumen y C:\Users\sofia\Respaldos\job-tracker-referencias\), sha256
+721591c023215728a729a39062d9417e7e12ca38be8c25068c0f19c9078d9396, integrity_check ok. Salida al detener: 0.
+
+Para volver atrás:
+
+```
+docker compose stop jobtracker
+docker tag job-tracker:pre-remotefirstjobs-20261024 job-tracker-jobtracker:latest
+docker compose up -d --no-build
+```
+
+**Qué se pierde al volver:** deja de consultarse Remote First Jobs; las ofertas ya guardadas de esa fuente se quedan en la
+base. Ningún cambio de la versión anterior escribe en la base, así que no se pierden ofertas ni estados.
+Reversión probada en copia (volumen temporal, 8767): healthy, GET / 200 y huellas idénticas.
+
 ## Temas con nombres nuevo, ayudas al día y selector de Seguimiento (24-10-2026)
 
 Commits e79ace5, d1440db (temas y ayuda de Métricas y Ajustes), 8e35e23 (tutorial), b060819 (fixtures sin datos
