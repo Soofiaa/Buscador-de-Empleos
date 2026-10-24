@@ -8,10 +8,11 @@ from test_historial import correr_js
 PAGINA = (Path(__file__).resolve().parent.parent / "web" / "pagina.html").read_text(encoding="utf-8")
 
 
-def test_las_metricas_viven_en_la_barra_derecha_y_no_en_las_pestanas():
+def test_las_metricas_viven_en_su_apartado_y_no_en_las_pestanas():
     assert '["metricas", "Métricas"]' not in PAGINA
-    assert 'id="metricas-panel"' in PAGINA
-    assert 'lateral-derecha' in PAGINA and PAGINA.index('id="metricas-panel"') > PAGINA.index('class="lateral-derecha"')
+    assert 'lateral-derecha' not in PAGINA
+    inicio = PAGINA.index('id="apartado-metricas"')
+    assert inicio < PAGINA.index('id="metricas-panel"') < PAGINA.index("</section>", inicio)
     assert '$("metricas-panel")' in PAGINA
 
 

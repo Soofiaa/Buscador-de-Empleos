@@ -191,21 +191,9 @@
   .lateral { background:var(--panel); border-right:1px solid var(--borde); padding:22px 16px 28px;
              position:sticky; top:0; height:100vh; overflow-y:auto; }
   .principal { padding:26px 36px 48px; width:100%; max-width:1280px; margin:0; box-sizing:border-box; min-width:0; }
-  /* barra derecha (puestos y exclusiones): fija a la derecha en pantallas anchas; en las angostas va debajo */
-  .lateral-derecha { background:var(--panel); border-left:1px solid var(--borde); padding:22px 16px 28px;
-                     position:sticky; top:0; height:100vh; overflow-y:auto; box-sizing:border-box; }
-  @media (min-width:1200px) {
-    .app { grid-template-columns:304px minmax(0,1fr) 300px; }
-    .lateral-derecha { grid-column:3; }
-  }
-  @media (max-width:1199px) and (min-width:861px) {
-    .app { grid-template-columns:304px minmax(0,1fr); }
-    .lateral-derecha { grid-column:1 / -1; position:static; height:auto; border-left:0; border-top:1px solid var(--borde); }
-  }
   @media (max-width:860px) {
     .app { grid-template-columns:minmax(0,1fr); }
     .lateral { position:static; height:auto; border-right:0; border-bottom:1px solid var(--borde); }
-    .lateral-derecha { grid-column:auto; position:static; height:auto; border-left:0; border-top:1px solid var(--borde); }
     .principal { padding:20px 16px 40px; }
   }
 
@@ -443,18 +431,17 @@
   .metricas-kpi-card .det { font-size:.8rem; color:var(--suave); }
   .metricas-bloque { background:var(--panel); border:1px solid var(--borde); border-radius:14px; padding:14px 16px; display:flex; flex-direction:column; gap:8px; min-width:0; }
   .metricas-bloque h3 { margin:0 0 4px; font-size:.95rem; font-weight:700; color:var(--tinta); }
-  .metricas-desgloses { display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:12px; }
+  .metricas-desgloses { display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 400px), 1fr)); gap:12px; }
+  .metricas-bloque table.fuentes { margin-top:0; }
   .metrica-barra { display:grid; grid-template-columns:minmax(120px, 170px) 1fr 44px; align-items:center; gap:10px; font-size:.84rem; }
-  /* en la barra derecha (~250 px): una columna, tablas y barras compactas */
-  #metricas-panel .metricas-seccion { gap:12px; }
-  #metricas-panel .metricas-kpis, #metricas-panel .metricas-desgloses { grid-template-columns:minmax(0, 1fr); gap:8px; }
-  #metricas-panel .metricas-kpi-card { padding:10px 12px; }
-  #metricas-panel .metricas-kpi-card .num { font-size:1.4rem; }
-  #metricas-panel .metricas-bloque { padding:10px; }
-  #metricas-panel .metrica-barra { grid-template-columns:minmax(0, 88px) minmax(0, 1fr) 30px; gap:6px; font-size:.78rem; }
-  #metricas-panel table.fuentes { font-size:.76rem; table-layout:fixed; }
-  #metricas-panel table.fuentes th, #metricas-panel table.fuentes td { padding:3px 2px; overflow-wrap:anywhere; }
-  #metricas-panel table.fuentes th:first-child, #metricas-panel table.fuentes td:first-child { width:34%; }
+  #metricas-panel table.fuentes td:not(:first-child), #metricas-panel table.fuentes th:not(:first-child) { text-align:right; font-variant-numeric:tabular-nums; }
+  /* apartado Ajustes: bloques en tarjetas, dos columnas si hay ancho */
+  .ajustes-grupo { margin:0 0 22px; }
+  .ajustes-grupo > h3 { font-size:1rem; margin:0 0 4px; }
+  .ajustes-grupo > .sub { margin:0 0 12px; }
+  .ajustes-columnas { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:14px; align-items:start; }
+  .ajustes-bloque { background:var(--panel); border:1px solid var(--borde); border-radius:14px; padding:14px 16px; min-width:0; }
+  .ajustes-bloque > h4 { margin:0 0 6px; font-size:.95rem; }
   .metrica-etq { color:var(--suave); font-weight:600; overflow-wrap:anywhere; }
   .metrica-track { background:var(--panel2); border:1px solid var(--borde); border-radius:99px; height:12px; overflow:hidden; display:block; }
   .metrica-relleno { display:block; height:100%; background:var(--accion); border-radius:99px; }
@@ -588,35 +575,33 @@
    </section>
    <section class="apartado" id="apartado-metricas" tabindex="-1" aria-labelledby="titulo-metricas" hidden>
     <h2 class="titulo-sel" id="titulo-metricas">Métricas</h2>
-    <div class="aviso-provisional">
-      <p>Aquí quedarán los indicadores, el embudo y los desgloses, a pantalla completa.</p>
-      <p>Por ahora están en la columna «Métricas», a la derecha (en pantallas angostas, al final de la página).</p>
+    <p class="sub" style="margin:2px 0 16px;">Sobre todas tus ofertas relevantes, sin importar la búsqueda elegida en el historial.</p>
+    <div id="metricas-panel">
+      <p class="nota">Cargando…</p>
     </div>
    </section>
    <section class="apartado" id="apartado-ajustes" tabindex="-1" aria-labelledby="titulo-ajustes" hidden>
-    <h2 class="titulo-sel" id="titulo-ajustes">Ajustes</h2>
+    <h2 class="titulo-sel" id="titulo-ajustes" style="margin-bottom:16px;">Ajustes</h2>
+    <section class="ajustes-grupo" aria-labelledby="titulo-que-busco">
+      <h3 id="titulo-que-busco">Qué busco</h3>
+      <p class="sub">Qué se pide a las fuentes y qué se descarta siempre.</p>
+      <div class="ajustes-columnas">
+        <div class="ajustes-bloque">
+          <h4>Puestos que busco</h4>
+          <div id="puestos-panel"><p class="nota">Cargando…</p></div>
+        </div>
+        <div class="ajustes-bloque">
+          <h4>Exclusiones</h4>
+          <div id="exclusiones-panel"><p class="nota">Cargando…</p></div>
+        </div>
+      </div>
+    </section>
     <div class="aviso-provisional">
-      <p>Aquí quedarán tres secciones: <b>Qué busco</b> (puestos y exclusiones), <b>Datos</b> (exportar y respaldos) y
-        <b>Apariencia</b> (tema, contraste y avisos).</p>
-      <p>Por ahora: puestos y exclusiones están en la columna de la derecha; tema, contraste, avisos, exportar y
-        respaldos, en el menú de la izquierda.</p>
+      <p>Pronto también aquí: <b>Datos</b> (exportar y respaldos) y <b>Apariencia</b> (tema, contraste y avisos).
+        Por ahora están en el menú de la izquierda.</p>
     </div>
    </section>
   </main>
-  <aside class="lateral-derecha" aria-label="Configuración de búsqueda">
-    <div class="seccion-lateral-titulo">Puestos que busco</div>
-    <div class="seccion-lateral" id="puestos-panel">
-      <p class="nota">Lo que busca Indeed. Los cambios se usan en la próxima búsqueda.</p>
-    </div>
-    <div class="seccion-lateral-titulo">Exclusiones</div>
-    <div class="seccion-lateral" id="exclusiones-panel">
-      <p class="nota">Lo que nunca aparece. Los cambios se aplican al clasificar.</p>
-    </div>
-    <div class="seccion-lateral-titulo">Métricas</div>
-    <div class="seccion-lateral" id="metricas-panel">
-      <p class="nota">Cargando…</p>
-    </div>
-  </aside>
 </div>
 <div class="toast-container" id="toast-container" aria-live="polite"></div>
 
@@ -1947,7 +1932,7 @@ function tableroSeguimiento(filas) {
   return h("div", { class: "kanban-board" }, COLUMNAS_TABLERO.map(c => columnaTablero(c, por[c.id])));
 }
 
-// Panel «Métricas» de la barra derecha: lee S.datos (todas las ofertas, sin importar la búsqueda elegida en el historial)
+// Apartado «Métricas»: lee S.datos (todas las ofertas, sin importar la búsqueda elegida en el historial)
 function pintarMetricas(datos) {
   const panel = $("metricas-panel");
   if (!datos) { panel.replaceChildren(h("p", { class: "nota" }, "Cargando…")); return; }

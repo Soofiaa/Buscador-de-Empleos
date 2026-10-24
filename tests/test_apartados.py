@@ -72,6 +72,14 @@ def test_lista_de_ofertas_muestra_sin_texto_aunque_la_principal_este_vacia():
     assert 'listaDe(S.datos, "sin_descripcion", S.sel).filter(pasa)' in PAGINA
 
 
+def test_paso2_sin_barra_derecha_puestos_y_exclusiones_en_ajustes():
+    assert "lateral-derecha" not in PAGINA
+    inicio = PAGINA.index('id="apartado-ajustes"')
+    fin = PAGINA.index("</main>")
+    for panel in ('id="puestos-panel"', 'id="exclusiones-panel"'):
+        assert PAGINA.count(panel) == 1 and inicio < PAGINA.index(panel) < fin
+
+
 def test_navegacion_por_hash_y_atajo_vuelve_a_ofertas():
     assert 'window.addEventListener("hashchange"' in PAGINA
     assert 'S.apartado = apartadoDeHash(location.hash);' in PAGINA
