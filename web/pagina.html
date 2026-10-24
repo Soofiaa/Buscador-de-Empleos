@@ -213,6 +213,18 @@
   .marca { display:flex; align-items:center; justify-content:space-between; gap:8px; }
   .marca h1 { font-size:1.3rem; margin:0; }
   #ultima { margin:4px 0 16px; }
+  /* menú de apartados (navegación por #hash) */
+  nav.menu { display:flex; flex-direction:column; gap:2px; margin:14px 0 12px; }
+  nav.menu a { display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:10px; color:var(--suave);
+               text-decoration:none; font-weight:600; border-left:3px solid transparent; }
+  nav.menu a:hover { background:var(--panel2); color:var(--tinta); }
+  nav.menu a[aria-current="page"] { background:var(--sel); color:var(--tinta); border-left-color:var(--accion); }
+  nav.menu .menu-icono { width:1.3em; text-align:center; }
+  nav.menu .cuenta { margin-left:auto; }
+  .apartado:focus { outline:none; }
+  .aviso-provisional { background:var(--panel); border:1px dashed var(--borde); border-radius:14px; padding:18px 20px; max-width:640px; color:var(--suave); }
+  .aviso-provisional p { margin:0 0 10px; }
+  .aviso-provisional a.boton { display:inline-block; text-decoration:none; margin-top:4px; }
   .boton { background:var(--accion); color:var(--accion-tinta); border:0; border-radius:10px; padding:10px 16px; font-weight:600; cursor:pointer; }
   .boton:hover { filter:brightness(1.06); }
   .boton:disabled { opacity:.55; cursor:progress; }
@@ -518,6 +530,7 @@
     <label class="interruptor-soporte" style="margin:6px 0 0;" title="Colores de texto y acento más oscuros o más claros, según el tema, para cumplir contraste WCAG AA">
       <input type="checkbox" id="contraste-aa"> Contraste reforzado
     </label>
+    <nav class="menu" id="menu" aria-label="Apartados"></nav>
     <div class="sub" id="ultima">Cargando…</div>
 
     <div class="seccion-lateral">
@@ -546,6 +559,7 @@
     <div class="badge-db-status" id="estado-db" role="status"><span class="dot-online"></span> <span id="texto-db">Conectando…</span></div>
   </aside>
   <main class="principal">
+   <section class="apartado" id="apartado-ofertas" tabindex="-1" aria-label="Ofertas">
     <header class="encabezado">
       <div class="encabezado-fila">
         <div>
@@ -563,6 +577,31 @@
     <nav class="pestanas" id="pestanas" role="tablist" aria-label="Categorías de ofertas"></nav>
     <div class="filtros" id="filtros"></div>
     <div id="lista"></div>
+   </section>
+   <section class="apartado" id="apartado-seguimiento" tabindex="-1" aria-labelledby="titulo-seguimiento" hidden>
+    <h2 class="titulo-sel" id="titulo-seguimiento">Seguimiento</h2>
+    <div class="aviso-provisional">
+      <p>Aquí quedarán el tablero y la lista de tus postulaciones, a todo el ancho.</p>
+      <p>Por ahora están en <b>Ofertas</b>, pestaña «Seguimiento».</p>
+      <a class="boton" href="#ofertas" id="ir-seguimiento">Ir a la pestaña Seguimiento</a>
+    </div>
+   </section>
+   <section class="apartado" id="apartado-metricas" tabindex="-1" aria-labelledby="titulo-metricas" hidden>
+    <h2 class="titulo-sel" id="titulo-metricas">Métricas</h2>
+    <div class="aviso-provisional">
+      <p>Aquí quedarán los indicadores, el embudo y los desgloses, a pantalla completa.</p>
+      <p>Por ahora están en la columna «Métricas», a la derecha (en pantallas angostas, al final de la página).</p>
+    </div>
+   </section>
+   <section class="apartado" id="apartado-ajustes" tabindex="-1" aria-labelledby="titulo-ajustes" hidden>
+    <h2 class="titulo-sel" id="titulo-ajustes">Ajustes</h2>
+    <div class="aviso-provisional">
+      <p>Aquí quedarán tres secciones: <b>Qué busco</b> (puestos y exclusiones), <b>Datos</b> (exportar y respaldos) y
+        <b>Apariencia</b> (tema, contraste y avisos).</p>
+      <p>Por ahora: puestos y exclusiones están en la columna de la derecha; tema, contraste, avisos, exportar y
+        respaldos, en el menú de la izquierda.</p>
+    </div>
+   </section>
   </main>
   <aside class="lateral-derecha" aria-label="Configuración de búsqueda">
     <div class="seccion-lateral-titulo">Puestos que busco</div>
@@ -648,6 +687,10 @@ function listaDe(datos, pestana, sel) {
     : pestana === "descartadas_usuario" ? gestionadas(datos).filter(o => o.estado === "descartada")
     : (datos[pestana] || []);
   return filtrarSeleccion(base, pestana, sel, datos.corridas);
+}
+// La cuenta de Ofertas incluye las «Sin texto» pendientes: se muestran en la misma pestaña, al final
+function totalOfertas(datos, sel) {
+  return listaDe(datos, "ofertas", sel).length + listaDe(datos, "sin_descripcion", sel).length;
 }
 function progresoDe(mensaje) {                   // "[12/40] ..." o "[bne 2/5] ..." -> {n, total, pct}
   const m = /\[(?:[^\[\]]*\s)?(\d+)\/(\d+)\]/.exec(mensaje || "");
@@ -957,6 +1000,14 @@ function decidirAviso(ultimaAvisada, corridaId, relevantesNuevas) {
   if (corridaId <= ultimaAvisada) return { avisar: false, ultima: ultimaAvisada };
   return { avisar: relevantesNuevas > 0, ultima: corridaId };
 }
+// Apartados del menú: [id, nombre, icono]. El #hash de la dirección elige uno; si no es válido, Ofertas.
+const APARTADOS = [["ofertas", "Ofertas", "📋"], ["seguimiento", "Seguimiento", "📌"], ["metricas", "Métricas", "📊"], ["ajustes", "Ajustes", "⚙️"]];
+function apartadoDeHash(hash) {
+  let id = String(hash || "").replace(/^#/, "");
+  try { id = decodeURIComponent(id); } catch (e) {}
+  id = id.trim().toLowerCase();
+  return APARTADOS.some(([a]) => a === id) ? id : "ofertas";
+}
 // </puras>
 
 const ESTADOS = ["nueva", "revisada", "postulada", "entrevista", "descartada"];
@@ -969,6 +1020,7 @@ const PESTANAS = [
 const FILTROS_VACIOS = () => ({ texto: "", estado: "activas", prioridad: "", modalidad: "", fuente: "", tipo: "" });
 const S = { datos: null, pestana: "ofertas", sel: { tipo: "todas" }, ultima: null, f: FILTROS_VACIOS(), agrupar: "prioridad", densidad: "detallada", masFiltros: false };
 try { if (localStorage.getItem("densidad") === "compacta") S.densidad = "compacta"; } catch (e) {}
+S.apartado = apartadoDeHash(location.hash);
 S.vistaSeg = "tablero";                           // la primera vez, Tablero; después, lo que se guardó
 try { if (localStorage.getItem("vistaSeguimiento") === "lista") S.vistaSeg = "lista"; } catch (e) {}
 
@@ -1392,7 +1444,8 @@ function pasa(o) {
 function pintarPestanas() {
   const nav = $("pestanas");
   conFoco(nav, () => nav.replaceChildren(...PESTANAS.map(([id, nombre]) => {
-    const total = id === "descartadas" && S.datos && S.sel.tipo === "todas" ? S.datos.total_descartadas : listaDe(S.datos, id, S.sel).length;
+    const total = id === "descartadas" && S.datos && S.sel.tipo === "todas" ? S.datos.total_descartadas
+      : id === "ofertas" ? totalOfertas(S.datos, S.sel) : listaDe(S.datos, id, S.sel).length;
     return h("button", { type: "button", role: "tab", "aria-selected": String(S.pestana === id), "data-clave": id,
       onclick: () => { S.pestana = id; pintar(); } }, nombre, total === null ? null : h("span", { class: "cuenta" }, total));
   })));
@@ -1948,7 +2001,9 @@ function pintarLista() {
     ? [h("div", { class: "tabla-compacta" }, ...lista.map(filaCompacta))] : lista.map(o => tarjeta(o, completa));
   const cabecera = S.pestana === "seguimiento" ? [selectorVista(), kpisSeguimiento()] : [];
   if (S.pestana === "seguimiento" && S.vistaSeg === "tablero") { cont.replaceChildren(...cabecera, tableroSeguimiento(filas)); return; }
-  if (!filas.length) {
+  // las «Sin texto» pendientes van al final de Ofertas, aunque no haya ninguna otra
+  const sinTextoFilas = S.pestana === "ofertas" ? listaDe(S.datos, "sin_descripcion", S.sel).filter(pasa) : [];
+  if (!filas.length && !sinTextoFilas.length) {
     const msj = S.sel.tipo !== "todas" && !SIN_FILTRO_HISTORIAL.has(S.pestana) ? "No hay ofertas de esta selección en esta pestaña."
       : S.pestana === "ofertas" ? "No hay ofertas con estos filtros. Prueba «Buscar empleos» o relaja los filtros."
       : S.pestana === "descartadas_usuario" ? "No tienes ofertas descartadas manualmente."
@@ -1972,7 +2027,6 @@ function pintarLista() {
       h("h3", { class: "grupo" }, porFuente ? k : "Prioridad " + k, h("span", { class: "cuenta" }, grupos.get(k).length)),
       ...pintarItems(grupos.get(k))]);
     
-    const sinTextoFilas = (S.datos.sin_descripcion || []).filter(o => !CERRADOS.has(o.estado)).filter(pasa);
     if (sinTextoFilas.length > 0) {
         elementos.push(h("h3", { class: "grupo" }, "Sin texto", h("span", { class: "cuenta" }, sinTextoFilas.length)));
         elementos.push(h("p", { class: "sub" }, "El aviso sí tiene descripción en LinkedIn, pero LinkedIn no se la entrega a la app: "
@@ -1992,15 +2046,39 @@ function pintarLista() {
   cont.replaceChildren(...cabecera, ...[nota].filter(Boolean), ...pintarItems(filas));
 }
 
-function pintar() { pintarHistorial(); pintarEncabezado(); pintarPestanas(); pintarFiltros(); pintarLista(); pintarMetricas(S.datos); }
+function pintarMenu() {
+  const nav = $("menu");
+  conFoco(nav, () => nav.replaceChildren(...APARTADOS.map(([id, nombre, icono]) => {
+    const total = !S.datos ? null : id === "ofertas" ? totalOfertas(S.datos, S.sel)
+      : id === "seguimiento" ? listaDe(S.datos, id, S.sel).length : null;
+    return h("a", { href: "#" + id, "data-clave": id, "aria-current": S.apartado === id ? "page" : null },
+      h("span", { class: "menu-icono", "aria-hidden": "true" }, icono), nombre,
+      total === null ? null : h("span", { class: "cuenta" }, total));
+  })));
+}
+function aplicarApartado() {
+  for (const [id] of APARTADOS) $("apartado-" + id).hidden = id !== S.apartado;
+}
+function irApartado(id, enfocar) {
+  if (id === S.apartado) return;
+  S.apartado = id;
+  aplicarApartado();
+  pintarMenu();
+  if (enfocar) { window.scrollTo(0, 0); $("apartado-" + id).focus({ preventScroll: true }); }
+}
+window.addEventListener("hashchange", () => irApartado(apartadoDeHash(location.hash), true));
+$("ir-seguimiento").addEventListener("click", () => { S.pestana = "seguimiento"; guardarPrefs(); pintar(); });
 
-// atajo global: "/" o Ctrl+K llevan al buscador
+function pintar() { pintarMenu(); pintarHistorial(); pintarEncabezado(); pintarPestanas(); pintarFiltros(); pintarLista(); pintarMetricas(S.datos); }
+
+// atajo global: "/" o Ctrl+K llevan al buscador (desde cualquier apartado: primero vuelve a Ofertas)
 window.addEventListener("keydown", e => {
   if (detalle) return;                            // con el detalle abierto, el teclado es del diálogo
   const activo = document.activeElement;
   const escribiendo = activo && ["INPUT", "TEXTAREA", "SELECT"].includes(activo.tagName);
   if ((e.key === "/" && !escribiendo) || ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k")) {
     e.preventDefault();
+    if (S.apartado !== "ofertas") { irApartado("ofertas", false); history.pushState(null, "", "#ofertas"); }
     const buscador = document.querySelector(".filtros input[type=search]");
     if (buscador) { buscador.focus(); buscador.select(); }
   }
@@ -2012,6 +2090,8 @@ for (const b of busquedasManuales()) {
       b.enlaces.map(e => h("a", { class: "chip", href: e.url, target: "_blank", rel: "noopener noreferrer" }, "↗ " + e.texto))));
 }
 
+aplicarApartado();
+pintarMenu();
 cargar();
 cargarPuestos();
 cargarExclusiones();
