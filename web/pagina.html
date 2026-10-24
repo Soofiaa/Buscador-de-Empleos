@@ -849,6 +849,26 @@ const S = { datos: null, pestana: "ofertas", sel: { tipo: "todas" }, ultima: nul
 try { if (localStorage.getItem("densidad") === "compacta") S.densidad = "compacta"; } catch (e) {}
 S.vistaSeg = "tablero";                           // la primera vez, Tablero; después, lo que se guardó
 try { if (localStorage.getItem("vistaSeguimiento") === "lista") S.vistaSeg = "lista"; } catch (e) {}
+// <prefs> pestaña, filtros, agrupación y «Más filtros» se recuerdan en el navegador; datos inválidos se ignoran
+const CLAVE_PREFS = "vistaPrefs";
+function cargarPrefs() {
+  try {
+    const p = JSON.parse(localStorage.getItem(CLAVE_PREFS) || "null");
+    if (!p || typeof p !== "object") return;
+    if (PESTANAS.some(([id]) => id === p.pestana)) S.pestana = p.pestana;
+    if (p.agrupar === "prioridad" || p.agrupar === "fuente") S.agrupar = p.agrupar;
+    if (typeof p.masFiltros === "boolean") S.masFiltros = p.masFiltros;
+    if (p.f && typeof p.f === "object") {
+      for (const k of Object.keys(FILTROS_VACIOS())) if (typeof p.f[k] === "string") S.f[k] = p.f[k];
+    }
+  } catch (e) {}
+}
+function guardarPrefs() {
+  try { localStorage.setItem(CLAVE_PREFS, JSON.stringify({ pestana: S.pestana, agrupar: S.agrupar, masFiltros: S.masFiltros, f: S.f })); } catch (e) {}
+}
+cargarPrefs();
+// </prefs>
+
 
 function h(tag, attrs, ...hijos) {
   const e = document.createElement(tag);
@@ -1166,7 +1186,7 @@ function pintarFiltros() {
   secundarios.push(selector("fuente", "Fuente", fuentesOpciones, null, nombreFuente));
   const activos = ["prioridad", "modalidad", "tipo", "fuente"].filter(k => S.f[k]).length;
   partes.push(h("details", { class: "filtros-extra", open: S.masFiltros || activos > 0 ? true : null,
-      ontoggle: e => { S.masFiltros = e.target.open; } },
+      ontoggle: e => { S.masFiltros = e.target.open; guardarPrefs(); } },
     h("summary", {}, "Más filtros" + (activos ? " · " + activos + (activos === 1 ? " activo" : " activos") : "")),
     h("div", { class: "filtros-extra-grid" }, secundarios)));
   if (S.pestana === "ofertas") {
@@ -1635,6 +1655,7 @@ function tableroSeguimiento(filas) {
 }
 
 function pintarLista() {
+  guardarPrefs();
   const cont = $("lista");
   if (!S.datos) { cont.replaceChildren(h("div", { class: "vacio" }, "Cargando…")); return; }
   const filas = listaDe(S.datos, S.pestana, S.sel).filter(pasa);
