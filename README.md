@@ -20,7 +20,7 @@ A partir del 21 de octubre de 2026, la aplicación distingue dos grupos principa
    - Las que pasan los filtros se muestran en la pestaña **«Ofertas»**.
 
 2. **Ofertas sin texto**: llegan sin descripción (hoy, LinkedIn).
-   - Se muestran en la pestaña **«Sin texto»**.
+   - Se muestran al final de la pestaña **«Ofertas»**, bajo el título «Sin texto».
    - La app solo puede decidir con base en el título y la empresa.
    - Para decidirlas, abre el aviso con ↗ y pega su descripción en la tarjeta. Así el servidor la reclasifica solo a esa oferta.
 
@@ -29,7 +29,7 @@ A partir del 21 de octubre de 2026, la aplicación distingue dos grupos principa
 - Las ofertas de Indeed, los portales chilenos y Get on Board siguen trayendo texto completo.
 - El registro de estados (nueva, revisada, postulada, entrevista, descartada) funciona igual para las ofertas sin texto.
 - Las demás funciones (seguimiento, notas, tablero, criterios de SAP/ERP, soporte TI, seniority, exclusiones y reglas de experiencia) siguen igual.
-- Las listas «Ofertas» y «Sin texto» usan los mismos filtros.
+- Las ofertas «Ofertas» y «Sin texto» usan los mismos filtros.
 
 ## Pruebas
 

@@ -67,7 +67,10 @@ La pantalla tiene un menú a la izquierda y, a la derecha, el apartado que elija
 **Ajustes**
 - **Qué busco:** los puestos que se buscan en Indeed y las exclusiones (lo que nunca debe aparecer).
 - **Datos:** exportar a CSV o JSON y hacer un respaldo de la base (ver la sección 9).
-- **Apariencia y avisos:** el tema (seis combinaciones de color), el contraste reforzado (viene activado) y los avisos del navegador cuando entran ofertas nuevas. Todo se recuerda en tu navegador.
+- **Apariencia y avisos:** el tema, el contraste reforzado (viene activado) y los avisos del navegador cuando entran ofertas nuevas. Todo se recuerda en tu navegador. Hay seis temas:
+  - Suaves: 🌷 **Primavera** (claro) y 🌹 **Rosa nocturna** (oscuro).
+  - Frescos: 🌊 **Océano** (claro) y 🌌 **Medianoche** (oscuro).
+  - Neutros: 🏔️ **Niebla** (claro) y 🌑 **Carbón** (oscuro).
 
 ## 5. Buscar empleos
 
