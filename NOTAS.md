@@ -3,6 +3,21 @@
 ## Estado actual (se actualiza en cada despliegue; leer al empezar cada sesión)
 
 ### Producción y base
+- **Despliegue NO registrado de las exclusiones (23-10-2026, ~20:17 hora de Chile; vigente):** encontrado el 23-10 al
+  preparar la fase 3. Imagen `job-tracker-jobtracker:latest` = `sha256:c2207ae0b52e34f945515856f7fac5375e6651b519e8ec9ccde45bec2e81b95f`,
+  healthy en `127.0.0.1:8765`. El código del contenedor coincide con el commit `446a22c` (exclusiones; «Métricas» aún
+  como pestaña): `buscar.py`, `config.py`, `exclusiones.py`, `filtros.py` y `servidor.py` con el mismo sha256 que el
+  árbol de trabajo.
+  - Imagen anterior: `job-tracker:pre-puestos-20261023` = `sha256:2509d984…` (la de la reclasificación). Es lo único
+    que dejó ese despliegue.
+  - **Sin referencia de la base** (no hay `ofertas_pre_*_20261023.db` en el volumen ni en `job-tracker-referencias`),
+    sin huellas antes/después y sin entrada en `REVERSION_FASE_A.md`. No se puede demostrar que la base no cambió.
+  - Estado de la base al encontrarlo (copia con la API de backup, conexión `mode=ro`): integrity_check ok, 4452
+    ofertas, 36 postuladas, 45 corridas; sha256 de la copia `ba4b3db52e761560b73caf34970055ce2b960e459dee6a2a5663bea602b755d2`.
+  - Quedaron candidatas sin borrar (`jt_revision_metricas` corriendo en 8766 y `jt_revision_excl` detenida); se
+    borraron el 23-10 con sus volúmenes.
+  - Para volver atrás: `docker compose stop jobtracker`, `docker tag job-tracker:pre-puestos-20261023
+    job-tracker-jobtracker:latest`, `docker compose up -d --no-build`.
 - **Reclasificación de lo guardado, APLICADA (22-10-2026; vigente):** `python buscar.py --reclasificar` sobre la base real.
   Referencia previa `ofertas_pre_reclasif_20261022.db` (sha256 `da3a88e9…`, integrity ok, 4245 ofertas, 34 postuladas,
   6 POR VERIFICAR); imagen anterior `job-tracker:pre-reclasif-20261022` (= `sha256:2509d984…`).
