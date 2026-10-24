@@ -562,6 +562,10 @@
     <div class="seccion-lateral" id="exclusiones-panel">
       <p class="nota">Lo que nunca aparece. Los cambios se aplican al clasificar.</p>
     </div>
+    <div class="seccion-lateral-titulo">Métricas</div>
+    <div class="seccion-lateral" id="metricas-panel">
+      <p class="nota">Cargando…</p>
+    </div>
   </aside>
 </div>
 <div class="toast-container" id="toast-container" aria-live="polite"></div>
@@ -941,8 +945,7 @@ const ETIQUETAS_ESTADO = { nueva: "🌱 Nueva", revisada: "🔍 Revisada", postu
 const PESTANAS = [
   ["ofertas", "Ofertas"], ["seguimiento", "Seguimiento"],
   ["fuera_perfil", "Fuera de perfil"],
-  ["sospechosas", "Sospechosas"], ["descartadas_usuario", "Descartadas"], ["descartadas", "Descartadas por filtros"],
-  ["metricas", "Métricas"]
+  ["sospechosas", "Sospechosas"], ["descartadas_usuario", "Descartadas"], ["descartadas", "Descartadas por filtros"]
 ];
 const FILTROS_VACIOS = () => ({ texto: "", estado: "activas", prioridad: "", modalidad: "", fuente: "", tipo: "" });
 const S = { datos: null, pestana: "ofertas", sel: { tipo: "todas" }, ultima: null, f: FILTROS_VACIOS(), agrupar: "prioridad", densidad: "detallada", masFiltros: false };
@@ -1314,7 +1317,7 @@ function pasa(o) {
 function pintarPestanas() {
   const nav = $("pestanas");
   conFoco(nav, () => nav.replaceChildren(...PESTANAS.map(([id, nombre]) => {
-    const total = id === "metricas" ? null : id === "descartadas" && S.datos && S.sel.tipo === "todas" ? S.datos.total_descartadas : listaDe(S.datos, id, S.sel).length;
+    const total = id === "descartadas" && S.datos && S.sel.tipo === "todas" ? S.datos.total_descartadas : listaDe(S.datos, id, S.sel).length;
     return h("button", { type: "button", role: "tab", "aria-selected": String(S.pestana === id), "data-clave": id,
       onclick: () => { S.pestana = id; pintar(); } }, nombre, total === null ? null : h("span", { class: "cuenta" }, total));
   })));
@@ -1332,7 +1335,6 @@ const PESTANAS_PRINCIPAL = new Set(["ofertas", "seguimiento", "descartadas_usuar
 // "Sin descripción" trae su propia lista, pero se ve y se trabaja como Ofertas: tarjeta completa y los mismos filtros
 const PESTANAS_COMPLETAS = new Set([...PESTANAS_PRINCIPAL, "sin_descripcion"]);
 function pintarFiltros() {
-  if (S.pestana === "metricas") { $("filtros").replaceChildren(); return; }   // las métricas no se filtran
   const base = PESTANAS_PRINCIPAL.has(S.pestana) ? gestionadas(S.datos) : (S.datos[S.pestana] || []);
   const unicos = campo => [...new Set(base.map(o => o[campo]).filter(Boolean))].sort();
   const txt = h("input", { type: "search", placeholder: "Buscar por cargo, empresa, stack o notas… (Pulsa / para buscar)", "aria-label": "Buscar", value: S.f.texto,
@@ -1594,7 +1596,6 @@ const AYUDA_PESTANA = {
   fuera_perfil: { titulo: "Fuera de perfil", texto: "Ofertas que la app apartó por no encajar con tu perfil, por ejemplo soporte o mesa de ayuda. Revísalas por si alguna te sirve; la razón de cada una aparece en su tarjeta. El interruptor «Incluir soporte TI» decide si se ven también en Ofertas." },
   sospechosas: { titulo: "Sospechosas", texto: "Ofertas con señales de posible estafa: piden un pago, datos bancarios o contacto solo por WhatsApp. No postules a ninguna sin verificar la empresa por otro medio." },
   descartadas_usuario: { titulo: "Descartadas", texto: "Ofertas que tú descartaste. Para recuperar una, abre su tarjeta y cambia su estado a otro (Nueva, Revisada, etc.)." },
-  metricas: { titulo: "Métricas", texto: "Tu progreso en la búsqueda, sin cambiar nada. «Relevantes» son las ofertas que la app considera de tu perfil; «Postuladas» cuentan las que tienen fecha de postulación o están postuladas o en entrevista. Una oferta que descartaste después de postular sigue contando en el embudo. La tasa de respuesta es entrevistas sobre postuladas. Los datos de cambios de fase son desde el 13-10-2026." },
   descartadas: { titulo: "Descartadas por filtros", texto: "Ofertas que la app descartó sola (por experiencia, nivel, ubicación, práctica u otra regla). Sirven para comprobar que los filtros no están dejando fuera algo que sí te interesa. Si ves un patrón, avísame para ajustar la regla." }
 };
 const AYUDA_GENERAL = [
@@ -1818,11 +1819,13 @@ function tableroSeguimiento(filas) {
   return h("div", { class: "kanban-board" }, COLUMNAS_TABLERO.map(c => columnaTablero(c, por[c.id])));
 }
 
-// Pestaña «Métricas»: lee S.datos (todas las ofertas, sin importar la búsqueda elegida en el historial)
+// Panel «Métricas» de la barra derecha: lee S.datos (todas las ofertas, sin importar la búsqueda elegida en el historial)
 function pintarMetricas(datos) {
+  const panel = $("metricas-panel");
+  if (!datos) { panel.replaceChildren(h("p", { class: "nota" }, "Cargando…")); return; }
   const hoyISO = hoy();
   const relevantes = (datos.principal || []).length;
-  if (!relevantes) return h("div", { class: "metricas-seccion" }, h("div", { class: "vacio" }, "Aún no hay ofertas relevantes que medir."));
+  if (!relevantes) { panel.replaceChildren(h("p", { class: "nota" }, "Aún no hay ofertas relevantes que medir.")); return; }
   const tasa = tasaRespuesta(datos), dias = diasPromedioActivos(datos, hoyISO), embud = embudo(datos);
   const tarjetaKpi = (etq, num, det) => h("div", { class: "metricas-kpi-card" },
     h("span", { class: "etq" }, etq), h("span", { class: "num" }, num), det ? h("span", { class: "det" }, det) : null);
@@ -1854,17 +1857,16 @@ function pintarMetricas(datos) {
       h("span", { class: "metrica-etq" }, "Sem. " + fechaLarga(s.semana).replace(/^\S+\s/, "")),
       h("span", { class: "metrica-track" }, h("span", { class: "metrica-relleno", style: "width:" + Math.round(100 * s.n / maxSemana) + "%" })),
       h("span", { class: "metrica-num" }, s.n))));
-  return h("div", { class: "metricas-seccion" },
+  panel.replaceChildren(h("div", { class: "metricas-seccion" },
     kpis, embudoBloque,
     h("div", { class: "metricas-desgloses" }, tabla("Por fuente", "fuente"), tabla("Por modalidad", "modalidad"), tabla("Por tipo", "tipo")),
     actividad,
-    h("p", { class: "sub" }, "Las fechas de cambio de fase existen desde el 13-10-2026; antes no se inventa nada."));
+    h("p", { class: "sub" }, "Las fechas de cambio de fase existen desde el 13-10-2026; antes no se inventa nada.")));
 }
 function pintarLista() {
   guardarPrefs();
   const cont = $("lista");
   if (!S.datos) { cont.replaceChildren(h("div", { class: "vacio" }, "Cargando…")); return; }
-  if (S.pestana === "metricas") { cont.replaceChildren(pintarMetricas(S.datos)); return; }
   const filas = listaDe(S.datos, S.pestana, S.sel).filter(pasa);
   const completa = PESTANAS_COMPLETAS.has(S.pestana);
   const pintarItems = lista => S.densidad === "compacta"
@@ -1915,7 +1917,7 @@ function pintarLista() {
   cont.replaceChildren(...cabecera, ...[nota].filter(Boolean), ...pintarItems(filas));
 }
 
-function pintar() { pintarHistorial(); pintarEncabezado(); pintarPestanas(); pintarFiltros(); pintarLista(); }
+function pintar() { pintarHistorial(); pintarEncabezado(); pintarPestanas(); pintarFiltros(); pintarLista(); pintarMetricas(S.datos); }
 
 // atajo global: "/" o Ctrl+K llevan al buscador
 window.addEventListener("keydown", e => {

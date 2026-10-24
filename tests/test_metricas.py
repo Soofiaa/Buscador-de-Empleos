@@ -8,10 +8,11 @@ from test_historial import correr_js
 PAGINA = (Path(__file__).resolve().parent.parent / "web" / "pagina.html").read_text(encoding="utf-8")
 
 
-def test_la_pestana_metricas_existe_y_no_muestra_filtros():
-    assert '["metricas", "Métricas"]' in PAGINA
-    assert 'if (S.pestana === "metricas") { $("filtros").replaceChildren(); return; }' in PAGINA
-    assert 'if (S.pestana === "metricas") { cont.replaceChildren(pintarMetricas(S.datos)); return; }' in PAGINA
+def test_las_metricas_viven_en_la_barra_derecha_y_no_en_las_pestanas():
+    assert '["metricas", "Métricas"]' not in PAGINA
+    assert 'id="metricas-panel"' in PAGINA
+    assert 'lateral-derecha' in PAGINA and PAGINA.index('id="metricas-panel"') > PAGINA.index('class="lateral-derecha"')
+    assert '$("metricas-panel")' in PAGINA
 
 
 def test_las_funciones_de_metricas_estan_en_la_seccion_pura():
