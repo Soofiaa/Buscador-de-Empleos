@@ -58,14 +58,22 @@ La pantalla tiene un menú a la izquierda y, a la derecha, el apartado que elija
 
 **Ofertas**
 - **Pestañas:** Ofertas, Fuera de perfil, Sospechosas, Descartadas y Descartadas por filtros. Las ofertas *Sin texto* aparecen al final de Ofertas (ver más abajo).
-- **Filtros:** búsqueda por texto y estado. Los filtros de prioridad, modalidad, tipo y fuente están en **«Más filtros»**.
-- **Vista:** Tarjetas (con detalle) o Compacta (una línea por oferta).
+- **Filtros:** búsqueda por texto (busca en cargo, empresa, lugar, motivo y notas; cada palabra debe aparecer) y estado. Los filtros de prioridad, modalidad, tipo y fuente están en **«Más filtros»**; cuando uno está activo, el resumen lo indica (por ejemplo, «Más filtros · 2 activos»). **«Limpiar filtros»** los quita todos.
+- **Agrupar:** en Ofertas, por prioridad (Alta, Media, Baja) o por fuente.
+- **Vista:** Tarjetas (con detalle) o Compacta (una línea por oferta). La vista y los filtros que eliges se recuerdan en tu navegador.
 - **Atajo:** «/» o Ctrl+K llevan al buscador.
+- **Ayuda de esta pantalla:** el botón ❓ explica la pestaña o el apartado en el que estás.
 
-**Métricas:** el embudo de postulaciones, la tasa de respuesta, los procesos activos, desgloses por fuente, modalidad y tipo, y la actividad por semana.
+**Métricas** (solo lectura, sobre todas tus ofertas relevantes, sin importar la búsqueda que elijas en el historial):
+- **Indicadores:** cuántas postulaciones tienes, cuántas tuvieron respuesta, cuántos procesos siguen activos y cuántos días promedio tardan.
+- **Embudo:** cuatro etapas: *Relevantes*, *Postuladas*, *Llegaron a entrevista* y *Final u oferta*. Cada una cuenta las ofertas que llegaron hasta ahí, así que una oferta puede estar en varias.
+- **Desgloses:** por fuente, por modalidad y por tipo de contrato.
+- **Actividad:** postulaciones por semana, de las últimas 8.
+
+Las fechas de cambio de etapa existen desde el 13-10-2026; antes no se inventan.
 
 **Ajustes**
-- **Qué busco:** los puestos que se buscan en Indeed y las exclusiones (lo que nunca debe aparecer).
+- **Qué busco:** los puestos que se buscan en Indeed y las exclusiones (lo que nunca debe aparecer). Los puestos se usan en la próxima búsqueda; las exclusiones se aplican al clasificar las ofertas.
 - **Datos:** exportar a CSV o JSON y hacer un respaldo de la base (ver la sección 9).
 - **Apariencia y avisos:** el tema, el contraste reforzado (viene activado) y los avisos del navegador cuando entran ofertas nuevas. Todo se recuerda en tu navegador. Hay seis temas:
   - Suaves: 🌷 **Primavera** (claro) y 🌹 **Rosa nocturna** (oscuro).
@@ -110,6 +118,8 @@ El apartado **Seguimiento** muestra las ofertas que revisaste, postulaste o en l
 - **Tarjetas:** la misma información en una lista de tarjetas detalladas, útil para buscar.
 - **Compacta:** una fila por oferta.
 - **Resumen:** arriba aparece cuántas ofertas hay en cada columna.
+- **Historial:** igual que en Ofertas, puedes elegir una búsqueda para ver solo sus ofertas. Si la eliges estando en otro apartado, la app te lleva a Ofertas con esa búsqueda.
+- **Atajo:** «/» o Ctrl+K enfocan el buscador de Seguimiento.
 
 Cada movimiento muestra un aviso con **«Deshacer»**, que vuelve exactamente al estado anterior.
 
