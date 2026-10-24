@@ -745,6 +745,20 @@ estaba centrado en prácticas.
 - La página revisada mostraba un programa de prácticas. No se recorrieron los 29 términos; se dejó en baja
   prioridad porque las prácticas no son el objetivo de búsqueda actual.
 
+### Exploración de remoto mundial: We Work Remotely y Remote First Jobs (24-10-2026; sin cambios en el proyecto)
+
+- **We Work Remotely:** su RSS es público, pero sus términos solo permiten usar lo que se expone por la API; la API de
+  lectura pide un token especial y no hay forma pública de obtenerlo sin contactarlos. Queda fuera por ahora.
+- **Remote First Jobs** (`remotefirstjobs.com/api/search-jobs`): API pública, gratuita y sin clave; 100 ofertas por
+  página, hasta 5 páginas; las ofertas aparecen 24 horas después de publicarse. Términos: citar la fuente y no
+  republicar en LinkedIn, Google Jobs ni Jooble.
+- Muestra de 100 ofertas (página 0, 24-10-2026): ninguna con Chile en `locations`; 33 de Estados Unidos, 7 de Reino
+  Unido, resto disperso. Por nivel: 38 «middle», 23 «senior», 17 «manager», 6 «entry_level»; solo 9 entry/intern/junior,
+  y varias son de Filipinas, EE. UU. o cargos de práctica. De las 18 que mencionan Chile o Latinoamérica, todas lo hacen
+  como parte de la empresa, no como lugar donde se puede trabajar.
+- Evaluación: el aporte para Chile es casi nulo. Podría integrarse como fuente remota con el filtro de nivel y
+  ubicación de Jobicy y Himalayas, pero se espera muy poco volumen útil. No integrar sin decisión de Sofia.
+
 ### Decisión y preguntas abiertas
 
 - No se aprueba ni se inicia la integración de ninguna fuente nueva; no se hicieron cambios de código, configuración,
