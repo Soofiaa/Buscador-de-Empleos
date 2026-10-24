@@ -135,7 +135,8 @@ def test_la_pagina_no_tiene_manejadores_en_el_html_ni_botones_de_fases_futuras()
     cuerpo = PAGINA.split("</style>")[1]           # el CSS original ya trae estilos para las fases siguientes; eso no es UI
     # Fase A trajo el detalle, "Gestionar proceso" y "Deshacer"; la B1, la postulación manual y exportar.
     # Importar (B2) no se hace; lo demás llega en fases posteriores.
-    for futuro in ("Importar", "/api/importar", "Redactor", "Automatización", "Kanban", "Métricas",
+    # «Métricas» (C3) y «Kanban» (C2) ya están hechas; por eso no figuran aquí
+    for futuro in ("Importar", "/api/importar", "Redactor", "Automatización",
                    "badge-alertas", "Probar fuentes", "Notification"):
         assert futuro not in cuerpo, futuro
 
