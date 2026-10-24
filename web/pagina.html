@@ -712,7 +712,7 @@ function tituloSeleccion(sel, corridas) {
   return "Todas las ofertas";
 }
 const NOMBRE_FUENTE = { indeed: "Indeed", google: "Google", glassdoor: "Glassdoor", getonboard: "Get on Board",
-  himalayas: "Himalayas", jobicy: "Jobicy", bne: "BNE", trabajando: "Trabajando", chiletrabajos: "Chiletrabajos", chumi: "Chumi", laborum: "Laborum", linkedin: "LinkedIn", manual: "✍️ Manual" };
+  himalayas: "Himalayas", jobicy: "Jobicy", remotefirstjobs: "Remote First Jobs", bne: "BNE", trabajando: "Trabajando", chiletrabajos: "Chiletrabajos", chumi: "Chumi", laborum: "Laborum", linkedin: "LinkedIn", manual: "✍️ Manual" };
 const nombreFuente = f => NOMBRE_FUENTE[f] || f || "sin fuente";
 function textoProgreso(mensaje) {                // "[3/40] indeed | qa tester | …" -> "Buscando en Indeed · qa tester · 3 de 40"
   const m = /^\s*\[(\d+)\/(\d+)\]\s*([^|\[\]]+?)\s*\|\s*([^|:]+?)\s*(?:[|:]|$)/.exec(mensaje || "");
@@ -1496,7 +1496,7 @@ function pintarFiltros() {
   if (PESTANAS_COMPLETAS.has(vista())) {
     secundarios.push(selector("prioridad", "Prioridad", ["Alta", "Media", "Baja"]), selector("modalidad", "Modalidad", unicos("modalidad")), selector("tipo", "Tipo", unicos("tipo")));
   }
-  const fuentesConocidas = ["indeed", "linkedin", "chiletrabajos", "bne", "trabajando", "chumi", "laborum", "getonboard", "glassdoor", "himalayas", "jobicy"];
+  const fuentesConocidas = ["indeed", "linkedin", "chiletrabajos", "bne", "trabajando", "chumi", "laborum", "getonboard", "glassdoor", "himalayas", "jobicy", "remotefirstjobs"];
   const fuentesOpciones = [...new Set([...fuentesConocidas, ...unicos("fuente")])].sort((a, b) => nombreFuente(a).localeCompare(nombreFuente(b)));
   secundarios.push(selector("fuente", "Fuente", fuentesOpciones, null, nombreFuente));
   const activos = ["prioridad", "modalidad", "tipo", "fuente"].filter(k => S.f[k]).length;

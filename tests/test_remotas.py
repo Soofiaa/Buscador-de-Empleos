@@ -9,6 +9,7 @@ import config
 import filtros
 import himalayas
 import jobicy
+import remotefirstjobs
 
 AHORA = datetime(2026, 10, 22, 15, 0, tzinfo=timezone.utc)
 
@@ -128,8 +129,54 @@ def test_jobicy_buscar_usa_la_api_y_filtra(monkeypatch):
 
 # ---- Conexión con la app
 
+def _rfj(**k):
+    base = {"id": "x", "url": "https://remotefirstjobs.com/jobs/x", "company_name": "Oceans",
+            "title": "Analista Funcional", "category": "data", "seniority": "entry_level",
+            "description": "<p>Analista funcional con SQL y procesos.</p>", "salary_min": None, "salary_max": None,
+            "locations": [], "published_at": "2026-10-23T18:00:00.000Z"}
+    base.update(k)
+    return base
+
+
+def test_rfj_sin_paises_se_acepta_como_remoto_global():
+    f = remotefirstjobs.a_fila(_rfj())
+    assert f["location"] == "Remoto (global)" and f["is_remote"] is True
+    assert "Nivel junior" in f["description"] and "Modalidad 100% remota" in f["description"]
+    assert f["posted_at"].startswith("2026-10-23T18:00:00") and f["date_posted"] == "2026-10-23"
+
+
+def test_rfj_restringido_a_otro_pais_se_descarta():
+    assert remotefirstjobs.a_fila(_rfj(locations=["United States"])) is None
+    assert remotefirstjobs.a_fila(_rfj(locations=["Philippines", "India"])) is None
+
+
+def test_rfj_restringido_a_chile_queda_como_chile():
+    assert remotefirstjobs.a_fila(_rfj(locations=["Chile", "Argentina"]))["location"] == "Chile"
+
+
+def test_rfj_niveles_y_sueldo():
+    assert "Nivel senior" in remotefirstjobs.a_fila(_rfj(seniority="senior"))["description"]
+    assert "Nivel práctica" in remotefirstjobs.a_fila(_rfj(seniority="intern"))["description"]
+    sin_nivel = remotefirstjobs.a_fila(_rfj(seniority=""))
+    assert "Nivel" not in sin_nivel["description"] and sin_nivel["currency"] == ""
+    con_sueldo = remotefirstjobs.a_fila(_rfj(salary_min=80000, salary_max=100000))
+    assert con_sueldo["min_amount"] == 80000 and con_sueldo["currency"] == "USD" and con_sueldo["interval"] == "yearly"
+
+
+def test_rfj_buscar_usa_la_api_y_filtra(monkeypatch):
+    class Resp:
+        status_code = 200
+        def raise_for_status(self): pass
+        def json(self): return {"jobs": [_rfj(), _rfj(locations=["United States"]), _rfj(title="")]}
+    llamadas = []
+    monkeypatch.setattr(remotefirstjobs.requests, "get", lambda url, **k: (llamadas.append(k["params"]), Resp())[1])
+    df = remotefirstjobs.buscar("", 10)
+    assert len(df) == 1 and list(df.columns) == remotefirstjobs.COLUMNAS
+    assert llamadas == [{"page": 0}]
+
+
 def test_remotas_estan_en_las_fuentes_y_nombres():
-    for s in ("himalayas", "jobicy"):
+    for s in ("himalayas", "jobicy", "remotefirstjobs"):
         assert s in config.SITIOS and s in config.NOMBRE_FUENTE and s in config.MAX_ANTIGUEDAD_DIAS
         assert s in buscar.APIS_REMOTAS
 
@@ -144,6 +191,7 @@ def test_remotas_son_una_consulta_por_corrida(monkeypatch):
             for t in ([""] if s in buscar.APIS_REMOTAS else [config.TERMINOS_SECUNDARIOS[0]])
             for l in (["Chile"] if s in buscar.APIS_REMOTAS else ["Santiago, Chile"])]
     assert ("himalayas", "", "Chile") in plan and ("jobicy", "", "Chile") in plan
+    assert ("remotefirstjobs", "", "Chile") in plan
     assert sum(1 for p in plan if p[0] == "himalayas") == 1
 
 

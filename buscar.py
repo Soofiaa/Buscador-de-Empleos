@@ -30,6 +30,7 @@ import laborum
 import getonboard
 import himalayas
 import jobicy
+import remotefirstjobs
 import exclusiones
 import filtros
 import puestos
@@ -50,7 +51,7 @@ def _say(mensaje: str):
 
 PORTALES = {"bne": bne, "trabajando": trabajando, "chiletrabajos": chiletrabajos, "chumi": chumi, "laborum": laborum}
 # APIs que no buscan por texto: una sola solicitud por corrida, sin ubicación (ver getonboard.py, himalayas.py, jobicy.py)
-APIS_REMOTAS = {"getonboard": getonboard, "himalayas": himalayas, "jobicy": jobicy}
+APIS_REMOTAS = {"getonboard": getonboard, "himalayas": himalayas, "jobicy": jobicy, "remotefirstjobs": remotefirstjobs}
 ESTADOS = ["nueva", "revisada", "postulada", "entrevista", "descartada"]
 ESTADOS_CERRADOS = {"postulada", "entrevista", "descartada"}
 LIMITE_DESCARTADAS = 300   # la página muestra las descartadas más recientes (con su motivo)

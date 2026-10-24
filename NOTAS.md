@@ -758,6 +758,10 @@ estaba centrado en prácticas.
   como parte de la empresa, no como lugar donde se puede trabajar.
 - Evaluación: el aporte para Chile es casi nulo. Podría integrarse como fuente remota con el filtro de nivel y
   ubicación de Jobicy y Himalayas, pero se espera muy poco volumen útil. No integrar sin decisión de Sofia.
+- **Remotive** (`remotive.com/api/remote-jobs`, 24-10-2026): sin clave, pero devuelve siempre 10 ofertas, con cualquier
+  filtro (la versión gratuita no pagina). Las ofertas llegan con 24 h de retraso. Su aviso pide enlazarlos y citarlos,
+  y no publicar sus ofertas en Jooble, Neuvoo, Google Jobs ni LinkedIn. Muestra: 10 ofertas, ninguna con Chile
+  («Worldwide» en 7). Evaluación: no integrar (volumen mínimo y retraso). Si se quiere igual, es un conector de ~40 líneas.
 
 ### Decisión y preguntas abiertas
 

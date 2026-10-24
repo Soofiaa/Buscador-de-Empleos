@@ -37,7 +37,7 @@ TERMINOS_B = [  # roles puente (no TI)
 # con la ubicación escrita ("Santiago, Chile"). Es un rodeo: ver probar_fuentes.py.
 # Google está desactivado: JobSpy recibe "Google returned no job data" (probado 2026-10-10).
 # Para reintentarlo, agrégalo a la lista: SITIOS = ["indeed", "glassdoor", "google"]
-SITIOS = ["indeed", "glassdoor", "getonboard", "himalayas", "jobicy", "bne", "trabajando", "chiletrabajos", "chumi", "laborum", "linkedin"]
+SITIOS = ["indeed", "glassdoor", "getonboard", "himalayas", "jobicy", "remotefirstjobs", "bne", "trabajando", "chiletrabajos", "chumi", "laborum", "linkedin"]
 # himalayas / jobicy: APIs públicas de empleo remoto (ver himalayas.py y jobicy.py). Traen el listado reciente en una
 # sola solicitud por corrida; el clasificador filtra por rol. Atribución: enlace a la fuente y postulación a la oferta.
 # chumi y laborum: verificados contra el sitio real el 2026-10-20 (ver chumi.py y laborum.py; Laborum usa Playwright).
@@ -58,7 +58,7 @@ TERMINOS_SECUNDARIOS = [
     "soporte TI", "help desk",
 ]
 NOMBRE_FUENTE = {"indeed": "Indeed", "google": "Google", "glassdoor": "Glassdoor", "getonboard": "Get on Board",
-                 "himalayas": "Himalayas", "jobicy": "Jobicy", "bne": "BNE", "trabajando": "Trabajando", "chiletrabajos": "Chiletrabajos", "laborum": "Laborum",
+                 "himalayas": "Himalayas", "jobicy": "Jobicy", "remotefirstjobs": "Remote First Jobs", "bne": "BNE", "trabajando": "Trabajando", "chiletrabajos": "Chiletrabajos", "laborum": "Laborum",
                  "chumi": "Chumi", "linkedin": "LinkedIn"}
 # Fuentes cuyo listado puede llegar SIN descripción. Sin texto no hay nada que revisar: ni experiencia, ni nivel, ni
 # contrato, ni sueldo, ni señales. Esas ofertas van a "sin_descripcion" (las revisa Sofia abriendo el aviso), nunca se
@@ -114,7 +114,7 @@ PAUSA_JOBSPY = {"linkedin": (6.0, 10.0), "glassdoor": (3.0, 5.0)}
 # ---- Antigüedad: solo se recolectan ofertas recientes (las más antiguas no se guardan ni cuentan) ----
 # Días hacia atrás por fuente: 1 = "hoy y ayer". Fuentes con hora (Get on Board, Trabajando, y el filtro de Indeed)
 # usan un corte exacto de 24 h por día. BNE publica con desfase, por eso 3. Las ofertas sin fecha pasan siempre.
-MAX_ANTIGUEDAD_DIAS = {"indeed": 1, "glassdoor": 1, "getonboard": 1, "himalayas": 1, "jobicy": 1, "bne": 3, "trabajando": 1, "chiletrabajos": 1, "laborum": 1, "chumi": 1, "linkedin": 1}
+MAX_ANTIGUEDAD_DIAS = {"indeed": 1, "glassdoor": 1, "getonboard": 1, "himalayas": 1, "jobicy": 1, "remotefirstjobs": 2, "bne": 3, "trabajando": 1, "chiletrabajos": 1, "laborum": 1, "chumi": 1, "linkedin": 1}
 # Si pasan días sin buscar, la ventana crece sola (días desde el fin de la última búsqueda + 1), hasta este tope.
 DIAS_MAXIMOS = 14
 ZONA_HORARIA = "America/Santiago"   # "hoy" se calcula en hora de Chile, no con la hora del equipo o contenedor
