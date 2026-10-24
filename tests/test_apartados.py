@@ -59,7 +59,7 @@ def test_paso3_seguimiento_es_apartado_y_no_pestana():
     assert '$("pestanas").hidden = S.apartado !== "ofertas";' in PAGINA
     # lo que pinta la lista usa vista(), no la pestaña de Ofertas
     for trozo in ('listaDe(S.datos, vista(), S.sel).filter(pasa)', 'const cabecera = vista() === "seguimiento"',
-                  'AYUDA_PESTANA[vista()]', 'alcanceExportar(vista())'):
+                  'AYUDA_PESTANA[vista()]'):
         assert trozo in PAGINA
     # una preferencia vieja con la pestaña «seguimiento» abre el apartado
     assert 'else if (p.pestana === "seguimiento" && !location.hash) S.apartado = "seguimiento";' in PAGINA
@@ -94,6 +94,24 @@ def test_paso2_sin_barra_derecha_puestos_y_exclusiones_en_ajustes():
     fin = PAGINA.index("</main>")
     for panel in ('id="puestos-panel"', 'id="exclusiones-panel"'):
         assert PAGINA.count(panel) == 1 and inicio < PAGINA.index(panel) < fin
+
+
+def test_paso4_datos_y_apariencia_viven_en_ajustes():
+    inicio = PAGINA.index('id="apartado-ajustes"')
+    fin = PAGINA.index("</main>")
+    for ident in ("tema", "contraste-aa", "avisos", "btn-exportar-csv", "btn-exportar-csv-seg",
+                  "btn-exportar-json", "btn-respaldo", "estado-respaldo"):
+        marca = f'id="{ident}"'
+        assert PAGINA.count(marca) == 1 and inicio < PAGINA.index(marca) < fin, ident
+    assert "aviso-provisional" not in PAGINA
+    # el menú izquierdo queda con lo de todos los días
+    lateral = PAGINA[PAGINA.index('<aside class="lateral">'):PAGINA.index("</aside>")]
+    for ident in ("menu", "ultima", "buscar", "progreso", "busquedas-manuales", "historial", "estado-db"):
+        assert f'id="{ident}"' in lateral, ident
+    assert "seccion-lateral-titulo" not in lateral
+    # cada botón de CSV exporta lo suyo, sin depender del apartado abierto
+    assert 'descargar("csv", alcanceExportar("ofertas"))' in PAGINA
+    assert 'descargar("csv", alcanceExportar("seguimiento"))' in PAGINA
 
 
 def test_navegacion_por_hash_y_atajo_vuelve_a_ofertas():

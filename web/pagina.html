@@ -210,9 +210,6 @@
   nav.menu .menu-icono { width:1.3em; text-align:center; }
   nav.menu .cuenta { margin-left:auto; }
   .apartado:focus { outline:none; }
-  .aviso-provisional { background:var(--panel); border:1px dashed var(--borde); border-radius:14px; padding:18px 20px; max-width:640px; color:var(--suave); }
-  .aviso-provisional p { margin:0 0 10px; }
-  .aviso-provisional a.boton { display:inline-block; text-decoration:none; margin-top:4px; }
   .boton { background:var(--accion); color:var(--accion-tinta); border:0; border-radius:10px; padding:10px 16px; font-weight:600; cursor:pointer; }
   .boton:hover { filter:brightness(1.06); }
   .boton:disabled { opacity:.55; cursor:progress; }
@@ -442,6 +439,9 @@
   .ajustes-columnas { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:14px; align-items:start; }
   .ajustes-bloque { background:var(--panel); border:1px solid var(--borde); border-radius:14px; padding:14px 16px; min-width:0; }
   .ajustes-bloque > h4 { margin:0 0 6px; font-size:.95rem; }
+  .ajustes-bloque .acciones-datos { display:flex; flex-wrap:wrap; gap:8px; }
+  .ajustes-bloque .boton.sec { font-size:.85rem; padding:8px 12px; }
+  .ajustes-bloque #avisos .boton { width:auto; }
   .metrica-etq { color:var(--suave); font-weight:600; overflow-wrap:anywhere; }
   .metrica-track { background:var(--panel2); border:1px solid var(--borde); border-radius:99px; height:12px; overflow:hidden; display:block; }
   .metrica-relleno { display:block; height:100%; background:var(--accion); border-radius:99px; }
@@ -477,7 +477,6 @@
     .fila-compacta .ocultar-movil { display:none; }
   }
   .seccion-lateral { margin-bottom:12px; }
-  .seccion-lateral-titulo { font-size:.74rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--suave); margin:14px 2px 6px; }
   .badge-db-status { margin-top:20px; padding:10px 12px; background:var(--panel2); border:1px solid var(--borde); border-radius:10px; font-size:.78rem; color:var(--suave); display:flex; align-items:center; gap:8px; }
   .dot-online { width:8px; height:8px; border-radius:50%; background:#10B981; box-shadow:0 0 6px #10B981; flex-shrink:0; }
   /* ---------- corrección de contraste WCAG AA: activa con data-contraste="aa" en <html> (interruptor «Contraste reforzado») */
@@ -499,46 +498,18 @@
   <aside class="lateral">
     <div class="marca">
       <h1>Búsqueda de empleo</h1>
-      <select class="selector-tema" id="tema" aria-label="Elegir tema visual">
-        <optgroup label="🌸 Estilo Girly">
-          <option value="girly-claro">🌸 Girly Claro</option>
-          <option value="girly-oscuro">🌺 Girly Oscuro</option>
-        </optgroup>
-        <optgroup label="👔 Estilo Hombre">
-          <option value="hombre-claro">👔 Hombre Claro</option>
-          <option value="hombre-oscuro">💼 Hombre Oscuro</option>
-        </optgroup>
-        <optgroup label="☀️ Neutro">
-          <option value="neutro-claro">☀️ Neutro Claro</option>
-          <option value="neutro-oscuro">🌙 Neutro Oscuro</option>
-        </optgroup>
-      </select>
     </div>
-    <label class="interruptor-soporte" style="margin:6px 0 0;" title="Colores de texto y acento más oscuros o más claros, según el tema, para cumplir contraste WCAG AA">
-      <input type="checkbox" id="contraste-aa"> Contraste reforzado
-    </label>
     <nav class="menu" id="menu" aria-label="Apartados"></nav>
     <div class="sub" id="ultima">Cargando…</div>
 
     <div class="seccion-lateral">
       <button class="boton ancho" id="buscar" type="button">Buscar empleos</button>
       <p class="nota">Búsqueda completa (~15 a 20 min) en Indeed, LinkedIn, Chiletrabajos, BNE, etc.</p>
-      <div id="avisos" style="margin:8px 0;"></div>
       <div class="progreso" id="progreso" role="status" aria-live="polite"></div>
       <div class="barra" id="barra" role="progressbar" aria-label="Avance de la búsqueda" aria-valuemin="0" hidden><div class="barra-relleno" id="barra-relleno"></div></div>
       <details class="busquedas-manuales" id="busquedas-manuales" style="margin-top:8px; font-size:.8rem;">
         <summary title="Estos sitios no aceptan búsquedas automáticas: se abren en tu navegador">🔎 Buscar a mano</summary>
       </details>
-    </div>
-
-    <div class="seccion-lateral-titulo">Gestión de Datos</div>
-    <div class="seccion-lateral">
-      <div class="acciones-datos" style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
-        <button class="boton sec" id="btn-exportar-csv" type="button" title="Descargar para Excel lo que estás viendo: Seguimiento si estás en ese apartado; si no, las ofertas" style="font-size:.78rem; padding:7px 4px; justify-content:center;">📥 CSV / Excel</button>
-        <button class="boton sec" id="btn-exportar-json" type="button" title="Descargar todas las ofertas en JSON (respaldo legible)" style="font-size:.78rem; padding:7px 4px; justify-content:center;">📦 Respaldo JSON</button>
-      </div>
-      <button class="boton sec ancho" id="btn-respaldo" type="button" title="Copia exacta de la base a tu carpeta de respaldos" style="margin-top:6px; font-size:.8rem; padding:7px 8px; justify-content:center;">💾 Respaldar ahora</button>
-      <div class="sub" id="estado-respaldo" role="status" style="margin:6px 2px 0; font-size:.78rem;"></div>
     </div>
 
     <button class="boton sec ancho historial-toggle" id="historial-toggle" type="button" aria-expanded="false" aria-controls="historial">📜 Ver historial de búsquedas</button>
@@ -588,10 +559,57 @@
         </div>
       </div>
     </section>
-    <div class="aviso-provisional">
-      <p>Pronto también aquí: <b>Datos</b> (exportar y respaldos) y <b>Apariencia</b> (tema, contraste y avisos).
-        Por ahora están en el menú de la izquierda.</p>
-    </div>
+    <section class="ajustes-grupo" aria-labelledby="titulo-datos">
+      <h3 id="titulo-datos">Datos</h3>
+      <p class="sub">Descargas para Excel y copias de seguridad de la base.</p>
+      <div class="ajustes-columnas">
+        <div class="ajustes-bloque">
+          <h4>Exportar</h4>
+          <div class="acciones-datos">
+            <button class="boton sec" id="btn-exportar-csv" type="button" title="Ofertas relevantes, para abrir en Excel">📥 CSV de Ofertas</button>
+            <button class="boton sec" id="btn-exportar-csv-seg" type="button" title="Revisadas, postuladas y en entrevista, para abrir en Excel">📥 CSV de Seguimiento</button>
+            <button class="boton sec" id="btn-exportar-json" type="button" title="Todas las ofertas en JSON (respaldo legible)">📦 Todo en JSON</button>
+          </div>
+        </div>
+        <div class="ajustes-bloque">
+          <h4>Respaldos</h4>
+          <p class="nota">Copia exacta de la base a tu carpeta de respaldos.</p>
+          <button class="boton sec" id="btn-respaldo" type="button">💾 Respaldar ahora</button>
+          <div class="sub" id="estado-respaldo" role="status" style="margin:8px 0 0;"></div>
+        </div>
+      </div>
+    </section>
+    <section class="ajustes-grupo" aria-labelledby="titulo-apariencia">
+      <h3 id="titulo-apariencia">Apariencia y avisos</h3>
+      <p class="sub">Se recuerdan en este navegador.</p>
+      <div class="ajustes-columnas">
+        <div class="ajustes-bloque">
+          <h4><label for="tema">Tema</label></h4>
+          <select class="selector-tema" id="tema">
+            <optgroup label="🌸 Estilo Girly">
+              <option value="girly-claro">🌸 Girly Claro</option>
+              <option value="girly-oscuro">🌺 Girly Oscuro</option>
+            </optgroup>
+            <optgroup label="👔 Estilo Hombre">
+              <option value="hombre-claro">👔 Hombre Claro</option>
+              <option value="hombre-oscuro">💼 Hombre Oscuro</option>
+            </optgroup>
+            <optgroup label="☀️ Neutro">
+              <option value="neutro-claro">☀️ Neutro Claro</option>
+              <option value="neutro-oscuro">🌙 Neutro Oscuro</option>
+            </optgroup>
+          </select>
+          <label class="interruptor-soporte" style="margin:12px 0 0;">
+            <input type="checkbox" id="contraste-aa"> Contraste reforzado
+          </label>
+          <p class="nota">Colores de texto y acento más marcados, para cumplir contraste WCAG AA.</p>
+        </div>
+        <div class="ajustes-bloque">
+          <h4>Avisos</h4>
+          <div id="avisos"></div>
+        </div>
+      </div>
+    </section>
    </section>
   </main>
 </div>
@@ -1720,7 +1738,8 @@ const AYUDA_PESTANA = {
 };
 const AYUDA_GENERAL = [
   ["Buscar empleos", "Pulsa «Buscar empleos». Tarda unos 15 a 20 minutos; la barra muestra en qué portal va."],
-  ["Respaldos", "«Respaldar ahora» copia la base. Hay un respaldo automático por día y se guardan los últimos 30."],
+  ["Respaldos", "En Ajustes > Datos, «Respaldar ahora» copia la base. Hay un respaldo automático por día y se guardan los últimos 30."],
+  ["Ajustes", "Puestos, exclusiones, exportar a Excel, respaldos, tema, contraste y avisos."],
   ["Adaptar a tu perfil", "La búsqueda viene configurada para un perfil de TI junior en Chile. Para otro perfil, cambia config.py. Guía completa en TUTORIAL.md."]
 ];
 function abrirAyuda(origen) {
@@ -1745,7 +1764,8 @@ function descargar(formato, alcance) {
   enlace.click();
   enlace.remove();
 }
-$("btn-exportar-csv").addEventListener("click", () => descargar("csv", alcanceExportar(vista())));
+$("btn-exportar-csv").addEventListener("click", () => descargar("csv", alcanceExportar("ofertas")));
+$("btn-exportar-csv-seg").addEventListener("click", () => descargar("csv", alcanceExportar("seguimiento")));
 $("btn-exportar-json").addEventListener("click", () => descargar("json", "todas"));
 $("btn-respaldo").addEventListener("click", async e => {
   const boton = e.currentTarget;
