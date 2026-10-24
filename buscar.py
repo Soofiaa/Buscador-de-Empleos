@@ -30,6 +30,8 @@ import laborum
 import getonboard
 import himalayas
 import jobicy
+import exclusiones
+import filtros
 import puestos
 import telemetria
 import trabajando
@@ -136,6 +138,42 @@ def guardar_soporte(con, datos) -> dict:
     with transaccion(con):
         con.execute("INSERT OR REPLACE INTO ajustes (clave, valor) VALUES ('soporte', ?)", (json.dumps({"incluir": datos["incluir"]}),))
     return {"incluir": datos["incluir"]}
+
+
+def exclusiones_por_defecto() -> dict:
+    """Las listas de config.py, en la forma que usa la página."""
+    return {"empresas": list(config.EXCLUIR_EMPRESAS),
+            "titulo": list(config.EXCLUIR_PRACTICA_TITULO),
+            "descripcion": list(config.EXCLUIR_PRACTICA_DESC)}
+
+
+def leer_exclusiones(con):
+    """Exclusiones guardadas (clave 'exclusiones') o None si no hay ninguna válida: en ese caso rige config."""
+    fila = con.execute("SELECT valor FROM ajustes WHERE clave = 'exclusiones'").fetchone()
+    if not fila:
+        return None
+    try:
+        limpias, errores = exclusiones.validar(json.loads(fila[0]))
+    except (ValueError, TypeError):
+        return None
+    return None if errores else limpias
+
+
+def aplicar_exclusiones(con) -> None:
+    """Carga las exclusiones guardadas en el clasificador. Llamar antes de clasificar."""
+    filtros.fijar_exclusiones(leer_exclusiones(con))
+
+
+def guardar_exclusiones(con, datos) -> dict:
+    """POST /api/ajustes/exclusiones: {empresas, titulo, descripcion}. Si algo no pasa la validación, no se guarda."""
+    limpias, errores = exclusiones.validar(datos)
+    if errores:
+        raise ErrorDatos(400, "; ".join(errores))
+    with transaccion(con):
+        con.execute("INSERT OR REPLACE INTO ajustes (clave, valor) VALUES ('exclusiones', ?)",
+                    (json.dumps(limpias, ensure_ascii=False),))
+    aplicar_exclusiones(con)
+    return limpias
 
 
 def terminos_puestos_default() -> list[str]:
@@ -410,6 +448,7 @@ def guardar(con, filas: list[dict]) -> int:
 def reclasificar(con) -> Counter:
     """Re-aplica la configuración actual a todo lo guardado (conserva el estado). Las ofertas ingresadas a mano no
     se tocan: su clasificación la decidiste tú."""
+    aplicar_exclusiones(con)
     for fila in con.execute("SELECT url, raw FROM ofertas WHERE COALESCE(fuente, '') != 'manual'").fetchall():
         cl = clasificar(json.loads(fila["raw"]))
         con.execute(
@@ -437,6 +476,7 @@ def reclasificar_dirigida(con, escribir: bool = True, seleccion=_afectada_por_so
     """Re-aplica la clasificación SOLO a las ofertas de la selección, y solo escribe las que cambian. A diferencia de
     reclasificar(), no toca el resto (aunque el código actual las clasificara distinto). Nunca toca el estado ni las
     columnas de seguimiento. Devuelve los cambios [{url, titulo, antes, despues}]; con escribir=False solo simula."""
+    aplicar_exclusiones(con)
     def calcular():
         cambios = []
         for fila in con.execute("SELECT * FROM ofertas").fetchall():
@@ -699,6 +739,7 @@ def _pausa_jobspy(sitio: str) -> float:
 def buscar_ofertas(con) -> int:
     from jobspy import scrape_jobs  # import aquí: los tests no lo necesitan
     _vigilar_429()
+    aplicar_exclusiones(con)   # las exclusiones que Sofia guardó, antes de clasificar lo que llegue
 
     lugares = list(config.UBICACIONES) + ([REMOTO] if config.INCLUIR_REMOTO else [])
     terminos_indeed = leer_puestos(con)     # la lista que Sofia editó, o la de config

@@ -191,9 +191,21 @@
   .lateral { background:var(--panel); border-right:1px solid var(--borde); padding:22px 16px 28px;
              position:sticky; top:0; height:100vh; overflow-y:auto; }
   .principal { padding:26px 36px 48px; width:100%; max-width:1280px; margin:0; box-sizing:border-box; min-width:0; }
+  /* barra derecha (puestos y exclusiones): fija a la derecha en pantallas anchas; en las angostas va debajo */
+  .lateral-derecha { background:var(--panel); border-left:1px solid var(--borde); padding:22px 16px 28px;
+                     position:sticky; top:0; height:100vh; overflow-y:auto; box-sizing:border-box; }
+  @media (min-width:1200px) {
+    .app { grid-template-columns:304px minmax(0,1fr) 300px; }
+    .lateral-derecha { grid-column:3; }
+  }
+  @media (max-width:1199px) and (min-width:861px) {
+    .app { grid-template-columns:304px minmax(0,1fr); }
+    .lateral-derecha { grid-column:1 / -1; position:static; height:auto; border-left:0; border-top:1px solid var(--borde); }
+  }
   @media (max-width:860px) {
     .app { grid-template-columns:minmax(0,1fr); }
     .lateral { position:static; height:auto; border-right:0; border-bottom:1px solid var(--borde); }
+    .lateral-derecha { grid-column:auto; position:static; height:auto; border-left:0; border-top:1px solid var(--borde); }
     .principal { padding:20px 16px 40px; }
   }
 
@@ -518,11 +530,6 @@
       <div class="sub" id="estado-respaldo" role="status" style="margin:6px 2px 0; font-size:.78rem;"></div>
     </div>
 
-    <div class="seccion-lateral-titulo">Puestos que busco</div>
-    <div class="seccion-lateral" id="puestos-panel">
-      <p class="nota">Lo que busca Indeed. Los cambios se usan en la próxima búsqueda.</p>
-    </div>
-
     <button class="boton sec ancho historial-toggle" id="historial-toggle" type="button" aria-expanded="false" aria-controls="historial">📜 Ver historial de búsquedas</button>
     <nav class="historial" id="historial" aria-label="Historial de búsquedas" data-plegado></nav>
     <div class="badge-db-status" id="estado-db" role="status"><span class="dot-online"></span> <span id="texto-db">Conectando…</span></div>
@@ -546,6 +553,16 @@
     <div class="filtros" id="filtros"></div>
     <div id="lista"></div>
   </main>
+  <aside class="lateral-derecha" aria-label="Configuración de búsqueda">
+    <div class="seccion-lateral-titulo">Puestos que busco</div>
+    <div class="seccion-lateral" id="puestos-panel">
+      <p class="nota">Lo que busca Indeed. Los cambios se usan en la próxima búsqueda.</p>
+    </div>
+    <div class="seccion-lateral-titulo">Exclusiones</div>
+    <div class="seccion-lateral" id="exclusiones-panel">
+      <p class="nota">Lo que nunca aparece. Los cambios se aplican al clasificar.</p>
+    </div>
+  </aside>
 </div>
 <div class="toast-container" id="toast-container" aria-live="polite"></div>
 
@@ -932,6 +949,7 @@ const S = { datos: null, pestana: "ofertas", sel: { tipo: "todas" }, ultima: nul
 try { if (localStorage.getItem("densidad") === "compacta") S.densidad = "compacta"; } catch (e) {}
 S.vistaSeg = "tablero";                           // la primera vez, Tablero; después, lo que se guardó
 try { if (localStorage.getItem("vistaSeguimiento") === "lista") S.vistaSeg = "lista"; } catch (e) {}
+
 // <prefs> pestaña, filtros, agrupación y «Más filtros» se recuerdan en el navegador; datos inválidos se ignoran
 const CLAVE_PREFS = "vistaPrefs";
 function cargarPrefs() {
@@ -951,7 +969,6 @@ function guardarPrefs() {
 }
 cargarPrefs();
 // </prefs>
-
 
 function h(tag, attrs, ...hijos) {
   const e = document.createElement(tag);
@@ -1044,6 +1061,68 @@ async function cargarPuestos() {
   const r = await api("/api/ajustes/puestos");
   if (r.ok) pintarPuestos(r.json.lista);
   else $("puestos-panel").replaceChildren(h("p", { class: "nota" }, "No se pudieron cargar los puestos."));
+}
+
+// ---------- exclusiones (tres listas: empresas, títulos y descripciones; el servidor valida los patrones)
+const EXCLUSIONES_ETIQUETAS = {
+  empresas: ["Empresas", "Nombre de empresa (no distingue mayúsculas ni tildes)."],
+  titulo: ["Títulos", "Expresiones que, si aparecen en el título, descartan la oferta."],
+  descripcion: ["Descripciones", "Expresiones que, si aparecen en la descripción, descartan la oferta."],
+};
+// misma regla que el servidor: 2 a 80 caracteres en empresas; títulos y descripciones se validan como patrones
+function validarExclusionLocal(clave, p) {
+  if (!p) return "vacío";
+  if (p.length > 80) return "como máximo 80 caracteres";
+  if (clave !== "empresas") { try { new RegExp(p); } catch (e) { return "no es un patrón válido"; } }
+  return "";
+}
+function pintarExclusiones(datos) {
+  const panel = $("exclusiones-panel");
+  const borrador = { empresas: [...datos.empresas], titulo: [...datos.titulo], descripcion: [...datos.descripcion] };
+  const errores = h("div", { class: "sub", role: "alert", style: "color:var(--rojo); font-size:.78rem; margin-top:4px;" });
+  const bloques = Object.keys(EXCLUSIONES_ETIQUETAS).map(clave => {
+    const [titulo, ayuda] = EXCLUSIONES_ETIQUETAS[clave];
+    const campo = h("input", { type: "text", maxlength: "80", placeholder: "Agregar", "aria-label": "Nueva " + titulo.toLowerCase(), autocomplete: "off" });
+    const ul = h("ul", { style: "list-style:none; padding:0; margin:4px 0 8px; max-height:140px; overflow:auto;" });
+    const pintarItems = () => ul.replaceChildren(...borrador[clave].map((p, i) =>
+      h("li", { style: "display:flex; align-items:center; justify-content:space-between; gap:6px; padding:2px 0; font-size:.82rem;" },
+        h("span", { style: "overflow-wrap:anywhere;" }, p),
+        h("button", { type: "button", class: "btn-manual-header", "aria-label": "Quitar " + p, style: "padding:0 6px;",
+          onclick: () => { borrador[clave].splice(i, 1); pintarItems(); errores.textContent = ""; } }, "✕"))));
+    const agregar = () => {
+      const p = campo.value.replace(/\s+/g, " ").trim();
+      if (!p) return;
+      const motivo = validarExclusionLocal(clave, p);
+      if (motivo) { errores.textContent = `«${p}»: ${motivo}.`; return; }
+      if (borrador[clave].some(x => x.toLowerCase() === p.toLowerCase())) { errores.textContent = `«${p}»: ya está en la lista.`; return; }
+      borrador[clave].push(p); campo.value = ""; errores.textContent = ""; pintarItems(); campo.focus();
+    };
+    campo.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); agregar(); } });
+    pintarItems();
+    return h("div", { style: "margin-bottom:10px;" },
+      h("div", { style: "font-weight:600; font-size:.86rem;" }, titulo),
+      h("p", { class: "nota", style: "margin:2px 0 4px;" }, ayuda),
+      h("div", { style: "display:flex; gap:6px;" }, campo, h("button", { type: "button", class: "boton sec", onclick: agregar }, "Agregar")),
+      ul);
+  });
+  const guardar = h("button", { class: "boton sec ancho", type: "button", style: "font-size:.8rem; padding:7px 8px; justify-content:center;" }, "💾 Guardar exclusiones");
+  guardar.onclick = async () => {
+    errores.textContent = "";
+    guardar.disabled = true;
+    const r = await api("/api/ajustes/exclusiones", borrador);
+    guardar.disabled = false;
+    if (!r.ok) { errores.textContent = mensajeError(r.status, r.json); return; }
+    mostrarAviso("Exclusiones guardadas: se aplican a lo que llegue y a la reclasificación");
+    pintarExclusiones(r.json);
+  };
+  panel.replaceChildren(
+    h("p", { class: "nota" }, "Lo que nunca aparece. Los cambios se aplican al clasificar."),
+    ...bloques, errores, guardar);
+}
+async function cargarExclusiones() {
+  const r = await api("/api/ajustes/exclusiones");
+  if (r.ok) pintarExclusiones(r.json);
+  else $("exclusiones-panel").replaceChildren(h("p", { class: "nota" }, "No se pudieron cargar las exclusiones."));
 }
 
 async function cargar() {
@@ -1511,7 +1590,7 @@ $("btn-manual").addEventListener("click", e => abrirManual(e.currentTarget));
 const AYUDA_PESTANA = {
   ofertas: { titulo: "Ofertas", texto: "Las ofertas que la app considera relevantes y que aún no decidiste. Revisa cada una: abre el aviso con el título o con ↗, y cambia su estado desde la tarjeta. Si no te interesa, márcala como Descartada: sale de esta lista y queda en Descartadas." },
   seguimiento: { titulo: "Seguimiento", texto: "Las ofertas en proceso (revisadas, postuladas o en entrevista). En Tablero, arrastra cada tarjeta a su etapa, o usa «Mover a…». Cada movimiento tiene «Deshacer». Con «⚡ Gestionar proceso» anotas la fecha de postulación, la fase, las notas y el sueldo." },
-  sin_descripcion: { titulo: "Sin texto", texto: "Ofertas que llegaron sin descripción (hoy, LinkedIn): la app no puede revisar su experiencia ni su nivel. Abre el aviso con ↗, copia la descripción completa y pégala en su tarjeta con «Guardar descripción». Si cumple, pasa a Ofertas; si no, queda descartada." },
+  sin_descripcion: { titulo: "Descripción desconocida", texto: "Ofertas que llegaron sin descripción (hoy, LinkedIn): la app no puede revisar su experiencia ni su nivel. Abre el aviso con ↗, copia la descripción completa y pégala en su tarjeta con «Guardar descripción». Si cumple, pasa a Ofertas; si no, queda descartada." },
   fuera_perfil: { titulo: "Fuera de perfil", texto: "Ofertas que la app apartó por no encajar con tu perfil, por ejemplo soporte o mesa de ayuda. Revísalas por si alguna te sirve; la razón de cada una aparece en su tarjeta. El interruptor «Incluir soporte TI» decide si se ven también en Ofertas." },
   sospechosas: { titulo: "Sospechosas", texto: "Ofertas con señales de posible estafa: piden un pago, datos bancarios o contacto solo por WhatsApp. No postules a ninguna sin verificar la empresa por otro medio." },
   descartadas_usuario: { titulo: "Descartadas", texto: "Ofertas que tú descartaste. Para recuperar una, abre su tarjeta y cambia su estado a otro (Nueva, Revisada, etc.)." },
@@ -1858,6 +1937,7 @@ for (const b of busquedasManuales()) {
 
 cargar();
 cargarPuestos();
+cargarExclusiones();
 </script>
 </body>
 </html>

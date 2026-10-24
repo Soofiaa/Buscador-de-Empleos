@@ -127,6 +127,27 @@ def _hay(patrones, t) -> bool:
     return any(re.search(p, t) for p in patrones)
 
 
+# Exclusiones activas. Las rellena buscar.py con lo guardado en la página; si nunca se guardó nada, son las de config.
+_EXCLUSIONES = None
+
+
+def fijar_exclusiones(datos) -> None:
+    """Usa las exclusiones guardadas (dict con empresas, titulo, descripcion). None vuelve a las de config."""
+    global _EXCLUSIONES
+    _EXCLUSIONES = None if datos is None else {
+        "empresas": [normalizar(x) for x in datos["empresas"]],
+        "titulo": list(datos["titulo"]),
+        "descripcion": list(datos["descripcion"]),
+    }
+
+
+def exclusiones_activas() -> dict:
+    if _EXCLUSIONES is not None:
+        return _EXCLUSIONES
+    return {"empresas": [normalizar(x) for x in config.EXCLUIR_EMPRESAS],
+            "titulo": config.EXCLUIR_PRACTICA_TITULO, "descripcion": config.EXCLUIR_PRACTICA_DESC}
+
+
 # ------------------------------------------------------------------ extracción de datos
 def detectar_modalidad(t: str, d: str, es_remoto: bool):
     """Devuelve (modalidad, evidencia) para poder auditar por qué se decidió."""
@@ -364,10 +385,11 @@ def clasificar(o: dict) -> dict:
         res.update(categoria=categoria, razon=razon)
         return res
 
-    # exclusiones absolutas
-    if any(x in e for x in config.EXCLUIR_EMPRESAS):
+    # exclusiones absolutas (las editadas en la página, o las de config si no hay ninguna guardada)
+    exc = exclusiones_activas()
+    if any(x in e for x in exc["empresas"]):
         return fin("descartada", "empresa excluida")
-    if _hay(config.EXCLUIR_PRACTICA_TITULO, t) or _hay(config.EXCLUIR_PRACTICA_DESC, d):
+    if _hay(exc["titulo"], t) or _hay(exc["descripcion"], d):
         return fin("descartada", "práctica / estudiante")
     if re.search(r"\btrainee\b", t) and not re.search(r"egresad|titulad", d):
         return fin("descartada", "trainee sin mención de titulados")
