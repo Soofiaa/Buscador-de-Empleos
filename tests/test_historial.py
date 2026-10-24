@@ -272,6 +272,7 @@ def test_todos_los_textos_con_contador_concuerdan_en_singular_y_plural():
     assert r == {
         "activas": ["0 activas", "1 activa", "2 activas"],
         "relevantesNuevas": ["0 relevantes nuevas", "1 relevante nueva", "2 relevantes nuevas"],
+        "procesosEnCurso": ["0 procesos en curso", "1 proceso en curso", "2 procesos en curso"],
         "ofertasRelevantesNuevas": ["0 ofertas relevantes nuevas", "1 oferta relevante nueva", "2 ofertas relevantes nuevas"],
         "busquedas": ["0 búsquedas", "1 búsqueda", "2 búsquedas"],
         "busquedasRegistradas": ["0 búsquedas registradas", "1 búsqueda registrada", "2 búsquedas registradas"],

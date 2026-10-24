@@ -534,7 +534,7 @@
     <div class="seccion-lateral-titulo">Gestión de Datos</div>
     <div class="seccion-lateral">
       <div class="acciones-datos" style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
-        <button class="boton sec" id="btn-exportar-csv" type="button" title="Descargar la pestaña actual (Seguimiento u Ofertas) para Excel" style="font-size:.78rem; padding:7px 4px; justify-content:center;">📥 CSV / Excel</button>
+        <button class="boton sec" id="btn-exportar-csv" type="button" title="Descargar para Excel lo que estás viendo: Seguimiento si estás en ese apartado; si no, las ofertas" style="font-size:.78rem; padding:7px 4px; justify-content:center;">📥 CSV / Excel</button>
         <button class="boton sec" id="btn-exportar-json" type="button" title="Descargar todas las ofertas en JSON (respaldo legible)" style="font-size:.78rem; padding:7px 4px; justify-content:center;">📦 Respaldo JSON</button>
       </div>
       <button class="boton sec ancho" id="btn-respaldo" type="button" title="Copia exacta de la base a tu carpeta de respaldos" style="margin-top:6px; font-size:.8rem; padding:7px 8px; justify-content:center;">💾 Respaldar ahora</button>
@@ -546,7 +546,7 @@
     <div class="badge-db-status" id="estado-db" role="status"><span class="dot-online"></span> <span id="texto-db">Conectando…</span></div>
   </aside>
   <main class="principal">
-   <section class="apartado" id="apartado-ofertas" tabindex="-1" aria-label="Ofertas">
+   <section class="apartado" id="vista-lista" tabindex="-1" aria-label="Ofertas">
     <header class="encabezado">
       <div class="encabezado-fila">
         <div>
@@ -564,14 +564,6 @@
     <nav class="pestanas" id="pestanas" role="tablist" aria-label="Categorías de ofertas"></nav>
     <div class="filtros" id="filtros"></div>
     <div id="lista"></div>
-   </section>
-   <section class="apartado" id="apartado-seguimiento" tabindex="-1" aria-labelledby="titulo-seguimiento" hidden>
-    <h2 class="titulo-sel" id="titulo-seguimiento">Seguimiento</h2>
-    <div class="aviso-provisional">
-      <p>Aquí quedarán el tablero y la lista de tus postulaciones, a todo el ancho.</p>
-      <p>Por ahora están en <b>Ofertas</b>, pestaña «Seguimiento».</p>
-      <a class="boton" href="#ofertas" id="ir-seguimiento">Ir a la pestaña Seguimiento</a>
-    </div>
    </section>
    <section class="apartado" id="apartado-metricas" tabindex="-1" aria-labelledby="titulo-metricas" hidden>
     <h2 class="titulo-sel" id="titulo-metricas">Métricas</h2>
@@ -709,6 +701,7 @@ const TXT = {
   ofertasRelevantesNuevas: n => plural(n, "oferta relevante nueva", "ofertas relevantes nuevas"),
   busquedas: n => plural(n, "búsqueda", "búsquedas"),
   busquedasRegistradas: n => plural(n, "búsqueda registrada", "búsquedas registradas"),
+  procesosEnCurso: n => plural(n, "proceso en curso", "procesos en curso"),
   encontradas: n => plural(n, "encontrada", "encontradas"),
   nuevasRelevantes: n => plural(n, "nueva relevante", "nuevas relevantes"),
   errores: n => plural(n, "error", "errores"),
@@ -998,8 +991,7 @@ function apartadoDeHash(hash) {
 const ESTADOS = ["nueva", "revisada", "postulada", "entrevista", "descartada"];
 const ETIQUETAS_ESTADO = { nueva: "🌱 Nueva", revisada: "🔍 Revisada", postulada: "✉️ Postulada", entrevista: "🎯 En Entrevista", descartada: "❌ Descartada" };
 const PESTANAS = [
-  ["ofertas", "Ofertas"], ["seguimiento", "Seguimiento"],
-  ["fuera_perfil", "Fuera de perfil"],
+  ["ofertas", "Ofertas"], ["fuera_perfil", "Fuera de perfil"],
   ["sospechosas", "Sospechosas"], ["descartadas_usuario", "Descartadas"], ["descartadas", "Descartadas por filtros"]
 ];
 const FILTROS_VACIOS = () => ({ texto: "", estado: "activas", prioridad: "", modalidad: "", fuente: "", tipo: "" });
@@ -1016,6 +1008,8 @@ function cargarPrefs() {
     const p = JSON.parse(localStorage.getItem(CLAVE_PREFS) || "null");
     if (!p || typeof p !== "object") return;
     if (PESTANAS.some(([id]) => id === p.pestana)) S.pestana = p.pestana;
+    // antes Seguimiento era una pestaña: si quedó guardada y la dirección no pide otro apartado, se abre ese apartado
+    else if (p.pestana === "seguimiento" && !location.hash) S.apartado = "seguimiento";
     if (p.agrupar === "prioridad" || p.agrupar === "fuente") S.agrupar = p.agrupar;
     if (typeof p.masFiltros === "boolean") S.masFiltros = p.masFiltros;
     if (p.f && typeof p.f === "object") {
@@ -1028,6 +1022,8 @@ function guardarPrefs() {
 }
 cargarPrefs();
 // </prefs>
+// lo que muestra la vista de lista: en el apartado Seguimiento, el seguimiento; si no, la pestaña elegida en Ofertas
+const vista = () => S.apartado === "seguimiento" ? "seguimiento" : S.pestana;
 
 function h(tag, attrs, ...hijos) {
   const e = document.createElement(tag);
@@ -1315,7 +1311,12 @@ try { contrasteGuardado = localStorage.getItem("contraste"); } catch (e) {}
 aplicarContraste(contrasteGuardado !== "normal");
 
 // ---------- columna izquierda: historial
-function elegir(sel) { S.sel = sel; pintar(); }
+// el historial filtra Ofertas: al elegir una búsqueda desde otro apartado, se vuelve a Ofertas
+function elegir(sel) {
+  S.sel = sel;
+  if (S.apartado !== "ofertas") { irApartado("ofertas", false); history.pushState(null, "", "#ofertas"); }
+  pintar();
+}
 
 // en móvil el historial empieza plegado; el botón lo abre y lo cierra (aria-expanded refleja el estado)
 $("historial-toggle").addEventListener("click", e => {
@@ -1374,6 +1375,12 @@ function pintarUltima() {
 // ---------- encabezado de la columna principal
 function pintarEncabezado() {
   const sel = S.sel, cs = corridas();
+  if (vista() === "seguimiento") {
+    $("titulo-sel").textContent = "Seguimiento";
+    $("sub-sel").textContent = S.datos ? TXT.procesosEnCurso(listaDe(S.datos, "seguimiento", sel).length) + " (revisadas, postuladas o en entrevista)" : "";
+    $("fuentes-sel").hidden = true; $("panel-corrida").hidden = true;
+    return;
+  }
   $("titulo-sel").textContent = tituloSeleccion(sel, cs);
   let sub = "";
   if (sel.tipo === "todas") sub = cs.length ? TXT.busquedasRegistradas(cs.length) : "";
@@ -1418,7 +1425,7 @@ function pintarEncabezado() {
 function pasa(o) {
   const f = S.f;
   if (f.texto && !coincideTexto(o, f.texto)) return false;
-  if (S.pestana === "ofertas" && f.estado !== "activas" && f.estado !== "" && o.estado !== f.estado) return false;
+  if (vista() === "ofertas" && f.estado !== "activas" && f.estado !== "" && o.estado !== f.estado) return false;
   if (f.prioridad && o.prioridad !== f.prioridad) return false;
   if (f.modalidad && o.modalidad !== f.modalidad) return false;
   if (f.fuente && o.fuente !== f.fuente) return false;
@@ -1448,15 +1455,15 @@ const PESTANAS_PRINCIPAL = new Set(["ofertas", "seguimiento", "descartadas_usuar
 // "Sin descripción" trae su propia lista, pero se ve y se trabaja como Ofertas: tarjeta completa y los mismos filtros
 const PESTANAS_COMPLETAS = new Set([...PESTANAS_PRINCIPAL, "sin_descripcion"]);
 function pintarFiltros() {
-  const base = PESTANAS_PRINCIPAL.has(S.pestana) ? gestionadas(S.datos) : (S.datos[S.pestana] || []);
+  const base = PESTANAS_PRINCIPAL.has(vista()) ? gestionadas(S.datos) : (S.datos[vista()] || []);
   const unicos = campo => [...new Set(base.map(o => o[campo]).filter(Boolean))].sort();
   const txt = h("input", { type: "search", placeholder: "Buscar por cargo, empresa, stack o notas… (Pulsa / para buscar)", "aria-label": "Buscar", value: S.f.texto,
     oninput: e => { S.f.texto = e.target.value; pintarLista(); } });
   const partes = [txt];
-  if (S.pestana === "ofertas") partes.push(selector("estado", "Estado", ["nueva", "revisada"], [h("option", { value: "activas" }, "Estado: activas"), h("option", { value: "" }, "Estado: todas")]));
+  if (vista() === "ofertas") partes.push(selector("estado", "Estado", ["nueva", "revisada"], [h("option", { value: "activas" }, "Estado: activas"), h("option", { value: "" }, "Estado: todas")]));
   // secundarios (prioridad, modalidad, tipo, fuente) van plegados en «Más filtros»; se abre solo si hay alguno activo
   const secundarios = [];
-  if (PESTANAS_COMPLETAS.has(S.pestana)) {
+  if (PESTANAS_COMPLETAS.has(vista())) {
     secundarios.push(selector("prioridad", "Prioridad", ["Alta", "Media", "Baja"]), selector("modalidad", "Modalidad", unicos("modalidad")), selector("tipo", "Tipo", unicos("tipo")));
   }
   const fuentesConocidas = ["indeed", "linkedin", "chiletrabajos", "bne", "trabajando", "chumi", "laborum", "getonboard", "glassdoor", "himalayas", "jobicy"];
@@ -1467,7 +1474,7 @@ function pintarFiltros() {
       ontoggle: e => { S.masFiltros = e.target.open; guardarPrefs(); } },
     h("summary", {}, "Más filtros" + (activos ? " · " + activos + (activos === 1 ? " activo" : " activos") : "")),
     h("div", { class: "filtros-extra-grid" }, secundarios)));
-  if (S.pestana === "ofertas") {
+  if (vista() === "ofertas") {
     const g = h("select", { "aria-label": "Agrupar", onchange: e => { S.agrupar = e.target.value; pintarLista(); } },
       h("option", { value: "prioridad" }, "Agrupar: prioridad"), h("option", { value: "fuente" }, "Agrupar: fuente"));
     g.value = S.agrupar; partes.push(g);
@@ -1717,7 +1724,7 @@ const AYUDA_GENERAL = [
   ["Adaptar a tu perfil", "La búsqueda viene configurada para un perfil de TI junior en Chile. Para otro perfil, cambia config.py. Guía completa en TUTORIAL.md."]
 ];
 function abrirAyuda(origen) {
-  const info = AYUDA_PESTANA[S.pestana] || AYUDA_PESTANA.ofertas;
+  const info = AYUDA_PESTANA[vista()] || AYUDA_PESTANA.ofertas;
   const tarjeta = h("div", { class: "modal-tarjeta", role: "dialog", "aria-modal": "true", "aria-labelledby": "ayuda-titulo" },
     h("div", { class: "modal-cabecera" },
       h("h2", { id: "ayuda-titulo" }, "Ayuda: " + info.titulo),
@@ -1738,7 +1745,7 @@ function descargar(formato, alcance) {
   enlace.click();
   enlace.remove();
 }
-$("btn-exportar-csv").addEventListener("click", () => descargar("csv", alcanceExportar(S.pestana)));
+$("btn-exportar-csv").addEventListener("click", () => descargar("csv", alcanceExportar(vista())));
 $("btn-exportar-json").addEventListener("click", () => descargar("json", "todas"));
 $("btn-respaldo").addEventListener("click", async e => {
   const boton = e.currentTarget;
@@ -1980,23 +1987,23 @@ function pintarLista() {
   guardarPrefs();
   const cont = $("lista");
   if (!S.datos) { cont.replaceChildren(h("div", { class: "vacio" }, "Cargando…")); return; }
-  const filas = listaDe(S.datos, S.pestana, S.sel).filter(pasa);
-  const completa = PESTANAS_COMPLETAS.has(S.pestana);
+  const filas = listaDe(S.datos, vista(), S.sel).filter(pasa);
+  const completa = PESTANAS_COMPLETAS.has(vista());
   const pintarItems = lista => S.densidad === "compacta"
     ? [h("div", { class: "tabla-compacta" }, ...lista.map(filaCompacta))] : lista.map(o => tarjeta(o, completa));
-  const cabecera = S.pestana === "seguimiento" ? [selectorVista(), kpisSeguimiento()] : [];
-  if (S.pestana === "seguimiento" && S.vistaSeg === "tablero") { cont.replaceChildren(...cabecera, tableroSeguimiento(filas)); return; }
+  const cabecera = vista() === "seguimiento" ? [selectorVista(), kpisSeguimiento()] : [];
+  if (vista() === "seguimiento" && S.vistaSeg === "tablero") { cont.replaceChildren(...cabecera, tableroSeguimiento(filas)); return; }
   // las «Sin texto» pendientes van al final de Ofertas, aunque no haya ninguna otra
-  const sinTextoFilas = S.pestana === "ofertas" ? listaDe(S.datos, "sin_descripcion", S.sel).filter(pasa) : [];
+  const sinTextoFilas = vista() === "ofertas" ? listaDe(S.datos, "sin_descripcion", S.sel).filter(pasa) : [];
   if (!filas.length && !sinTextoFilas.length) {
-    const msj = S.sel.tipo !== "todas" && !SIN_FILTRO_HISTORIAL.has(S.pestana) ? "No hay ofertas de esta selección en esta pestaña."
-      : S.pestana === "ofertas" ? "No hay ofertas con estos filtros. Prueba «Buscar empleos» o relaja los filtros."
-      : S.pestana === "descartadas_usuario" ? "No tienes ofertas descartadas manualmente."
-      : S.pestana === "sin_descripcion" ? "Nada pendiente. Aquí llegan las ofertas cuyo texto la app no recibe (LinkedIn), para que las abras tú."
+    const msj = S.sel.tipo !== "todas" && !SIN_FILTRO_HISTORIAL.has(vista()) ? "No hay ofertas de esta selección en esta pestaña."
+      : vista() === "ofertas" ? "No hay ofertas con estos filtros. Prueba «Buscar empleos» o relaja los filtros."
+      : vista() === "descartadas_usuario" ? "No tienes ofertas descartadas manualmente."
+      : vista() === "sin_descripcion" ? "Nada pendiente. Aquí llegan las ofertas cuyo texto la app no recibe (LinkedIn), para que las abras tú."
       : "Nada que mostrar aquí.";
     cont.replaceChildren(...cabecera, h("div", { class: "vacio" }, msj)); return;
   }
-  if (S.pestana === "ofertas") {
+  if (vista() === "ofertas") {
     const porFuente = S.agrupar === "fuente", grupos = new Map();
     for (const o of filas) {
       const clave = porFuente ? nombreFuente(o.fuente) : (o.prioridad || "sin prioridad");
@@ -2024,7 +2031,7 @@ function pintarLista() {
     return;
   }
   let nota = null;
-  if (S.pestana === "descartadas" && S.datos.total_descartadas > S.datos.descartadas.length)
+  if (vista() === "descartadas" && S.datos.total_descartadas > S.datos.descartadas.length)
     nota = h("p", { class: "sub" }, S.sel.tipo === "todas"
       ? "Mostrando " + TXT.masRecientes(S.datos.descartadas.length) + " de " + S.datos.total_descartadas + "."
       : "Se busca solo entre " + TXT.descartadasMasRecientes(S.datos.descartadas.length) + " (de " + S.datos.total_descartadas + ").");
@@ -2041,29 +2048,32 @@ function pintarMenu() {
       total === null ? null : h("span", { class: "cuenta" }, total));
   })));
 }
+// Ofertas y Seguimiento comparten la vista de lista (encabezado, filtros, lista); Seguimiento no lleva pestañas
+const SECCION_APARTADO = { ofertas: "vista-lista", seguimiento: "vista-lista", metricas: "apartado-metricas", ajustes: "apartado-ajustes" };
 function aplicarApartado() {
-  for (const [id] of APARTADOS) $("apartado-" + id).hidden = id !== S.apartado;
+  for (const s of new Set(Object.values(SECCION_APARTADO))) $(s).hidden = s !== SECCION_APARTADO[S.apartado];
+  $("pestanas").hidden = S.apartado !== "ofertas";
+  $("vista-lista").setAttribute("aria-label", S.apartado === "seguimiento" ? "Seguimiento" : "Ofertas");
 }
 function irApartado(id, enfocar) {
   if (id === S.apartado) return;
   S.apartado = id;
   aplicarApartado();
-  pintarMenu();
-  if (enfocar) { window.scrollTo(0, 0); $("apartado-" + id).focus({ preventScroll: true }); }
+  if (S.datos) pintar(); else pintarMenu();
+  if (enfocar) { window.scrollTo(0, 0); $(SECCION_APARTADO[id]).focus({ preventScroll: true }); }
 }
 window.addEventListener("hashchange", () => irApartado(apartadoDeHash(location.hash), true));
-$("ir-seguimiento").addEventListener("click", () => { S.pestana = "seguimiento"; guardarPrefs(); pintar(); });
 
 function pintar() { pintarMenu(); pintarHistorial(); pintarEncabezado(); pintarPestanas(); pintarFiltros(); pintarLista(); pintarMetricas(S.datos); }
 
-// atajo global: "/" o Ctrl+K llevan al buscador (desde cualquier apartado: primero vuelve a Ofertas)
+// atajo global: "/" o Ctrl+K llevan al buscador (Ofertas y Seguimiento tienen el suyo; desde otro apartado, vuelve a Ofertas)
 window.addEventListener("keydown", e => {
   if (detalle) return;                            // con el detalle abierto, el teclado es del diálogo
   const activo = document.activeElement;
   const escribiendo = activo && ["INPUT", "TEXTAREA", "SELECT"].includes(activo.tagName);
   if ((e.key === "/" && !escribiendo) || ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k")) {
     e.preventDefault();
-    if (S.apartado !== "ofertas") { irApartado("ofertas", false); history.pushState(null, "", "#ofertas"); }
+    if (SECCION_APARTADO[S.apartado] !== "vista-lista") { irApartado("ofertas", false); history.pushState(null, "", "#ofertas"); }
     const buscador = document.querySelector(".filtros input[type=search]");
     if (buscador) { buscador.focus(); buscador.select(); }
   }

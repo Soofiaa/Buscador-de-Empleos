@@ -39,17 +39,33 @@ def test_la_pagina_tiene_menu_y_una_seccion_por_apartado():
     assert 'id="menu"' in PAGINA
     menu = PAGINA.index('id="menu"')
     assert PAGINA.index('class="lateral"') < menu < PAGINA.index('<main class="principal">')
-    for ident in IDS:
-        assert f'id="apartado-{ident}"' in PAGINA
-    # la vista de siempre (encabezado, pestañas, filtros y lista) vive dentro de Ofertas
-    ofertas = PAGINA.index('id="apartado-ofertas"')
-    fin = PAGINA.index("</section>", ofertas)
+    # Ofertas y Seguimiento comparten la vista de lista (encabezado, pestañas, filtros y lista)
+    lista = PAGINA.index('id="vista-lista"')
+    fin = PAGINA.index("</section>", lista)
     for parte in ('id="titulo-sel"', 'id="pestanas"', 'id="filtros"', 'id="lista"'):
-        assert ofertas < PAGINA.index(parte) < fin
-    # solo Ofertas se ve al cargar sin #hash
-    for ident in IDS[1:]:
+        assert lista < PAGINA.index(parte) < fin
+    # Métricas y Ajustes tienen su sección, oculta al cargar sin #hash
+    for ident in ("metricas", "ajustes"):
         etiqueta = PAGINA[PAGINA.index(f'id="apartado-{ident}"'):]
         assert " hidden>" in etiqueta[: etiqueta.index(">") + 1]
+    assert 'id="apartado-seguimiento"' not in PAGINA and 'id="ir-seguimiento"' not in PAGINA
+
+
+def test_paso3_seguimiento_es_apartado_y_no_pestana():
+    pestanas = PAGINA[PAGINA.index("const PESTANAS = ["):]
+    pestanas = pestanas[: pestanas.index("];")]
+    assert '"seguimiento"' not in pestanas and '"ofertas"' in pestanas
+    assert 'const vista = () => S.apartado === "seguimiento" ? "seguimiento" : S.pestana;' in PAGINA
+    assert '$("pestanas").hidden = S.apartado !== "ofertas";' in PAGINA
+    # lo que pinta la lista usa vista(), no la pestaña de Ofertas
+    for trozo in ('listaDe(S.datos, vista(), S.sel).filter(pasa)', 'const cabecera = vista() === "seguimiento"',
+                  'AYUDA_PESTANA[vista()]', 'alcanceExportar(vista())'):
+        assert trozo in PAGINA
+    # una preferencia vieja con la pestaña «seguimiento» abre el apartado
+    assert 'else if (p.pestana === "seguimiento" && !location.hash) S.apartado = "seguimiento";' in PAGINA
+    # elegir una búsqueda del historial desde otro apartado vuelve a Ofertas
+    elegir = PAGINA[PAGINA.index("function elegir(sel) {"):]
+    assert 'irApartado("ofertas", false)' in elegir[:300]
 
 
 DATOS = {
@@ -83,5 +99,5 @@ def test_paso2_sin_barra_derecha_puestos_y_exclusiones_en_ajustes():
 def test_navegacion_por_hash_y_atajo_vuelve_a_ofertas():
     assert 'window.addEventListener("hashchange"' in PAGINA
     assert 'S.apartado = apartadoDeHash(location.hash);' in PAGINA
-    assert 'if (S.apartado !== "ofertas") { irApartado("ofertas", false);' in PAGINA
+    assert 'if (SECCION_APARTADO[S.apartado] !== "vista-lista") { irApartado("ofertas", false);' in PAGINA
     assert '"aria-current": S.apartado === id ? "page" : null' in PAGINA
