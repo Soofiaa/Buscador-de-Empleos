@@ -513,6 +513,7 @@
     <div class="seccion-lateral">
       <button class="boton ancho" id="buscar" type="button">Buscar empleos</button>
       <p class="nota">Búsqueda completa (~15 a 20 min) en Indeed, LinkedIn, Chiletrabajos, BNE, etc.</p>
+      <div id="avisos" style="margin:8px 0;"></div>
       <div class="progreso" id="progreso" role="status" aria-live="polite"></div>
       <div class="barra" id="barra" role="progressbar" aria-label="Avance de la búsqueda" aria-valuemin="0" hidden><div class="barra-relleno" id="barra-relleno"></div></div>
       <details class="busquedas-manuales" id="busquedas-manuales" style="margin-top:8px; font-size:.8rem;">
@@ -938,6 +939,14 @@ function busquedasManuales() {
     { sitio: "Empleos Públicos", enlaces: [{ texto: "convocatorias abiertas", url: "https://www.empleospublicos.cl/pub/convocatorias/convocatorias.aspx" }] },
   ];
 }
+// Avisos: qué hacer al ver una corrida. La primera vez (ultimaAvisada null) solo se recuerda: no avisa de lo ya existente.
+// Devuelve {avisar, ultima}: avisar solo si la corrida es nueva y trajo ofertas relevantes nuevas.
+function decidirAviso(ultimaAvisada, corridaId, relevantesNuevas) {
+  if (corridaId === null || corridaId === undefined) return { avisar: false, ultima: ultimaAvisada };
+  if (ultimaAvisada === null) return { avisar: false, ultima: corridaId };
+  if (corridaId <= ultimaAvisada) return { avisar: false, ultima: ultimaAvisada };
+  return { avisar: relevantesNuevas > 0, ultima: corridaId };
+}
 // </puras>
 
 const ESTADOS = ["nueva", "revisada", "postulada", "entrevista", "descartada"];
@@ -1164,6 +1173,7 @@ async function estado() {
   S.ultima = e.corrida || null;
   pintarUltima();
   pintarEncabezado();
+  if (!e.buscando) revisarAvisos(S.ultima);
   if (e.buscando && !sondeo) {
     sondeo = setInterval(async () => {
       const x = await api("/api/estado");
@@ -1173,6 +1183,61 @@ async function estado() {
       if (!x.json.buscando) { clearInterval(sondeo); sondeo = null; cargar(); }
     }, 2500);
   }
+}
+
+// ---------- avisos del navegador: cuando termina una búsqueda con ofertas relevantes nuevas
+// Lo que ya se avisó se recuerda en este navegador ("avisoUltimaCorrida"); la primera vez solo se marca, no avisa.
+const CLAVE_AVISO_ULTIMA = "avisoUltimaCorrida", CLAVE_AVISOS = "avisos";
+let revisandoAvisos = false;
+function leerAvisoUltima() {
+  try { const v = localStorage.getItem(CLAVE_AVISO_ULTIMA); return v === null ? null : Number(v); } catch (e) { return null; }
+}
+function guardarAvisoUltima(id) { try { localStorage.setItem(CLAVE_AVISO_ULTIMA, String(id)); } catch (e) {} }
+function avisosActivos() {
+  try { return localStorage.getItem(CLAVE_AVISOS) === "on" && "Notification" in window && Notification.permission === "granted"; } catch (e) { return false; }
+}
+function notificarNuevas(n) {
+  const aviso = new Notification("Búsqueda de empleo", { body: TXT.ofertasRelevantesNuevas(n) + " para revisar", tag: "jt-corrida" });
+  aviso.onclick = () => { window.focus(); aviso.close(); };
+}
+async function revisarAvisos(corrida) {
+  if (!corrida || revisandoAvisos) return;
+  const previa = leerAvisoUltima();
+  if (previa !== null && corrida.id <= previa) return;          // ya visto: no pedir nada
+  revisandoAvisos = true;
+  try {
+    const r = await api("/api/ofertas");
+    if (!r.ok) return;
+    const relevantes = (r.json.principal || []).filter(o => o.corrida_id === corrida.id && o.estado === "nueva").length;
+    const d = decidirAviso(previa, corrida.id, relevantes);
+    if (d.ultima !== previa) guardarAvisoUltima(d.ultima);
+    if (d.avisar && avisosActivos()) notificarNuevas(relevantes);
+  } finally {
+    revisandoAvisos = false;
+  }
+}
+function pintarAvisos() {
+  const cont = $("avisos");
+  if (!("Notification" in window)) {
+    cont.replaceChildren(h("p", { class: "nota" }, "Este navegador no permite avisos."));
+    return;
+  }
+  const activos = avisosActivos();
+  const bloqueado = Notification.permission === "denied";
+  const boton = h("button", { type: "button", class: "boton sec ancho", "aria-pressed": String(activos), style: "font-size:.8rem; padding:7px 8px; justify-content:center;",
+    disabled: bloqueado,
+    onclick: async () => {
+      if (activos) { try { localStorage.setItem(CLAVE_AVISOS, "off"); } catch (e) {} pintarAvisos(); return; }
+      if (Notification.permission !== "granted") await Notification.requestPermission();
+      if (Notification.permission === "granted") {
+        try { localStorage.setItem(CLAVE_AVISOS, "on"); } catch (e) {}
+        mostrarAviso("Avisos activados: te aviso cuando entren ofertas relevantes nuevas");
+      }
+      pintarAvisos();
+    } }, activos ? "🔔 Avisos activados" : "🔕 Avisar al entrar ofertas");
+  cont.replaceChildren(boton, bloqueado
+    ? h("p", { class: "nota" }, "El navegador bloqueó los avisos. Permítelos para este sitio en la configuración del navegador.")
+    : h("p", { class: "nota" }, "Solo funciona con la página abierta en el navegador."));
 }
 
 $("buscar").addEventListener("click", async () => {
@@ -1940,6 +2005,8 @@ for (const b of busquedasManuales()) {
 cargar();
 cargarPuestos();
 cargarExclusiones();
+pintarAvisos();
+setInterval(() => { if (!sondeo) estado(); }, 60000);   // revisa cada minuto si entró una búsqueda nueva
 </script>
 </body>
 </html>

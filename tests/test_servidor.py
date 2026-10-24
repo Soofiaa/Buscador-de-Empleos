@@ -137,7 +137,7 @@ def test_la_pagina_no_tiene_manejadores_en_el_html_ni_botones_de_fases_futuras()
     # Importar (B2) no se hace; lo demás llega en fases posteriores.
     # «Métricas» (C3) y «Kanban» (C2) ya están hechas; por eso no figuran aquí
     for futuro in ("Importar", "/api/importar", "Redactor", "Automatización",
-                   "badge-alertas", "Probar fuentes", "Notification"):
+                   "badge-alertas", "Probar fuentes"):
         assert futuro not in cuerpo, futuro
 
 
