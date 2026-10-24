@@ -617,6 +617,29 @@ filtros y agrupación (fase 1). Lo que el navegador guardó (avisos, avisoUltima
 localStorage sin uso. Ningún cambio escribe en la base, así que no se pierden ofertas ni estados.
 Reversión probada en copia (volumen temporal, 8767): healthy, GET / 200 y huellas idénticas a la referencia.
 
+## Temas con nombres nuevo, ayudas al día y selector de Seguimiento (24-10-2026)
+
+Commits e79ace5, d1440db (temas y ayuda de Métricas y Ajustes), 8e35e23 (tutorial), b060819 (fixtures sin datos
+reales). Solo cambian `web/pagina.html`, `TUTORIAL.md`, `README.md` y pruebas: el servidor y la base no cambian.
+Imagen anterior: job-tracker:pre-ayudas-20261024 (sha256:0602873e29fc21f596f8284d2775afd439d14b8425ead41eaae651843bec0503,
+la del rediseño por apartados). Imagen desplegada: job-tracker-jobtracker:latest = sha256:0191a03a285eab4b43a46da28ee1ffbfe47a8001374f6ffd6a9256c60c011584.
+Referencia: ofertas_pre_ayudas_20261024.db (volumen y C:\Users\sofia\Respaldos\job-tracker-referencias\), sha256
+721591c023215728a729a39062d9417e7e12ca38be8c25068c0f19c9078d9396, integrity_check ok. Salida al detener: 0.
+La base creció desde el despliegue anterior (45 → 46 búsquedas, 4452 → 4516 ofertas, 36 → 37 postuladas): actividad
+normal de las búsquedas, no de este despliegue. Huellas antes y después: RESULTADO OK.
+
+Para volver atrás:
+
+```
+docker compose stop jobtracker
+docker tag job-tracker:pre-ayudas-20261024 job-tracker-jobtracker:latest
+docker compose up -d --no-build
+```
+
+**Qué se pierde al volver:** vuelven los nombres de temas anteriores (Girly, Hombre, Neutro), la ayuda sin Métricas ni
+Ajustes y el tutorial de esta versión. Ningún cambio escribe en la base, así que no se pierden ofertas ni estados.
+Reversión probada en copia (volumen temporal, 8767): healthy, GET / 200 con la página anterior y huellas idénticas.
+
 ## Rediseño por apartados (pasos 1 a 4) y selector único de Seguimiento (23-10-2026)
 
 Commits 7aad48a, 73ab2db, 10fc78e y 26a23a5 (pasos 1 a 4: menú de apartados Ofertas, Seguimiento, Métricas y Ajustes;

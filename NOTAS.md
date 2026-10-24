@@ -3,7 +3,14 @@
 ## Estado actual (se actualiza en cada despliegue; leer al empezar cada sesión)
 
 ### Producción y base
-- **Despliegue del rediseño por apartados (23-10-2026, ~23:40; vigente):** commits `7aad48a`, `73ab2db`, `10fc78e`,
+- **Despliegue de temas nuevos, ayudas al día y selector de Seguimiento (24-10-2026; vigente):** commits `e79ace5`,
+  `d1440db`, `8e35e23` y `b060819` (fixtures sin correo ni token reales). Imagen `job-tracker-jobtracker:latest` =
+  `sha256:0191a03a285eab4b43a46da28ee1ffbfe47a8001374f6ffd6a9256c60c011584`, healthy en `127.0.0.1:8765`. Imagen
+  anterior: `job-tracker:pre-ayudas-20261024` (= `sha256:0602873e…`). Referencia `ofertas_pre_ayudas_20261024.db`,
+  sha256 `721591c0…`, integrity_check ok; salida al detener 0. Huellas OK; HTTP igual que en el despliegue anterior;
+  reversión probada en copia. Base: 46 búsquedas, 4516 ofertas, 37 postuladas, 6 POR VERIFICAR (crecimiento normal).
+  Pendiente: los avisos reales del sistema no se probaron.
+- **Despliegue del rediseño por apartados (23-10-2026, ~23:40; anterior):** commits `7aad48a`, `73ab2db`, `10fc78e`,
   `26a23a5` (menú izquierdo con Ofertas, Seguimiento, Métricas y Ajustes; navegación por #hash; sin barra derecha;
   Datos y Apariencia en Ajustes) y `a677529` (selector único «Tablero · Tarjetas · Compacta» en Seguimiento y
   tutorial al día). Solo cambia `web/pagina.html`. Imagen `job-tracker-jobtracker:latest` =
