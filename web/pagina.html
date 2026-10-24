@@ -537,14 +537,26 @@
     <div id="lista"></div>
    </section>
    <section class="apartado" id="apartado-metricas" tabindex="-1" aria-labelledby="titulo-metricas" hidden>
-    <h2 class="titulo-sel" id="titulo-metricas">Métricas</h2>
-    <p class="sub" style="margin:2px 0 16px;">Sobre todas tus ofertas relevantes, sin importar la búsqueda elegida en el historial.</p>
+    <div class="encabezado-fila">
+      <div>
+        <h2 class="titulo-sel" id="titulo-metricas">Métricas</h2>
+        <div class="sub">Sobre todas tus ofertas relevantes, sin importar la búsqueda elegida en el historial.</div>
+      </div>
+      <div class="acciones-encabezado">
+        <button class="boton sec btn-ayuda-pantalla" type="button" aria-haspopup="dialog" title="Qué hay en esta pantalla y cómo usarla">❓ Ayuda de esta pantalla</button>
+      </div>
+    </div>
     <div id="metricas-panel">
       <p class="nota">Cargando…</p>
     </div>
    </section>
    <section class="apartado" id="apartado-ajustes" tabindex="-1" aria-labelledby="titulo-ajustes" hidden>
-    <h2 class="titulo-sel" id="titulo-ajustes" style="margin-bottom:16px;">Ajustes</h2>
+    <div class="encabezado-fila" style="margin-bottom:16px;">
+      <div><h2 class="titulo-sel" id="titulo-ajustes">Ajustes</h2></div>
+      <div class="acciones-encabezado">
+        <button class="boton sec btn-ayuda-pantalla" type="button" aria-haspopup="dialog" title="Qué hay en esta pantalla y cómo usarla">❓ Ayuda de esta pantalla</button>
+      </div>
+    </div>
     <section class="ajustes-grupo" aria-labelledby="titulo-que-busco">
       <h3 id="titulo-que-busco">Qué busco</h3>
       <p class="sub">Qué se pide a las fuentes y qué se descarta siempre.</p>
@@ -587,16 +599,16 @@
           <h4><label for="tema">Tema</label></h4>
           <select class="selector-tema" id="tema">
             <optgroup label="🌸 Estilo Girly">
-              <option value="girly-claro">🌸 Girly Claro</option>
-              <option value="girly-oscuro">🌺 Girly Oscuro</option>
+              <option value="girly-claro">🌷 Primavera</option>
+              <option value="girly-oscuro">🌹 Rosa nocturna</option>
             </optgroup>
             <optgroup label="👔 Estilo Hombre">
-              <option value="hombre-claro">👔 Hombre Claro</option>
-              <option value="hombre-oscuro">💼 Hombre Oscuro</option>
+              <option value="hombre-claro">🌊 Océano</option>
+              <option value="hombre-oscuro">🌌 Medianoche</option>
             </optgroup>
             <optgroup label="☀️ Neutro">
-              <option value="neutro-claro">☀️ Neutro Claro</option>
-              <option value="neutro-oscuro">🌙 Neutro Oscuro</option>
+              <option value="neutro-claro">🏔️ Niebla</option>
+              <option value="neutro-oscuro">🌑 Carbón</option>
             </optgroup>
           </select>
           <label class="interruptor-soporte" style="margin:12px 0 0;">
@@ -1730,7 +1742,9 @@ $("btn-manual").addEventListener("click", e => abrirManual(e.currentTarget));
 // ---------- ayuda por pantalla: cambia según la pestaña activa (mismo diálogo que los demás: Esc cierra, el foco no sale)
 const AYUDA_PESTANA = {
   ofertas: { titulo: "Ofertas", texto: "Las ofertas que la app considera relevantes y que aún no decidiste. Revisa cada una: abre el aviso con el título o con ↗, y cambia su estado desde la tarjeta. Si no te interesa, márcala como Descartada: sale de esta lista y queda en Descartadas." },
-  seguimiento: { titulo: "Seguimiento", texto: "Las ofertas en proceso (revisadas, postuladas o en entrevista). En Tablero, arrastra cada tarjeta a su etapa, o usa «Mover a…». Cada movimiento tiene «Deshacer». Con «⚡ Gestionar proceso» anotas la fecha de postulación, la fase, las notas y el sueldo." },
+  seguimiento: { titulo: "Seguimiento", texto: "Las ofertas en proceso (revisadas, postuladas o en entrevista). Arriba eliges cómo verlas: Tablero, Tarjetas o Compacta. En Tablero, arrastra cada tarjeta a su etapa, o usa «Mover a…». Cada movimiento tiene «Deshacer». Con «⚡ Gestionar proceso» anotas la fecha de postulación, la fase, las notas y el sueldo." },
+  metricas: { titulo: "Métricas", texto: "Indicadores sobre todas tus ofertas relevantes: cuántas postulaciones, cuántas respuestas, el embudo por etapa y los días promedio. Abajo hay desgloses por fuente, modalidad y tipo, y la actividad de las últimas semanas. Es solo lectura: para cambiar algo, ve a Ofertas o a Seguimiento." },
+  ajustes: { titulo: "Ajustes", texto: "Tres secciones. Qué busco: los puestos que se piden a las fuentes y las exclusiones (lo que nunca debe aparecer); los cambios se usan en la próxima búsqueda. Datos: CSV de Ofertas, CSV de Seguimiento, respaldo JSON y «Respaldar ahora». Apariencia y avisos: tema, contraste reforzado y avisos del navegador. Lo que eliges se recuerda en este navegador." },
   sin_descripcion: { titulo: "Descripción desconocida", texto: "Ofertas que llegaron sin descripción (hoy, LinkedIn): la app no puede revisar su experiencia ni su nivel. Abre el aviso con ↗, copia la descripción completa y pégala en su tarjeta con «Guardar descripción». Si cumple, pasa a Ofertas; si no, queda descartada." },
   fuera_perfil: { titulo: "Fuera de perfil", texto: "Ofertas que la app apartó por no encajar con tu perfil, por ejemplo soporte o mesa de ayuda. Revísalas por si alguna te sirve; la razón de cada una aparece en su tarjeta. El interruptor «Incluir soporte TI» decide si se ven también en Ofertas." },
   sospechosas: { titulo: "Sospechosas", texto: "Ofertas con señales de posible estafa: piden un pago, datos bancarios o contacto solo por WhatsApp. No postules a ninguna sin verificar la empresa por otro medio." },
@@ -1740,11 +1754,11 @@ const AYUDA_PESTANA = {
 const AYUDA_GENERAL = [
   ["Buscar empleos", "Pulsa «Buscar empleos». Tarda unos 15 a 20 minutos; la barra muestra en qué portal va."],
   ["Respaldos", "En Ajustes > Datos, «Respaldar ahora» copia la base. Hay un respaldo automático por día y se guardan los últimos 30."],
-  ["Ajustes", "Puestos, exclusiones, exportar a Excel, respaldos, tema, contraste y avisos."],
   ["Adaptar a tu perfil", "La búsqueda viene configurada para un perfil de TI junior en Chile. Para otro perfil, cambia config.py. Guía completa en TUTORIAL.md."]
 ];
 function abrirAyuda(origen) {
-  const info = AYUDA_PESTANA[vista()] || AYUDA_PESTANA.ofertas;
+  // Métricas y Ajustes tienen su propia ayuda; Ofertas y Seguimiento, la de su pestaña o vista
+  const info = AYUDA_PESTANA[S.apartado === "metricas" || S.apartado === "ajustes" ? S.apartado : vista()] || AYUDA_PESTANA.ofertas;
   const tarjeta = h("div", { class: "modal-tarjeta", role: "dialog", "aria-modal": "true", "aria-labelledby": "ayuda-titulo" },
     h("div", { class: "modal-cabecera" },
       h("h2", { id: "ayuda-titulo" }, "Ayuda: " + info.titulo),
@@ -1756,7 +1770,7 @@ function abrirAyuda(origen) {
     h("div", { class: "modal-acciones" }, h("button", { type: "button", class: "boton", onclick: cerrarDetalle }, "Entendido")));
   montarDialogo(tarjeta, origen, tarjeta.querySelector(".btn-cerrar"));
 }
-$("btn-ayuda").addEventListener("click", e => abrirAyuda(e.currentTarget));
+for (const b of document.querySelectorAll("#btn-ayuda, .btn-ayuda-pantalla")) b.addEventListener("click", e => abrirAyuda(e.currentTarget));
 
 // ---------- exportar (descarga: el servidor responde con Content-Disposition: attachment)
 function descargar(formato, alcance) {

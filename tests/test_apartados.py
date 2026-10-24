@@ -59,7 +59,7 @@ def test_paso3_seguimiento_es_apartado_y_no_pestana():
     assert '$("pestanas").hidden = S.apartado !== "ofertas";' in PAGINA
     # lo que pinta la lista usa vista(), no la pestaña de Ofertas
     for trozo in ('listaDe(S.datos, vista(), S.sel).filter(pasa)', 'const cabecera = vista() === "seguimiento"',
-                  'AYUDA_PESTANA[vista()]'):
+                  'AYUDA_PESTANA[S.apartado === "metricas"'):
         assert trozo in PAGINA
     # una preferencia vieja con la pestaña «seguimiento» abre el apartado
     assert 'else if (p.pestana === "seguimiento" && !location.hash) S.apartado = "seguimiento";' in PAGINA
@@ -122,6 +122,20 @@ def test_seguimiento_tiene_un_solo_selector_de_vista():
         assert clave in sel
     assert 'if (vista() !== "seguimiento") partes.push(h("div", { class: "selector-vista", role: "group", "aria-label": "Densidad de vista" }' in PAGINA
     assert 'const opcionVistaSeg = () => S.vistaSeg === "tablero" ? "tablero" : S.densidad;' in PAGINA
+
+
+def test_ayuda_de_cada_apartado_y_textos_al_dia():
+    # Métricas y Ajustes tienen su botón de ayuda y su texto; Ofertas y Seguimiento, el suyo
+    for ident in ("metricas", "ajustes"):
+        inicio = PAGINA.index(f'id="apartado-{ident}"')
+        assert 'btn-ayuda-pantalla' in PAGINA[inicio:PAGINA.index("</section>", inicio)]
+    assert PAGINA.count('id="btn-ayuda"') == 1
+    assert 'for (const b of document.querySelectorAll("#btn-ayuda, .btn-ayuda-pantalla"))' in PAGINA
+    assert "metricas: { titulo:" in PAGINA and "ajustes: { titulo:" in PAGINA
+    # los textos nombran lo que hay hoy: el selector de vista de Seguimiento y las secciones de Ajustes
+    assert "Arriba eliges cómo verlas: Tablero, Tarjetas o Compacta" in PAGINA
+    assert "Qué busco" in PAGINA and "Apariencia y avisos" in PAGINA
+    assert 'AYUDA_PESTANA[S.apartado === "metricas" || S.apartado === "ajustes" ? S.apartado : vista()]' in PAGINA
 
 
 def test_navegacion_por_hash_y_atajo_vuelve_a_ofertas():
