@@ -48,20 +48,26 @@ Luego abre **http://127.0.0.1:8765/**. La base se guarda en `ofertas.db`, en la 
 
 ## 4. Recorrido de la pantalla
 
-La pantalla tiene dos columnas.
+La pantalla tiene un menú a la izquierda y, a la derecha, el apartado que elijas.
 
-**Columna izquierda**
+**Menú izquierdo**
+- **Apartados:** Ofertas, Seguimiento, Métricas y Ajustes. Ofertas y Seguimiento muestran cuántas hay. Cada apartado tiene su dirección (`#ofertas`, `#seguimiento`, `#metricas`, `#ajustes`), así que puedes guardarla en favoritos.
 - **Buscar empleos:** lanza una búsqueda en los portales. Tarda unos 15 a 20 minutos. Mientras corre, la barra muestra el avance.
-- **Historial:** las búsquedas anteriores, agrupadas por día. Elige una para ver solo lo que trajo.
-- **Gestión de datos:** exportar a CSV o Excel, descargar un respaldo en JSON y hacer un respaldo de la base.
 - **Buscar a mano:** enlaces a sitios que no admiten búsquedas automáticas (Computrabajo y Empleos Públicos). Se abren en tu navegador.
-- **Contraste reforzado:** colores de texto más legibles. Viene activado; puedes apagarlo.
-- **Tema:** seis combinaciones de color. Se recuerdan en tu navegador.
+- **Historial:** las búsquedas anteriores, agrupadas por día. Elige una para ver en Ofertas solo lo que trajo.
 
-**Columna principal**
-- **Pestañas:** Ofertas, Seguimiento, Sin texto, Fuera de perfil, Sospechosas, Descartadas y Descartadas por filtros.
+**Ofertas**
+- **Pestañas:** Ofertas, Fuera de perfil, Sospechosas, Descartadas y Descartadas por filtros. Las ofertas *Sin texto* aparecen al final de Ofertas (ver más abajo).
 - **Filtros:** búsqueda por texto y estado. Los filtros de prioridad, modalidad, tipo y fuente están en **«Más filtros»**.
 - **Vista:** Tarjetas (con detalle) o Compacta (una línea por oferta).
+- **Atajo:** «/» o Ctrl+K llevan al buscador.
+
+**Métricas:** el embudo de postulaciones, la tasa de respuesta, los procesos activos, desgloses por fuente, modalidad y tipo, y la actividad por semana.
+
+**Ajustes**
+- **Qué busco:** los puestos que se buscan en Indeed y las exclusiones (lo que nunca debe aparecer).
+- **Datos:** exportar a CSV o JSON y hacer un respaldo de la base (ver la sección 9).
+- **Apariencia y avisos:** el tema (seis combinaciones de color), el contraste reforzado (viene activado) y los avisos del navegador cuando entran ofertas nuevas. Todo se recuerda en tu navegador.
 
 ## 5. Buscar empleos
 
@@ -84,7 +90,7 @@ Las ofertas de **Ofertas** son las que la app considera relevantes. Si una te in
 
 ### Sin texto
 
-Algunas fuentes (hoy, LinkedIn) no entregan la descripción del aviso. La app no puede revisar su experiencia ni su nivel, así que las pone en **Sin texto**.
+Algunas fuentes (hoy, LinkedIn) no entregan la descripción del aviso. La app no puede revisar su experiencia ni su nivel, así que las marca como **Sin texto** y las muestra al final de Ofertas.
 
 Para decidirlas:
 1. Abre el aviso con ↗.
@@ -95,10 +101,11 @@ La app la revisa y, si cumple, la pasa a **Ofertas**. Si no cumple, queda descar
 
 ## 7. Seguimiento de postulaciones
 
-La pestaña **Seguimiento** muestra las ofertas que ya postulaste o en las que vas en proceso.
+El apartado **Seguimiento** muestra las ofertas que revisaste, postulaste o en las que vas en proceso. Arriba eliges cómo verlas:
 
 - **Tablero:** cuatro columnas: *Por postular*, *CV enviado*, *Entrevistas* y *Oferta / Cierre*. Arrastra una tarjeta a otra columna para cambiar su etapa. Si no puedes arrastrar (pantalla táctil o teclado), usa el selector **«Mover a…»** de la tarjeta.
-- **Lista:** la misma información en filas, útil para buscar.
+- **Tarjetas:** la misma información en una lista de tarjetas detalladas, útil para buscar.
+- **Compacta:** una fila por oferta.
 - **Resumen:** arriba aparece cuántas ofertas hay en cada columna.
 
 Cada movimiento muestra un aviso con **«Deshacer»**, que vuelve exactamente al estado anterior.
@@ -115,10 +122,12 @@ Si ya tienes esa oferta registrada (mismo cargo, empresa y ciudad, o el mismo en
 
 ## 9. Respaldos y exportación
 
+Todo está en **Ajustes > Datos**.
+
 - **Respaldar ahora:** copia la base completa a la carpeta de respaldos. Se puede usar cada minuto como máximo.
 - **Respaldo automático:** la app guarda una copia por día y conserva las últimas 30.
-- **CSV / Excel:** exporta la pestaña que estás mirando.
-- **Respaldo JSON:** exporta todas las ofertas en un archivo legible.
+- **CSV de Ofertas** y **CSV de Seguimiento:** cada uno exporta lo suyo, para abrir en Excel.
+- **Todo en JSON:** exporta todas las ofertas en un archivo legible.
 
 Con Docker, la carpeta de respaldos se define en `docker-compose.yml`. Conviene elegir una carpeta **fuera de OneDrive** o de cualquier servicio que sincronice archivos, para que la base no se copie a medias.
 

@@ -114,6 +114,16 @@ def test_paso4_datos_y_apariencia_viven_en_ajustes():
     assert 'descargar("csv", alcanceExportar("seguimiento"))' in PAGINA
 
 
+def test_seguimiento_tiene_un_solo_selector_de_vista():
+    # Tablero · Tarjetas · Compacta en un grupo; el de densidad de los filtros no sale en Seguimiento
+    sel = PAGINA[PAGINA.index("function selectorVista() {"):]
+    sel = sel[: sel.index("\n}\n")]
+    for clave in ('boton("tablero"', 'boton("detallada"', 'boton("compacta"'):
+        assert clave in sel
+    assert 'if (vista() !== "seguimiento") partes.push(h("div", { class: "selector-vista", role: "group", "aria-label": "Densidad de vista" }' in PAGINA
+    assert 'const opcionVistaSeg = () => S.vistaSeg === "tablero" ? "tablero" : S.densidad;' in PAGINA
+
+
 def test_navegacion_por_hash_y_atajo_vuelve_a_ofertas():
     assert 'window.addEventListener("hashchange"' in PAGINA
     assert 'S.apartado = apartadoDeHash(location.hash);' in PAGINA

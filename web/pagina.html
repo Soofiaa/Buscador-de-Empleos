@@ -1499,7 +1499,8 @@ function pintarFiltros() {
   }
   const densidad = (valor, texto, titulo) => h("button", { type: "button", class: "btn-vista", "aria-pressed": String(S.densidad === valor), title: titulo,
     onclick: () => { S.densidad = valor; try { localStorage.setItem("densidad", valor); } catch (e) {} pintarLista(); pintarFiltros(); } }, texto);
-  partes.push(h("div", { class: "selector-vista", role: "group", "aria-label": "Densidad de vista" },
+  // en Seguimiento la densidad va en su selector de vista (Tablero · Tarjetas · Compacta)
+  if (vista() !== "seguimiento") partes.push(h("div", { class: "selector-vista", role: "group", "aria-label": "Densidad de vista" },
     densidad("detallada", "🗂️ Tarjetas", "Vista de tarjetas detalladas"), densidad("compacta", "📋 Compacta", "Vista compacta de alta densidad tipo tabla")));
   const vacios = FILTROS_VACIOS();
   if (Object.keys(vacios).some(k => S.f[k] !== vacios[k])) {
@@ -1887,15 +1888,20 @@ function kpisSeguimiento() {                     // cifras reales del embudo de 
 }
 
 // ---------- tablero de Seguimiento (C2)
-function selectorVista() {                       // "📊 Tablero / 📋 Lista", se recuerda en el navegador
-  const boton = (valor, texto) => h("button", { type: "button", class: "btn-vista", "aria-pressed": String(S.vistaSeg === valor),
-    "data-clave": "vista-" + valor, onclick: () => {
-      S.vistaSeg = valor;
-      try { localStorage.setItem("vistaSeguimiento", valor); } catch (e) {}
+// un solo selector en Seguimiento: el tablero o la lista en tarjetas o compacta (ambos se recuerdan en el navegador)
+const opcionVistaSeg = () => S.vistaSeg === "tablero" ? "tablero" : S.densidad;
+function selectorVista() {
+  const boton = (valor, texto, titulo) => h("button", { type: "button", class: "btn-vista", title: titulo,
+    "aria-pressed": String(opcionVistaSeg() === valor), "data-clave": "vista-" + valor, onclick: () => {
+      S.vistaSeg = valor === "tablero" ? "tablero" : "lista";
+      if (valor !== "tablero") { S.densidad = valor; try { localStorage.setItem("densidad", valor); } catch (e) {} }
+      try { localStorage.setItem("vistaSeguimiento", S.vistaSeg); } catch (e) {}
       conFoco($("lista"), pintarLista);
     } }, texto);
   return h("div", { class: "selector-vista", role: "group", "aria-label": "Vista de Seguimiento" },
-    boton("tablero", "📊 Tablero"), boton("lista", "📋 Lista"));
+    boton("tablero", "📊 Tablero", "Columnas por etapa; arrastra para mover"),
+    boton("detallada", "🗂️ Tarjetas", "Lista de tarjetas detalladas"),
+    boton("compacta", "📋 Compacta", "Lista compacta, una fila por oferta"));
 }
 
 let arrastrada = null;                            // la oferta en arrastre (el dataTransfer no se puede leer en dragover)
