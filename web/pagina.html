@@ -433,6 +433,16 @@
   .metricas-bloque h3 { margin:0 0 4px; font-size:.95rem; font-weight:700; color:var(--tinta); }
   .metricas-desgloses { display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:12px; }
   .metrica-barra { display:grid; grid-template-columns:minmax(120px, 170px) 1fr 44px; align-items:center; gap:10px; font-size:.84rem; }
+  /* en la barra derecha (~250 px): una columna, tablas y barras compactas */
+  #metricas-panel .metricas-seccion { gap:12px; }
+  #metricas-panel .metricas-kpis, #metricas-panel .metricas-desgloses { grid-template-columns:minmax(0, 1fr); gap:8px; }
+  #metricas-panel .metricas-kpi-card { padding:10px 12px; }
+  #metricas-panel .metricas-kpi-card .num { font-size:1.4rem; }
+  #metricas-panel .metricas-bloque { padding:10px; }
+  #metricas-panel .metrica-barra { grid-template-columns:minmax(0, 88px) minmax(0, 1fr) 30px; gap:6px; font-size:.78rem; }
+  #metricas-panel table.fuentes { font-size:.76rem; table-layout:fixed; }
+  #metricas-panel table.fuentes th, #metricas-panel table.fuentes td { padding:3px 2px; overflow-wrap:anywhere; }
+  #metricas-panel table.fuentes th:first-child, #metricas-panel table.fuentes td:first-child { width:34%; }
   .metrica-etq { color:var(--suave); font-weight:600; overflow-wrap:anywhere; }
   .metrica-track { background:var(--panel2); border:1px solid var(--borde); border-radius:99px; height:12px; overflow:hidden; display:block; }
   .metrica-relleno { display:block; height:100%; background:var(--accion); border-radius:99px; }
