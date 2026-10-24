@@ -592,3 +592,27 @@ docker compose up -d --no-build
 `
 
 **Qué se pierde al volver:** nada del código; vuelve a la misma versión funcional. No se pierden ofertas ni estados.
+
+## Métricas en la barra derecha y avisos del navegador (fase 3) (23-10-2026)
+
+Commits d519ed2 (fase 1: recordar pestaña, filtros y agrupación), 6c6c664 y 7751107 (métricas, en la barra
+derecha), 2cb86e0 (avisos del navegador), ca1e4f0 (estilos compactos del panel de métricas). La página anterior no
+tenía ni la fase 1 ni las métricas. Imagen anterior: job-tracker:pre-avisos-20261023
+(sha256:c2207ae0b52e34f945515856f7fac5375e6651b519e8ec9ccde45bec2e81b95f, la de las exclusiones, desplegada sin
+registro; ver NOTAS.md). Imagen desplegada: job-tracker-jobtracker:latest =
+sha256:57a228999bd97a737b9e4ce841cfdf988561183158d7a7a11c698abc9c1f2a9a.
+Referencia: ofertas_pre_avisos_20261023.db (volumen y C:\Users\sofia\Respaldos\job-tracker-referencias\), sha256
+ba4b3db52e761560b73caf34970055ce2b960e459dee6a2a5663bea602b755d2, integrity_check ok. Salida al detener: 0.
+
+Para volver atrás:
+
+```
+docker compose stop jobtracker
+docker tag job-tracker:pre-avisos-20261023 job-tracker-jobtracker:latest
+docker compose up -d --no-build
+```
+
+**Qué se pierde al volver:** desaparecen las métricas, el botón «Avisar al entrar ofertas» y la memoria de pestaña,
+filtros y agrupación (fase 1). Lo que el navegador guardó (avisos, avisoUltimaCorrida, vistaPrefs) queda en
+localStorage sin uso. Ningún cambio escribe en la base, así que no se pierden ofertas ni estados.
+Reversión probada en copia (volumen temporal, 8767): healthy, GET / 200 y huellas idénticas a la referencia.

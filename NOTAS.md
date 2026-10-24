@@ -3,11 +3,28 @@
 ## Estado actual (se actualiza en cada despliegue; leer al empezar cada sesión)
 
 ### Producción y base
-- **Despliegue NO registrado de las exclusiones (23-10-2026, ~20:17 hora de Chile; vigente):** encontrado el 23-10 al
+- **Despliegue de métricas en la barra derecha y avisos del navegador, fase 3 (23-10-2026; vigente):** commits
+  `d519ed2` (fase 1: recordar pestaña y filtros), `6c6c664` + `7751107` (métricas, en la barra derecha), `2cb86e0`
+  (avisos), `ca1e4f0` (estilos compactos). Imagen `job-tracker-jobtracker:latest` =
+  `sha256:57a228999bd97a737b9e4ce841cfdf988561183158d7a7a11c698abc9c1f2a9a`, healthy en `127.0.0.1:8765`.
+  Imagen anterior: `job-tracker:pre-avisos-20261023` (= `sha256:c2207ae0…`, la de las exclusiones).
+  Referencia `ofertas_pre_avisos_20261023.db` (volumen y `C:\Users\sofia\Respaldos\job-tracker-referencias\`), sha256
+  `ba4b3db52e761560b73caf34970055ce2b960e459dee6a2a5663bea602b755d2`, integrity_check ok; salida al detener 0.
+  - Línea base: v7; ofertas 4452, corridas 45, historial_estados 290, ajustes 5, terminos_no_disponibles 16,
+    alertas 0, pruebas_fuentes 0; postuladas 36; POR VERIFICAR 6.
+  - Huellas antes, después y después de las comprobaciones: RESULTADO OK, todas las tablas idénticas.
+  - HTTP: `/`, `/api/estado`, `/api/ofertas`, `/api/respaldo` 200; Host y Origin ajenos 403; POST sin origen, con
+    origen inválido o campo no permitido 400; cuerpo grande 413. `error_auto` vacío.
+  - Candidata `jt_revision_avisos` (8766, sobre copia de la base) revisada por Sofia antes. Reversión probada en copia
+    (8767): healthy, huellas idénticas. 111 respaldos anteriores con el mismo sha256.
+  - Pendiente: los avisos reales del sistema no se probaron (el navegador integrado los bloquea); el flujo se probó
+    simulado. Pregunta abierta: «Ofertas 0» con «2 relevantes nuevas» (ya pasaba antes de este despliegue).
+- **Despliegue NO registrado de las exclusiones (23-10-2026, ~20:17 hora de Chile; anterior):** encontrado el 23-10 al
   preparar la fase 3. Imagen `job-tracker-jobtracker:latest` = `sha256:c2207ae0b52e34f945515856f7fac5375e6651b519e8ec9ccde45bec2e81b95f`,
-  healthy en `127.0.0.1:8765`. El código del contenedor coincide con el commit `446a22c` (exclusiones; «Métricas» aún
-  como pestaña): `buscar.py`, `config.py`, `exclusiones.py`, `filtros.py` y `servidor.py` con el mismo sha256 que el
-  árbol de trabajo.
+  healthy en `127.0.0.1:8765`. `buscar.py`, `config.py`, `exclusiones.py`, `filtros.py` y `servidor.py` tenían el
+  mismo sha256 que el árbol de trabajo (los de `446a22c`), pero `web/pagina.html` era otra versión: con exclusiones y
+  barra derecha, SIN la fase 1 (`d519ed2`, recordar pestaña y filtros) y SIN métricas (`6c6c664`). No corresponde a
+  ningún commit; se construyó desde un árbol de trabajo intermedio.
   - Imagen anterior: `job-tracker:pre-puestos-20261023` = `sha256:2509d984…` (la de la reclasificación). Es lo único
     que dejó ese despliegue.
   - **Sin referencia de la base** (no hay `ofertas_pre_*_20261023.db` en el volumen ni en `job-tracker-referencias`),
