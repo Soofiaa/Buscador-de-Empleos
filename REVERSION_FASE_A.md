@@ -616,3 +616,28 @@ docker compose up -d --no-build
 filtros y agrupación (fase 1). Lo que el navegador guardó (avisos, avisoUltimaCorrida, vistaPrefs) queda en
 localStorage sin uso. Ningún cambio escribe en la base, así que no se pierden ofertas ni estados.
 Reversión probada en copia (volumen temporal, 8767): healthy, GET / 200 y huellas idénticas a la referencia.
+
+## Rediseño por apartados (pasos 1 a 4) y selector único de Seguimiento (23-10-2026)
+
+Commits 7aad48a, 73ab2db, 10fc78e y 26a23a5 (pasos 1 a 4: menú de apartados Ofertas, Seguimiento, Métricas y Ajustes;
+sin barra derecha) y a677529 (selector «Tablero · Tarjetas · Compacta» y tutorial). Solo cambia `web/pagina.html`;
+el servidor y la base no cambian. Desplegado sin candidata, a pedido de Sofia. Imagen anterior:
+job-tracker:pre-rediseno-20261023 (sha256:57a228999bd97a737b9e4ce841cfdf988561183158d7a7a11c698abc9c1f2a9a). Imagen
+desplegada: job-tracker-jobtracker:latest = sha256:0602873e29fc21f596f8284d2775afd439d14b8425ead41eaae651843bec0503.
+Referencia: ofertas_pre_rediseno_20261023.db (volumen y C:\Users\sofia\Respaldos\job-tracker-referencias\), sha256
+ba4b3db52e761560b73caf34970055ce2b960e459dee6a2a5663bea602b755d2 (igual a la de los avisos: la base no cambió entre
+ambos despliegues), integrity_check ok. Salida al detener: 0.
+
+Para volver atrás:
+
+```
+docker compose stop jobtracker
+docker tag job-tracker:pre-rediseno-20261023 job-tracker-jobtracker:latest
+docker compose up -d --no-build
+```
+
+**Qué se pierde al volver:** vuelve la pantalla de dos columnas más la barra derecha (puestos, exclusiones y
+métricas), con Seguimiento como pestaña. Las direcciones con #apartado abren Ofertas. La preferencia guardada
+`vistaPrefs` sigue sirviendo. Ningún cambio escribe en la base, así que no se pierden ofertas ni estados.
+Reversión probada en copia (volumen temporal, 8767): healthy, GET / 200 con la página anterior y huellas idénticas a
+la referencia.

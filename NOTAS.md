@@ -3,7 +3,25 @@
 ## Estado actual (se actualiza en cada despliegue; leer al empezar cada sesión)
 
 ### Producción y base
-- **Despliegue de métricas en la barra derecha y avisos del navegador, fase 3 (23-10-2026; vigente):** commits
+- **Despliegue del rediseño por apartados (23-10-2026, ~23:40; vigente):** commits `7aad48a`, `73ab2db`, `10fc78e`,
+  `26a23a5` (menú izquierdo con Ofertas, Seguimiento, Métricas y Ajustes; navegación por #hash; sin barra derecha;
+  Datos y Apariencia en Ajustes) y `a677529` (selector único «Tablero · Tarjetas · Compacta» en Seguimiento y
+  tutorial al día). Solo cambia `web/pagina.html`. Imagen `job-tracker-jobtracker:latest` =
+  `sha256:0602873e29fc21f596f8284d2775afd439d14b8425ead41eaae651843bec0503`, healthy en `127.0.0.1:8765`.
+  Imagen anterior: `job-tracker:pre-rediseno-20261023` (= `sha256:57a22899…`, la de los avisos).
+  Referencia `ofertas_pre_rediseno_20261023.db` (volumen y `C:\Users\sofia\Respaldos\job-tracker-referencias\`),
+  sha256 `ba4b3db5…` (idéntica a la de los avisos), integrity_check ok; salida al detener 0.
+  - Línea base sin cambios: v7; ofertas 4452, corridas 45, historial_estados 290, ajustes 5,
+    terminos_no_disponibles 16; postuladas 36; POR VERIFICAR 6.
+  - Huellas antes, después y después de las comprobaciones: RESULTADO OK, todas las tablas idénticas.
+  - HTTP: `/`, `/api/estado`, `/api/ofertas`, `/api/respaldo` 200; Host y Origin ajenos 403; POST sin origen, con campo
+    no permitido o estado inválido 400; Origin ajeno 403; cuerpo grande 413. `error_auto` vacío.
+  - **Sin candidata en 8766:** Sofia pidió desplegar directo. Se revisó antes con un servidor local sobre una copia
+    de la referencia, y después en producción solo leyendo (los cuatro apartados cargan). Reversión probada en copia
+    (8767): healthy, huellas idénticas. 113 respaldos anteriores con el mismo sha256.
+  - Subido a GitHub (rama `feat/unificar-ofertas`, hasta `a677529`) con aprobación de Sofia, antes de desplegar.
+  - Pendiente: los avisos reales del sistema siguen sin probarse (el navegador integrado los bloquea).
+- **Despliegue de métricas en la barra derecha y avisos del navegador, fase 3 (23-10-2026; anterior):** commits
   `d519ed2` (fase 1: recordar pestaña y filtros), `6c6c664` + `7751107` (métricas, en la barra derecha), `2cb86e0`
   (avisos), `ca1e4f0` (estilos compactos). Imagen `job-tracker-jobtracker:latest` =
   `sha256:57a228999bd97a737b9e4ce841cfdf988561183158d7a7a11c698abc9c1f2a9a`, healthy en `127.0.0.1:8765`.
