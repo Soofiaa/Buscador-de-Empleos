@@ -84,6 +84,14 @@ def test_manual_duplicada_es_409_y_no_crea_nada(srv, repetida):
     assert filas(db) == antes
 
 
+def test_el_aviso_de_duplicada_no_mete_null_en_el_dom():
+    # replaceChildren(null) crea un nodo de texto "null": el botón "Ver la existente" solo se añade si hay existente
+    pagina = (Path(__file__).resolve().parent.parent / "web" / "pagina.html").read_text(encoding="utf-8")
+    linea = next(l for l in pagina.splitlines() if "error.replaceChildren(mensajeManual" in l)
+    assert "null" not in linea
+    assert "if (existente) error.append(" in pagina
+
+
 @pytest.mark.parametrize("malo", [
     {"empresa": "X"}, {"titulo": "X"}, {"titulo": "   ", "empresa": "X"},
     {**MANUAL, "url": "javascript:alert(1)"}, {**MANUAL, "url": "ftp://x.cl"}, {**MANUAL, "url": "https://"},

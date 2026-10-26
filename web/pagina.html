@@ -1715,8 +1715,8 @@ function abrirManual(origen) {
         sueldo_manual: sueldo.value, fase: fase.value, notas: notas.value });
       if (r.status === 201) { cerrarDetalle(); await cargar(); mostrarAviso("Postulación agregada ✓"); return; }
       const existente = r.status === 409 && S.datos ? S.datos.principal.find(x => x.url === r.json.url_existente) : null;
-      error.replaceChildren(mensajeManual(r.status, r.json),
-        existente ? h("button", { type: "button", class: "boton sec", style: "margin-left:8px;", onclick: () => abrirDetalle(existente, $("btn-manual")) }, "Ver la existente") : null);
+      error.replaceChildren(mensajeManual(r.status, r.json));
+      if (existente) error.append(h("button", { type: "button", class: "boton sec", style: "margin-left:8px;", onclick: () => abrirDetalle(existente, $("btn-manual")) }, "Ver la existente"));
       error.hidden = false;
     } },
     h("div", { class: "form-fila" }, grupo("Cargo *", titulo), grupo("Empresa *", empresa)),
