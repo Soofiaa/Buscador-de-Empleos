@@ -21,8 +21,15 @@ Aplicación local en Python + SQLite con interfaz web integrada (`web/pagina.htm
 - `servidor.py`: Servidor HTTP local con API REST y restricciones de origen (bloqueo de CSRF/orígenes ajenos).
 - `buscar.py`, `filtros.py`, `red.py`: Motor central de base de datos, lógica de negocio, clasificación y conexión HTTP con manejo de `robots.txt`.
 - `*.py` (módulos específicos): Conectores para cada fuente (`jooble.py`, `weworkremotely.py`, `arbeitnow.py`, `bne.py`, `trabajando.py`, etc.).
-- `tests/`: Suite completa de pruebas unitarias e de integración (más de 850 pruebas).
-- `NOTAS.md` y `TUTORIAL.md`: Documentación detallada de decisiones técnicas, flujos y guía de uso.
+- `tests/`: Suite completa de pruebas unitarias y de integración (más de 850 pruebas).
+- `NOTAS.md`: decisiones, hallazgos y estado de producción. Leer al empezar cada sesión.
+- `TUTORIAL.md`: guía de uso de la aplicación.
+- `.claude/skills/desplegar/SKILL.md`: procedimiento estándar para desplegar a producción.
+
+## Configuración
+
+- **Jooble** necesita una clave gratuita (uso no comercial) en la variable `JOOBLE_KEY`. Guárdala en un archivo `.env` en la raíz del proyecto (ya está en `.gitignore`, nunca se sube al repositorio); `docker-compose.yml` la pasa al contenedor. Sin clave, Jooble no devuelve ofertas.
+- Las fuentes activas, los términos de búsqueda, las ubicaciones y las ventanas de antigüedad están en `config.py`.
 
 ## Ejecución de Pruebas
 
@@ -32,10 +39,10 @@ Las pruebas se ejecutan con pytest:
 venv\Scripts\python.exe -m pytest -q
 ```
 
-## Despliegue con Docker
+Las pruebas que leen `web/pagina.html` comprueban su estructura, así que conviene correrlas después de cualquier cambio en la interfaz.
 
-El proyecto corre habitualmente en un contenedor Docker con volumen persistente para la base de datos:
+## Despliegue
 
-```bash
-docker compose up -d --build
-```
+La aplicación corre en un contenedor Docker (`jobtracker`, en `127.0.0.1:8765`) con la base de datos en un volumen persistente.
+
+El despliegue a producción no se hace a mano. Sigue el procedimiento de `.claude/skills/desplegar/SKILL.md`: referencia de la base con sha256, huellas antes y después, comprobaciones HTTP y reversión documentada. Nunca se despliega sin aprobación explícita.
