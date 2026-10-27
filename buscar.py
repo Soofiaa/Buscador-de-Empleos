@@ -1138,6 +1138,14 @@ def _revivir_descartada(con, antes, seguimiento: dict, datos: dict) -> dict:
     return {**_con_prioridad_mostrada(guardada), "actualizada": True}
 
 
+def _resumen_oferta(fila) -> dict:
+    """La oferta existente tal como la pide la página (para abrirla en su ficha), sin raw ni claves internas."""
+    o = dict(fila)
+    for k in ("raw", "clave", "clave_base"):
+        o.pop(k, None)
+    return _con_prioridad_mostrada(o)
+
+
 def crear_oferta_manual(con, datos) -> dict:
     """POST /api/oferta/manual: una postulación que no vino de la búsqueda. Si la URL ya existe, o la misma oferta
     (título + empresa + ciudad) ya está con otra URL, no duplica: si estaba descartada, la revive (ver
@@ -1145,6 +1153,9 @@ def crear_oferta_manual(con, datos) -> dict:
     'manual': ni la búsqueda ni las reclasificaciones la modifican."""
     if not isinstance(datos, dict):
         raise ErrorDatos(400, "formato inválido")
+    datos = dict(datos)
+    # «Guardar de todas formas»: el usuario confirma que es otra oferta pese a cargo y empresa iguales (no es un campo)
+    confirmar = datos.pop("confirmar_duplicada", False) is True
     permitidos = {"titulo", "empresa", "url", "ubicacion", "modalidad", "estado", "fecha_postulacion", "notas",
                   "fase", "sueldo_manual", "prioridad_manual"}
     extra = set(datos) - permitidos
@@ -1209,9 +1220,14 @@ def crear_oferta_manual(con, datos) -> dict:
             # una descartada no es un duplicado: se revive con lo que trae el formulario (y queda en el historial)
             if existente["estado"] == "descartada" and estado != "descartada":
                 return _revivir_descartada(con, existente, seguimiento, d)
-            if existente["url"] == fila["url"]:
-                raise ErrorDatos(409, "ya tienes esa URL", url_existente=existente["url"])
-            raise ErrorDatos(409, "ya tienes esa oferta (mismo cargo y empresa)", url_existente=existente["url"])
+            resumen = _resumen_oferta(existente)
+            if existente["url"] == fila["url"]:       # misma URL: no hay forma de guardar dos filas
+                raise ErrorDatos(409, "ya tienes esa URL", url_existente=existente["url"], existente=resumen)
+            if not confirmar:
+                raise ErrorDatos(409, "ya tienes esa oferta (mismo cargo y empresa)", url_existente=existente["url"],
+                                 existente=resumen, confirmable=True)
+            # confirmada: la clave es UNIQUE, así que esta fila lleva un sufijo; la búsqueda la sigue reconociendo por clave_base
+            fila["clave"] = f"{fila['clave']}|forzada:{uuid.uuid4().hex}"
         cols = list(fila)
         con.execute(f"INSERT INTO ofertas ({', '.join(cols)}) VALUES ({', '.join('?' * len(cols))})", [fila[c] for c in cols])
         _cambiar_seguimiento(con, fila["url"], None, seguimiento, "manual")

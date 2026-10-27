@@ -1718,21 +1718,28 @@ function abrirManual(origen) {
   const fase = h("select", { id: "manual-fase" }, h("option", { value: "" }, "Sin fase"), FASES_PIPELINE.map(f => h("option", { value: f.id }, f.nombre)));
   const notas = h("textarea", { id: "manual-notas", maxlength: "5000", rows: "4", placeholder: "Contacto, cómo postulaste, próximos pasos…" });
   const grupo = (etq, campo) => h("div", { class: "form-grupo" }, h("label", { for: campo.id }, etq), campo);
+  const enviar = async confirmar => {
+    error.hidden = true;
+    const r = await api("/api/oferta/manual", { titulo: titulo.value, empresa: empresa.value, url: url.value.trim(), ubicacion: ubicacion.value,
+      modalidad: modalidad.value, estado: estado.value, fecha_postulacion: fecha.value, prioridad_manual: prioridad.value,
+      sueldo_manual: sueldo.value, fase: fase.value, notas: notas.value, ...(confirmar ? { confirmar_duplicada: true } : {}) });
+    if (r.status === 201) { cerrarDetalle(); await cargar(); mostrarAviso("Postulación agregada ✓"); return; }
+    if (r.status === 200 && r.json.actualizada) {
+      cerrarDetalle(); await cargar(); mostrarAviso("Estaba descartada: la reactivé con esta postulación ✓"); return;
+    }
+    // la existente viene en la respuesta: no depende de que esté cargada en la lista de la página
+    const existente = r.status === 409 && r.json.existente ? r.json.existente : null;
+    error.replaceChildren(mensajeManual(r.status, r.json));
+    if (existente) error.append(h("button", { type: "button", class: "boton sec", style: "margin-left:8px;",
+      onclick: () => abrirDetalle(existente, $("btn-manual")) }, "Ver la existente"));
+    if (r.status === 409 && r.json.confirmable) error.append(h("button", { type: "button", class: "boton", style: "margin-left:8px;",
+      onclick: () => enviar(true) }, "Guardar de todas formas"));
+    error.hidden = false;
+  };
   const form = h("form", { class: "modal-form", novalidate: true, onsubmit: async e => {
       e.preventDefault();
-      error.hidden = true;
       if (!titulo.value.trim() || !empresa.value.trim()) { error.replaceChildren("El cargo y la empresa son obligatorios."); error.hidden = false; return; }
-      const r = await api("/api/oferta/manual", { titulo: titulo.value, empresa: empresa.value, url: url.value.trim(), ubicacion: ubicacion.value,
-        modalidad: modalidad.value, estado: estado.value, fecha_postulacion: fecha.value, prioridad_manual: prioridad.value,
-        sueldo_manual: sueldo.value, fase: fase.value, notas: notas.value });
-      if (r.status === 201) { cerrarDetalle(); await cargar(); mostrarAviso("Postulación agregada ✓"); return; }
-      if (r.status === 200 && r.json.actualizada) {
-        cerrarDetalle(); await cargar(); mostrarAviso("Estaba descartada: la reactivé con esta postulación ✓"); return;
-      }
-      const existente = r.status === 409 ? ofertaPorUrl(S.datos, r.json.url_existente) : null;
-      error.replaceChildren(mensajeManual(r.status, r.json));
-      if (existente) error.append(h("button", { type: "button", class: "boton sec", style: "margin-left:8px;", onclick: () => abrirDetalle(existente, $("btn-manual")) }, "Ver la existente"));
-      error.hidden = false;
+      await enviar(false);
     } },
     h("div", { class: "form-fila" }, grupo("Cargo *", titulo), grupo("Empresa *", empresa)),
     h("div", { class: "form-fila" }, grupo("Enlace del aviso", url), grupo("Ubicación", ubicacion)),

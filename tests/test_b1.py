@@ -106,6 +106,38 @@ def test_manual_invalida_es_400(srv, malo):
     assert filas(db) == antes
 
 
+def test_mismo_cargo_y_empresa_sin_ciudad_pide_confirmar_y_trae_la_existente(srv):
+    puerto, db = srv                     # la de la búsqueda es «Santiago»; la nueva no trae ciudad
+    antes = filas(db)
+    st, r = post(puerto, "/api/oferta/manual", {"titulo": "QA Tester", "empresa": "Acme", "estado": "nueva"})
+    assert st == 409 and r["confirmable"] is True and r["url_existente"] == "http://qa"
+    assert r["existente"]["url"] == "http://qa" and r["existente"]["titulo"] == "QA Tester"
+    assert "raw" not in r["existente"] and "clave" not in r["existente"]
+    assert filas(db) == antes
+
+
+def test_guardar_de_todas_formas_crea_una_fila_aparte(srv):
+    puerto, db = srv
+    st, r = post(puerto, "/api/oferta/manual", {"titulo": "QA Tester", "empresa": "Acme", "ubicacion": "Valparaíso",
+                                                "confirmar_duplicada": True})
+    assert st == 201 and r["oferta"]["url"].startswith("manual:")
+    assert len(filas(db)) == 2 and filas(db)["http://qa"]["estado"] == "nueva"
+
+
+def test_confirmar_no_salta_la_misma_url(srv):
+    puerto, db = srv
+    st, r = post(puerto, "/api/oferta/manual", {"titulo": "QA Tester", "empresa": "Acme", "url": "http://qa",
+                                                "confirmar_duplicada": True})
+    assert st == 409 and "confirmable" not in r and r["url_existente"] == "http://qa"
+    assert len(filas(db)) == 1
+
+
+def test_confirmar_debe_ser_booleano_y_no_llega_a_la_base(srv):
+    puerto, db = srv
+    assert post(puerto, "/api/oferta/manual", {"titulo": "X", "empresa": "Y", "confirmar_duplicada": "si"})[0] == 201
+    assert "confirmar_duplicada" not in filas(db)[next(u for u in filas(db) if u.startswith("manual:") and filas(db)[u]["titulo"] == "X")]["raw"]
+
+
 def test_manual_sobre_una_descartada_la_revive_sin_duplicar(srv):
     puerto, db = srv
     post(puerto, "/api/oferta/manual", MANUAL)
