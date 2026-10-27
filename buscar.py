@@ -36,6 +36,7 @@ import filtros
 import puestos
 import telemetria
 import trabajando
+import jooble
 from red import Bloqueo, ClienteHTTP, ErrorFuente, NoEncontrada, USER_AGENT_HTTP
 from robots import GestorRobots
 from filtros import (ORDEN_MODALIDAD, ORDEN_PRIORIDAD, ZONA, ahora_chile, antiguedad, base_oferta, ciudad_de,
@@ -51,7 +52,8 @@ def _say(mensaje: str):
 
 PORTALES = {"bne": bne, "trabajando": trabajando, "chiletrabajos": chiletrabajos, "chumi": chumi, "laborum": laborum}
 # APIs que no buscan por texto: una sola solicitud por corrida, sin ubicación (ver getonboard.py, himalayas.py, jobicy.py)
-APIS_REMOTAS = {"getonboard": getonboard, "himalayas": himalayas, "jobicy": jobicy, "remotefirstjobs": remotefirstjobs}
+APIS_REMOTAS = {"getonboard": getonboard, "himalayas": himalayas, "jobicy": jobicy, "remotefirstjobs": remotefirstjobs,
+                "jooble": jooble}
 ESTADOS = ["nueva", "revisada", "postulada", "entrevista", "descartada"]
 ESTADOS_CERRADOS = {"postulada", "entrevista", "descartada"}
 LIMITE_DESCARTADAS = 300   # la página muestra las descartadas más recientes (con su motivo)
@@ -1120,13 +1122,15 @@ def _revivir_descartada(con, antes, seguimiento: dict, datos: dict) -> dict:
               "fecha_postulacion": antes["fecha_postulacion"] or ""}
     actual = {"estado": estado, "fase": seguimiento["fase"], "fecha_postulacion": fecha}
     _cambiar_seguimiento(con, url, previo, actual, "manual")
-    relleno = {c: datos[c] for c in ("notas", "sueldo_manual", "prioridad_manual")
-               if datos.get(c) and not (antes[c] or "")}
+    # se completa solo lo que estaba vacío: lo que ya habías escrito no se pisa
+    if datos.get("notas") and not (antes["notas"] or ""):
+        con.execute("UPDATE ofertas SET notas = ? WHERE url = ?", (datos["notas"], url))
+    if datos.get("sueldo_manual") and not (antes["sueldo_manual"] or ""):
+        con.execute("UPDATE ofertas SET sueldo_manual = ? WHERE url = ?", (datos["sueldo_manual"], url))
+    if datos.get("prioridad_manual") and not (antes["prioridad_manual"] or ""):
+        con.execute("UPDATE ofertas SET prioridad_manual = ? WHERE url = ?", (datos["prioridad_manual"], url))
     if antes["categoria"] != "principal":
-        relleno["categoria"] = "principal"
-    if relleno:
-        con.execute("UPDATE ofertas SET " + ", ".join(f"{c} = ?" for c in relleno) + " WHERE url = ?",
-                    [*relleno.values(), url])
+        con.execute("UPDATE ofertas SET categoria = 'principal' WHERE url = ?", (url,))
     guardada = dict(con.execute("SELECT * FROM ofertas WHERE url = ?", (url,)).fetchone())
     guardada.pop("raw", None)
     return {**_con_prioridad_mostrada(guardada), "actualizada": True}

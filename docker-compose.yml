@@ -11,6 +11,7 @@ services:
     environment:
       - TZ=America/Santiago
       - JT_RESPALDOS=/respaldos
+      - JOOBLE_KEY=${JOOBLE_KEY:-}          # clave de la API de Jooble (en .env, que no se sube a git)
     volumes:
       - jt_datos:/datos                # la base de datos (ofertas y estados) vive aquí, no en el contenedor
       # respaldos de la base en tu equipo, FUERA de OneDrive (OneDrive sincroniza C:/Users/sofia/OneDrive)
