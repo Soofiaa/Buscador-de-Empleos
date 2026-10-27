@@ -36,6 +36,7 @@ import filtros
 import puestos
 import telemetria
 import trabajando
+import arbeitnow
 import jooble
 import weworkremotely
 from red import Bloqueo, ClienteHTTP, ErrorFuente, NoEncontrada, USER_AGENT_HTTP
@@ -54,7 +55,7 @@ def _say(mensaje: str):
 PORTALES = {"bne": bne, "trabajando": trabajando, "chiletrabajos": chiletrabajos, "chumi": chumi, "laborum": laborum}
 # APIs que no buscan por texto: una sola solicitud por corrida, sin ubicación (ver getonboard.py, himalayas.py, jobicy.py)
 APIS_REMOTAS = {"getonboard": getonboard, "himalayas": himalayas, "jobicy": jobicy, "remotefirstjobs": remotefirstjobs,
-                "jooble": jooble, "weworkremotely": weworkremotely}
+                "jooble": jooble, "weworkremotely": weworkremotely, "arbeitnow": arbeitnow}
 ESTADOS = ["nueva", "revisada", "postulada", "entrevista", "descartada"]
 ESTADOS_CERRADOS = {"postulada", "entrevista", "descartada"}
 LIMITE_DESCARTADAS = 300   # la página muestra las descartadas más recientes (con su motivo)
