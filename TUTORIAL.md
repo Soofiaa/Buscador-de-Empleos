@@ -131,7 +131,7 @@ Las tarjetas muestran cuántos días llevan desde la postulación. Hasta 3 días
 
 Si postulaste a una oferta que la búsqueda no trajo, pulsa **«➕ Agregar postulación manual»**. Pide el cargo y la empresa como obligatorios; el enlace, la ubicación y el resto son opcionales.
 
-Si ya tienes esa oferta registrada (mismo cargo, empresa y ciudad, o el mismo enlace), la app te avisa en vez de duplicarla.
+Si ya tienes esa oferta registrada (mismo cargo, empresa y ciudad, o el mismo enlace), la app te avisa en vez de duplicarla. Si estaba descartada, la reactiva con la nueva postulación (la misma fila, con su historial).
 
 ## 9. Respaldos y exportación
 

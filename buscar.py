@@ -1107,10 +1107,36 @@ def _url_valida(url: str) -> bool:
     return partes.scheme in ("http", "https") and bool(partes.netloc)
 
 
+def _revivir_descartada(con, antes, seguimiento: dict, datos: dict) -> dict:
+    """Una postulación manual sobre una oferta que ya tenías descartada no crea una fila nueva: la revive con el estado,
+    la fase y la fecha del formulario (o los que ya tenía, si el formulario no los trae), la devuelve a 'principal' y
+    completa notas, sueldo y prioridad manual solo si estaban vacíos. El cambio queda en el historial como 'manual'."""
+    url = antes["url"]
+    estado = seguimiento["estado"]
+    fecha = seguimiento["fecha_postulacion"] or antes["fecha_postulacion"] or ""
+    if estado in ESTADOS_CON_FECHA and not fecha:
+        fecha = ahora_chile().strftime("%Y-%m-%d")
+    previo = {"estado": antes["estado"], "fase": antes["fase"] or "",
+              "fecha_postulacion": antes["fecha_postulacion"] or ""}
+    actual = {"estado": estado, "fase": seguimiento["fase"], "fecha_postulacion": fecha}
+    _cambiar_seguimiento(con, url, previo, actual, "manual")
+    relleno = {c: datos[c] for c in ("notas", "sueldo_manual", "prioridad_manual")
+               if datos.get(c) and not (antes[c] or "")}
+    if antes["categoria"] != "principal":
+        relleno["categoria"] = "principal"
+    if relleno:
+        con.execute("UPDATE ofertas SET " + ", ".join(f"{c} = ?" for c in relleno) + " WHERE url = ?",
+                    [*relleno.values(), url])
+    guardada = dict(con.execute("SELECT * FROM ofertas WHERE url = ?", (url,)).fetchone())
+    guardada.pop("raw", None)
+    return {**_con_prioridad_mostrada(guardada), "actualizada": True}
+
+
 def crear_oferta_manual(con, datos) -> dict:
-    """POST /api/oferta/manual: una postulación que no vino de la búsqueda. Nunca reemplaza una fila: si la URL ya existe
-    o la misma oferta (título + empresa + ciudad) ya está con otra URL, 409 con la URL existente. Sin URL, la clave es
-    sintética ('manual:...'). La fuente es 'manual': ni la búsqueda ni las reclasificaciones la modifican."""
+    """POST /api/oferta/manual: una postulación que no vino de la búsqueda. Si la URL ya existe, o la misma oferta
+    (título + empresa + ciudad) ya está con otra URL, no duplica: si estaba descartada, la revive (ver
+    _revivir_descartada); si no, 409 con la URL existente. Sin URL, la clave es sintética ('manual:...'). La fuente es
+    'manual': ni la búsqueda ni las reclasificaciones la modifican."""
     if not isinstance(datos, dict):
         raise ErrorDatos(400, "formato inválido")
     permitidos = {"titulo", "empresa", "url", "ubicacion", "modalidad", "estado", "fecha_postulacion", "notas",
@@ -1166,12 +1192,20 @@ def crear_oferta_manual(con, datos) -> dict:
     seguimiento = {"estado": estado, "fase": d.get("fase", ""), "fecha_postulacion": fecha}
     assert not set(fila) & set(CAMPOS_HISTORIAL)
     with transaccion(con):
-        if con.execute("SELECT 1 FROM ofertas WHERE url = ?", (fila["url"],)).fetchone():
-            raise ErrorDatos(409, "ya tienes esa URL", url_existente=fila["url"])
-        existente = _url_duplicada(con, fila) or con.execute("SELECT url FROM ofertas WHERE clave = ?", (fila["clave"],)).fetchone()
-        if existente:
-            raise ErrorDatos(409, "ya tienes esa oferta (mismo cargo y empresa)",
-                             url_existente=existente if isinstance(existente, str) else existente[0])
+        existente = con.execute("SELECT * FROM ofertas WHERE url = ?", (fila["url"],)).fetchone()
+        if existente is None:                     # la URL es nueva: ¿la misma oferta con otro enlace?
+            otra = _url_duplicada(con, fila) or con.execute(
+                "SELECT url FROM ofertas WHERE clave = ?", (fila["clave"],)).fetchone()
+            if otra:
+                existente = con.execute("SELECT * FROM ofertas WHERE url = ?",
+                                        (otra if isinstance(otra, str) else otra[0],)).fetchone()
+        if existente is not None:
+            # una descartada no es un duplicado: se revive con lo que trae el formulario (y queda en el historial)
+            if existente["estado"] == "descartada" and estado != "descartada":
+                return _revivir_descartada(con, existente, seguimiento, d)
+            if existente["url"] == fila["url"]:
+                raise ErrorDatos(409, "ya tienes esa URL", url_existente=existente["url"])
+            raise ErrorDatos(409, "ya tienes esa oferta (mismo cargo y empresa)", url_existente=existente["url"])
         cols = list(fila)
         con.execute(f"INSERT INTO ofertas ({', '.join(cols)}) VALUES ({', '.join('?' * len(cols))})", [fila[c] for c in cols])
         _cambiar_seguimiento(con, fila["url"], None, seguimiento, "manual")

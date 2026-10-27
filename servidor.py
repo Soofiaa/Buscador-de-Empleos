@@ -27,7 +27,8 @@
   POST /api/ajustes/exclusiones  {empresas, titulo, descripcion} (nada más) -> {ok, ...}; validación en exclusiones.py
   POST /api/oferta/manual  {titulo, empresa (obligatorios), url (http/https), ubicacion, modalidad, estado,
                           fecha_postulacion, notas, fase, sueldo_manual, prioridad_manual} -> 201 {ok, oferta};
-                          409 {error, url_existente} si la URL o la misma oferta (cargo+empresa+ciudad) ya existe
+                          si la URL o la misma oferta (cargo+empresa+ciudad) ya existe y estaba DESCARTADA, la revive
+                          -> 200 {ok, oferta, actualizada}; si no estaba descartada -> 409 {error, url_existente}
   GET  /api/exportar?formato=csv|json&alcance=seguimiento|principal|todas  descarga (attachment); el CSV protege
                           las celdas que empiezan con = + - @ tab CR; columnas de una lista cerrada (sin raw)
   Límite de cuerpo: 10 KB, 64 KB en /api/nota y /api/oferta/manual; más grande -> 413
@@ -369,7 +370,11 @@ def crear_servidor(app: Aplicacion, puerto: int = None, host: str = None) -> Thr
                     if isinstance(ex, buscar.BaseOcupada) or buscar.es_base_ocupada(ex):
                         return self._json(503, {"error": "base ocupada, reintenta"})
                     raise
-                return self._json(codigo_ok.get(ruta, 200), {"ok": True, **resultado})
+                codigo = codigo_ok.get(ruta, 200)
+                oferta = resultado.get("oferta") if isinstance(resultado, dict) else None
+                if isinstance(oferta, dict) and oferta.pop("actualizada", False):
+                    codigo, resultado = 200, {**resultado, "actualizada": True}   # revivir una descartada, no un alta
+                return self._json(codigo, {"ok": True, **resultado})
             self._json(404, {"error": "no existe"})
 
     return ThreadingHTTPServer((host or config.HOST, puerto or config.PUERTO), Manejador)

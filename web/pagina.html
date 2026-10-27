@@ -686,6 +686,13 @@ function filtrarSeleccion(lista, pestana, sel, corridas) {
 }
 // Ofertas y Sin descripción son las dos listas que se gestionan con estado y fases: tus decisiones salen de ambas
 const gestionadas = datos => [...(datos.principal || []), ...(datos.sin_descripcion || [])];
+// una oferta por URL en cualquier lista: la del aviso de duplicada puede estar descartada, no solo en Ofertas
+function ofertaPorUrl(datos, url) {
+  if (!datos || !url) return null;
+  for (const clave of ["principal", "sin_descripcion", "fuera_perfil", "sospechosas", "descartadas"])
+    for (const o of datos[clave] || []) if (o.url === url) return o;
+  return null;
+}
 function listaDe(datos, pestana, sel) {
   if (!datos) return [];
   const base = pestana === "ofertas" ? datos.principal.filter(o => !CERRADOS.has(o.estado))
@@ -829,7 +836,12 @@ function mensajeError(status, json) {            // texto para el usuario según
   return (json && json.error) ? "No se pudo guardar: " + json.error : "No se pudo guardar.";
 }
 function mensajeManual(status, json) {            // respuesta de /api/oferta/manual en palabras
-  if (status === 409) return "Ya la tienes registrada (" + ((json && json.error) || "duplicada") + ").";
+  if (status === 409) {
+    const motivo = (json && json.error) || "";
+    if (motivo === "ya tienes esa URL") return "Ya tienes registrada una oferta con ese enlace.";
+    if (motivo.startsWith("ya tienes esa oferta")) return "Ya tienes registrada esa oferta (mismo cargo y empresa).";
+    return "Ya la tienes registrada.";
+  }
   if (status === 413) return "El texto es demasiado largo.";
   return mensajeError(status, json);
 }
@@ -1714,7 +1726,10 @@ function abrirManual(origen) {
         modalidad: modalidad.value, estado: estado.value, fecha_postulacion: fecha.value, prioridad_manual: prioridad.value,
         sueldo_manual: sueldo.value, fase: fase.value, notas: notas.value });
       if (r.status === 201) { cerrarDetalle(); await cargar(); mostrarAviso("Postulación agregada ✓"); return; }
-      const existente = r.status === 409 && S.datos ? S.datos.principal.find(x => x.url === r.json.url_existente) : null;
+      if (r.status === 200 && r.json.actualizada) {
+        cerrarDetalle(); await cargar(); mostrarAviso("Estaba descartada: la reactivé con esta postulación ✓"); return;
+      }
+      const existente = r.status === 409 ? ofertaPorUrl(S.datos, r.json.url_existente) : null;
       error.replaceChildren(mensajeManual(r.status, r.json));
       if (existente) error.append(h("button", { type: "button", class: "boton sec", style: "margin-left:8px;", onclick: () => abrirDetalle(existente, $("btn-manual")) }, "Ver la existente"));
       error.hidden = false;
@@ -1733,7 +1748,7 @@ function abrirManual(origen) {
     h("div", { class: "modal-cabecera" },
       h("h2", { id: "manual-titulo-dialogo" }, "Agregar postulación manual"),
       h("button", { type: "button", class: "btn-cerrar", "aria-label": "Cerrar", onclick: cerrarDetalle }, "✕")),
-    h("p", { class: "sub", style: "margin:0 0 12px;" }, "Para una oferta que no trajo la búsqueda. Si ya la tienes (mismo cargo, empresa y ciudad, o el mismo enlace), te avisa en vez de duplicarla."),
+    h("p", { class: "sub", style: "margin:0 0 12px;" }, "Para una oferta que no trajo la búsqueda. Si ya la tienes descartada, la reactiva con esta postulación; si sigue activa (mismo cargo, empresa y ciudad, o el mismo enlace), te avisa en vez de duplicarla."),
     form);
   montarDialogo(tarjeta, origen, titulo);
 }

@@ -106,6 +106,38 @@ def test_manual_invalida_es_400(srv, malo):
     assert filas(db) == antes
 
 
+def test_manual_sobre_una_descartada_la_revive_sin_duplicar(srv):
+    puerto, db = srv
+    post(puerto, "/api/oferta/manual", MANUAL)
+    assert post(puerto, "/api/marcar", {"url": MANUAL["url"], "estado": "descartada", "origen": "lista"})[0] == 200
+    st, r = post(puerto, "/api/oferta/manual", {**MANUAL, "notas": "volví a postular"})
+    assert st == 200 and r["actualizada"] is True and "actualizada" not in r["oferta"]
+    f = filas(db)[MANUAL["url"]]
+    assert (f["estado"], f["categoria"], f["notas"]) == ("postulada", "principal", "volví a postular")
+    con = sqlite3.connect(db)
+    assert con.execute("SELECT COUNT(*) FROM ofertas").fetchone()[0] == 2          # la de la búsqueda + esta, sin duplicar
+    origenes = [x[0] for x in con.execute("SELECT origen FROM historial_estados WHERE url = ? ORDER BY id", (MANUAL["url"],))]
+    con.close()
+    assert origenes[-1] == "manual"
+
+
+def test_manual_sobre_una_descartada_de_la_busqueda_revive_esa_fila(srv):
+    puerto, db = srv
+    assert post(puerto, "/api/marcar", {"url": "http://qa", "estado": "descartada", "origen": "lista"})[0] == 200
+    st, r = post(puerto, "/api/oferta/manual", {"titulo": "QA Tester", "empresa": "Acme", "ubicacion": "Santiago"})
+    assert st == 200 and r["oferta"]["url"] == "http://qa" and r["actualizada"] is True
+    assert len(filas(db)) == 1 and filas(db)["http://qa"]["estado"] == "postulada"
+
+
+def test_manual_sobre_una_descartada_no_la_revive_si_el_formulario_la_descarta(srv):
+    puerto, db = srv
+    post(puerto, "/api/oferta/manual", MANUAL)
+    post(puerto, "/api/marcar", {"url": MANUAL["url"], "estado": "descartada", "origen": "lista"})
+    antes = filas(db)
+    assert post(puerto, "/api/oferta/manual", {**MANUAL, "estado": "descartada"})[0] == 409
+    assert filas(db) == antes
+
+
 def test_manual_guarda_texto_con_html_tal_cual(srv):
     puerto, db = srv
     raro = '<img src=x onerror="alert(1)"> & "comillas"'

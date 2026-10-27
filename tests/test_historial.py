@@ -333,10 +333,18 @@ def test_textos_de_la_postulacion_manual_y_alcance_del_csv():
         msj: [[409, {error: "ya tienes esa URL"}], [413, {}], [503, {}], [400, {error: "falta titulo"}]].map(([s, j]) => mensajeManual(s, j)),
         alcance: ["seguimiento", "ofertas", "descartadas_usuario", "fuera_perfil"].map(alcanceExportar),
         sinUrl: [urlSegura("manual:abc"), urlSegura("javascript:alert(1)"), urlSegura("https://x.cl")]};""")
-    assert r["msj"] == ["Ya la tienes registrada (ya tienes esa URL).", "El texto es demasiado largo.",
+    assert r["msj"] == ["Ya tienes registrada una oferta con ese enlace.", "El texto es demasiado largo.",
                         "La base está ocupada; reintenta en unos segundos.", "No se pudo guardar: falta titulo"]
     assert r["alcance"] == ["seguimiento", "principal", "principal", "principal"]
     assert r["sinUrl"] == ["#", "#", "https://x.cl"]
+
+
+def test_oferta_por_url_la_encuentra_aunque_este_descartada():
+    r = correr_js("""const datos = {principal: [{url: "p1"}], sin_descripcion: [{url: "v1"}],
+        fuera_perfil: [{url: "f1"}], sospechosas: [{url: "x1"}], descartadas: [{url: "d1"}]};
+      return [["p1"], ["d1"], ["x1"], ["no-existe"], [""], [null]].map(([u]) => {
+        const o = ofertaPorUrl(u ? datos : null, u); return o ? o.url : null; });""")
+    assert r == ["p1", "d1", "x1", None, None, None]
 
 
 def test_linea_de_estado_del_respaldo():
