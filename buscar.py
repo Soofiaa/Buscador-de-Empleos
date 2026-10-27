@@ -741,6 +741,23 @@ def _pausa_jobspy(sitio: str) -> float:
     return random.uniform(*rango) if rango else config.PAUSA_ENTRE_BUSQUEDAS
 
 
+def _rotar_plan(con, sitio: str, combinaciones: list, tope: int) -> list:
+    """Solo `tope` combinaciones por corrida, en orden circular: la siguiente corrida sigue donde quedó el cursor."""
+    if len(combinaciones) <= tope:
+        return combinaciones
+    clave = f"rotacion_{sitio}"
+    fila = con.execute("SELECT valor FROM ajustes WHERE clave = ?", (clave,)).fetchone()
+    try:
+        inicio = int(json.loads(fila[0]).get("cursor", 0)) if fila else 0
+    except (ValueError, TypeError, AttributeError):
+        inicio = 0
+    inicio %= len(combinaciones)
+    elegidas = [combinaciones[(inicio + i) % len(combinaciones)] for i in range(tope)]
+    con.execute("INSERT OR REPLACE INTO ajustes (clave, valor) VALUES (?, ?)",
+                (clave, json.dumps({"cursor": (inicio + tope) % len(combinaciones)})))
+    return elegidas
+
+
 def buscar_ofertas(con) -> int:
     from jobspy import scrape_jobs  # import aquí: los tests no lo necesitan
     _vigilar_429()
@@ -752,6 +769,12 @@ def buscar_ofertas(con) -> int:
             for t in (terminos_indeed if s == "indeed"
                       else [""] if s in APIS_REMOTAS else config.TERMINOS_SECUNDARIOS)
             for l in (["Chile"] if s in APIS_REMOTAS else lugares)]   # las APIs no usan ubicación ni término
+    # fuentes con tope de consultas: se reparte el total entre corridas (ver _rotar_plan)
+    for sitio, tope in config.TOPE_CONSULTAS.items():
+        mias = [p for p in plan if p[0] == sitio]
+        if mias:
+            elegidas = set(map(tuple, _rotar_plan(con, sitio, mias, tope)))
+            plan = [p for p in plan if p[0] != sitio or p in elegidas]
     stats = {s: {"encontradas": 0, "antiguas": 0, "relevantes": 0, "sin_chile": 0, "errores": 0} for s in config.SITIOS}
     # telemetría pasiva (solo contadores): JobSpy no expone sus solicitudes, se cuentan sus llamadas, también por ubicación
     tele = {s: (telemetria.contador("http") if s in PORTALES or s in APIS_REMOTAS
