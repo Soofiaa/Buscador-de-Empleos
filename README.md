@@ -1,46 +1,41 @@
 # Búsqueda de empleo · job-tracker
 
-El perfil de trabajo de Sofía (nombre del proyecto: `job-tracker`) es una aplicación de seguimiento de ofertas laborales hecha en Python + SQLite + una página local (`web/pagina.html`). Responde siempre en español.
+Aplicación local en Python + SQLite con interfaz web integrada (`web/pagina.html`) para la búsqueda y el seguimiento de ofertas laborales en Chile y en modalidad remota global.
 
-## Cómo está organizado
+## Fuentes y Portales Activos (15 en total)
 
-- `web/pagina.html`: la interfaz completa (un solo archivo con CSS y JavaScript).
-- `servidor.py`: la API local y la página. Escucha solo en `127.0.0.1`.
-- `buscar.py`, `filtros.py`, `red.py`: búsqueda, clasificación y conexión a la base.
-- `tests/`: pruebas. Se ejecutan con `venv\Scripts\python.exe -m pytest -q`.
-- `NOTAS.md`: decisiones, hallazgos y estado de producción. Leer al empezar cada sesión.
-- `.claude/skills/desplegar/SKILL.md`: procedimiento estándar para desplegar a producción. Requiere aprobación explícita.
+- **Portales y APIs chilenas / remotas**: BNE, Trabajando, Chiletrabajos, Chumi, Laborum, Get on Board, Himalayas, Jobicy, Remote First Jobs, We Work Remotely, Arbeitnow, Jooble.
+- **Motores con JobSpy**: Indeed, Glassdoor, LinkedIn (con consultas intercaladas para evitar límites de tasa/429).
 
-## Ofertas sin texto
+## Características Principales
 
-A partir del 21 de octubre de 2026, la aplicación distingue dos grupos principales de ofertas:
+1. **Clasificación Automática**: Filtros estrictos de seniority, experiencia, exclusiones por palabras clave y región (Santiago, Viña del Mar/Valparaíso y remoto global).
+2. **Postulaciones Manuales**: Permite registrar ofertas fuera de la búsqueda automática, revivir descartadas conservando su historial, y confirmar o consultar ante posibles duplicados (mismo cargo y empresa).
+3. **Sección «Sin texto»**: Ofertas cuyo listado no incluye descripción completa (ej. LinkedIn), permitiendo al usuario pegar el texto desde el navegador para su reclasificación posterior.
+4. **Seguimiento y Métricas**: Tablero Kanban (Por postular, CV enviado, Entrevistas, Ofertas/Cierre), notas, fechas de postulación, sueldos manuales/calculados y estadísticas de conversión.
+5. **Respaldo Automático**: Respaldos diarios de la base de datos con verificación SHA-256 y control de retención.
 
-1. **Ofertas revisadas con texto**: se clasifican automáticamente según experiencia, nivel, contrato, zona y reglas de seniority.
-   - Vienen de los portales (BNE, Trabajando, Chiletrabajos, Chumi, Laborum), de Indeed y de Get on Board.
-   - Las que pasan los filtros se muestran en la pestaña **«Ofertas»**.
+## Estructura del Repositorio
 
-2. **Ofertas sin texto**: llegan sin descripción (hoy, LinkedIn).
-   - Se muestran al final de la pestaña **«Ofertas»**, bajo el título «Sin texto».
-   - La app solo puede decidir con base en el título y la empresa.
-   - Para decidirlas, abre el aviso con ↗ y pega su descripción en la tarjeta. Así el servidor la reclasifica solo a esa oferta.
+- `web/pagina.html`: Interfaz web completa de un solo archivo (HTML/CSS/JS).
+- `servidor.py`: Servidor HTTP local con API REST y restricciones de origen (bloqueo de CSRF/orígenes ajenos).
+- `buscar.py`, `filtros.py`, `red.py`: Motor central de base de datos, lógica de negocio, clasificación y conexión HTTP con manejo de `robots.txt`.
+- `*.py` (módulos específicos): Conectores para cada fuente (`jooble.py`, `weworkremotely.py`, `arbeitnow.py`, `bne.py`, `trabajando.py`, etc.).
+- `tests/`: Suite completa de pruebas unitarias e de integración (más de 850 pruebas).
+- `NOTAS.md` y `TUTORIAL.md`: Documentación detallada de decisiones técnicas, flujos y guía de uso.
 
-### Qué no cambia
+## Ejecución de Pruebas
 
-- Las ofertas de Indeed, los portales chilenos y Get on Board siguen trayendo texto completo.
-- El registro de estados (nueva, revisada, postulada, entrevista, descartada) funciona igual para las ofertas sin texto.
-- Las demás funciones (seguimiento, notas, tablero, criterios de SAP/ERP, soporte TI, seniority, exclusiones y reglas de experiencia) siguen igual.
-- Las ofertas «Ofertas» y «Sin texto» usan los mismos filtros.
+Las pruebas se ejecutan con pytest:
 
-## Pruebas
-
-Las pruebas del proyecto se ejecutan con:
-
-```
+```bash
 venv\Scripts\python.exe -m pytest -q
 ```
 
-Las pruebas que leen `web/pagina.html` comprueban su estructura, así que conviene correrlas después de cualquier cambio en la interfaz.
+## Despliegue con Docker
 
-## Despliegue
+El proyecto corre habitualmente en un contenedor Docker con volumen persistente para la base de datos:
 
-El despliegue a producción no se hace a mano. Sigue el procedimiento de `.claude/skills/desplegar/SKILL.md`: referencia de la base con sha256, huellas antes y después, comprobaciones HTTP y reversión documentada. Nunca se despliega sin aprobación explícita.
+```bash
+docker compose up -d --build
+```
