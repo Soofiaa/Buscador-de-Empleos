@@ -48,20 +48,37 @@ Luego abre **http://127.0.0.1:8765/**. La base se guarda en `ofertas.db`, en la 
 
 ## 4. Recorrido de la pantalla
 
-La pantalla tiene dos columnas.
+La pantalla tiene un menú a la izquierda y, a la derecha, el apartado que elijas.
 
-**Columna izquierda**
+**Menú izquierdo**
+- **Apartados:** Ofertas, Seguimiento, Métricas y Ajustes. Ofertas y Seguimiento muestran cuántas hay. Cada apartado tiene su dirección (`#ofertas`, `#seguimiento`, `#metricas`, `#ajustes`), así que puedes guardarla en favoritos.
 - **Buscar empleos:** lanza una búsqueda en los portales. Tarda unos 15 a 20 minutos. Mientras corre, la barra muestra el avance.
-- **Historial:** las búsquedas anteriores, agrupadas por día. Elige una para ver solo lo que trajo.
-- **Gestión de datos:** exportar a CSV o Excel, descargar un respaldo en JSON y hacer un respaldo de la base.
 - **Buscar a mano:** enlaces a sitios que no admiten búsquedas automáticas (Computrabajo y Empleos Públicos). Se abren en tu navegador.
-- **Contraste reforzado:** colores de texto más legibles. Viene activado; puedes apagarlo.
-- **Tema:** seis combinaciones de color. Se recuerdan en tu navegador.
+- **Historial:** las búsquedas anteriores, agrupadas por día. Elige una para ver en Ofertas solo lo que trajo.
 
-**Columna principal**
-- **Pestañas:** Ofertas, Seguimiento, Sin texto, Fuera de perfil, Sospechosas, Descartadas y Descartadas por filtros.
-- **Filtros:** búsqueda por texto y estado. Los filtros de prioridad, modalidad, tipo y fuente están en **«Más filtros»**.
-- **Vista:** Tarjetas (con detalle) o Compacta (una línea por oferta).
+**Ofertas**
+- **Pestañas:** Ofertas, Fuera de perfil, Sospechosas, Descartadas y Descartadas por filtros. Las ofertas *Sin texto* aparecen al final de Ofertas (ver más abajo).
+- **Filtros:** búsqueda por texto (busca en cargo, empresa, lugar, motivo y notas; cada palabra debe aparecer) y estado. Los filtros de prioridad, modalidad, tipo y fuente están en **«Más filtros»**; cuando uno está activo, el resumen lo indica (por ejemplo, «Más filtros · 2 activos»). **«Limpiar filtros»** los quita todos.
+- **Agrupar:** en Ofertas, por prioridad (Alta, Media, Baja) o por fuente.
+- **Vista:** Tarjetas (con detalle) o Compacta (una línea por oferta). La vista y los filtros que eliges se recuerdan en tu navegador.
+- **Atajo:** «/» o Ctrl+K llevan al buscador.
+- **Ayuda de esta pantalla:** el botón ❓ explica la pestaña o el apartado en el que estás.
+
+**Métricas** (solo lectura, sobre todas tus ofertas relevantes, sin importar la búsqueda que elijas en el historial):
+- **Indicadores:** cuántas postulaciones tienes, cuántas tuvieron respuesta, cuántos procesos siguen activos y cuántos días promedio tardan.
+- **Embudo:** cuatro etapas: *Relevantes*, *Postuladas*, *Llegaron a entrevista* y *Final u oferta*. Cada una cuenta las ofertas que llegaron hasta ahí, así que una oferta puede estar en varias.
+- **Desgloses:** por fuente, por modalidad y por tipo de contrato.
+- **Actividad:** postulaciones por semana, de las últimas 8.
+
+Las fechas de cambio de etapa existen desde el 13-10-2026; antes no se inventan.
+
+**Ajustes**
+- **Qué busco:** los puestos que se buscan en Indeed y las exclusiones (lo que nunca debe aparecer). Los puestos se usan en la próxima búsqueda; las exclusiones se aplican al clasificar las ofertas.
+- **Datos:** exportar a CSV o JSON y hacer un respaldo de la base (ver la sección 9).
+- **Apariencia y avisos:** el tema, el contraste reforzado (viene activado) y los avisos del navegador cuando entran ofertas nuevas. Todo se recuerda en tu navegador. Hay seis temas:
+  - Suaves: 🌷 **Primavera** (claro) y 🌹 **Rosa nocturna** (oscuro).
+  - Frescos: 🌊 **Océano** (claro) y 🌌 **Medianoche** (oscuro).
+  - Neutros: 🏔️ **Niebla** (claro) y 🌑 **Carbón** (oscuro).
 
 ## 5. Buscar empleos
 
@@ -84,7 +101,7 @@ Las ofertas de **Ofertas** son las que la app considera relevantes. Si una te in
 
 ### Sin texto
 
-Algunas fuentes (hoy, LinkedIn) no entregan la descripción del aviso. La app no puede revisar su experiencia ni su nivel, así que las pone en **Sin texto**.
+Algunas fuentes (hoy, LinkedIn) no entregan la descripción del aviso. La app no puede revisar su experiencia ni su nivel, así que las marca como **Sin texto** y las muestra al final de Ofertas.
 
 Para decidirlas:
 1. Abre el aviso con ↗.
@@ -95,11 +112,14 @@ La app la revisa y, si cumple, la pasa a **Ofertas**. Si no cumple, queda descar
 
 ## 7. Seguimiento de postulaciones
 
-La pestaña **Seguimiento** muestra las ofertas que ya postulaste o en las que vas en proceso.
+El apartado **Seguimiento** muestra las ofertas que revisaste, postulaste o en las que vas en proceso. Arriba eliges cómo verlas:
 
 - **Tablero:** cuatro columnas: *Por postular*, *CV enviado*, *Entrevistas* y *Oferta / Cierre*. Arrastra una tarjeta a otra columna para cambiar su etapa. Si no puedes arrastrar (pantalla táctil o teclado), usa el selector **«Mover a…»** de la tarjeta.
-- **Lista:** la misma información en filas, útil para buscar.
+- **Tarjetas:** la misma información en una lista de tarjetas detalladas, útil para buscar.
+- **Compacta:** una fila por oferta.
 - **Resumen:** arriba aparece cuántas ofertas hay en cada columna.
+- **Historial:** igual que en Ofertas, puedes elegir una búsqueda para ver solo sus ofertas. Si la eliges estando en otro apartado, la app te lleva a Ofertas con esa búsqueda.
+- **Atajo:** «/» o Ctrl+K enfocan el buscador de Seguimiento.
 
 Cada movimiento muestra un aviso con **«Deshacer»**, que vuelve exactamente al estado anterior.
 
@@ -111,14 +131,20 @@ Las tarjetas muestran cuántos días llevan desde la postulación. Hasta 3 días
 
 Si postulaste a una oferta que la búsqueda no trajo, pulsa **«➕ Agregar postulación manual»**. Pide el cargo y la empresa como obligatorios; el enlace, la ubicación y el resto son opcionales.
 
-Si ya tienes esa oferta registrada (mismo cargo, empresa y ciudad, o el mismo enlace), la app te avisa en vez de duplicarla.
+Si ya tienes esa oferta registrada, la app reacciona según el caso:
+
+- **Mismo enlace**: no crea nada nuevo; te muestra la existente con «Ver la existente».
+- **Mismo cargo y empresa** (en la misma ciudad, o si dejas la ubicación vacía): te avisa y ofrece dos botones. «Ver la existente» abre su ficha, y «Guardar de todas formas» crea la postulación como una oferta aparte. Úsalo si es otra oferta de la misma empresa y cargo.
+- **Estaba descartada**: la reactiva con la nueva postulación (la misma fila, con su historial), sin preguntar.
 
 ## 9. Respaldos y exportación
 
+Todo está en **Ajustes > Datos**.
+
 - **Respaldar ahora:** copia la base completa a la carpeta de respaldos. Se puede usar cada minuto como máximo.
 - **Respaldo automático:** la app guarda una copia por día y conserva las últimas 30.
-- **CSV / Excel:** exporta la pestaña que estás mirando.
-- **Respaldo JSON:** exporta todas las ofertas en un archivo legible.
+- **CSV de Ofertas** y **CSV de Seguimiento:** cada uno exporta lo suyo, para abrir en Excel.
+- **Todo en JSON:** exporta todas las ofertas en un archivo legible.
 
 Con Docker, la carpeta de respaldos se define en `docker-compose.yml`. Conviene elegir una carpeta **fuera de OneDrive** o de cualquier servicio que sincronice archivos, para que la base no se copie a medias.
 

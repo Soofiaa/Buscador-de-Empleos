@@ -84,6 +84,14 @@ def test_manual_duplicada_es_409_y_no_crea_nada(srv, repetida):
     assert filas(db) == antes
 
 
+def test_el_aviso_de_duplicada_no_mete_null_en_el_dom():
+    # replaceChildren(null) crea un nodo de texto "null": el botón "Ver la existente" solo se añade si hay existente
+    pagina = (Path(__file__).resolve().parent.parent / "web" / "pagina.html").read_text(encoding="utf-8")
+    linea = next(l for l in pagina.splitlines() if "error.replaceChildren(mensajeManual" in l)
+    assert "null" not in linea
+    assert "if (existente) error.append(" in pagina
+
+
 @pytest.mark.parametrize("malo", [
     {"empresa": "X"}, {"titulo": "X"}, {"titulo": "   ", "empresa": "X"},
     {**MANUAL, "url": "javascript:alert(1)"}, {**MANUAL, "url": "ftp://x.cl"}, {**MANUAL, "url": "https://"},
@@ -95,6 +103,70 @@ def test_manual_invalida_es_400(srv, malo):
     puerto, db = srv
     antes = filas(db)
     assert post(puerto, "/api/oferta/manual", malo)[0] == 400
+    assert filas(db) == antes
+
+
+def test_mismo_cargo_y_empresa_sin_ciudad_pide_confirmar_y_trae_la_existente(srv):
+    puerto, db = srv                     # la de la búsqueda es «Santiago»; la nueva no trae ciudad
+    antes = filas(db)
+    st, r = post(puerto, "/api/oferta/manual", {"titulo": "QA Tester", "empresa": "Acme", "estado": "nueva"})
+    assert st == 409 and r["confirmable"] is True and r["url_existente"] == "http://qa"
+    assert r["existente"]["url"] == "http://qa" and r["existente"]["titulo"] == "QA Tester"
+    assert "raw" not in r["existente"] and "clave" not in r["existente"]
+    assert filas(db) == antes
+
+
+def test_guardar_de_todas_formas_crea_una_fila_aparte(srv):
+    puerto, db = srv
+    st, r = post(puerto, "/api/oferta/manual", {"titulo": "QA Tester", "empresa": "Acme", "ubicacion": "Valparaíso",
+                                                "confirmar_duplicada": True})
+    assert st == 201 and r["oferta"]["url"].startswith("manual:")
+    assert len(filas(db)) == 2 and filas(db)["http://qa"]["estado"] == "nueva"
+
+
+def test_confirmar_no_salta_la_misma_url(srv):
+    puerto, db = srv
+    st, r = post(puerto, "/api/oferta/manual", {"titulo": "QA Tester", "empresa": "Acme", "url": "http://qa",
+                                                "confirmar_duplicada": True})
+    assert st == 409 and "confirmable" not in r and r["url_existente"] == "http://qa"
+    assert len(filas(db)) == 1
+
+
+def test_confirmar_debe_ser_booleano_y_no_llega_a_la_base(srv):
+    puerto, db = srv
+    assert post(puerto, "/api/oferta/manual", {"titulo": "X", "empresa": "Y", "confirmar_duplicada": "si"})[0] == 201
+    assert "confirmar_duplicada" not in filas(db)[next(u for u in filas(db) if u.startswith("manual:") and filas(db)[u]["titulo"] == "X")]["raw"]
+
+
+def test_manual_sobre_una_descartada_la_revive_sin_duplicar(srv):
+    puerto, db = srv
+    post(puerto, "/api/oferta/manual", MANUAL)
+    assert post(puerto, "/api/marcar", {"url": MANUAL["url"], "estado": "descartada", "origen": "lista"})[0] == 200
+    st, r = post(puerto, "/api/oferta/manual", {**MANUAL, "notas": "volví a postular"})
+    assert st == 200 and r["actualizada"] is True and "actualizada" not in r["oferta"]
+    f = filas(db)[MANUAL["url"]]
+    assert (f["estado"], f["categoria"], f["notas"]) == ("postulada", "principal", "volví a postular")
+    con = sqlite3.connect(db)
+    assert con.execute("SELECT COUNT(*) FROM ofertas").fetchone()[0] == 2          # la de la búsqueda + esta, sin duplicar
+    origenes = [x[0] for x in con.execute("SELECT origen FROM historial_estados WHERE url = ? ORDER BY id", (MANUAL["url"],))]
+    con.close()
+    assert origenes[-1] == "manual"
+
+
+def test_manual_sobre_una_descartada_de_la_busqueda_revive_esa_fila(srv):
+    puerto, db = srv
+    assert post(puerto, "/api/marcar", {"url": "http://qa", "estado": "descartada", "origen": "lista"})[0] == 200
+    st, r = post(puerto, "/api/oferta/manual", {"titulo": "QA Tester", "empresa": "Acme", "ubicacion": "Santiago"})
+    assert st == 200 and r["oferta"]["url"] == "http://qa" and r["actualizada"] is True
+    assert len(filas(db)) == 1 and filas(db)["http://qa"]["estado"] == "postulada"
+
+
+def test_manual_sobre_una_descartada_no_la_revive_si_el_formulario_la_descarta(srv):
+    puerto, db = srv
+    post(puerto, "/api/oferta/manual", MANUAL)
+    post(puerto, "/api/marcar", {"url": MANUAL["url"], "estado": "descartada", "origen": "lista"})
+    antes = filas(db)
+    assert post(puerto, "/api/oferta/manual", {**MANUAL, "estado": "descartada"})[0] == 409
     assert filas(db) == antes
 
 

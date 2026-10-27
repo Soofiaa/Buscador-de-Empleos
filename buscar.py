@@ -30,9 +30,15 @@ import laborum
 import getonboard
 import himalayas
 import jobicy
+import remotefirstjobs
+import exclusiones
+import filtros
 import puestos
 import telemetria
 import trabajando
+import arbeitnow
+import jooble
+import weworkremotely
 from red import Bloqueo, ClienteHTTP, ErrorFuente, NoEncontrada, USER_AGENT_HTTP
 from robots import GestorRobots
 from filtros import (ORDEN_MODALIDAD, ORDEN_PRIORIDAD, ZONA, ahora_chile, antiguedad, base_oferta, ciudad_de,
@@ -48,7 +54,8 @@ def _say(mensaje: str):
 
 PORTALES = {"bne": bne, "trabajando": trabajando, "chiletrabajos": chiletrabajos, "chumi": chumi, "laborum": laborum}
 # APIs que no buscan por texto: una sola solicitud por corrida, sin ubicación (ver getonboard.py, himalayas.py, jobicy.py)
-APIS_REMOTAS = {"getonboard": getonboard, "himalayas": himalayas, "jobicy": jobicy}
+APIS_REMOTAS = {"getonboard": getonboard, "himalayas": himalayas, "jobicy": jobicy, "remotefirstjobs": remotefirstjobs,
+                "jooble": jooble, "weworkremotely": weworkremotely, "arbeitnow": arbeitnow}
 ESTADOS = ["nueva", "revisada", "postulada", "entrevista", "descartada"]
 ESTADOS_CERRADOS = {"postulada", "entrevista", "descartada"}
 LIMITE_DESCARTADAS = 300   # la página muestra las descartadas más recientes (con su motivo)
@@ -136,6 +143,42 @@ def guardar_soporte(con, datos) -> dict:
     with transaccion(con):
         con.execute("INSERT OR REPLACE INTO ajustes (clave, valor) VALUES ('soporte', ?)", (json.dumps({"incluir": datos["incluir"]}),))
     return {"incluir": datos["incluir"]}
+
+
+def exclusiones_por_defecto() -> dict:
+    """Las listas de config.py, en la forma que usa la página."""
+    return {"empresas": list(config.EXCLUIR_EMPRESAS),
+            "titulo": list(config.EXCLUIR_PRACTICA_TITULO),
+            "descripcion": list(config.EXCLUIR_PRACTICA_DESC)}
+
+
+def leer_exclusiones(con):
+    """Exclusiones guardadas (clave 'exclusiones') o None si no hay ninguna válida: en ese caso rige config."""
+    fila = con.execute("SELECT valor FROM ajustes WHERE clave = 'exclusiones'").fetchone()
+    if not fila:
+        return None
+    try:
+        limpias, errores = exclusiones.validar(json.loads(fila[0]))
+    except (ValueError, TypeError):
+        return None
+    return None if errores else limpias
+
+
+def aplicar_exclusiones(con) -> None:
+    """Carga las exclusiones guardadas en el clasificador. Llamar antes de clasificar."""
+    filtros.fijar_exclusiones(leer_exclusiones(con))
+
+
+def guardar_exclusiones(con, datos) -> dict:
+    """POST /api/ajustes/exclusiones: {empresas, titulo, descripcion}. Si algo no pasa la validación, no se guarda."""
+    limpias, errores = exclusiones.validar(datos)
+    if errores:
+        raise ErrorDatos(400, "; ".join(errores))
+    with transaccion(con):
+        con.execute("INSERT OR REPLACE INTO ajustes (clave, valor) VALUES ('exclusiones', ?)",
+                    (json.dumps(limpias, ensure_ascii=False),))
+    aplicar_exclusiones(con)
+    return limpias
 
 
 def terminos_puestos_default() -> list[str]:
@@ -410,6 +453,7 @@ def guardar(con, filas: list[dict]) -> int:
 def reclasificar(con) -> Counter:
     """Re-aplica la configuración actual a todo lo guardado (conserva el estado). Las ofertas ingresadas a mano no
     se tocan: su clasificación la decidiste tú."""
+    aplicar_exclusiones(con)
     for fila in con.execute("SELECT url, raw FROM ofertas WHERE COALESCE(fuente, '') != 'manual'").fetchall():
         cl = clasificar(json.loads(fila["raw"]))
         con.execute(
@@ -437,6 +481,7 @@ def reclasificar_dirigida(con, escribir: bool = True, seleccion=_afectada_por_so
     """Re-aplica la clasificación SOLO a las ofertas de la selección, y solo escribe las que cambian. A diferencia de
     reclasificar(), no toca el resto (aunque el código actual las clasificara distinto). Nunca toca el estado ni las
     columnas de seguimiento. Devuelve los cambios [{url, titulo, antes, despues}]; con escribir=False solo simula."""
+    aplicar_exclusiones(con)
     def calcular():
         cambios = []
         for fila in con.execute("SELECT * FROM ofertas").fetchall():
@@ -696,9 +741,33 @@ def _pausa_jobspy(sitio: str) -> float:
     return random.uniform(*rango) if rango else config.PAUSA_ENTRE_BUSQUEDAS
 
 
+def _intercalar(plan: list, sitio: str) -> list:
+    """Reparte las consultas de `sitio` entre los turnos de las demás fuentes: un turno de `sitio`, otra fuente, otro
+    turno de `sitio`, etc. Así no se piden todas seguidas (LinkedIn respondió 429 con ráfagas). Cada turno de `sitio`
+    tiene el mismo tamaño, redondeado hacia arriba, para que todas quepan en la corrida."""
+    propias = [p for p in plan if p[0] == sitio]
+    otras = [p for p in plan if p[0] != sitio]
+    if not propias or not otras:
+        return plan
+    bloques = []                                    # bloques consecutivos de una misma fuente, en orden
+    for p in otras:
+        if bloques and bloques[-1][0][0] == p[0]:
+            bloques[-1].append(p)
+        else:
+            bloques.append([p])
+    turno = -(-len(propias) // len(bloques))        # techo: caben todas en la corrida
+    salida, pendientes = [], list(propias)
+    for bloque in bloques:                          # turno de `sitio`, después el bloque de otra fuente
+        salida += pendientes[:turno]
+        pendientes = pendientes[turno:]
+        salida += bloque
+    return salida + pendientes
+
+
 def buscar_ofertas(con) -> int:
     from jobspy import scrape_jobs  # import aquí: los tests no lo necesitan
     _vigilar_429()
+    aplicar_exclusiones(con)   # las exclusiones que Sofia guardó, antes de clasificar lo que llegue
 
     lugares = list(config.UBICACIONES) + ([REMOTO] if config.INCLUIR_REMOTO else [])
     terminos_indeed = leer_puestos(con)     # la lista que Sofia editó, o la de config
@@ -706,6 +775,9 @@ def buscar_ofertas(con) -> int:
             for t in (terminos_indeed if s == "indeed"
                       else [""] if s in APIS_REMOTAS else config.TERMINOS_SECUNDARIOS)
             for l in (["Chile"] if s in APIS_REMOTAS else lugares)]   # las APIs no usan ubicación ni término
+    # LinkedIn no va en ráfaga: sus consultas se intercalan con los turnos de las demás fuentes (ver _intercalar)
+    for sitio in config.DISTANCIAR:
+        plan = _intercalar(plan, sitio)
     stats = {s: {"encontradas": 0, "antiguas": 0, "relevantes": 0, "sin_chile": 0, "errores": 0} for s in config.SITIOS}
     # telemetría pasiva (solo contadores): JobSpy no expone sus solicitudes, se cuentan sus llamadas, también por ubicación
     tele = {s: (telemetria.contador("http") if s in PORTALES or s in APIS_REMOTAS
@@ -1065,12 +1137,51 @@ def _url_valida(url: str) -> bool:
     return partes.scheme in ("http", "https") and bool(partes.netloc)
 
 
+def _revivir_descartada(con, antes, seguimiento: dict, datos: dict) -> dict:
+    """Una postulación manual sobre una oferta que ya tenías descartada no crea una fila nueva: la revive con el estado,
+    la fase y la fecha del formulario (o los que ya tenía, si el formulario no los trae), la devuelve a 'principal' y
+    completa notas, sueldo y prioridad manual solo si estaban vacíos. El cambio queda en el historial como 'manual'."""
+    url = antes["url"]
+    estado = seguimiento["estado"]
+    fecha = seguimiento["fecha_postulacion"] or antes["fecha_postulacion"] or ""
+    if estado in ESTADOS_CON_FECHA and not fecha:
+        fecha = ahora_chile().strftime("%Y-%m-%d")
+    previo = {"estado": antes["estado"], "fase": antes["fase"] or "",
+              "fecha_postulacion": antes["fecha_postulacion"] or ""}
+    actual = {"estado": estado, "fase": seguimiento["fase"], "fecha_postulacion": fecha}
+    _cambiar_seguimiento(con, url, previo, actual, "manual")
+    # se completa solo lo que estaba vacío: lo que ya habías escrito no se pisa
+    if datos.get("notas") and not (antes["notas"] or ""):
+        con.execute("UPDATE ofertas SET notas = ? WHERE url = ?", (datos["notas"], url))
+    if datos.get("sueldo_manual") and not (antes["sueldo_manual"] or ""):
+        con.execute("UPDATE ofertas SET sueldo_manual = ? WHERE url = ?", (datos["sueldo_manual"], url))
+    if datos.get("prioridad_manual") and not (antes["prioridad_manual"] or ""):
+        con.execute("UPDATE ofertas SET prioridad_manual = ? WHERE url = ?", (datos["prioridad_manual"], url))
+    if antes["categoria"] != "principal":
+        con.execute("UPDATE ofertas SET categoria = 'principal' WHERE url = ?", (url,))
+    guardada = dict(con.execute("SELECT * FROM ofertas WHERE url = ?", (url,)).fetchone())
+    guardada.pop("raw", None)
+    return {**_con_prioridad_mostrada(guardada), "actualizada": True}
+
+
+def _resumen_oferta(fila) -> dict:
+    """La oferta existente tal como la pide la página (para abrirla en su ficha), sin raw ni claves internas."""
+    o = dict(fila)
+    for k in ("raw", "clave", "clave_base"):
+        o.pop(k, None)
+    return _con_prioridad_mostrada(o)
+
+
 def crear_oferta_manual(con, datos) -> dict:
-    """POST /api/oferta/manual: una postulación que no vino de la búsqueda. Nunca reemplaza una fila: si la URL ya existe
-    o la misma oferta (título + empresa + ciudad) ya está con otra URL, 409 con la URL existente. Sin URL, la clave es
-    sintética ('manual:...'). La fuente es 'manual': ni la búsqueda ni las reclasificaciones la modifican."""
+    """POST /api/oferta/manual: una postulación que no vino de la búsqueda. Si la URL ya existe, o la misma oferta
+    (título + empresa + ciudad) ya está con otra URL, no duplica: si estaba descartada, la revive (ver
+    _revivir_descartada); si no, 409 con la URL existente. Sin URL, la clave es sintética ('manual:...'). La fuente es
+    'manual': ni la búsqueda ni las reclasificaciones la modifican."""
     if not isinstance(datos, dict):
         raise ErrorDatos(400, "formato inválido")
+    datos = dict(datos)
+    # «Guardar de todas formas»: el usuario confirma que es otra oferta pese a cargo y empresa iguales (no es un campo)
+    confirmar = datos.pop("confirmar_duplicada", False) is True
     permitidos = {"titulo", "empresa", "url", "ubicacion", "modalidad", "estado", "fecha_postulacion", "notas",
                   "fase", "sueldo_manual", "prioridad_manual"}
     extra = set(datos) - permitidos
@@ -1124,12 +1235,25 @@ def crear_oferta_manual(con, datos) -> dict:
     seguimiento = {"estado": estado, "fase": d.get("fase", ""), "fecha_postulacion": fecha}
     assert not set(fila) & set(CAMPOS_HISTORIAL)
     with transaccion(con):
-        if con.execute("SELECT 1 FROM ofertas WHERE url = ?", (fila["url"],)).fetchone():
-            raise ErrorDatos(409, "ya tienes esa URL", url_existente=fila["url"])
-        existente = _url_duplicada(con, fila) or con.execute("SELECT url FROM ofertas WHERE clave = ?", (fila["clave"],)).fetchone()
-        if existente:
-            raise ErrorDatos(409, "ya tienes esa oferta (mismo cargo y empresa)",
-                             url_existente=existente if isinstance(existente, str) else existente[0])
+        existente = con.execute("SELECT * FROM ofertas WHERE url = ?", (fila["url"],)).fetchone()
+        if existente is None:                     # la URL es nueva: ¿la misma oferta con otro enlace?
+            otra = _url_duplicada(con, fila) or con.execute(
+                "SELECT url FROM ofertas WHERE clave = ?", (fila["clave"],)).fetchone()
+            if otra:
+                existente = con.execute("SELECT * FROM ofertas WHERE url = ?",
+                                        (otra if isinstance(otra, str) else otra[0],)).fetchone()
+        if existente is not None:
+            # una descartada no es un duplicado: se revive con lo que trae el formulario (y queda en el historial)
+            if existente["estado"] == "descartada" and estado != "descartada":
+                return _revivir_descartada(con, existente, seguimiento, d)
+            resumen = _resumen_oferta(existente)
+            if existente["url"] == fila["url"]:       # misma URL: no hay forma de guardar dos filas
+                raise ErrorDatos(409, "ya tienes esa URL", url_existente=existente["url"], existente=resumen)
+            if not confirmar:
+                raise ErrorDatos(409, "ya tienes esa oferta (mismo cargo y empresa)", url_existente=existente["url"],
+                                 existente=resumen, confirmable=True)
+            # confirmada: la clave es UNIQUE, así que esta fila lleva un sufijo; la búsqueda la sigue reconociendo por clave_base
+            fila["clave"] = f"{fila['clave']}|forzada:{uuid.uuid4().hex}"
         cols = list(fila)
         con.execute(f"INSERT INTO ofertas ({', '.join(cols)}) VALUES ({', '.join('?' * len(cols))})", [fila[c] for c in cols])
         _cambiar_seguimiento(con, fila["url"], None, seguimiento, "manual")

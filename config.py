@@ -37,7 +37,7 @@ TERMINOS_B = [  # roles puente (no TI)
 # con la ubicación escrita ("Santiago, Chile"). Es un rodeo: ver probar_fuentes.py.
 # Google está desactivado: JobSpy recibe "Google returned no job data" (probado 2026-10-10).
 # Para reintentarlo, agrégalo a la lista: SITIOS = ["indeed", "glassdoor", "google"]
-SITIOS = ["indeed", "glassdoor", "getonboard", "himalayas", "jobicy", "bne", "trabajando", "chiletrabajos", "chumi", "laborum", "linkedin"]
+SITIOS = ["indeed", "glassdoor", "getonboard", "himalayas", "jobicy", "remotefirstjobs", "bne", "trabajando", "chiletrabajos", "chumi", "laborum", "linkedin", "jooble", "weworkremotely", "arbeitnow"]
 # himalayas / jobicy: APIs públicas de empleo remoto (ver himalayas.py y jobicy.py). Traen el listado reciente en una
 # sola solicitud por corrida; el clasificador filtra por rol. Atribución: enlace a la fuente y postulación a la oferta.
 # chumi y laborum: verificados contra el sitio real el 2026-10-20 (ver chumi.py y laborum.py; Laborum usa Playwright).
@@ -58,15 +58,16 @@ TERMINOS_SECUNDARIOS = [
     "soporte TI", "help desk",
 ]
 NOMBRE_FUENTE = {"indeed": "Indeed", "google": "Google", "glassdoor": "Glassdoor", "getonboard": "Get on Board",
-                 "himalayas": "Himalayas", "jobicy": "Jobicy", "bne": "BNE", "trabajando": "Trabajando", "chiletrabajos": "Chiletrabajos", "laborum": "Laborum",
-                 "chumi": "Chumi", "linkedin": "LinkedIn"}
+                 "himalayas": "Himalayas", "jobicy": "Jobicy", "remotefirstjobs": "Remote First Jobs", "bne": "BNE", "trabajando": "Trabajando", "chiletrabajos": "Chiletrabajos", "laborum": "Laborum",
+                 "chumi": "Chumi", "linkedin": "LinkedIn", "jooble": "Jooble",
+                 "weworkremotely": "We Work Remotely", "arbeitnow": "Arbeitnow"}
 # Fuentes cuyo listado puede llegar SIN descripción. Sin texto no hay nada que revisar: ni experiencia, ni nivel, ni
 # contrato, ni sueldo, ni señales. Esas ofertas van a "sin_descripcion" (las revisa Sofia abriendo el aviso), nunca se
 # muestran como si hubieran pasado los filtros. LinkedIn nunca trae descripción: su robots.txt dice "Disallow: /" a
 # todo el mundo, así que la app no pide el detalle (ver NOTAS.md, 21-10). Glassdoor sí lo trae desde el 21-10
 # (fetch_description), pero sigue aquí por las ofertas guardadas antes de ese cambio.
-FUENTES_SIN_TEXTO = ("linkedin", "glassdoor")
-AVISO_SIN_TEXTO = "⚠ el texto del aviso no llegó a la app: experiencia y nivel sin verificar"
+FUENTES_SIN_TEXTO = ("linkedin", "glassdoor", "jooble")
+AVISO_SIN_TEXTO = "⚠ la descripción del aviso no llegó a la app: experiencia y nivel sin verificar"
 EXPERIENCIA_SIN_VERIFICAR = "Sin verificar"
 
 # ---- Portales chilenos (términos validados por la app anterior; sin tildes porque van en la URL) ----
@@ -110,11 +111,14 @@ PAUSA_ENTRE_BUSQUEDAS = 1.5       # segundos, para no gatillar bloqueos
 # Pausa aleatoria (mínimo, máximo en segundos) entre consultas JobSpy de las fuentes que limitan más: LinkedIn
 # respondió 429 el 19-10 con 1,5 s. Si igual responde 429, esa fuente se deja por el resto de la corrida.
 PAUSA_JOBSPY = {"linkedin": (6.0, 10.0), "glassdoor": (3.0, 5.0)}
+# Fuentes que se reparten a lo largo de la corrida, intercaladas con las demás (buscar._intercalar), en vez de
+# pedir todas sus consultas seguidas: LinkedIn respondió 429 en las corridas 55-57.
+DISTANCIAR = ("linkedin",)
 
 # ---- Antigüedad: solo se recolectan ofertas recientes (las más antiguas no se guardan ni cuentan) ----
 # Días hacia atrás por fuente: 1 = "hoy y ayer". Fuentes con hora (Get on Board, Trabajando, y el filtro de Indeed)
 # usan un corte exacto de 24 h por día. BNE publica con desfase, por eso 3. Las ofertas sin fecha pasan siempre.
-MAX_ANTIGUEDAD_DIAS = {"indeed": 1, "glassdoor": 1, "getonboard": 1, "himalayas": 1, "jobicy": 1, "bne": 3, "trabajando": 1, "chiletrabajos": 1, "laborum": 1, "chumi": 1, "linkedin": 1}
+MAX_ANTIGUEDAD_DIAS = {"indeed": 1, "glassdoor": 1, "getonboard": 1, "himalayas": 1, "jobicy": 1, "remotefirstjobs": 2, "bne": 3, "trabajando": 1, "chiletrabajos": 1, "laborum": 1, "chumi": 1, "linkedin": 1, "jooble": 7, "weworkremotely": 2, "arbeitnow": 2}
 # Si pasan días sin buscar, la ventana crece sola (días desde el fin de la última búsqueda + 1), hasta este tope.
 DIAS_MAXIMOS = 14
 ZONA_HORARIA = "America/Santiago"   # "hoy" se calcula en hora de Chile, no con la hora del equipo o contenedor

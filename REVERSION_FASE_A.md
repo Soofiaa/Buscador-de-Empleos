@@ -575,3 +575,113 @@ docker compose up -d --no-build
 **Qué se pierde al volver:** la sección «Puestos que busco» desaparece y Indeed vuelve a usar la lista fija de
 config.py. Si Sofia ya guardó una lista propia, queda guardada en justes pero deja de usarse. No se pierden
 ofertas ni estados. Probado con la candidata en navegador antes del despliegue.
+
+## Redespliegue con la misma versión (22-10-2026)
+
+Commit de42a51 (código idéntico al de «Puestos que busco»). Imagen anterior: job-tracker:pre-redespliegue-20261022
+(sha256:ba0cc91630d5f60b9b5f89dd5341b781fb00863e44b366ce43ce3f3af5549d41). Imagen desplegada:
+job-tracker-jobtracker:latest = sha256:2509d984b4ada5ecac0df265735f94496f3d4ec58d5ee6650f85802c38fc39b1.
+Referencia: ofertas_pre_redespliegue_20261022.db, sha256 da3a88e9e1d3218dd616de2e641564adc2c39c2f2dabe44af0ca27e52f0c18c9.
+
+Para volver atrás:
+
+`
+docker compose stop jobtracker
+docker tag job-tracker:pre-redespliegue-20261022 job-tracker-jobtracker:latest
+docker compose up -d --no-build
+`
+
+**Qué se pierde al volver:** nada del código; vuelve a la misma versión funcional. No se pierden ofertas ni estados.
+
+## Métricas en la barra derecha y avisos del navegador (fase 3) (23-10-2026)
+
+Commits d519ed2 (fase 1: recordar pestaña, filtros y agrupación), 6c6c664 y 7751107 (métricas, en la barra
+derecha), 2cb86e0 (avisos del navegador), ca1e4f0 (estilos compactos del panel de métricas). La página anterior no
+tenía ni la fase 1 ni las métricas. Imagen anterior: job-tracker:pre-avisos-20261023
+(sha256:c2207ae0b52e34f945515856f7fac5375e6651b519e8ec9ccde45bec2e81b95f, la de las exclusiones, desplegada sin
+registro; ver NOTAS.md). Imagen desplegada: job-tracker-jobtracker:latest =
+sha256:57a228999bd97a737b9e4ce841cfdf988561183158d7a7a11c698abc9c1f2a9a.
+Referencia: ofertas_pre_avisos_20261023.db (volumen y C:\Users\sofia\Respaldos\job-tracker-referencias\), sha256
+ba4b3db52e761560b73caf34970055ce2b960e459dee6a2a5663bea602b755d2, integrity_check ok. Salida al detener: 0.
+
+Para volver atrás:
+
+```
+docker compose stop jobtracker
+docker tag job-tracker:pre-avisos-20261023 job-tracker-jobtracker:latest
+docker compose up -d --no-build
+```
+
+**Qué se pierde al volver:** desaparecen las métricas, el botón «Avisar al entrar ofertas» y la memoria de pestaña,
+filtros y agrupación (fase 1). Lo que el navegador guardó (avisos, avisoUltimaCorrida, vistaPrefs) queda en
+localStorage sin uso. Ningún cambio escribe en la base, así que no se pierden ofertas ni estados.
+Reversión probada en copia (volumen temporal, 8767): healthy, GET / 200 y huellas idénticas a la referencia.
+
+## Remote First Jobs como fuente remota (24-10-2026)
+
+Commit efbfa23: conector `remotefirstjobs.py` (API pública de remotefirstjobs.com), conectado en `config.py`,
+`buscar.py` y la lista de fuentes de la página; 5 pruebas nuevas. Cambia también la búsqueda: una solicitud extra por
+corrida. Imagen anterior: job-tracker:pre-remotefirstjobs-20261024 (sha256:0191a03a285eab4b43a46da28ee1ffbfe47a8001374f6ffd6a9256c60c011584).
+Imagen desplegada: job-tracker-jobtracker:latest = sha256:f36ac2f07c6d47852748b3ef86a1722fc8e75e4f9de55d474a6432454de227a5.
+Referencia: ofertas_pre_remotefirstjobs_20261024.db (volumen y C:\Users\sofia\Respaldos\job-tracker-referencias\), sha256
+721591c023215728a729a39062d9417e7e12ca38be8c25068c0f19c9078d9396, integrity_check ok. Salida al detener: 0.
+
+Para volver atrás:
+
+```
+docker compose stop jobtracker
+docker tag job-tracker:pre-remotefirstjobs-20261024 job-tracker-jobtracker:latest
+docker compose up -d --no-build
+```
+
+**Qué se pierde al volver:** deja de consultarse Remote First Jobs; las ofertas ya guardadas de esa fuente se quedan en la
+base. Ningún cambio de la versión anterior escribe en la base, así que no se pierden ofertas ni estados.
+Reversión probada en copia (volumen temporal, 8767): healthy, GET / 200 y huellas idénticas.
+
+## Temas con nombres nuevo, ayudas al día y selector de Seguimiento (24-10-2026)
+
+Commits e79ace5, d1440db (temas y ayuda de Métricas y Ajustes), 8e35e23 (tutorial), b060819 (fixtures sin datos
+reales). Solo cambian `web/pagina.html`, `TUTORIAL.md`, `README.md` y pruebas: el servidor y la base no cambian.
+Imagen anterior: job-tracker:pre-ayudas-20261024 (sha256:0602873e29fc21f596f8284d2775afd439d14b8425ead41eaae651843bec0503,
+la del rediseño por apartados). Imagen desplegada: job-tracker-jobtracker:latest = sha256:0191a03a285eab4b43a46da28ee1ffbfe47a8001374f6ffd6a9256c60c011584.
+Referencia: ofertas_pre_ayudas_20261024.db (volumen y C:\Users\sofia\Respaldos\job-tracker-referencias\), sha256
+721591c023215728a729a39062d9417e7e12ca38be8c25068c0f19c9078d9396, integrity_check ok. Salida al detener: 0.
+La base creció desde el despliegue anterior (45 → 46 búsquedas, 4452 → 4516 ofertas, 36 → 37 postuladas): actividad
+normal de las búsquedas, no de este despliegue. Huellas antes y después: RESULTADO OK.
+
+Para volver atrás:
+
+```
+docker compose stop jobtracker
+docker tag job-tracker:pre-ayudas-20261024 job-tracker-jobtracker:latest
+docker compose up -d --no-build
+```
+
+**Qué se pierde al volver:** vuelven los nombres de temas anteriores (Girly, Hombre, Neutro), la ayuda sin Métricas ni
+Ajustes y el tutorial de esta versión. Ningún cambio escribe en la base, así que no se pierden ofertas ni estados.
+Reversión probada en copia (volumen temporal, 8767): healthy, GET / 200 con la página anterior y huellas idénticas.
+
+## Rediseño por apartados (pasos 1 a 4) y selector único de Seguimiento (23-10-2026)
+
+Commits 7aad48a, 73ab2db, 10fc78e y 26a23a5 (pasos 1 a 4: menú de apartados Ofertas, Seguimiento, Métricas y Ajustes;
+sin barra derecha) y a677529 (selector «Tablero · Tarjetas · Compacta» y tutorial). Solo cambia `web/pagina.html`;
+el servidor y la base no cambian. Desplegado sin candidata, a pedido de Sofia. Imagen anterior:
+job-tracker:pre-rediseno-20261023 (sha256:57a228999bd97a737b9e4ce841cfdf988561183158d7a7a11c698abc9c1f2a9a). Imagen
+desplegada: job-tracker-jobtracker:latest = sha256:0602873e29fc21f596f8284d2775afd439d14b8425ead41eaae651843bec0503.
+Referencia: ofertas_pre_rediseno_20261023.db (volumen y C:\Users\sofia\Respaldos\job-tracker-referencias\), sha256
+ba4b3db52e761560b73caf34970055ce2b960e459dee6a2a5663bea602b755d2 (igual a la de los avisos: la base no cambió entre
+ambos despliegues), integrity_check ok. Salida al detener: 0.
+
+Para volver atrás:
+
+```
+docker compose stop jobtracker
+docker tag job-tracker:pre-rediseno-20261023 job-tracker-jobtracker:latest
+docker compose up -d --no-build
+```
+
+**Qué se pierde al volver:** vuelve la pantalla de dos columnas más la barra derecha (puestos, exclusiones y
+métricas), con Seguimiento como pestaña. Las direcciones con #apartado abren Ofertas. La preferencia guardada
+`vistaPrefs` sigue sirviendo. Ningún cambio escribe en la base, así que no se pierden ofertas ni estados.
+Reversión probada en copia (volumen temporal, 8767): healthy, GET / 200 con la página anterior y huellas idénticas a
+la referencia.

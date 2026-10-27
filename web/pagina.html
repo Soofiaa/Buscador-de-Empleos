@@ -201,6 +201,15 @@
   .marca { display:flex; align-items:center; justify-content:space-between; gap:8px; }
   .marca h1 { font-size:1.3rem; margin:0; }
   #ultima { margin:4px 0 16px; }
+  /* menú de apartados (navegación por #hash) */
+  nav.menu { display:flex; flex-direction:column; gap:2px; margin:14px 0 12px; }
+  nav.menu a { display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:10px; color:var(--suave);
+               text-decoration:none; font-weight:600; border-left:3px solid transparent; }
+  nav.menu a:hover { background:var(--panel2); color:var(--tinta); }
+  nav.menu a[aria-current="page"] { background:var(--sel); color:var(--tinta); border-left-color:var(--accion); }
+  nav.menu .menu-icono { width:1.3em; text-align:center; }
+  nav.menu .cuenta { margin-left:auto; }
+  .apartado:focus { outline:none; }
   .boton { background:var(--accion); color:var(--accion-tinta); border:0; border-radius:10px; padding:10px 16px; font-weight:600; cursor:pointer; }
   .boton:hover { filter:brightness(1.06); }
   .boton:disabled { opacity:.55; cursor:progress; }
@@ -417,6 +426,26 @@
   .metricas-kpi-card .etq { font-size:.82rem; font-weight:600; color:var(--suave); }
   .metricas-kpi-card .num { font-size:1.8rem; font-weight:700; font-family:var(--display); color:var(--tinta); }
   .metricas-kpi-card .det { font-size:.8rem; color:var(--suave); }
+  .metricas-bloque { background:var(--panel); border:1px solid var(--borde); border-radius:14px; padding:14px 16px; display:flex; flex-direction:column; gap:8px; min-width:0; }
+  .metricas-bloque h3 { margin:0 0 4px; font-size:.95rem; font-weight:700; color:var(--tinta); }
+  .metricas-desgloses { display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 400px), 1fr)); gap:12px; }
+  .metricas-bloque table.fuentes { margin-top:0; }
+  .metrica-barra { display:grid; grid-template-columns:minmax(120px, 170px) 1fr 44px; align-items:center; gap:10px; font-size:.84rem; }
+  #metricas-panel table.fuentes td:not(:first-child), #metricas-panel table.fuentes th:not(:first-child) { text-align:right; font-variant-numeric:tabular-nums; }
+  /* apartado Ajustes: bloques en tarjetas, dos columnas si hay ancho */
+  .ajustes-grupo { margin:0 0 22px; }
+  .ajustes-grupo > h3 { font-size:1rem; margin:0 0 4px; }
+  .ajustes-grupo > .sub { margin:0 0 12px; }
+  .ajustes-columnas { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:14px; align-items:start; }
+  .ajustes-bloque { background:var(--panel); border:1px solid var(--borde); border-radius:14px; padding:14px 16px; min-width:0; }
+  .ajustes-bloque > h4 { margin:0 0 6px; font-size:.95rem; }
+  .ajustes-bloque .acciones-datos { display:flex; flex-wrap:wrap; gap:8px; }
+  .ajustes-bloque .boton.sec { font-size:.85rem; padding:8px 12px; }
+  .ajustes-bloque #avisos .boton { width:auto; }
+  .metrica-etq { color:var(--suave); font-weight:600; overflow-wrap:anywhere; }
+  .metrica-track { background:var(--panel2); border:1px solid var(--borde); border-radius:99px; height:12px; overflow:hidden; display:block; }
+  .metrica-relleno { display:block; height:100%; background:var(--accion); border-radius:99px; }
+  .metrica-num { font-weight:700; text-align:right; color:var(--tinta); font-variant-numeric:tabular-nums; }
   .breakdowns-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:14px; }
   .breakdown-card { background:var(--panel); border:1px solid var(--borde); border-radius:14px; padding:16px; }
   .breakdown-card h3 { margin:0 0 12px; font-size:1rem; font-weight:700; }
@@ -448,7 +477,6 @@
     .fila-compacta .ocultar-movil { display:none; }
   }
   .seccion-lateral { margin-bottom:12px; }
-  .seccion-lateral-titulo { font-size:.74rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--suave); margin:14px 2px 6px; }
   .badge-db-status { margin-top:20px; padding:10px 12px; background:var(--panel2); border:1px solid var(--borde); border-radius:10px; font-size:.78rem; color:var(--suave); display:flex; align-items:center; gap:8px; }
   .dot-online { width:8px; height:8px; border-radius:50%; background:#10B981; box-shadow:0 0 6px #10B981; flex-shrink:0; }
   /* ---------- corrección de contraste WCAG AA: activa con data-contraste="aa" en <html> (interruptor «Contraste reforzado») */
@@ -470,24 +498,8 @@
   <aside class="lateral">
     <div class="marca">
       <h1>Búsqueda de empleo</h1>
-      <select class="selector-tema" id="tema" aria-label="Elegir tema visual">
-        <optgroup label="🌸 Estilo Girly">
-          <option value="girly-claro">🌸 Girly Claro</option>
-          <option value="girly-oscuro">🌺 Girly Oscuro</option>
-        </optgroup>
-        <optgroup label="👔 Estilo Hombre">
-          <option value="hombre-claro">👔 Hombre Claro</option>
-          <option value="hombre-oscuro">💼 Hombre Oscuro</option>
-        </optgroup>
-        <optgroup label="☀️ Neutro">
-          <option value="neutro-claro">☀️ Neutro Claro</option>
-          <option value="neutro-oscuro">🌙 Neutro Oscuro</option>
-        </optgroup>
-      </select>
     </div>
-    <label class="interruptor-soporte" style="margin:6px 0 0;" title="Colores de texto y acento más oscuros o más claros, según el tema, para cumplir contraste WCAG AA">
-      <input type="checkbox" id="contraste-aa"> Contraste reforzado
-    </label>
+    <nav class="menu" id="menu" aria-label="Apartados"></nav>
     <div class="sub" id="ultima">Cargando…</div>
 
     <div class="seccion-lateral">
@@ -500,26 +512,12 @@
       </details>
     </div>
 
-    <div class="seccion-lateral-titulo">Gestión de Datos</div>
-    <div class="seccion-lateral">
-      <div class="acciones-datos" style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
-        <button class="boton sec" id="btn-exportar-csv" type="button" title="Descargar la pestaña actual (Seguimiento u Ofertas) para Excel" style="font-size:.78rem; padding:7px 4px; justify-content:center;">📥 CSV / Excel</button>
-        <button class="boton sec" id="btn-exportar-json" type="button" title="Descargar todas las ofertas en JSON (respaldo legible)" style="font-size:.78rem; padding:7px 4px; justify-content:center;">📦 Respaldo JSON</button>
-      </div>
-      <button class="boton sec ancho" id="btn-respaldo" type="button" title="Copia exacta de la base a tu carpeta de respaldos" style="margin-top:6px; font-size:.8rem; padding:7px 8px; justify-content:center;">💾 Respaldar ahora</button>
-      <div class="sub" id="estado-respaldo" role="status" style="margin:6px 2px 0; font-size:.78rem;"></div>
-    </div>
-
-    <div class="seccion-lateral-titulo">Puestos que busco</div>
-    <div class="seccion-lateral" id="puestos-panel">
-      <p class="nota">Lo que busca Indeed. Los cambios se usan en la próxima búsqueda.</p>
-    </div>
-
     <button class="boton sec ancho historial-toggle" id="historial-toggle" type="button" aria-expanded="false" aria-controls="historial">📜 Ver historial de búsquedas</button>
     <nav class="historial" id="historial" aria-label="Historial de búsquedas" data-plegado></nav>
     <div class="badge-db-status" id="estado-db" role="status"><span class="dot-online"></span> <span id="texto-db">Conectando…</span></div>
   </aside>
   <main class="principal">
+   <section class="apartado" id="vista-lista" tabindex="-1" aria-label="Ofertas">
     <header class="encabezado">
       <div class="encabezado-fila">
         <div>
@@ -537,6 +535,94 @@
     <nav class="pestanas" id="pestanas" role="tablist" aria-label="Categorías de ofertas"></nav>
     <div class="filtros" id="filtros"></div>
     <div id="lista"></div>
+   </section>
+   <section class="apartado" id="apartado-metricas" tabindex="-1" aria-labelledby="titulo-metricas" hidden>
+    <div class="encabezado-fila">
+      <div>
+        <h2 class="titulo-sel" id="titulo-metricas">Métricas</h2>
+        <div class="sub">Sobre todas tus ofertas relevantes, sin importar la búsqueda elegida en el historial.</div>
+      </div>
+      <div class="acciones-encabezado">
+        <button class="boton sec btn-ayuda-pantalla" type="button" aria-haspopup="dialog" title="Qué hay en esta pantalla y cómo usarla">❓ Ayuda de esta pantalla</button>
+      </div>
+    </div>
+    <div id="metricas-panel">
+      <p class="nota">Cargando…</p>
+    </div>
+   </section>
+   <section class="apartado" id="apartado-ajustes" tabindex="-1" aria-labelledby="titulo-ajustes" hidden>
+    <div class="encabezado-fila" style="margin-bottom:16px;">
+      <div><h2 class="titulo-sel" id="titulo-ajustes">Ajustes</h2></div>
+      <div class="acciones-encabezado">
+        <button class="boton sec btn-ayuda-pantalla" type="button" aria-haspopup="dialog" title="Qué hay en esta pantalla y cómo usarla">❓ Ayuda de esta pantalla</button>
+      </div>
+    </div>
+    <section class="ajustes-grupo" aria-labelledby="titulo-que-busco">
+      <h3 id="titulo-que-busco">Qué busco</h3>
+      <p class="sub">Qué se pide a las fuentes y qué se descarta siempre.</p>
+      <div class="ajustes-columnas">
+        <div class="ajustes-bloque">
+          <h4>Puestos que busco</h4>
+          <div id="puestos-panel"><p class="nota">Cargando…</p></div>
+        </div>
+        <div class="ajustes-bloque">
+          <h4>Exclusiones</h4>
+          <div id="exclusiones-panel"><p class="nota">Cargando…</p></div>
+        </div>
+      </div>
+    </section>
+    <section class="ajustes-grupo" aria-labelledby="titulo-datos">
+      <h3 id="titulo-datos">Datos</h3>
+      <p class="sub">Descargas para Excel y copias de seguridad de la base.</p>
+      <div class="ajustes-columnas">
+        <div class="ajustes-bloque">
+          <h4>Exportar</h4>
+          <div class="acciones-datos">
+            <button class="boton sec" id="btn-exportar-csv" type="button" title="Ofertas relevantes, para abrir en Excel">📥 CSV de Ofertas</button>
+            <button class="boton sec" id="btn-exportar-csv-seg" type="button" title="Revisadas, postuladas y en entrevista, para abrir en Excel">📥 CSV de Seguimiento</button>
+            <button class="boton sec" id="btn-exportar-json" type="button" title="Todas las ofertas en JSON (respaldo legible)">📦 Todo en JSON</button>
+          </div>
+        </div>
+        <div class="ajustes-bloque">
+          <h4>Respaldos</h4>
+          <p class="nota">Copia exacta de la base a tu carpeta de respaldos.</p>
+          <button class="boton sec" id="btn-respaldo" type="button">💾 Respaldar ahora</button>
+          <div class="sub" id="estado-respaldo" role="status" style="margin:8px 0 0;"></div>
+        </div>
+      </div>
+    </section>
+    <section class="ajustes-grupo" aria-labelledby="titulo-apariencia">
+      <h3 id="titulo-apariencia">Apariencia y avisos</h3>
+      <p class="sub">Se recuerdan en este navegador.</p>
+      <div class="ajustes-columnas">
+        <div class="ajustes-bloque">
+          <h4><label for="tema">Tema</label></h4>
+          <select class="selector-tema" id="tema">
+            <optgroup label="🌸 Estilo Girly">
+              <option value="girly-claro">🌷 Primavera</option>
+              <option value="girly-oscuro">🌹 Rosa nocturna</option>
+            </optgroup>
+            <optgroup label="👔 Estilo Hombre">
+              <option value="hombre-claro">🌊 Océano</option>
+              <option value="hombre-oscuro">🌌 Medianoche</option>
+            </optgroup>
+            <optgroup label="☀️ Neutro">
+              <option value="neutro-claro">🏔️ Niebla</option>
+              <option value="neutro-oscuro">🌑 Carbón</option>
+            </optgroup>
+          </select>
+          <label class="interruptor-soporte" style="margin:12px 0 0;">
+            <input type="checkbox" id="contraste-aa"> Contraste reforzado
+          </label>
+          <p class="nota">Colores de texto y acento más marcados, para cumplir contraste WCAG AA.</p>
+        </div>
+        <div class="ajustes-bloque">
+          <h4>Avisos</h4>
+          <div id="avisos"></div>
+        </div>
+      </div>
+    </section>
+   </section>
   </main>
 </div>
 <div class="toast-container" id="toast-container" aria-live="polite"></div>
@@ -600,6 +686,13 @@ function filtrarSeleccion(lista, pestana, sel, corridas) {
 }
 // Ofertas y Sin descripción son las dos listas que se gestionan con estado y fases: tus decisiones salen de ambas
 const gestionadas = datos => [...(datos.principal || []), ...(datos.sin_descripcion || [])];
+// una oferta por URL en cualquier lista: la del aviso de duplicada puede estar descartada, no solo en Ofertas
+function ofertaPorUrl(datos, url) {
+  if (!datos || !url) return null;
+  for (const clave of ["principal", "sin_descripcion", "fuera_perfil", "sospechosas", "descartadas"])
+    for (const o of datos[clave] || []) if (o.url === url) return o;
+  return null;
+}
 function listaDe(datos, pestana, sel) {
   if (!datos) return [];
   const base = pestana === "ofertas" ? datos.principal.filter(o => !CERRADOS.has(o.estado))
@@ -608,6 +701,10 @@ function listaDe(datos, pestana, sel) {
     : pestana === "descartadas_usuario" ? gestionadas(datos).filter(o => o.estado === "descartada")
     : (datos[pestana] || []);
   return filtrarSeleccion(base, pestana, sel, datos.corridas);
+}
+// La cuenta de Ofertas incluye las «Sin texto» pendientes: se muestran en la misma pestaña, al final
+function totalOfertas(datos, sel) {
+  return listaDe(datos, "ofertas", sel).length + listaDe(datos, "sin_descripcion", sel).length;
 }
 function progresoDe(mensaje) {                   // "[12/40] ..." o "[bne 2/5] ..." -> {n, total, pct}
   const m = /\[(?:[^\[\]]*\s)?(\d+)\/(\d+)\]/.exec(mensaje || "");
@@ -622,7 +719,7 @@ function tituloSeleccion(sel, corridas) {
   return "Todas las ofertas";
 }
 const NOMBRE_FUENTE = { indeed: "Indeed", google: "Google", glassdoor: "Glassdoor", getonboard: "Get on Board",
-  himalayas: "Himalayas", jobicy: "Jobicy", bne: "BNE", trabajando: "Trabajando", chiletrabajos: "Chiletrabajos", chumi: "Chumi", laborum: "Laborum", linkedin: "LinkedIn", manual: "✍️ Manual" };
+  himalayas: "Himalayas", jobicy: "Jobicy", remotefirstjobs: "Remote First Jobs", bne: "BNE", trabajando: "Trabajando", chiletrabajos: "Chiletrabajos", chumi: "Chumi", laborum: "Laborum", linkedin: "LinkedIn", manual: "✍️ Manual" };
 const nombreFuente = f => NOMBRE_FUENTE[f] || f || "sin fuente";
 function textoProgreso(mensaje) {                // "[3/40] indeed | qa tester | …" -> "Buscando en Indeed · qa tester · 3 de 40"
   const m = /^\s*\[(\d+)\/(\d+)\]\s*([^|\[\]]+?)\s*\|\s*([^|:]+?)\s*(?:[|:]|$)/.exec(mensaje || "");
@@ -641,6 +738,7 @@ const TXT = {
   ofertasRelevantesNuevas: n => plural(n, "oferta relevante nueva", "ofertas relevantes nuevas"),
   busquedas: n => plural(n, "búsqueda", "búsquedas"),
   busquedasRegistradas: n => plural(n, "búsqueda registrada", "búsquedas registradas"),
+  procesosEnCurso: n => plural(n, "proceso en curso", "procesos en curso"),
   encontradas: n => plural(n, "encontrada", "encontradas"),
   nuevasRelevantes: n => plural(n, "nueva relevante", "nuevas relevantes"),
   errores: n => plural(n, "error", "errores"),
@@ -738,7 +836,12 @@ function mensajeError(status, json) {            // texto para el usuario según
   return (json && json.error) ? "No se pudo guardar: " + json.error : "No se pudo guardar.";
 }
 function mensajeManual(status, json) {            // respuesta de /api/oferta/manual en palabras
-  if (status === 409) return "Ya la tienes registrada (" + ((json && json.error) || "duplicada") + ").";
+  if (status === 409) {
+    const motivo = (json && json.error) || "";
+    if (motivo === "ya tienes esa URL") return "Ya tienes registrada una oferta con ese enlace.";
+    if (motivo.startsWith("ya tienes esa oferta")) return "Ya tienes registrada esa oferta (mismo cargo y empresa).";
+    return "Ya la tienes registrada.";
+  }
   if (status === 413) return "El texto es demasiado largo.";
   return mensajeError(status, json);
 }
@@ -822,6 +925,80 @@ function senalesTablero(o, hoy) {
   else if (r && !seguimiento) etapa = { texto: r.dias === 0 ? "🕒 Postulada hoy" : "🕒 Postulada hace " + TXT.dias(r.dias), clase: "" };
   return { etapa, seguimiento };
 }
+// ---------- métricas y embudo (C3). Solo lectura: sale de /api/ofertas, sin rutas nuevas.
+// «Fase» = lo más lejos que llegó: una oferta descartada después de postular sigue contando en el embudo.
+const FASES_ENTREVISTA = new Set(["rrhh", "tecnica", "final", "oferta"]);
+const FASES_FINAL = new Set(["final", "oferta"]);
+const llegoPostulada = o => !!o.fecha_postulacion || o.estado === "postulada" || o.estado === "entrevista";
+const llegoEntrevista = o => FASES_ENTREVISTA.has(o.fase || "") || o.estado === "entrevista";
+const llegoFinal = o => FASES_FINAL.has(o.fase || "");
+// [{id, etiqueta, n}] en orden de embudo; n nunca crece de una etapa a la siguiente
+function embudo(datos) {
+  const relevantes = (datos && datos.principal) || [];
+  const postuladas = relevantes.filter(llegoPostulada);
+  const entrevistas = postuladas.filter(llegoEntrevista);
+  const finales = entrevistas.filter(llegoFinal);
+  return [
+    { id: "relevantes", etiqueta: "Relevantes", n: relevantes.length },
+    { id: "postuladas", etiqueta: "Postuladas", n: postuladas.length },
+    { id: "entrevistas", etiqueta: "Llegaron a entrevista", n: entrevistas.length },
+    { id: "finales", etiqueta: "Final u oferta", n: finales.length }
+  ];
+}
+// tasa de respuesta: entrevistas sobre postuladas; el divisor siempre se muestra ("1 de 8", "0 de 0")
+function tasaRespuesta(datos) {
+  const postuladas = ((datos && datos.principal) || []).filter(llegoPostulada);
+  const respondieron = postuladas.filter(llegoEntrevista).length;
+  return { respondieron, postuladas: postuladas.length, pct: postuladas.length ? Math.round(100 * respondieron / postuladas.length) : null };
+}
+// procesos activos: postulada o entrevista que no está descartada ni cerrada por ti
+function procesosActivos(datos) {
+  return gestionadas(datos).filter(o => (o.estado === "postulada" || o.estado === "entrevista") && o.estado !== "descartada");
+}
+// días promedio desde la postulación en los procesos activos; null si no hay fecha que contar
+function diasPromedioActivos(datos, hoy) {
+  const dias = procesosActivos(datos).map(o => diasDesde(o.fecha_postulacion, hoy)).filter(d => d !== null);
+  if (!dias.length) return null;
+  return Math.round(dias.reduce((a, b) => a + b, 0) / dias.length);
+}
+// descartadas que ya habían sido postuladas (con fecha de postulación)
+function descartadasDespuesDePostular(datos) {
+  return gestionadas(datos).filter(o => o.estado === "descartada" && !!o.fecha_postulacion).length;
+}
+// desglose por una clave (fuente, modalidad, tipo...): [{clave, relevantes, postuladas, entrevistas}] ordenado por relevantes
+function desglose(datos, campo) {
+  const grupos = new Map();
+  for (const o of (datos && datos.principal) || []) {
+    const k = o[campo] || "Sin dato";
+    if (!grupos.has(k)) grupos.set(k, { clave: k, relevantes: 0, postuladas: 0, entrevistas: 0 });
+    const g = grupos.get(k);
+    g.relevantes++;
+    if (llegoPostulada(o)) g.postuladas++;
+    if (llegoPostulada(o) && llegoEntrevista(o)) g.entrevistas++;
+  }
+  return [...grupos.values()].sort((a, b) => b.relevantes - a.relevantes || a.clave.localeCompare(b.clave));
+}
+// postulaciones por semana (lunes a domingo, en hora de Chile) de las últimas `semanas` semanas, la más reciente al final
+function semanasActividad(datos, hoy, semanas = 8) {
+  const lunesDe = iso => {                       // lunes de la semana de un "AAAA-MM-DD" (UTC para no tener desfases)
+    const [a, m, d] = iso.split("-").map(Number), f = new Date(Date.UTC(a, m - 1, d));
+    f.setUTCDate(f.getUTCDate() - ((f.getUTCDay() + 6) % 7));
+    return f.toISOString().slice(0, 10);
+  };
+  const lunesHoy = lunesDe(hoy);
+  const cubo = new Map();
+  for (let i = semanas - 1; i >= 0; i--) {
+    const [a, m, d] = lunesHoy.split("-").map(Number);
+    cubo.set(new Date(Date.UTC(a, m - 1, d - 7 * i)).toISOString().slice(0, 10), 0);
+  }
+  for (const o of (datos && datos.principal) || []) {
+    const f = o.fecha_postulacion;
+    if (!f || !/^\d{4}-\d{2}-\d{2}$/.test(f)) continue;
+    const clave = lunesDe(f);
+    if (cubo.has(clave)) cubo.set(clave, cubo.get(clave) + 1);
+  }
+  return [...cubo.entries()].map(([semana, n]) => ({ semana, n }));
+}
 // Búsquedas a mano: Computrabajo y Empleos Públicos rechazan a la app (403, ver NOTAS.md del 20-10). La página solo
 // arma los enlaces; se abren en el navegador de Sofia y lo que sirva se agrega con «Agregar manual».
 const TERMINOS_MANUALES = ["analista funcional", "analista qa", "analista de procesos", "desarrollador junior",
@@ -835,20 +1012,60 @@ function busquedasManuales() {
     { sitio: "Empleos Públicos", enlaces: [{ texto: "convocatorias abiertas", url: "https://www.empleospublicos.cl/pub/convocatorias/convocatorias.aspx" }] },
   ];
 }
+// Avisos: qué hacer al ver una corrida. La primera vez (ultimaAvisada null) solo se recuerda: no avisa de lo ya existente.
+// Devuelve {avisar, ultima}: avisar solo si la corrida es nueva y trajo ofertas relevantes nuevas.
+function decidirAviso(ultimaAvisada, corridaId, relevantesNuevas) {
+  if (corridaId === null || corridaId === undefined) return { avisar: false, ultima: ultimaAvisada };
+  if (ultimaAvisada === null) return { avisar: false, ultima: corridaId };
+  if (corridaId <= ultimaAvisada) return { avisar: false, ultima: ultimaAvisada };
+  return { avisar: relevantesNuevas > 0, ultima: corridaId };
+}
+// Apartados del menú: [id, nombre, icono]. El #hash de la dirección elige uno; si no es válido, Ofertas.
+const APARTADOS = [["ofertas", "Ofertas", "📋"], ["seguimiento", "Seguimiento", "📌"], ["metricas", "Métricas", "📊"], ["ajustes", "Ajustes", "⚙️"]];
+function apartadoDeHash(hash) {
+  let id = String(hash || "").replace(/^#/, "");
+  try { id = decodeURIComponent(id); } catch (e) {}
+  id = id.trim().toLowerCase();
+  return APARTADOS.some(([a]) => a === id) ? id : "ofertas";
+}
 // </puras>
 
 const ESTADOS = ["nueva", "revisada", "postulada", "entrevista", "descartada"];
 const ETIQUETAS_ESTADO = { nueva: "🌱 Nueva", revisada: "🔍 Revisada", postulada: "✉️ Postulada", entrevista: "🎯 En Entrevista", descartada: "❌ Descartada" };
 const PESTANAS = [
-  ["ofertas", "Ofertas"], ["seguimiento", "Seguimiento"],
-  ["fuera_perfil", "Fuera de perfil"],
+  ["ofertas", "Ofertas"], ["fuera_perfil", "Fuera de perfil"],
   ["sospechosas", "Sospechosas"], ["descartadas_usuario", "Descartadas"], ["descartadas", "Descartadas por filtros"]
 ];
 const FILTROS_VACIOS = () => ({ texto: "", estado: "activas", prioridad: "", modalidad: "", fuente: "", tipo: "" });
 const S = { datos: null, pestana: "ofertas", sel: { tipo: "todas" }, ultima: null, f: FILTROS_VACIOS(), agrupar: "prioridad", densidad: "detallada", masFiltros: false };
 try { if (localStorage.getItem("densidad") === "compacta") S.densidad = "compacta"; } catch (e) {}
+S.apartado = apartadoDeHash(location.hash);
 S.vistaSeg = "tablero";                           // la primera vez, Tablero; después, lo que se guardó
 try { if (localStorage.getItem("vistaSeguimiento") === "lista") S.vistaSeg = "lista"; } catch (e) {}
+
+// <prefs> pestaña, filtros, agrupación y «Más filtros» se recuerdan en el navegador; datos inválidos se ignoran
+const CLAVE_PREFS = "vistaPrefs";
+function cargarPrefs() {
+  try {
+    const p = JSON.parse(localStorage.getItem(CLAVE_PREFS) || "null");
+    if (!p || typeof p !== "object") return;
+    if (PESTANAS.some(([id]) => id === p.pestana)) S.pestana = p.pestana;
+    // antes Seguimiento era una pestaña: si quedó guardada y la dirección no pide otro apartado, se abre ese apartado
+    else if (p.pestana === "seguimiento" && !location.hash) S.apartado = "seguimiento";
+    if (p.agrupar === "prioridad" || p.agrupar === "fuente") S.agrupar = p.agrupar;
+    if (typeof p.masFiltros === "boolean") S.masFiltros = p.masFiltros;
+    if (p.f && typeof p.f === "object") {
+      for (const k of Object.keys(FILTROS_VACIOS())) if (typeof p.f[k] === "string") S.f[k] = p.f[k];
+    }
+  } catch (e) {}
+}
+function guardarPrefs() {
+  try { localStorage.setItem(CLAVE_PREFS, JSON.stringify({ pestana: S.pestana, agrupar: S.agrupar, masFiltros: S.masFiltros, f: S.f })); } catch (e) {}
+}
+cargarPrefs();
+// </prefs>
+// lo que muestra la vista de lista: en el apartado Seguimiento, el seguimiento; si no, la pestaña elegida en Ofertas
+const vista = () => S.apartado === "seguimiento" ? "seguimiento" : S.pestana;
 
 function h(tag, attrs, ...hijos) {
   const e = document.createElement(tag);
@@ -943,6 +1160,68 @@ async function cargarPuestos() {
   else $("puestos-panel").replaceChildren(h("p", { class: "nota" }, "No se pudieron cargar los puestos."));
 }
 
+// ---------- exclusiones (tres listas: empresas, títulos y descripciones; el servidor valida los patrones)
+const EXCLUSIONES_ETIQUETAS = {
+  empresas: ["Empresas", "Nombre de empresa (no distingue mayúsculas ni tildes)."],
+  titulo: ["Títulos", "Expresiones que, si aparecen en el título, descartan la oferta."],
+  descripcion: ["Descripciones", "Expresiones que, si aparecen en la descripción, descartan la oferta."],
+};
+// misma regla que el servidor: 2 a 80 caracteres en empresas; títulos y descripciones se validan como patrones
+function validarExclusionLocal(clave, p) {
+  if (!p) return "vacío";
+  if (p.length > 80) return "como máximo 80 caracteres";
+  if (clave !== "empresas") { try { new RegExp(p); } catch (e) { return "no es un patrón válido"; } }
+  return "";
+}
+function pintarExclusiones(datos) {
+  const panel = $("exclusiones-panel");
+  const borrador = { empresas: [...datos.empresas], titulo: [...datos.titulo], descripcion: [...datos.descripcion] };
+  const errores = h("div", { class: "sub", role: "alert", style: "color:var(--rojo); font-size:.78rem; margin-top:4px;" });
+  const bloques = Object.keys(EXCLUSIONES_ETIQUETAS).map(clave => {
+    const [titulo, ayuda] = EXCLUSIONES_ETIQUETAS[clave];
+    const campo = h("input", { type: "text", maxlength: "80", placeholder: "Agregar", "aria-label": "Nueva " + titulo.toLowerCase(), autocomplete: "off" });
+    const ul = h("ul", { style: "list-style:none; padding:0; margin:4px 0 8px; max-height:140px; overflow:auto;" });
+    const pintarItems = () => ul.replaceChildren(...borrador[clave].map((p, i) =>
+      h("li", { style: "display:flex; align-items:center; justify-content:space-between; gap:6px; padding:2px 0; font-size:.82rem;" },
+        h("span", { style: "overflow-wrap:anywhere;" }, p),
+        h("button", { type: "button", class: "btn-manual-header", "aria-label": "Quitar " + p, style: "padding:0 6px;",
+          onclick: () => { borrador[clave].splice(i, 1); pintarItems(); errores.textContent = ""; } }, "✕"))));
+    const agregar = () => {
+      const p = campo.value.replace(/\s+/g, " ").trim();
+      if (!p) return;
+      const motivo = validarExclusionLocal(clave, p);
+      if (motivo) { errores.textContent = `«${p}»: ${motivo}.`; return; }
+      if (borrador[clave].some(x => x.toLowerCase() === p.toLowerCase())) { errores.textContent = `«${p}»: ya está en la lista.`; return; }
+      borrador[clave].push(p); campo.value = ""; errores.textContent = ""; pintarItems(); campo.focus();
+    };
+    campo.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); agregar(); } });
+    pintarItems();
+    return h("div", { style: "margin-bottom:10px;" },
+      h("div", { style: "font-weight:600; font-size:.86rem;" }, titulo),
+      h("p", { class: "nota", style: "margin:2px 0 4px;" }, ayuda),
+      h("div", { style: "display:flex; gap:6px;" }, campo, h("button", { type: "button", class: "boton sec", onclick: agregar }, "Agregar")),
+      ul);
+  });
+  const guardar = h("button", { class: "boton sec ancho", type: "button", style: "font-size:.8rem; padding:7px 8px; justify-content:center;" }, "💾 Guardar exclusiones");
+  guardar.onclick = async () => {
+    errores.textContent = "";
+    guardar.disabled = true;
+    const r = await api("/api/ajustes/exclusiones", borrador);
+    guardar.disabled = false;
+    if (!r.ok) { errores.textContent = mensajeError(r.status, r.json); return; }
+    mostrarAviso("Exclusiones guardadas: se aplican a lo que llegue y a la reclasificación");
+    pintarExclusiones(r.json);
+  };
+  panel.replaceChildren(
+    h("p", { class: "nota" }, "Lo que nunca aparece. Los cambios se aplican al clasificar."),
+    ...bloques, errores, guardar);
+}
+async function cargarExclusiones() {
+  const r = await api("/api/ajustes/exclusiones");
+  if (r.ok) pintarExclusiones(r.json);
+  else $("exclusiones-panel").replaceChildren(h("p", { class: "nota" }, "No se pudieron cargar las exclusiones."));
+}
+
 async function cargar() {
   const r = await api("/api/ofertas");
   if (r.ok) {
@@ -979,6 +1258,7 @@ async function estado() {
   S.ultima = e.corrida || null;
   pintarUltima();
   pintarEncabezado();
+  if (!e.buscando) revisarAvisos(S.ultima);
   if (e.buscando && !sondeo) {
     sondeo = setInterval(async () => {
       const x = await api("/api/estado");
@@ -988,6 +1268,61 @@ async function estado() {
       if (!x.json.buscando) { clearInterval(sondeo); sondeo = null; cargar(); }
     }, 2500);
   }
+}
+
+// ---------- avisos del navegador: cuando termina una búsqueda con ofertas relevantes nuevas
+// Lo que ya se avisó se recuerda en este navegador ("avisoUltimaCorrida"); la primera vez solo se marca, no avisa.
+const CLAVE_AVISO_ULTIMA = "avisoUltimaCorrida", CLAVE_AVISOS = "avisos";
+let revisandoAvisos = false;
+function leerAvisoUltima() {
+  try { const v = localStorage.getItem(CLAVE_AVISO_ULTIMA); return v === null ? null : Number(v); } catch (e) { return null; }
+}
+function guardarAvisoUltima(id) { try { localStorage.setItem(CLAVE_AVISO_ULTIMA, String(id)); } catch (e) {} }
+function avisosActivos() {
+  try { return localStorage.getItem(CLAVE_AVISOS) === "on" && "Notification" in window && Notification.permission === "granted"; } catch (e) { return false; }
+}
+function notificarNuevas(n) {
+  const aviso = new Notification("Búsqueda de empleo", { body: TXT.ofertasRelevantesNuevas(n) + " para revisar", tag: "jt-corrida" });
+  aviso.onclick = () => { window.focus(); aviso.close(); };
+}
+async function revisarAvisos(corrida) {
+  if (!corrida || revisandoAvisos) return;
+  const previa = leerAvisoUltima();
+  if (previa !== null && corrida.id <= previa) return;          // ya visto: no pedir nada
+  revisandoAvisos = true;
+  try {
+    const r = await api("/api/ofertas");
+    if (!r.ok) return;
+    const relevantes = (r.json.principal || []).filter(o => o.corrida_id === corrida.id && o.estado === "nueva").length;
+    const d = decidirAviso(previa, corrida.id, relevantes);
+    if (d.ultima !== previa) guardarAvisoUltima(d.ultima);
+    if (d.avisar && avisosActivos()) notificarNuevas(relevantes);
+  } finally {
+    revisandoAvisos = false;
+  }
+}
+function pintarAvisos() {
+  const cont = $("avisos");
+  if (!("Notification" in window)) {
+    cont.replaceChildren(h("p", { class: "nota" }, "Este navegador no permite avisos."));
+    return;
+  }
+  const activos = avisosActivos();
+  const bloqueado = Notification.permission === "denied";
+  const boton = h("button", { type: "button", class: "boton sec ancho", "aria-pressed": String(activos), style: "font-size:.8rem; padding:7px 8px; justify-content:center;",
+    disabled: bloqueado,
+    onclick: async () => {
+      if (activos) { try { localStorage.setItem(CLAVE_AVISOS, "off"); } catch (e) {} pintarAvisos(); return; }
+      if (Notification.permission !== "granted") await Notification.requestPermission();
+      if (Notification.permission === "granted") {
+        try { localStorage.setItem(CLAVE_AVISOS, "on"); } catch (e) {}
+        mostrarAviso("Avisos activados: te aviso cuando entren ofertas relevantes nuevas");
+      }
+      pintarAvisos();
+    } }, activos ? "🔔 Avisos activados" : "🔕 Avisar al entrar ofertas");
+  cont.replaceChildren(boton, bloqueado
+    ? h("p", { class: "nota" }, "El navegador bloqueó los avisos. Permítelos para este sitio en la configuración del navegador.")
+    : h("p", { class: "nota" }, "Solo funciona con la página abierta en el navegador."));
 }
 
 $("buscar").addEventListener("click", async () => {
@@ -1018,7 +1353,12 @@ try { contrasteGuardado = localStorage.getItem("contraste"); } catch (e) {}
 aplicarContraste(contrasteGuardado !== "normal");
 
 // ---------- columna izquierda: historial
-function elegir(sel) { S.sel = sel; pintar(); }
+// el historial filtra Ofertas: al elegir una búsqueda desde otro apartado, se vuelve a Ofertas
+function elegir(sel) {
+  S.sel = sel;
+  if (S.apartado !== "ofertas") { irApartado("ofertas", false); history.pushState(null, "", "#ofertas"); }
+  pintar();
+}
 
 // en móvil el historial empieza plegado; el botón lo abre y lo cierra (aria-expanded refleja el estado)
 $("historial-toggle").addEventListener("click", e => {
@@ -1077,6 +1417,12 @@ function pintarUltima() {
 // ---------- encabezado de la columna principal
 function pintarEncabezado() {
   const sel = S.sel, cs = corridas();
+  if (vista() === "seguimiento") {
+    $("titulo-sel").textContent = "Seguimiento";
+    $("sub-sel").textContent = S.datos ? TXT.procesosEnCurso(listaDe(S.datos, "seguimiento", sel).length) + " (revisadas, postuladas o en entrevista)" : "";
+    $("fuentes-sel").hidden = true; $("panel-corrida").hidden = true;
+    return;
+  }
   $("titulo-sel").textContent = tituloSeleccion(sel, cs);
   let sub = "";
   if (sel.tipo === "todas") sub = cs.length ? TXT.busquedasRegistradas(cs.length) : "";
@@ -1121,7 +1467,7 @@ function pintarEncabezado() {
 function pasa(o) {
   const f = S.f;
   if (f.texto && !coincideTexto(o, f.texto)) return false;
-  if (S.pestana === "ofertas" && f.estado !== "activas" && f.estado !== "" && o.estado !== f.estado) return false;
+  if (vista() === "ofertas" && f.estado !== "activas" && f.estado !== "" && o.estado !== f.estado) return false;
   if (f.prioridad && o.prioridad !== f.prioridad) return false;
   if (f.modalidad && o.modalidad !== f.modalidad) return false;
   if (f.fuente && o.fuente !== f.fuente) return false;
@@ -1132,9 +1478,10 @@ function pasa(o) {
 function pintarPestanas() {
   const nav = $("pestanas");
   conFoco(nav, () => nav.replaceChildren(...PESTANAS.map(([id, nombre]) => {
-    const total = id === "descartadas" && S.datos && S.sel.tipo === "todas" ? S.datos.total_descartadas : listaDe(S.datos, id, S.sel).length;
+    const total = id === "descartadas" && S.datos && S.sel.tipo === "todas" ? S.datos.total_descartadas
+      : id === "ofertas" ? totalOfertas(S.datos, S.sel) : listaDe(S.datos, id, S.sel).length;
     return h("button", { type: "button", role: "tab", "aria-selected": String(S.pestana === id), "data-clave": id,
-      onclick: () => { S.pestana = id; pintar(); } }, nombre, h("span", { class: "cuenta" }, total));
+      onclick: () => { S.pestana = id; pintar(); } }, nombre, total === null ? null : h("span", { class: "cuenta" }, total));
   })));
 }
 
@@ -1150,33 +1497,34 @@ const PESTANAS_PRINCIPAL = new Set(["ofertas", "seguimiento", "descartadas_usuar
 // "Sin descripción" trae su propia lista, pero se ve y se trabaja como Ofertas: tarjeta completa y los mismos filtros
 const PESTANAS_COMPLETAS = new Set([...PESTANAS_PRINCIPAL, "sin_descripcion"]);
 function pintarFiltros() {
-  const base = PESTANAS_PRINCIPAL.has(S.pestana) ? gestionadas(S.datos) : (S.datos[S.pestana] || []);
+  const base = PESTANAS_PRINCIPAL.has(vista()) ? gestionadas(S.datos) : (S.datos[vista()] || []);
   const unicos = campo => [...new Set(base.map(o => o[campo]).filter(Boolean))].sort();
   const txt = h("input", { type: "search", placeholder: "Buscar por cargo, empresa, stack o notas… (Pulsa / para buscar)", "aria-label": "Buscar", value: S.f.texto,
     oninput: e => { S.f.texto = e.target.value; pintarLista(); } });
   const partes = [txt];
-  if (S.pestana === "ofertas") partes.push(selector("estado", "Estado", ["nueva", "revisada"], [h("option", { value: "activas" }, "Estado: activas"), h("option", { value: "" }, "Estado: todas")]));
+  if (vista() === "ofertas") partes.push(selector("estado", "Estado", ["nueva", "revisada"], [h("option", { value: "activas" }, "Estado: activas"), h("option", { value: "" }, "Estado: todas")]));
   // secundarios (prioridad, modalidad, tipo, fuente) van plegados en «Más filtros»; se abre solo si hay alguno activo
   const secundarios = [];
-  if (PESTANAS_COMPLETAS.has(S.pestana)) {
+  if (PESTANAS_COMPLETAS.has(vista())) {
     secundarios.push(selector("prioridad", "Prioridad", ["Alta", "Media", "Baja"]), selector("modalidad", "Modalidad", unicos("modalidad")), selector("tipo", "Tipo", unicos("tipo")));
   }
-  const fuentesConocidas = ["indeed", "linkedin", "chiletrabajos", "bne", "trabajando", "chumi", "laborum", "getonboard", "glassdoor", "himalayas", "jobicy"];
+  const fuentesConocidas = ["indeed", "linkedin", "chiletrabajos", "bne", "trabajando", "chumi", "laborum", "getonboard", "glassdoor", "himalayas", "jobicy", "remotefirstjobs"];
   const fuentesOpciones = [...new Set([...fuentesConocidas, ...unicos("fuente")])].sort((a, b) => nombreFuente(a).localeCompare(nombreFuente(b)));
   secundarios.push(selector("fuente", "Fuente", fuentesOpciones, null, nombreFuente));
   const activos = ["prioridad", "modalidad", "tipo", "fuente"].filter(k => S.f[k]).length;
   partes.push(h("details", { class: "filtros-extra", open: S.masFiltros || activos > 0 ? true : null,
-      ontoggle: e => { S.masFiltros = e.target.open; } },
+      ontoggle: e => { S.masFiltros = e.target.open; guardarPrefs(); } },
     h("summary", {}, "Más filtros" + (activos ? " · " + activos + (activos === 1 ? " activo" : " activos") : "")),
     h("div", { class: "filtros-extra-grid" }, secundarios)));
-  if (S.pestana === "ofertas") {
+  if (vista() === "ofertas") {
     const g = h("select", { "aria-label": "Agrupar", onchange: e => { S.agrupar = e.target.value; pintarLista(); } },
       h("option", { value: "prioridad" }, "Agrupar: prioridad"), h("option", { value: "fuente" }, "Agrupar: fuente"));
     g.value = S.agrupar; partes.push(g);
   }
   const densidad = (valor, texto, titulo) => h("button", { type: "button", class: "btn-vista", "aria-pressed": String(S.densidad === valor), title: titulo,
     onclick: () => { S.densidad = valor; try { localStorage.setItem("densidad", valor); } catch (e) {} pintarLista(); pintarFiltros(); } }, texto);
-  partes.push(h("div", { class: "selector-vista", role: "group", "aria-label": "Densidad de vista" },
+  // en Seguimiento la densidad va en su selector de vista (Tablero · Tarjetas · Compacta)
+  if (vista() !== "seguimiento") partes.push(h("div", { class: "selector-vista", role: "group", "aria-label": "Densidad de vista" },
     densidad("detallada", "🗂️ Tarjetas", "Vista de tarjetas detalladas"), densidad("compacta", "📋 Compacta", "Vista compacta de alta densidad tipo tabla")));
   const vacios = FILTROS_VACIOS();
   if (Object.keys(vacios).some(k => S.f[k] !== vacios[k])) {
@@ -1370,18 +1718,28 @@ function abrirManual(origen) {
   const fase = h("select", { id: "manual-fase" }, h("option", { value: "" }, "Sin fase"), FASES_PIPELINE.map(f => h("option", { value: f.id }, f.nombre)));
   const notas = h("textarea", { id: "manual-notas", maxlength: "5000", rows: "4", placeholder: "Contacto, cómo postulaste, próximos pasos…" });
   const grupo = (etq, campo) => h("div", { class: "form-grupo" }, h("label", { for: campo.id }, etq), campo);
+  const enviar = async confirmar => {
+    error.hidden = true;
+    const r = await api("/api/oferta/manual", { titulo: titulo.value, empresa: empresa.value, url: url.value.trim(), ubicacion: ubicacion.value,
+      modalidad: modalidad.value, estado: estado.value, fecha_postulacion: fecha.value, prioridad_manual: prioridad.value,
+      sueldo_manual: sueldo.value, fase: fase.value, notas: notas.value, ...(confirmar ? { confirmar_duplicada: true } : {}) });
+    if (r.status === 201) { cerrarDetalle(); await cargar(); mostrarAviso("Postulación agregada ✓"); return; }
+    if (r.status === 200 && r.json.actualizada) {
+      cerrarDetalle(); await cargar(); mostrarAviso("Estaba descartada: la reactivé con esta postulación ✓"); return;
+    }
+    // la existente viene en la respuesta: no depende de que esté cargada en la lista de la página
+    const existente = r.status === 409 && r.json.existente ? r.json.existente : null;
+    error.replaceChildren(mensajeManual(r.status, r.json));
+    if (existente) error.append(h("button", { type: "button", class: "boton sec", style: "margin-left:8px;",
+      onclick: () => abrirDetalle(existente, $("btn-manual")) }, "Ver la existente"));
+    if (r.status === 409 && r.json.confirmable) error.append(h("button", { type: "button", class: "boton", style: "margin-left:8px;",
+      onclick: () => enviar(true) }, "Guardar de todas formas"));
+    error.hidden = false;
+  };
   const form = h("form", { class: "modal-form", novalidate: true, onsubmit: async e => {
       e.preventDefault();
-      error.hidden = true;
       if (!titulo.value.trim() || !empresa.value.trim()) { error.replaceChildren("El cargo y la empresa son obligatorios."); error.hidden = false; return; }
-      const r = await api("/api/oferta/manual", { titulo: titulo.value, empresa: empresa.value, url: url.value.trim(), ubicacion: ubicacion.value,
-        modalidad: modalidad.value, estado: estado.value, fecha_postulacion: fecha.value, prioridad_manual: prioridad.value,
-        sueldo_manual: sueldo.value, fase: fase.value, notas: notas.value });
-      if (r.status === 201) { cerrarDetalle(); await cargar(); mostrarAviso("Postulación agregada ✓"); return; }
-      const existente = r.status === 409 && S.datos ? S.datos.principal.find(x => x.url === r.json.url_existente) : null;
-      error.replaceChildren(mensajeManual(r.status, r.json),
-        existente ? h("button", { type: "button", class: "boton sec", style: "margin-left:8px;", onclick: () => abrirDetalle(existente, $("btn-manual")) }, "Ver la existente") : null);
-      error.hidden = false;
+      await enviar(false);
     } },
     h("div", { class: "form-fila" }, grupo("Cargo *", titulo), grupo("Empresa *", empresa)),
     h("div", { class: "form-fila" }, grupo("Enlace del aviso", url), grupo("Ubicación", ubicacion)),
@@ -1397,7 +1755,7 @@ function abrirManual(origen) {
     h("div", { class: "modal-cabecera" },
       h("h2", { id: "manual-titulo-dialogo" }, "Agregar postulación manual"),
       h("button", { type: "button", class: "btn-cerrar", "aria-label": "Cerrar", onclick: cerrarDetalle }, "✕")),
-    h("p", { class: "sub", style: "margin:0 0 12px;" }, "Para una oferta que no trajo la búsqueda. Si ya la tienes (mismo cargo, empresa y ciudad, o el mismo enlace), te avisa en vez de duplicarla."),
+    h("p", { class: "sub", style: "margin:0 0 12px;" }, "Para una oferta que no trajo la búsqueda. Si ya la tienes descartada, la reactiva con esta postulación. Si ya existe una con el mismo enlace, no la duplica; si tiene el mismo cargo y empresa (por ejemplo, sin ciudad), te muestra «Ver la existente» y «Guardar de todas formas», para que decidas tú."),
     form);
   montarDialogo(tarjeta, origen, titulo);
 }
@@ -1405,9 +1763,11 @@ $("btn-manual").addEventListener("click", e => abrirManual(e.currentTarget));
 
 // ---------- ayuda por pantalla: cambia según la pestaña activa (mismo diálogo que los demás: Esc cierra, el foco no sale)
 const AYUDA_PESTANA = {
-  ofertas: { titulo: "Ofertas", texto: "Las ofertas que la app considera relevantes y que aún no decidiste. Revisa cada una: abre el aviso con el título o con ↗, y cambia su estado desde la tarjeta. Si no te interesa, márcala como Descartada: sale de esta lista y queda en Descartadas." },
-  seguimiento: { titulo: "Seguimiento", texto: "Las ofertas en proceso (revisadas, postuladas o en entrevista). En Tablero, arrastra cada tarjeta a su etapa, o usa «Mover a…». Cada movimiento tiene «Deshacer». Con «⚡ Gestionar proceso» anotas la fecha de postulación, la fase, las notas y el sueldo." },
-  sin_descripcion: { titulo: "Sin texto", texto: "Ofertas que llegaron sin descripción (hoy, LinkedIn): la app no puede revisar su experiencia ni su nivel. Abre el aviso con ↗, copia la descripción completa y pégala en su tarjeta con «Guardar descripción». Si cumple, pasa a Ofertas; si no, queda descartada." },
+  ofertas: { titulo: "Ofertas", texto: "Las ofertas que la app considera relevantes y que aún no decidiste. Revisa cada una: abre el aviso con el título o con ↗, y cambia su estado desde la tarjeta. Si no te interesa, márcala como Descartada: sale de esta lista y queda en Descartadas. Si postulaste a una que la búsqueda no trajo, usa «➕ Agregar postulación manual» (arriba): si ya la tienes, la app te muestra la existente y te deja guardarla igual. Al final aparecen las «Sin texto»: ofertas cuya descripción no llegó (hoy, LinkedIn). Pega la descripción en su tarjeta y la app la revisa." },
+  seguimiento: { titulo: "Seguimiento", texto: "Las ofertas en proceso (revisadas, postuladas o en entrevista). Arriba eliges cómo verlas: Tablero, Tarjetas o Compacta. En Tablero, arrastra cada tarjeta a su etapa, o usa «Mover a…». Cada movimiento tiene «Deshacer». Con «⚡ Gestionar proceso» anotas la fecha de postulación, la fase, las notas y el sueldo. Para agregar una postulación que no trajo la búsqueda, usa «➕ Agregar postulación manual»; si ya existe una con el mismo cargo y empresa, te ofrece verla o guardarla de todas formas." },
+  metricas: { titulo: "Métricas", texto: "Indicadores sobre todas tus ofertas relevantes: cuántas postulaciones, cuántas respuestas, el embudo por etapa y los días promedio. Abajo hay desgloses por fuente, modalidad y tipo, y la actividad de las últimas semanas. Es solo lectura: para cambiar algo, ve a Ofertas o a Seguimiento." },
+  ajustes: { titulo: "Ajustes", texto: "Tres secciones. Qué busco: los puestos que se piden a las fuentes y las exclusiones (lo que nunca debe aparecer); los cambios se usan en la próxima búsqueda. Datos: CSV de Ofertas, CSV de Seguimiento, respaldo JSON y «Respaldar ahora». Apariencia y avisos: tema, contraste reforzado y avisos del navegador. Lo que eliges se recuerda en este navegador." },
+  sin_descripcion: { titulo: "Descripción desconocida", texto: "Ofertas que llegaron sin descripción (hoy, LinkedIn): la app no puede revisar su experiencia ni su nivel. Abre el aviso con ↗, copia la descripción completa y pégala en su tarjeta con «Guardar descripción». Si cumple, pasa a Ofertas; si no, queda descartada." },
   fuera_perfil: { titulo: "Fuera de perfil", texto: "Ofertas que la app apartó por no encajar con tu perfil, por ejemplo soporte o mesa de ayuda. Revísalas por si alguna te sirve; la razón de cada una aparece en su tarjeta. El interruptor «Incluir soporte TI» decide si se ven también en Ofertas." },
   sospechosas: { titulo: "Sospechosas", texto: "Ofertas con señales de posible estafa: piden un pago, datos bancarios o contacto solo por WhatsApp. No postules a ninguna sin verificar la empresa por otro medio." },
   descartadas_usuario: { titulo: "Descartadas", texto: "Ofertas que tú descartaste. Para recuperar una, abre su tarjeta y cambia su estado a otro (Nueva, Revisada, etc.)." },
@@ -1415,11 +1775,12 @@ const AYUDA_PESTANA = {
 };
 const AYUDA_GENERAL = [
   ["Buscar empleos", "Pulsa «Buscar empleos». Tarda unos 15 a 20 minutos; la barra muestra en qué portal va."],
-  ["Respaldos", "«Respaldar ahora» copia la base. Hay un respaldo automático por día y se guardan los últimos 30."],
+  ["Respaldos", "En Ajustes > Datos, «Respaldar ahora» copia la base. Hay un respaldo automático por día y se guardan los últimos 30."],
   ["Adaptar a tu perfil", "La búsqueda viene configurada para un perfil de TI junior en Chile. Para otro perfil, cambia config.py. Guía completa en TUTORIAL.md."]
 ];
 function abrirAyuda(origen) {
-  const info = AYUDA_PESTANA[S.pestana] || AYUDA_PESTANA.ofertas;
+  // Métricas y Ajustes tienen su propia ayuda; Ofertas y Seguimiento, la de su pestaña o vista
+  const info = AYUDA_PESTANA[S.apartado === "metricas" || S.apartado === "ajustes" ? S.apartado : vista()] || AYUDA_PESTANA.ofertas;
   const tarjeta = h("div", { class: "modal-tarjeta", role: "dialog", "aria-modal": "true", "aria-labelledby": "ayuda-titulo" },
     h("div", { class: "modal-cabecera" },
       h("h2", { id: "ayuda-titulo" }, "Ayuda: " + info.titulo),
@@ -1431,7 +1792,7 @@ function abrirAyuda(origen) {
     h("div", { class: "modal-acciones" }, h("button", { type: "button", class: "boton", onclick: cerrarDetalle }, "Entendido")));
   montarDialogo(tarjeta, origen, tarjeta.querySelector(".btn-cerrar"));
 }
-$("btn-ayuda").addEventListener("click", e => abrirAyuda(e.currentTarget));
+for (const b of document.querySelectorAll("#btn-ayuda, .btn-ayuda-pantalla")) b.addEventListener("click", e => abrirAyuda(e.currentTarget));
 
 // ---------- exportar (descarga: el servidor responde con Content-Disposition: attachment)
 function descargar(formato, alcance) {
@@ -1440,7 +1801,8 @@ function descargar(formato, alcance) {
   enlace.click();
   enlace.remove();
 }
-$("btn-exportar-csv").addEventListener("click", () => descargar("csv", alcanceExportar(S.pestana)));
+$("btn-exportar-csv").addEventListener("click", () => descargar("csv", alcanceExportar("ofertas")));
+$("btn-exportar-csv-seg").addEventListener("click", () => descargar("csv", alcanceExportar("seguimiento")));
 $("btn-exportar-json").addEventListener("click", () => descargar("json", "todas"));
 $("btn-respaldo").addEventListener("click", async e => {
   const boton = e.currentTarget;
@@ -1562,15 +1924,20 @@ function kpisSeguimiento() {                     // cifras reales del embudo de 
 }
 
 // ---------- tablero de Seguimiento (C2)
-function selectorVista() {                       // "📊 Tablero / 📋 Lista", se recuerda en el navegador
-  const boton = (valor, texto) => h("button", { type: "button", class: "btn-vista", "aria-pressed": String(S.vistaSeg === valor),
-    "data-clave": "vista-" + valor, onclick: () => {
-      S.vistaSeg = valor;
-      try { localStorage.setItem("vistaSeguimiento", valor); } catch (e) {}
+// un solo selector en Seguimiento: el tablero o la lista en tarjetas o compacta (ambos se recuerdan en el navegador)
+const opcionVistaSeg = () => S.vistaSeg === "tablero" ? "tablero" : S.densidad;
+function selectorVista() {
+  const boton = (valor, texto, titulo) => h("button", { type: "button", class: "btn-vista", title: titulo,
+    "aria-pressed": String(opcionVistaSeg() === valor), "data-clave": "vista-" + valor, onclick: () => {
+      S.vistaSeg = valor === "tablero" ? "tablero" : "lista";
+      if (valor !== "tablero") { S.densidad = valor; try { localStorage.setItem("densidad", valor); } catch (e) {} }
+      try { localStorage.setItem("vistaSeguimiento", S.vistaSeg); } catch (e) {}
       conFoco($("lista"), pintarLista);
     } }, texto);
   return h("div", { class: "selector-vista", role: "group", "aria-label": "Vista de Seguimiento" },
-    boton("tablero", "📊 Tablero"), boton("lista", "📋 Lista"));
+    boton("tablero", "📊 Tablero", "Columnas por etapa; arrastra para mover"),
+    boton("detallada", "🗂️ Tarjetas", "Lista de tarjetas detalladas"),
+    boton("compacta", "📋 Compacta", "Lista compacta, una fila por oferta"));
 }
 
 let arrastrada = null;                            // la oferta en arrastre (el dataTransfer no se puede leer en dragover)
@@ -1634,24 +2001,71 @@ function tableroSeguimiento(filas) {
   return h("div", { class: "kanban-board" }, COLUMNAS_TABLERO.map(c => columnaTablero(c, por[c.id])));
 }
 
+// Apartado «Métricas»: lee S.datos (todas las ofertas, sin importar la búsqueda elegida en el historial)
+function pintarMetricas(datos) {
+  const panel = $("metricas-panel");
+  if (!datos) { panel.replaceChildren(h("p", { class: "nota" }, "Cargando…")); return; }
+  const hoyISO = hoy();
+  const relevantes = (datos.principal || []).length;
+  if (!relevantes) { panel.replaceChildren(h("p", { class: "nota" }, "Aún no hay ofertas relevantes que medir.")); return; }
+  const tasa = tasaRespuesta(datos), dias = diasPromedioActivos(datos, hoyISO), embud = embudo(datos);
+  const tarjetaKpi = (etq, num, det) => h("div", { class: "metricas-kpi-card" },
+    h("span", { class: "etq" }, etq), h("span", { class: "num" }, num), det ? h("span", { class: "det" }, det) : null);
+  const kpis = h("div", { class: "metricas-kpis" },
+    tarjetaKpi("Tasa de respuesta", tasa.pct === null ? "—" : tasa.pct + "%", tasa.respondieron + " de " + tasa.postuladas + " postuladas tuvieron entrevista"),
+    tarjetaKpi("Días promedio", dias === null ? "—" : String(dias), dias === null ? "Sin procesos activos con fecha" : "desde la postulación, en procesos activos"),
+    tarjetaKpi("Procesos activos", String(procesosActivos(datos).length), "postuladas o en entrevista"),
+    tarjetaKpi("Descartadas después de postular", String(descartadasDespuesDePostular(datos)), "estuvieron postuladas y luego las descartaste"));
+  const maxEmbudo = Math.max(1, ...embud.map(e => e.n));
+  const embudoBloque = h("section", { class: "metricas-bloque", "aria-label": "Embudo" },
+    h("h3", {}, "Embudo"),
+    embud.map(e => h("div", { class: "metrica-barra" },
+      h("span", { class: "metrica-etq" }, e.etiqueta),
+      h("span", { class: "metrica-track", role: "img", "aria-label": e.etiqueta + ": " + TXT.ofertas(e.n) },
+        h("span", { class: "metrica-relleno", style: "width:" + Math.round(100 * e.n / maxEmbudo) + "%" })),
+      h("span", { class: "metrica-num" }, e.n))));
+  const tabla = (titulo, campo) => {
+    const filas = desglose(datos, campo);
+    return h("section", { class: "metricas-bloque", "aria-label": titulo },
+      h("h3", {}, titulo),
+      h("table", { class: "fuentes" },
+        h("tr", {}, h("th", {}, titulo.replace(/^Por /, "")), h("th", {}, "Relevantes"), h("th", {}, "Postuladas"), h("th", {}, "Entrevistas")),
+        filas.map(f => h("tr", {}, h("td", {}, campo === "fuente" ? nombreFuente(f.clave) : f.clave), h("td", {}, f.relevantes), h("td", {}, f.postuladas), h("td", {}, f.entrevistas)))));
+  };
+  const semanas = semanasActividad(datos, hoyISO), maxSemana = Math.max(1, ...semanas.map(s => s.n));
+  const actividad = h("section", { class: "metricas-bloque", "aria-label": "Actividad" },
+    h("h3", {}, "Postulaciones por semana (últimas 8)"),
+    semanas.map(s => h("div", { class: "metrica-barra" },
+      h("span", { class: "metrica-etq" }, "Sem. " + fechaLarga(s.semana).replace(/^\S+\s/, "")),
+      h("span", { class: "metrica-track" }, h("span", { class: "metrica-relleno", style: "width:" + Math.round(100 * s.n / maxSemana) + "%" })),
+      h("span", { class: "metrica-num" }, s.n))));
+  panel.replaceChildren(h("div", { class: "metricas-seccion" },
+    kpis, embudoBloque,
+    h("div", { class: "metricas-desgloses" }, tabla("Por fuente", "fuente"), tabla("Por modalidad", "modalidad"), tabla("Por tipo", "tipo")),
+    actividad,
+    h("p", { class: "sub" }, "Las fechas de cambio de fase existen desde el 13-10-2026; antes no se inventa nada.")));
+}
 function pintarLista() {
+  guardarPrefs();
   const cont = $("lista");
   if (!S.datos) { cont.replaceChildren(h("div", { class: "vacio" }, "Cargando…")); return; }
-  const filas = listaDe(S.datos, S.pestana, S.sel).filter(pasa);
-  const completa = PESTANAS_COMPLETAS.has(S.pestana);
+  const filas = listaDe(S.datos, vista(), S.sel).filter(pasa);
+  const completa = PESTANAS_COMPLETAS.has(vista());
   const pintarItems = lista => S.densidad === "compacta"
     ? [h("div", { class: "tabla-compacta" }, ...lista.map(filaCompacta))] : lista.map(o => tarjeta(o, completa));
-  const cabecera = S.pestana === "seguimiento" ? [selectorVista(), kpisSeguimiento()] : [];
-  if (S.pestana === "seguimiento" && S.vistaSeg === "tablero") { cont.replaceChildren(...cabecera, tableroSeguimiento(filas)); return; }
-  if (!filas.length) {
-    const msj = S.sel.tipo !== "todas" && !SIN_FILTRO_HISTORIAL.has(S.pestana) ? "No hay ofertas de esta selección en esta pestaña."
-      : S.pestana === "ofertas" ? "No hay ofertas con estos filtros. Prueba «Buscar empleos» o relaja los filtros."
-      : S.pestana === "descartadas_usuario" ? "No tienes ofertas descartadas manualmente."
-      : S.pestana === "sin_descripcion" ? "Nada pendiente. Aquí llegan las ofertas cuyo texto la app no recibe (LinkedIn), para que las abras tú."
+  const cabecera = vista() === "seguimiento" ? [selectorVista(), kpisSeguimiento()] : [];
+  if (vista() === "seguimiento" && S.vistaSeg === "tablero") { cont.replaceChildren(...cabecera, tableroSeguimiento(filas)); return; }
+  // las «Sin texto» pendientes van al final de Ofertas, aunque no haya ninguna otra
+  const sinTextoFilas = vista() === "ofertas" ? listaDe(S.datos, "sin_descripcion", S.sel).filter(pasa) : [];
+  if (!filas.length && !sinTextoFilas.length) {
+    const msj = S.sel.tipo !== "todas" && !SIN_FILTRO_HISTORIAL.has(vista()) ? "No hay ofertas de esta selección en esta pestaña."
+      : vista() === "ofertas" ? "No hay ofertas con estos filtros. Prueba «Buscar empleos» o relaja los filtros."
+      : vista() === "descartadas_usuario" ? "No tienes ofertas descartadas manualmente."
+      : vista() === "sin_descripcion" ? "Nada pendiente. Aquí llegan las ofertas cuyo texto la app no recibe (LinkedIn), para que las abras tú."
       : "Nada que mostrar aquí.";
     cont.replaceChildren(...cabecera, h("div", { class: "vacio" }, msj)); return;
   }
-  if (S.pestana === "ofertas") {
+  if (vista() === "ofertas") {
     const porFuente = S.agrupar === "fuente", grupos = new Map();
     for (const o of filas) {
       const clave = porFuente ? nombreFuente(o.fuente) : (o.prioridad || "sin prioridad");
@@ -1667,7 +2081,6 @@ function pintarLista() {
       h("h3", { class: "grupo" }, porFuente ? k : "Prioridad " + k, h("span", { class: "cuenta" }, grupos.get(k).length)),
       ...pintarItems(grupos.get(k))]);
     
-    const sinTextoFilas = (S.datos.sin_descripcion || []).filter(o => !CERRADOS.has(o.estado)).filter(pasa);
     if (sinTextoFilas.length > 0) {
         elementos.push(h("h3", { class: "grupo" }, "Sin texto", h("span", { class: "cuenta" }, sinTextoFilas.length)));
         elementos.push(h("p", { class: "sub" }, "El aviso sí tiene descripción en LinkedIn, pero LinkedIn no se la entrega a la app: "
@@ -1680,22 +2093,49 @@ function pintarLista() {
     return;
   }
   let nota = null;
-  if (S.pestana === "descartadas" && S.datos.total_descartadas > S.datos.descartadas.length)
+  if (vista() === "descartadas" && S.datos.total_descartadas > S.datos.descartadas.length)
     nota = h("p", { class: "sub" }, S.sel.tipo === "todas"
       ? "Mostrando " + TXT.masRecientes(S.datos.descartadas.length) + " de " + S.datos.total_descartadas + "."
       : "Se busca solo entre " + TXT.descartadasMasRecientes(S.datos.descartadas.length) + " (de " + S.datos.total_descartadas + ").");
   cont.replaceChildren(...cabecera, ...[nota].filter(Boolean), ...pintarItems(filas));
 }
 
-function pintar() { pintarHistorial(); pintarEncabezado(); pintarPestanas(); pintarFiltros(); pintarLista(); }
+function pintarMenu() {
+  const nav = $("menu");
+  conFoco(nav, () => nav.replaceChildren(...APARTADOS.map(([id, nombre, icono]) => {
+    const total = !S.datos ? null : id === "ofertas" ? totalOfertas(S.datos, S.sel)
+      : id === "seguimiento" ? listaDe(S.datos, id, S.sel).length : null;
+    return h("a", { href: "#" + id, "data-clave": id, "aria-current": S.apartado === id ? "page" : null },
+      h("span", { class: "menu-icono", "aria-hidden": "true" }, icono), nombre,
+      total === null ? null : h("span", { class: "cuenta" }, total));
+  })));
+}
+// Ofertas y Seguimiento comparten la vista de lista (encabezado, filtros, lista); Seguimiento no lleva pestañas
+const SECCION_APARTADO = { ofertas: "vista-lista", seguimiento: "vista-lista", metricas: "apartado-metricas", ajustes: "apartado-ajustes" };
+function aplicarApartado() {
+  for (const s of new Set(Object.values(SECCION_APARTADO))) $(s).hidden = s !== SECCION_APARTADO[S.apartado];
+  $("pestanas").hidden = S.apartado !== "ofertas";
+  $("vista-lista").setAttribute("aria-label", S.apartado === "seguimiento" ? "Seguimiento" : "Ofertas");
+}
+function irApartado(id, enfocar) {
+  if (id === S.apartado) return;
+  S.apartado = id;
+  aplicarApartado();
+  if (S.datos) pintar(); else pintarMenu();
+  if (enfocar) { window.scrollTo(0, 0); $(SECCION_APARTADO[id]).focus({ preventScroll: true }); }
+}
+window.addEventListener("hashchange", () => irApartado(apartadoDeHash(location.hash), true));
 
-// atajo global: "/" o Ctrl+K llevan al buscador
+function pintar() { pintarMenu(); pintarHistorial(); pintarEncabezado(); pintarPestanas(); pintarFiltros(); pintarLista(); pintarMetricas(S.datos); }
+
+// atajo global: "/" o Ctrl+K llevan al buscador (Ofertas y Seguimiento tienen el suyo; desde otro apartado, vuelve a Ofertas)
 window.addEventListener("keydown", e => {
   if (detalle) return;                            // con el detalle abierto, el teclado es del diálogo
   const activo = document.activeElement;
   const escribiendo = activo && ["INPUT", "TEXTAREA", "SELECT"].includes(activo.tagName);
   if ((e.key === "/" && !escribiendo) || ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k")) {
     e.preventDefault();
+    if (SECCION_APARTADO[S.apartado] !== "vista-lista") { irApartado("ofertas", false); history.pushState(null, "", "#ofertas"); }
     const buscador = document.querySelector(".filtros input[type=search]");
     if (buscador) { buscador.focus(); buscador.select(); }
   }
@@ -1707,8 +2147,13 @@ for (const b of busquedasManuales()) {
       b.enlaces.map(e => h("a", { class: "chip", href: e.url, target: "_blank", rel: "noopener noreferrer" }, "↗ " + e.texto))));
 }
 
+aplicarApartado();
+pintarMenu();
 cargar();
 cargarPuestos();
+cargarExclusiones();
+pintarAvisos();
+setInterval(() => { if (!sondeo) estado(); }, 60000);   // revisa cada minuto si entró una búsqueda nueva
 </script>
 </body>
 </html>

@@ -3,7 +3,98 @@
 ## Estado actual (se actualiza en cada despliegue; leer al empezar cada sesión)
 
 ### Producción y base
-- **Despliegue de la sección «Puestos que busco» (22-10-2026; vigente):** commits `866faf3` (validación, paso 1),
+- **Despliegue de Remote First Jobs como fuente remota (24-10-2026; vigente):** commit `efbfa23` (conector
+  `remotefirstjobs.py`). Imagen `job-tracker-jobtracker:latest` = `sha256:f36ac2f0…`, healthy en `127.0.0.1:8765`.
+  Imagen anterior: `job-tracker:pre-remotefirstjobs-20261024` (= `sha256:0191a03a…`). Referencia
+  `ofertas_pre_remotefirstjobs_20261024.db`, sha256 `721591c0…` (la misma base que el despliegue anterior: sin cambios
+  en la base). Huellas OK; HTTP igual; reversión probada en copia. Pendiente: la primera corrida real de la nueva fuente
+  se verá en el historial de búsquedas.
+- **Despliegue de temas nuevos, ayudas al día y selector de Seguimiento (24-10-2026; anterior):** commits `e79ace5`,
+  `d1440db`, `8e35e23` y `b060819` (fixtures sin correo ni token reales). Imagen `job-tracker-jobtracker:latest` =
+  `sha256:0191a03a285eab4b43a46da28ee1ffbfe47a8001374f6ffd6a9256c60c011584`, healthy en `127.0.0.1:8765`. Imagen
+  anterior: `job-tracker:pre-ayudas-20261024` (= `sha256:0602873e…`). Referencia `ofertas_pre_ayudas_20261024.db`,
+  sha256 `721591c0…`, integrity_check ok; salida al detener 0. Huellas OK; HTTP igual que en el despliegue anterior;
+  reversión probada en copia. Base: 46 búsquedas, 4516 ofertas, 37 postuladas, 6 POR VERIFICAR (crecimiento normal).
+  Pendiente: los avisos reales del sistema no se probaron.
+- **Despliegue del rediseño por apartados (23-10-2026, ~23:40; anterior):** commits `7aad48a`, `73ab2db`, `10fc78e`,
+  `26a23a5` (menú izquierdo con Ofertas, Seguimiento, Métricas y Ajustes; navegación por #hash; sin barra derecha;
+  Datos y Apariencia en Ajustes) y `a677529` (selector único «Tablero · Tarjetas · Compacta» en Seguimiento y
+  tutorial al día). Solo cambia `web/pagina.html`. Imagen `job-tracker-jobtracker:latest` =
+  `sha256:0602873e29fc21f596f8284d2775afd439d14b8425ead41eaae651843bec0503`, healthy en `127.0.0.1:8765`.
+  Imagen anterior: `job-tracker:pre-rediseno-20261023` (= `sha256:57a22899…`, la de los avisos).
+  Referencia `ofertas_pre_rediseno_20261023.db` (volumen y `C:\Users\sofia\Respaldos\job-tracker-referencias\`),
+  sha256 `ba4b3db5…` (idéntica a la de los avisos), integrity_check ok; salida al detener 0.
+  - Línea base sin cambios: v7; ofertas 4452, corridas 45, historial_estados 290, ajustes 5,
+    terminos_no_disponibles 16; postuladas 36; POR VERIFICAR 6.
+  - Huellas antes, después y después de las comprobaciones: RESULTADO OK, todas las tablas idénticas.
+  - HTTP: `/`, `/api/estado`, `/api/ofertas`, `/api/respaldo` 200; Host y Origin ajenos 403; POST sin origen, con campo
+    no permitido o estado inválido 400; Origin ajeno 403; cuerpo grande 413. `error_auto` vacío.
+  - **Sin candidata en 8766:** Sofia pidió desplegar directo. Se revisó antes con un servidor local sobre una copia
+    de la referencia, y después en producción solo leyendo (los cuatro apartados cargan). Reversión probada en copia
+    (8767): healthy, huellas idénticas. 113 respaldos anteriores con el mismo sha256.
+  - Subido a GitHub (rama `feat/unificar-ofertas`, hasta `a677529`) con aprobación de Sofia, antes de desplegar.
+  - Pendiente: los avisos reales del sistema siguen sin probarse (el navegador integrado los bloquea).
+- **Despliegue de métricas en la barra derecha y avisos del navegador, fase 3 (23-10-2026; anterior):** commits
+  `d519ed2` (fase 1: recordar pestaña y filtros), `6c6c664` + `7751107` (métricas, en la barra derecha), `2cb86e0`
+  (avisos), `ca1e4f0` (estilos compactos). Imagen `job-tracker-jobtracker:latest` =
+  `sha256:57a228999bd97a737b9e4ce841cfdf988561183158d7a7a11c698abc9c1f2a9a`, healthy en `127.0.0.1:8765`.
+  Imagen anterior: `job-tracker:pre-avisos-20261023` (= `sha256:c2207ae0…`, la de las exclusiones).
+  Referencia `ofertas_pre_avisos_20261023.db` (volumen y `C:\Users\sofia\Respaldos\job-tracker-referencias\`), sha256
+  `ba4b3db52e761560b73caf34970055ce2b960e459dee6a2a5663bea602b755d2`, integrity_check ok; salida al detener 0.
+  - Línea base: v7; ofertas 4452, corridas 45, historial_estados 290, ajustes 5, terminos_no_disponibles 16,
+    alertas 0, pruebas_fuentes 0; postuladas 36; POR VERIFICAR 6.
+  - Huellas antes, después y después de las comprobaciones: RESULTADO OK, todas las tablas idénticas.
+  - HTTP: `/`, `/api/estado`, `/api/ofertas`, `/api/respaldo` 200; Host y Origin ajenos 403; POST sin origen, con
+    origen inválido o campo no permitido 400; cuerpo grande 413. `error_auto` vacío.
+  - Candidata `jt_revision_avisos` (8766, sobre copia de la base) revisada por Sofia antes. Reversión probada en copia
+    (8767): healthy, huellas idénticas. 111 respaldos anteriores con el mismo sha256.
+  - Pendiente: los avisos reales del sistema no se probaron (el navegador integrado los bloquea); el flujo se probó
+    simulado. Pregunta abierta: «Ofertas 0» con «2 relevantes nuevas» (ya pasaba antes de este despliegue).
+- **Despliegue NO registrado de las exclusiones (23-10-2026, ~20:17 hora de Chile; anterior):** encontrado el 23-10 al
+  preparar la fase 3. Imagen `job-tracker-jobtracker:latest` = `sha256:c2207ae0b52e34f945515856f7fac5375e6651b519e8ec9ccde45bec2e81b95f`,
+  healthy en `127.0.0.1:8765`. `buscar.py`, `config.py`, `exclusiones.py`, `filtros.py` y `servidor.py` tenían el
+  mismo sha256 que el árbol de trabajo (los de `446a22c`), pero `web/pagina.html` era otra versión: con exclusiones y
+  barra derecha, SIN la fase 1 (`d519ed2`, recordar pestaña y filtros) y SIN métricas (`6c6c664`). No corresponde a
+  ningún commit; se construyó desde un árbol de trabajo intermedio.
+  - Imagen anterior: `job-tracker:pre-puestos-20261023` = `sha256:2509d984…` (la de la reclasificación). Es lo único
+    que dejó ese despliegue.
+  - **Sin referencia de la base** (no hay `ofertas_pre_*_20261023.db` en el volumen ni en `job-tracker-referencias`),
+    sin huellas antes/después y sin entrada en `REVERSION_FASE_A.md`. No se puede demostrar que la base no cambió.
+  - Estado de la base al encontrarlo (copia con la API de backup, conexión `mode=ro`): integrity_check ok, 4452
+    ofertas, 36 postuladas, 45 corridas; sha256 de la copia `ba4b3db52e761560b73caf34970055ce2b960e459dee6a2a5663bea602b755d2`.
+  - Quedaron candidatas sin borrar (`jt_revision_metricas` corriendo en 8766 y `jt_revision_excl` detenida); se
+    borraron el 23-10 con sus volúmenes.
+  - Para volver atrás: `docker compose stop jobtracker`, `docker tag job-tracker:pre-puestos-20261023
+    job-tracker-jobtracker:latest`, `docker compose up -d --no-build`.
+- **Reclasificación de lo guardado, APLICADA (22-10-2026; vigente):** `python buscar.py --reclasificar` sobre la base real.
+  Referencia previa `ofertas_pre_reclasif_20261022.db` (sha256 `da3a88e9…`, integrity ok, 4245 ofertas, 34 postuladas,
+  6 POR VERIFICAR); imagen anterior `job-tracker:pre-reclasif-20261022` (= `sha256:2509d984…`).
+  - Huellas después: RESULTADO OK, idénticas a la referencia en todas las tablas; el estado de ninguna oferta cambió
+    (postuladas 34, POR VERIFICAR 6, historial 280 sin cambios). La reclasificación no cambió nada de estado, según la
+    simulación previa (0 cambios).
+  - **Incidente:** el contenedor quedó con salida 137 (SIGKILL) al detenerlo. Se verificó la base con una copia hecha con
+    la API de respaldo (integrity ok, mismos conteos) y el contenedor se levantó luego: healthy, rutas 200, Host/Origin
+    ajenos 403, huellas RESULTADO OK. Un comando previo dejó el contenedor detenido sin querer; se corrigió levantándolo.
+  - Para volver atrás: `docker compose stop jobtracker`, `docker tag job-tracker:pre-reclasif-20261022
+    job-tracker-jobtracker:latest`, `docker compose up -d --no-build`, y si hace falta la referencia
+    `ofertas_pre_reclasif_20261022.db`.
+- **Reclasificación de lo guardado, simulada (22-10-2026):** la simulación dio 0 cambios. Con las reglas actuales, la simulación sobre la
+  referencia `ofertas_pre_redespliegue_20261022.db` dio 0 cambios de 4240 ofertas revisadas (sin las manuales), incluidas
+  las de seguimiento. Como no cambia nada, no se hizo la escritura real. Control: el clasificador sí reconoce soporte
+  (categoría S, motivo «rol: soporte / helpdesk»).
+- **Redespliegue con la misma versión de código (22-10-2026; vigente):** commit `de42a51` (rama `feat/unificar-ofertas`,
+  subida a GitHub). Código idéntico al del despliegue de abajo (sha256 de los archivos que entran a la imagen iguales en
+  el contenedor y en el árbol de trabajo). Imagen `job-tracker-jobtracker:latest` =
+  `sha256:2509d984b4ada5ecac0df265735f94496f3d4ec58d5ee6650f85802c38fc39b1`, healthy en `127.0.0.1:8765`.
+  Imagen anterior inmediata: `job-tracker:pre-redespliegue-20261022` (`sha256:ba0cc916…`, la de «Puestos que busco»).
+  Referencia `ofertas_pre_redespliegue_20261022.db`, sha256 `da3a88e9e1d3218dd616de2e641564adc2c39c2f2dabe44af0ca27e52f0c18c9`
+  en `C:\Users\sofia\Respaldos\job-tracker-referencias\` y en el volumen; integrity_check ok; 4245 ofertas, 34 postuladas,
+  6 POR VERIFICAR.
+  - Huellas antes y después idénticas (`huellas.py --comparar`: RESULTADO OK, sin objetos agregados ni faltantes).
+  - Comprobaciones HTTP: `/`, `/api/estado`, `/api/ofertas`, `/api/respaldo` y `GET /api/ajustes/puestos`: 200;
+    Host ajeno y Origin ajeno: 403.
+  - Reversión: `job-tracker:pre-redespliegue-20261022` (y, para volver aún más atrás, `job-tracker:pre-puestos-20261022`).
+- **Despliegue de la sección «Puestos que busco» (22-10-2026; anterior):** commits `866faf3` (validación, paso 1),
   `dd55d0d` (guardado en ajustes y rutas, paso 2), `775a077` (sección en la barra lateral, paso 3) y `6eed95f` (CSS de
   filtros, ya en producción). Imagen `job-tracker-jobtracker:latest` = `sha256:ba0cc91630d5f60b9b5f89dd5341b781fb00863e44b366ce43ce3f3af5549d41`,
   healthy en `127.0.0.1:8765`. Imagen anterior inmediata: `job-tracker:pre-puestos-20261022`
@@ -659,6 +750,24 @@ estaba centrado en prácticas.
 
 - La página revisada mostraba un programa de prácticas. No se recorrieron los 29 términos; se dejó en baja
   prioridad porque las prácticas no son el objetivo de búsqueda actual.
+
+### Exploración de remoto mundial: We Work Remotely y Remote First Jobs (24-10-2026; sin cambios en el proyecto)
+
+- **We Work Remotely:** su RSS es público, pero sus términos solo permiten usar lo que se expone por la API; la API de
+  lectura pide un token especial y no hay forma pública de obtenerlo sin contactarlos. Queda fuera por ahora.
+- **Remote First Jobs** (`remotefirstjobs.com/api/search-jobs`): API pública, gratuita y sin clave; 100 ofertas por
+  página, hasta 5 páginas; las ofertas aparecen 24 horas después de publicarse. Términos: citar la fuente y no
+  republicar en LinkedIn, Google Jobs ni Jooble.
+- Muestra de 100 ofertas (página 0, 24-10-2026): ninguna con Chile en `locations`; 33 de Estados Unidos, 7 de Reino
+  Unido, resto disperso. Por nivel: 38 «middle», 23 «senior», 17 «manager», 6 «entry_level»; solo 9 entry/intern/junior,
+  y varias son de Filipinas, EE. UU. o cargos de práctica. De las 18 que mencionan Chile o Latinoamérica, todas lo hacen
+  como parte de la empresa, no como lugar donde se puede trabajar.
+- Evaluación: el aporte para Chile es casi nulo. Podría integrarse como fuente remota con el filtro de nivel y
+  ubicación de Jobicy y Himalayas, pero se espera muy poco volumen útil. No integrar sin decisión de Sofia.
+- **Remotive** (`remotive.com/api/remote-jobs`, 24-10-2026): sin clave, pero devuelve siempre 10 ofertas, con cualquier
+  filtro (la versión gratuita no pagina). Las ofertas llegan con 24 h de retraso. Su aviso pide enlazarlos y citarlos,
+  y no publicar sus ofertas en Jooble, Neuvoo, Google Jobs ni LinkedIn. Muestra: 10 ofertas, ninguna con Chile
+  («Worldwide» en 7). Evaluación: no integrar (volumen mínimo y retraso). Si se quiere igual, es un conector de ~40 líneas.
 
 ### Decisión y preguntas abiertas
 
