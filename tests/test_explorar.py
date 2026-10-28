@@ -88,6 +88,7 @@ def test_explorar_remotos_guarda_en_explorar_y_registra_su_corrida(con, monkeypa
     monkeypatch.setitem(sys.modules, "jobspy", types.SimpleNamespace(scrape_jobs=scrape_jobs))
     monkeypatch.setattr(buscar, "_pausa_jobspy", lambda s: 0)
     monkeypatch.setattr(buscar.config, "TERMINOS_EXPLORAR", ["customer success", "onboarding"])
+    monkeypatch.setattr(buscar.config, "EXPLORAR_APIS", ())
     assert buscar.explorar_remotos(con) == 2
     assert [p["site_name"] for p in pedidos] == [["indeed"], ["indeed"]]
     assert pedidos[0]["search_term"] == "customer success remoto"
@@ -96,6 +97,36 @@ def test_explorar_remotos_guarda_en_explorar_y_registra_su_corrida(con, monkeypa
     assert all(o["corrida_id"] is not None for o in d["explorar"])
     fila = con.execute("SELECT origen, nuevas FROM corridas").fetchone()
     assert (fila["origen"], fila["nuevas"]) == ("explorar", 2)
+
+
+def test_explorar_busca_en_las_apis_por_texto_y_ante_429_no_insiste(con, monkeypatch):
+    import requests
+    pedidos = []
+
+    def himalayas(termino, resultados, al_responder=None):
+        pedidos.append(("himalayas", termino))
+        return pd.DataFrame([{"job_url": f"http://h/{termino}", "title": "Technical Writer", "company": termino,
+                              "location": "Remoto (global)", "description": "Modalidad 100% remota. " + REMOTO,
+                              "date_posted": None, "is_remote": True}])
+
+    def jobicy(termino, resultados, al_responder=None):
+        pedidos.append(("jobicy", termino))
+        r = requests.Response()
+        r.status_code = 429
+        raise requests.HTTPError("429", response=r)
+    monkeypatch.setitem(sys.modules, "jobspy", types.SimpleNamespace(scrape_jobs=lambda **kw: pd.DataFrame()))
+    monkeypatch.setattr(buscar, "_pausa_jobspy", lambda s: 0)
+    monkeypatch.setitem(buscar.APIS_REMOTAS, "himalayas", types.SimpleNamespace(buscar=himalayas))
+    monkeypatch.setitem(buscar.APIS_REMOTAS, "jobicy", types.SimpleNamespace(buscar=jobicy))
+    monkeypatch.setattr(buscar.config, "TERMINOS_EXPLORAR", [])
+    monkeypatch.setattr(buscar.config, "TERMINOS_EXPLORAR_EN", ["technical writer", "ux research"])
+    assert buscar.explorar_remotos(con) == 2
+    assert pedidos == [("himalayas", "technical writer"), ("himalayas", "ux research"), ("jobicy", "technical writer")]
+    assert [o["url"] for o in buscar.ofertas_para_pagina(con)["explorar"]] == ["http://h/technical writer",
+                                                                                "http://h/ux research"]
+    d = json.loads(con.execute("SELECT detalle FROM corridas").fetchone()[0])
+    assert [f["fuente"] for f in d["fuentes"]] == ["Himalayas (explorar)", "Jobicy (explorar)"]
+    assert d["fuentes"][1]["errores"] == 1 and any("Jobicy respondió 429" in a for a in d["avisos"])
 
 
 def test_buscar_y_explorar_corren_a_la_vez_cada_una_con_su_avance(tmp_path):

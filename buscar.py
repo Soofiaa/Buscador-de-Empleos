@@ -882,44 +882,66 @@ def buscar_ofertas(con) -> int:
 
 
 def explorar_remotos(con) -> int:
-    """Botón «Explorar remotos»: busca en Indeed los TERMINOS_EXPLORAR como remotos en Chile. Puede correr junto con la
-    búsqueda normal: solo usa Indeed (nada de LinkedIn ni Glassdoor) y no toca la ventana de días de la otra. Devuelve
-    cuántas ofertas nuevas no descartadas guardó (en 'explorar' o, si el cargo resultó ser de tu perfil, en Ofertas)."""
+    """Botón «Explorar remotos»: busca los TERMINOS_EXPLORAR en Indeed (remotos en Chile) y los TERMINOS_EXPLORAR_EN en
+    las APIs remotas que buscan por texto (EXPLORAR_APIS). Puede correr junto con la búsqueda normal: nada de LinkedIn
+    ni Glassdoor, y no toca la ventana de días de la otra. Devuelve cuántas ofertas nuevas no descartadas guardó (en
+    'explorar' o, si el cargo resultó ser de tu perfil, en Ofertas)."""
     from jobspy import scrape_jobs
     _vigilar_429(limpiar=False)
     aplicar_exclusiones(con)
-    sitio, terminos = "indeed", config.TERMINOS_EXPLORAR
-    st = {"encontradas": 0, "antiguas": 0, "relevantes": 0, "sin_chile": 0, "errores": 0}
-    tele = telemetria.contador("consulta", [REMOTO])
-    avisos, total = [], 0
+    plan = ([("indeed", t) for t in config.TERMINOS_EXPLORAR]
+            + [(s, t) for s in config.EXPLORAR_APIS for t in config.TERMINOS_EXPLORAR_EN])
+    sitios = list(dict.fromkeys(s for s, _ in plan))
+    stats = {s: {"encontradas": 0, "antiguas": 0, "relevantes": 0, "sin_chile": 0, "errores": 0} for s in sitios}
+    tele = {s: telemetria.contador("http") if s in APIS_REMOTAS else telemetria.contador("consulta", [REMOTO])
+            for s in sitios}
+    avisos, total, frenadas = [], 0, set()
     ahora = ahora_chile()
     inicio = ahora.strftime("%Y-%m-%d %H:%M")
-    dias = ventanas_efectivas(con, ahora, explorar=True)[sitio]
-    for n, termino in enumerate(terminos, start=1):
-        if sitio in _VIGIA_429.frenadas:            # ante un 429 no se insiste (ver _Vigia429)
-            st["errores"] += 1
-            avisos.append("⚠ Indeed respondió 429 (demasiadas consultas): se dejó la exploración. No se insiste.")
-            break
+    ventanas = ventanas_efectivas(con, ahora, explorar=True)
+    for n, (sitio, termino) in enumerate(plan, start=1):
+        st, t = stats[sitio], tele[sitio]
+        if sitio in frenadas or sitio in _VIGIA_429.frenadas:     # ante un 429 no se insiste (ver _Vigia429)
+            if sitio not in frenadas:
+                frenadas.add(sitio)
+                st["errores"] += 1
+            if not any(config.NOMBRE_FUENTE[sitio] in a for a in avisos):
+                avisos.append(f"⚠ {config.NOMBRE_FUENTE[sitio]} respondió 429 (demasiadas consultas): se dejó en esta "
+                              "exploración. No se insiste.")
+            continue
         try:
-            df = scrape_jobs(**consulta(sitio, termino, REMOTO, dias=dias))
+            if sitio in APIS_REMOTAS:
+                df = APIS_REMOTAS[sitio].buscar(termino, config.RESULTADOS_POR_BUSQUEDA,
+                                                al_responder=lambda status, t=t: telemetria.anotar_status(t, status))
+            else:
+                df = scrape_jobs(**consulta(sitio, termino, REMOTO, dias=ventanas[sitio]))
         except Exception as e:
             st["errores"] += 1
-            telemetria.anotar_excepcion(tele, e, REMOTO)
-            _say(f"  ! [explorar] {termino}: {type(e).__name__}: {e}")
+            if getattr(getattr(e, "response", None), "status_code", None) == 429:
+                frenadas.add(sitio)
+            if sitio not in APIS_REMOTAS:
+                telemetria.anotar_excepcion(t, e, REMOTO)
+            _say(f"  ! [explorar] {sitio} | {termino}: {type(e).__name__}: {e}")
             continue
-        telemetria.anotar_consulta(tele, 0 if df is None else len(df), REMOTO)
-        df, antiguas = recientes(df if df is not None else pd.DataFrame(), sitio, ahora, dias)
-        filas = procesar(df, f"explorar | {termino} | {REMOTO}", sitio)
+        vacia = df is None or len(df) == 0
+        if sitio in APIS_REMOTAS:
+            if vacia:
+                telemetria.anotar_vacia(t)
+        else:
+            telemetria.anotar_consulta(t, 0 if vacia else len(df), REMOTO)
+        df, antiguas = recientes(df if df is not None else pd.DataFrame(), sitio, ahora, ventanas[sitio])
+        filas = procesar(df, f"explorar | {termino} | {REMOTO if sitio == 'indeed' else 'remoto'}", sitio)
         nuevas = guardar(con, filas)
         total += nuevas
         st["encontradas"] += len(df)
         st["antiguas"] += antiguas
         st["relevantes"] += nuevas
-        _say(f"  [{n}/{len(terminos)}] {sitio} | {termino}: {plural(len(df), 'encontrada', 'encontradas')}, "
+        _say(f"  [{n}/{len(plan)}] {sitio} | {termino}: {plural(len(df), 'encontrada', 'encontradas')}, "
              f"{plural(nuevas, 'nueva', 'nuevas')}")
         time.sleep(_pausa_jobspy(sitio))
-    detalle = {"fuentes": [{"fuente": config.NOMBRE_FUENTE[sitio] + " (explorar)", **st, "ventana_dias": dias,
-                            "telemetria": tele}], "ventana_dias": {sitio: dias}, "avisos": avisos}
+    detalle = {"fuentes": [{"fuente": config.NOMBRE_FUENTE[s] + " (explorar)", **stats[s], "ventana_dias": ventanas[s],
+                            "telemetria": tele[s]} for s in sitios],
+               "ventana_dias": {s: ventanas[s] for s in sitios}, "avisos": avisos}
     con.execute("INSERT INTO corridas (inicio, fin, nuevas, detalle, origen) VALUES (?, ?, ?, ?, 'explorar')",
                 (inicio, ahora_chile().strftime("%Y-%m-%d %H:%M"), total, json.dumps(detalle, ensure_ascii=False)))
     con.commit()

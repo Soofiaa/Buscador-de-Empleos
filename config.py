@@ -58,8 +58,8 @@ TERMINOS_SECUNDARIOS = [
     "soporte TI", "help desk",
 ]
 # ---- Explorar remotos (botón aparte): roles fuera de tu perfil TI que podrían calzar, SOLO remotos ----
-# Indeed los busca como "<término> remoto" en Chile. Las fuentes remotas de la búsqueda normal (Himalayas, Jobicy...)
-# también alimentan esta lista: el clasificador reconoce estos roles venga de donde venga la oferta.
+# Indeed los busca como "<término> remoto" en Chile (Himalayas y Jobicy, con TERMINOS_EXPLORAR_EN). Las fuentes remotas
+# de la búsqueda normal también alimentan esta lista: el clasificador reconoce estos roles venga de donde venga la oferta.
 TERMINOS_EXPLORAR = [
     "especialista de implementación", "onboarding", "customer success",
     "automatización no code", "zapier", "administrador CRM", "hubspot",
@@ -68,7 +68,15 @@ TERMINOS_EXPLORAR = [
     "product analyst", "analista de producto", "UX research", "UX writer",
     "asistente virtual", "asistente administrativo", "back office", "transcripción", "traductor",
     "moderador de contenido",
-    "freelance", "freelance python", "freelance QA", "freelance datos", "trabajo por proyecto", "independiente",
+    "freelance", "freelance python", "freelance QA", "freelance datos", "independiente",
+]
+# Las mismas familias en inglés, para las APIs remotas que buscan por texto (Himalayas y Jobicy; sus robots.txt lo
+# permiten). Remote First Jobs no: su robots.txt prohíbe /api/search-jobs.
+EXPLORAR_APIS = ("himalayas", "jobicy")
+TERMINOS_EXPLORAR_EN = [
+    "customer success", "implementation specialist", "onboarding specialist", "no-code", "hubspot",
+    "ai trainer", "data annotation", "technical writer", "product analyst", "ux research", "virtual assistant",
+    "freelance",
 ]
 # (etiqueta, patrón en el TÍTULO, prioridad). Solo se miran si ninguna regla de tu perfil reconoce el cargo (o si un
 # rol puente no junta sus señales). Pasan los mismos filtros (estafa, práctica, senior, experiencia, empresas) y

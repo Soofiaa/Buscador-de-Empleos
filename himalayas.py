@@ -74,10 +74,14 @@ def _avisar(al_responder, status):
 
 
 def buscar(termino: str = "", resultados: int = MAX_POR_PEDIDO, al_responder=None) -> pd.DataFrame:
-    """Trae el listado reciente de Himalayas. 'termino' se ignora (la API no busca por texto).
-    Lanza excepción si la API falla. al_responder: telemetría pasiva, recibe el status de la solicitud."""
+    """Trae el listado reciente de Himalayas, o con 'termino' su búsqueda por texto (/search, solo remotos sin
+    restricción de país; la usa «Explorar remotos»). Lanza excepción si la API falla. al_responder: telemetría pasiva,
+    recibe el status de la solicitud."""
+    params = {"limit": min(resultados, MAX_POR_PEDIDO)}
+    if termino:
+        params.update(q=termino, worldwide="true")
     try:
-        r = requests.get(BASE, headers=HEADERS, timeout=20, params={"limit": min(resultados, MAX_POR_PEDIDO)})
+        r = requests.get(BASE + ("/search" if termino else ""), headers=HEADERS, timeout=20, params=params)
     except requests.RequestException:
         _avisar(al_responder, 0)
         raise
