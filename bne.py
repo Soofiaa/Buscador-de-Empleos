@@ -1,15 +1,17 @@
-"""BNE (Bolsa Nacional de Empleo, bne.gob.cl): JSON público que usa la propia página, sin sesión ni cuenta.
+"""BNE (Bolsa Nacional de Empleo, bne.gob.cl): API JSON que usa la propia página, sin sesión ni cuenta.
 
-Formato verificado por la app anterior (2026-10-05 y 2026-10-10, fixtures en tests/fixtures/bne_*):
-  GET /data/ofertas/buscarListas?mostrar=empleo&(idOcupacion=N | textoLibre=T)&numPaginaRecuperar=1
-      &numResultadosPorPagina=25&clasificarYPaginar=true
-  -> {"paginaOfertas": {numPaginasTotal, resultados: [{codigo, fecha "dd/mm/aa", titulo, descripcion (recortada a
-      ~1.000 caracteres), empresa, region, comuna, mostrarEmpresa}]}}
-  - idOcupacion=7643 = "Desarrolladores y analistas de sistemas informáticos" (grupo TI, de la más nueva a la más antigua).
-  - Varias palabras se buscan como Y/frase. No distingue tildes. Busca también dentro de palabras ("rpa" -> "SERPAJ").
-  - Palabras de menos de 3 letras dan 0 resultados ("qa").
-Detalle: GET /oferta/<codigo> -> HTML del servidor con "REQUISITOS SOLICITADOS" (Experiencia: "No requerida" | "N años")
-  y "CARACTERÍSTICAS" (Tipo de contrato). No informa modalidad. Sin verificar: numPaginaRecuperar > 1.
+Formato verificado el 28-10-2026 (fixtures en tests/fixtures/bne_*). La versión anterior (/data/ofertas/buscarListas,
+/oferta/<codigo> en HTML) dejó de responder: 404 en todo.
+  Listado: POST /api/ofertas/busqueda?page=0&size=25  cuerpo {"textoBusqueda": T, "idsOcupPr": [7643]}
+    -> {content: [{id, codigoOferta, empresario: {nombreComercial}, nombrePuesto, region: {nombre}, comuna: {nombre},
+        fechaPublicacion "AAAA-MM-DD", descripcion (texto plano, completo)}], totalElements, totalPages, ...}
+    - idsOcupPr=[7643] = ocupación TI ("Desarrolladores y analistas de sistemas informáticos"); sin él, todas las ofertas.
+    - textoBusqueda busca por palabras (no por frase exacta). Sin el campo, devuelve todas las ofertas (no sirve).
+    - Si la empresa es confidencial, empresario.nombreComercial = "Confidencial".
+  Detalle: GET /api/ofertas/publica/<id> -> {descripcion, experienciaRequerida (años; 0 = no requerida),
+        tipoContratoNombre, tipoJornadaNombre, mostrarEmpresa, nombreEmpresa, fecPublicacionInicio, fecPublicacionFin,
+        estadoOferta}
+  Sin verificar: páginas > 0 (page=1) y textoBusqueda con más de una palabra.
 """
 import html
 import json
@@ -30,13 +32,7 @@ OCUPACION_TI = 7643
 COLUMNAS = ["job_url", "title", "company", "location", "description", "date_posted", "is_remote",
             "min_amount", "max_amount", "currency", "interval"]
 # Contrato que el sitio no informa de verdad
-CONTRATO_NO_INDICADO = ("no sabe / no responde", "indiferente", "")
-
-
-def url_busqueda(ocupacion: Optional[int] = None, termino: str = "", pagina: int = 1) -> str:
-    filtro = "idOcupacion=%d" % ocupacion if ocupacion is not None else "textoLibre=%s" % quote(termino)
-    return ("%s/data/ofertas/buscarListas?mostrar=empleo&%s&numPaginaRecuperar=%d&numResultadosPorPagina=%d"
-            "&clasificarYPaginar=true" % (BASE, filtro, pagina, POR_PAGINA))
+CONTRATO_NO_INDICADO = ("no sabe / no responde", "indiferente", "", "sin contrato")
 
 
 def _limpio(s) -> str:
@@ -46,9 +42,13 @@ def _limpio(s) -> str:
 
 def _fecha(s: str) -> str:
     try:
-        return datetime.strptime((s or "").strip(), "%d/%m/%y").date().isoformat()
+        return datetime.strptime((s or "").strip(), "%Y-%m-%d").date().isoformat()
     except ValueError:
         return ""
+
+
+def _nombre(obj) -> str:
+    return str((obj or {}).get("nombre") or "") if isinstance(obj, dict) else ""
 
 
 def parsear_busqueda(texto: str) -> pd.DataFrame:
@@ -57,63 +57,54 @@ def parsear_busqueda(texto: str) -> pd.DataFrame:
         j = json.loads(texto)
     except json.JSONDecodeError as ex:
         raise ErrorFuente("la respuesta de BNE no es JSON (%s)" % ex.msg)
-    p = j.get("paginaOfertas") if isinstance(j, dict) else None
-    if not isinstance(p, dict) or not isinstance(p.get("resultados"), list):
-        raise ErrorFuente("el JSON de BNE no trae 'paginaOfertas.resultados' (¿cambió el sitio?)")
+    resultados = j.get("content") if isinstance(j, dict) else None
+    if not isinstance(resultados, list):
+        raise ErrorFuente("el JSON de BNE no trae 'content' (¿cambió el sitio?)")
     filas = []
-    for o in p["resultados"]:
+    for o in resultados:
         if not isinstance(o, dict):
             continue
-        titulo, codigo = _limpio(o.get("titulo")), str(o.get("codigo") or "").strip()
+        titulo, codigo = _limpio(o.get("nombrePuesto")), str(o.get("id") or "").strip()
         if not titulo or not codigo:
             continue
-        empresa = _limpio(o.get("empresa")) if o.get("mostrarEmpresa", True) else ""
+        empresario = o.get("empresario") if isinstance(o.get("empresario"), dict) else {}
         filas.append({
-            "job_url": "%s/oferta/%s" % (BASE, quote(codigo)), "title": titulo, "company": empresa,
-            "location": ubicacion_indeed(o.get("comuna") or "", o.get("region") or ""),
-            "description": _limpio(o.get("descripcion")), "date_posted": _fecha(o.get("fecha")),
+            "job_url": "%s/ofertas/%s" % (BASE, quote(codigo)), "title": titulo,
+            "company": _limpio(empresario.get("nombreComercial")),
+            "location": ubicacion_indeed(_nombre(o.get("comuna")), _nombre(o.get("region"))),
+            "description": _limpio(o.get("descripcion")), "date_posted": _fecha(o.get("fechaPublicacion")),
             "is_remote": False, "min_amount": None, "max_amount": None, "currency": "", "interval": "",
         })
     return pd.DataFrame(filas, columns=COLUMNAS)
 
 
 def listar(termino: str, cliente, robots) -> pd.DataFrame:
-    """Una página de resultados. `termino` es un texto o 'ocupacion:7643'."""
-    if termino.startswith("ocupacion:"):
-        url = url_busqueda(ocupacion=int(termino.split(":", 1)[1]))
-    else:
-        url = url_busqueda(termino=termino)
-    return parsear_busqueda(pedir(url, cliente, robots))
+    """Una página de resultados de ocupación TI. `termino` es texto libre o 'ocupacion:7643'."""
+    cuerpo = {"idsOcupPr": [OCUPACION_TI]} if termino.startswith("ocupacion:") else {"textoBusqueda": termino}
+    url = "%s/api/ofertas/busqueda?page=0&size=%d" % (BASE, POR_PAGINA)
+    return parsear_busqueda(pedir(url, cliente, robots, datos=cuerpo))
 
 
 # ---- detalle ----
-_RX_PANEL = re.compile(r'<h3 class="panel-title">\s*(DESCRIPCI(?:Ó|&Oacute;)N|REQUISITOS SOLICITADOS|CARACTER(?:Í|&Iacute;)STICAS)'
-                       r'\s*</h3>(.*?)</article>', re.S | re.I)
-
-
-def _texto(fragmento: str) -> str:
-    t = re.sub(r"(?i)<br\s*/?>|</p>|</li>|</div>", "\n", fragmento)
-    return _limpio(re.sub(r"<[^>]+>", " ", t)).replace(" \n", "\n")
-
-
-def _campo(panel: str, etiqueta: str) -> str:
-    m = re.search(r"<strong>\s*<span>\s*" + re.escape(etiqueta) + r"\s*:?\s*</span>\s*</strong>\s*<br\s*/?>(.*?)</div>",
-                  panel, re.S | re.I)
-    return re.sub(r"\s+", " ", _texto(m.group(1))).strip() if m else ""
+def _id_de(url: str) -> str:
+    return url.rstrip("/").rsplit("/", 1)[-1]
 
 
 def parsear_detalle(texto: str) -> Dict:
-    paneles = {normalizar(html.unescape(m.group(1))).upper(): m.group(2) for m in _RX_PANEL.finditer(texto or "")}
-    if "REQUISITOS SOLICITADOS" not in paneles:
-        raise ErrorFuente("el detalle de BNE no trae 'REQUISITOS SOLICITADOS' (¿cambió el sitio?)")
-    m = re.search(r"<p>(.*?)</p>", paneles.get("DESCRIPCION", ""), re.S)
-    return {"descripcion": _texto(m.group(1)) if m else "",
-            "experiencia": _campo(paneles["REQUISITOS SOLICITADOS"], "Experiencia"),
-            "contrato": _campo(paneles.get("CARACTERISTICAS", ""), "Tipo de contrato")}
+    try:
+        j = json.loads(texto)
+    except json.JSONDecodeError as ex:
+        raise ErrorFuente("el detalle de BNE no es JSON (%s)" % ex.msg)
+    if not isinstance(j, dict) or "descripcion" not in j or "experienciaRequerida" not in j:
+        raise ErrorFuente("el detalle de BNE no trae 'descripcion' y 'experienciaRequerida' (¿cambió el sitio?)")
+    exp = j.get("experienciaRequerida")
+    return {"descripcion": _limpio(j.get("descripcion")),
+            "experiencia": "No requerida" if not exp else "%d años" % int(exp),
+            "contrato": _limpio(j.get("tipoContratoNombre"))}
 
 
 def detalle(url: str, cliente, robots) -> Dict:
-    return parsear_detalle(pedir(url, cliente, robots))
+    return parsear_detalle(pedir("%s/api/ofertas/publica/%s" % (BASE, _id_de(url)), cliente, robots))
 
 
 def completar(fila: dict, det: Dict) -> bool:

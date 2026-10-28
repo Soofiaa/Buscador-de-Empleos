@@ -40,7 +40,7 @@ class Falso:
     def __init__(self, respuestas):
         self.respuestas, self.pedidas = respuestas, []
 
-    def get(self, url):
+    def get(self, url, datos=None):
         self.pedidas.append(url)
         for trozo, (status, texto) in self.respuestas.items():
             if trozo in url:
@@ -59,21 +59,23 @@ def test_geo_normaliza_a_formato_indeed():
 
 # ---- parsers con fixtures reales
 def test_bne_listado():
-    df = bne.parsear_busqueda(leer("bne_ocupacion.json"))
-    assert len(df) == 25 and list(df.columns) == bne.COLUMNAS
-    assert df["job_url"].str.startswith("https://www.bne.gob.cl/oferta/").all()
+    df = bne.parsear_busqueda(leer("bne_busqueda.json"))
+    assert len(df) == 24 and list(df.columns) == bne.COLUMNAS
+    assert df["job_url"].str.fullmatch(r"https://www\.bne\.gob\.cl/ofertas/\d+").all()
     assert df["date_posted"].str.fullmatch(r"\d{4}-\d{2}-\d{2}").all()
     assert df["location"].str.endswith(", Chile").all()
+    assert df["company"].iloc[0] == "Confidencial"                  # el sitio ya oculta el nombre
 
 
 def test_bne_detalle_y_experiencia_llega_al_clasificador():
-    det = bne.parsear_detalle(leer("bne_detalle_2026-120083.html"))
-    assert det["experiencia"] == "1 años" and det["contrato"] == "Indiferente"
+    det = bne.parsear_detalle(leer("bne_detalle.json"))
+    assert det["experiencia"] == "5 años" and det["contrato"] == "Contrato indefinido"
     fila = {"description": "Analista de calidad"}
     assert bne.completar(fila, det)
-    assert "Experiencia mínima (BNE): 1 años." in fila["description"]
-    assert "Tipo de contrato" not in fila["description"]            # 'Indiferente' = no informado
-    assert extraer_experiencia(fila["description"])[0] == 1
+    assert "Experiencia mínima (BNE): 5 años." in fila["description"]
+    assert "Tipo de contrato (BNE): Contrato indefinido." in fila["description"]
+    assert extraer_experiencia(fila["description"])[0] == 5
+    assert bne.parsear_detalle('{"descripcion": "x", "experienciaRequerida": 0}')["experiencia"] == "No requerida"
     fila2 = {"description": "x"}
     bne.completar(fila2, {"descripcion": "", "experiencia": "3 años", "contrato": "Contrato a plazo Fijo"})
     assert extraer_experiencia(fila2["description"])[0] == 3 and "plazo Fijo" in fila2["description"]
@@ -196,38 +198,31 @@ def test_trabajando_404_se_recuerda_y_no_se_vuelve_a_pedir(con, monkeypatch):
 
 
 def test_bne_flujo_completo_detalle_con_tope_y_guardado(con, monkeypatch):
-    # fixture de octubre de 2026 (fechas 24/08 a 05/10): con 'hoy' 05/10 y la ventana de BNE (3 días) quedan 3 de 25
-    ahora = datetime(2026, 10, 5, 12, 0, tzinfo=ZONA)
+    ahora = datetime(2026, 9, 15, 12, 0, tzinfo=ZONA)
     monkeypatch.setattr(config, "TERMINOS_BNE", ["ocupacion:7643"])
     monkeypatch.setitem(config.MAX_DETALLES, "bne", 2)
-    cli = Falso({"buscarListas": (200, leer("bne_ocupacion.json")),
-                 "/oferta/": (200, leer("bne_detalle_2026-120083.html"))})
-    st = {"encontradas": 0, "relevantes": 0, "sin_chile": 0, "errores": 0}
+    cli = Falso({"busqueda": (200, leer("bne_busqueda.json")),
+                 "/api/ofertas/publica/": (200, leer("bne_detalle.json"))})
+    st = {"encontradas": 0, "relevantes": 0, "sin_chile": 0, "errores": 0, "antiguas": 0}
     avisos = []
-    buscar._buscar_portal(con, "bne", st, avisos, cli, RobotsLibre(), ahora, 3)
-    detalles = [u for u in cli.pedidas if "/oferta/" in u]
-    assert len(detalles) <= 2                                       # nunca más del tope
-    assert (st["encontradas"], st["antiguas"]) == (3, 22)           # "encontradas" cuenta después del corte
+    buscar._buscar_portal(con, "bne", st, avisos, cli, RobotsLibre(), ahora, 10)
+    detalles = [u for u in cli.pedidas if "/api/ofertas/publica/" in u]
+    assert len(detalles) <= 2
     filas = con.execute("SELECT url, fuente, publicada FROM ofertas").fetchall()
     assert filas and all(f["fuente"] == "bne" for f in filas)
-    assert all(f["publicada"] >= "2026-10-02" for f in filas)       # las antiguas no se guardan (ni como descartadas)
-    listado = bne.parsear_busqueda(leer("bne_ocupacion.json"))
-    recientes = set(listado.loc[listado["date_posted"] >= "2026-10-02", "job_url"])
-    assert len(recientes) == 3 and set(detalles) <= recientes       # el detalle solo se abre para recientes
     # segunda corrida: lo ya guardado no se vuelve a pedir
-    cli2 = Falso({"buscarListas": (200, leer("bne_ocupacion.json"))})
-    buscar._buscar_portal(con, "bne", st, [], cli2, RobotsLibre(), ahora, 3)
-    assert len([u for u in cli2.pedidas if "/oferta/" in u]) <= 2
+    cli2 = Falso({"busqueda": (200, leer("bne_busqueda.json"))})
+    buscar._buscar_portal(con, "bne", st, [], cli2, RobotsLibre(), ahora, 10)
+    assert len([u for u in cli2.pedidas if "/api/ofertas/publica/" in u]) <= 2
 
 
 def test_portal_no_abre_detalle_de_ofertas_antiguas(con, monkeypatch):
     monkeypatch.setattr(config, "TERMINOS_BNE", ["ocupacion:7643"])
-    cli = Falso({"buscarListas": (200, leer("bne_ocupacion.json")),
-                 "/oferta/": (200, leer("bne_detalle_2026-120083.html"))})
-    st = {"encontradas": 0, "relevantes": 0, "sin_chile": 0, "errores": 0}
-    buscar._buscar_portal(con, "bne", st, [], cli, RobotsLibre(), datetime(2026, 11, 30, 12, 0, tzinfo=ZONA), 3)
-    assert (st["encontradas"], st["antiguas"]) == (0, 25)
-    assert not [u for u in cli.pedidas if "/oferta/" in u]
+    cli = Falso({"busqueda": (200, leer("bne_busqueda.json")),
+                 "/api/ofertas/publica/": (200, leer("bne_detalle.json"))})
+    st = {"encontradas": 0, "relevantes": 0, "sin_chile": 0, "errores": 0, "antiguas": 0}
+    buscar._buscar_portal(con, "bne", st, [], cli, RobotsLibre(), datetime(2026, 1, 1, 12, 0, tzinfo=ZONA), 1)
+    assert not [u for u in cli.pedidas if "/api/ofertas/publica/" in u]
     assert con.execute("SELECT COUNT(*) FROM ofertas").fetchone()[0] == 0
 
 

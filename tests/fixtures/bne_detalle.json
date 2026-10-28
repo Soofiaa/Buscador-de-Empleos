@@ -1,0 +1,170 @@
+{
+ "idOferta": 1587955,
+ "codigoOferta": "2026-117921",
+ "idEmpresario": 302023,
+ "idEstadoOferta": 2,
+ "estadoOferta": "Validada",
+ "mostrarEmpresa": true,
+ "mostrarSueldo": false,
+ "aceptarDiscapacidad": true,
+ "puesto": "AI Lead Specialist",
+ "descripcion": "En EY, tendrás la oportunidad de desarrollar una carrera tan única como tú, con una visión global, el apoyo, la cultura inclusiva y la tecnología para convertirte en la mejor versión de ti. Contamos con tu voz y perspectiva únicas para ayudar a que EY también sea aún mejor. Súmate a nosotros y construye una experiencia excepcional para ti y un mejor mundo de negocio para todos.\r\n\r\nPara ser exitoso/a en el puesto es necesario:\r\n \r\n- Título universitario en ingeniería informática, civil informática, computación o carreras afínes.\r\n- Situación laboral regular en Chile / permiso de trabajo vigente.\r\n- Experiencia comprobable en al menos dos modelos llevados a producción (no solo POC o proyectos académicos)\r\n- Inglés técnico de lectura y conversación (mínimo B2)\r\n- Disponibilidad para modalidad híbrida y eventuales visitas a faena/cliente\r\n- 5+ años en roles de Machine Learning Engineer, Data Scientist o similar, con al menos 3 años trabajando con modelos en producción.\r\n- Proveniente de consultoras de datos/tecnología, empresas de producto tech, o equipos internos de analítica avanzada en industrias data-intensivas (minería, energía, retail, banca, telco, utilities). \r\n- Experiencia previa en consultoría o en roles con exposición directa a cliente es un diferenciador fuerte.\r\n- Python avanzado (pandas, NumPy, scikit-learn, PyTorch o TensorFlow) y SQL avanzado.\r\n- Procesamiento distribuido con Spark / Databricks.\r\n- MLOps: MLflow, versionado de modelos y datos, CI/CD (Git, GitHub Actions o Azure DevOps), contenedores (Docker).\r\n- Nube: Azure ML, Databricks, GCP Vertex AI o AWS SageMaker. \r\n- Orquestación (Airflow, Databricks Workflows) y modelamiento de datos (Delta Lake, lakehouse). \r\n- Deseable: GenAI y LLMs aplicados (RAG, embeddings, vector stores, frameworks tipo LangChain), series de tiempo, optimización, y visualización (Power BI / Streamlit).",
+ "experienciaRequerida": 5,
+ "esPractica": false,
+ "fecPublicacionInicio": "2026-10-01",
+ "fecPublicacionFin": "2026-12-03",
+ "numPuestos": 1,
+ "postSolicitados": 100,
+ "salarioMinimo": null,
+ "salarioMaximo": null,
+ "rangoSalarioDescripcion": null,
+ "idRegion": 378,
+ "regionNombre": "Metropolitana",
+ "idComuna": 1143,
+ "comunaNombre": "Las Condes",
+ "ocupacionPrincipalNombre": "Desarrolladores y analistas de sistemas informáticos",
+ "ocupacionAlternativa1Nombre": "Tecnicos en programacion informatica",
+ "nivelProfesionalPrincipalNombre": null,
+ "tipoContratoNombre": "Contrato indefinido",
+ "tipoJornadaNombre": "Jornada Completa",
+ "cargoNombre": "Analista",
+ "nombreEmpresa": "EY CONSULTORES LIMITADA",
+ "empresarioRazonSocial": null,
+ "empresarioDescripcion": null,
+ "empresarioDescripcionActEconomica": "Actividades de consultoría de gestión",
+ "reqGeneralesPermCond1Nombre": null,
+ "reqGeneralesPermCond2Nombre": null,
+ "reqGeneralesVehiculo1Nombre": null,
+ "reqGeneralesVehiculo2Nombre": null,
+ "reqGeneralesSitLaboralNombre": null,
+ "reqGeneralesIdColecEspec1": null,
+ "reqGeneralesIdColecEspec2": null,
+ "certificadosUcs": null,
+ "titulaciones": [
+  {
+   "id": 506668,
+   "idOferta": 1587955,
+   "idNivel": 7,
+   "idArea": 16,
+   "idSubarea": null,
+   "idTitulacion": 557,
+   "fecObt": null,
+   "fecAlta": "2026-10-01T15:39:28.217+00:00",
+   "fecModif": "2026-10-01T15:39:28.217+00:00",
+   "idTipoEdMedia": null,
+   "observaciones": "",
+   "ultCursoAprob": null,
+   "titulacionMagisDoctor": "",
+   "otrasTitulaciones": null,
+   "nombreInstitucion": "",
+   "nombreNivel": "Educación superior Completa",
+   "nombreTitulacion": "Ingeniería Civil en Computación e Informática",
+   "nombreTipoEdMedia": null,
+   "nombreArea": "CIENCIAS"
+  }
+ ],
+ "preguntas": [
+  {
+   "id": 1052762,
+   "idOferta": 1587955,
+   "orden": 1,
+   "pregunta": "Indique situación académica y casa de estudios",
+   "tipoRespuesta": {
+    "id": 4,
+    "codigo": "LTXT",
+    "nombre": "Texto largo"
+   }
+  },
+  {
+   "id": 1052763,
+   "idOferta": 1587955,
+   "orden": 1,
+   "pregunta": "Indique si ha postulado anteriormente a EY. De ser así ¿Cuándo y hasta qué etapa?",
+   "tipoRespuesta": {
+    "id": 4,
+    "codigo": "LTXT",
+    "nombre": "Texto largo"
+   }
+  },
+  {
+   "id": 1052764,
+   "idOferta": 1587955,
+   "orden": 1,
+   "pregunta": "¿Cuáles son tus pretensiones de renta? Y ¿Disponibilidad para comenzar a trabajar?",
+   "tipoRespuesta": {
+    "id": 4,
+    "codigo": "LTXT",
+    "nombre": "Texto largo"
+   }
+  },
+  {
+   "id": 1052765,
+   "idOferta": 1587955,
+   "orden": 1,
+   "pregunta": "EY cuenta con un programa de inclusión laboral, por lo que agradecemos nos comentes si necesitas de alguna atención especial para apoyarte",
+   "tipoRespuesta": {
+    "id": 4,
+    "codigo": "LTXT",
+    "nombre": "Texto largo"
+   }
+  }
+ ],
+ "idiomas": [
+  {
+   "id": 36048,
+   "idOferta": 1587955,
+   "idIdioma": 10,
+   "idNivIdiomaLectura": 1,
+   "idNivIdiomaEscritura": 1,
+   "idNivIdiomaHablado": 1,
+   "interpretacion": null,
+   "traduccion": null,
+   "docente": null,
+   "materno": null,
+   "fecAlta": "2026-10-01T15:39:38.397+00:00",
+   "fecModif": "2026-10-01T15:39:38.397+00:00",
+   "idioma": {
+    "id": 10,
+    "nombre": "INGLES",
+    "fecIniVig": null,
+    "fecFinVig": null,
+    "fecAlta": null,
+    "fecModif": null
+   },
+   "nivelLectura": {
+    "id": 1,
+    "nombre": "Alto",
+    "fecIniVig": null,
+    "fecFinVig": null,
+    "fecAlta": null,
+    "fecModif": null
+   },
+   "nivelEscritura": {
+    "id": 1,
+    "nombre": "Alto",
+    "fecIniVig": null,
+    "fecFinVig": null,
+    "fecAlta": null,
+    "fecModif": null
+   },
+   "nivelHablado": {
+    "id": 1,
+    "nombre": "Alto",
+    "fecIniVig": null,
+    "fecFinVig": null,
+    "fecAlta": null,
+    "fecModif": null
+   }
+  }
+ ],
+ "capacitaciones": null,
+ "trabajoNocturno": false,
+ "trabajoFestivos": false,
+ "soloManana": false,
+ "soloTarde": false,
+ "horariosEspeciales": false,
+ "logotipo": null,
+ "idOrigen": 1,
+ "origenOferta": "Ofertas BNE",
+ "esEnadi": null
+}

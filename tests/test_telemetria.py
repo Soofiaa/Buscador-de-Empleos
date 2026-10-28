@@ -207,7 +207,7 @@ def test_el_comportamiento_no_cambia_con_y_sin_telemetria(tmp_path, monkeypatch)
     ahora = datetime(2026, 10, 5, 12, 0, tzinfo=ZONA)
     monkeypatch.setattr(config, "TERMINOS_BNE", ["ocupacion:7643", "tester"])
     monkeypatch.setitem(config.MAX_DETALLES, "bne", 2)
-    red = {"buscarListas": (200, leer("bne_ocupacion.json")), "/oferta/": (200, leer("bne_detalle_2026-120083.html"))}
+    red = {"busqueda": (200, leer("bne_busqueda.json")), "/api/ofertas/publica/": (200, leer("bne_detalle.json"))}
     resultados = []
     for con_tele in (False, True):
         c_db = buscar.conectar(str(tmp_path / f"t{con_tele}.db"))

@@ -5,6 +5,7 @@ Reglas (heredadas de la app anterior "Busca Empleo", que las trae de decisiones 
   - Pausa aleatoria de 3 a 5 segundos entre peticiones y un User-Agent que dice quién es (no se disfraza).
   - Ante 401/403/429 o una página de verificación/CAPTCHA se DETIENE ese sitio: no se reintenta ni se esquiva.
 """
+import json
 import random
 import time
 import urllib.error
@@ -69,9 +70,10 @@ class ClienteHTTP:
         self._primera = False
         self.peticiones += 1
 
-    def get(self, url: str) -> Respuesta:
+    def get(self, url: str, datos: Optional[dict] = None) -> Respuesta:
+        """GET; con `datos`, un POST con ese cuerpo JSON."""
         self.esperar_turno()
-        respuesta = self._get(url)
+        respuesta = self._get(url, datos)
         if self.al_responder:
             try:
                 self.al_responder(respuesta.status)
@@ -79,24 +81,29 @@ class ClienteHTTP:
                 pass                                       # la telemetría nunca cambia lo que pasa con la fuente
         return respuesta
 
-    def _get(self, url: str) -> Respuesta:
-        req = urllib.request.Request(url, headers={
+    def _get(self, url: str, datos: Optional[dict] = None) -> Respuesta:
+        cuerpo = json.dumps(datos).encode("utf-8") if datos is not None else None
+        headers = {
             "User-Agent": self.ua, "Accept": "text/html,application/xhtml+xml,application/json;q=0.9",
             "Accept-Language": "es-CL,es;q=0.9", "Accept-Encoding": "identity",
-        })
+        }
+        if cuerpo is not None:
+            headers["Content-Type"] = "application/json"
+        req = urllib.request.Request(url, data=cuerpo, headers=headers)
         try:
             with self._abrir(req, timeout=self.timeout) as r:
-                cuerpo = r.read()
+                cuerpo_resp = r.read()
                 cs = r.headers.get_content_charset() if hasattr(r.headers, "get_content_charset") else None
-                return Respuesta(getattr(r, "status", 200), cuerpo.decode(cs or "utf-8", errors="replace"))
+                return Respuesta(getattr(r, "status", 200), cuerpo_resp.decode(cs or "utf-8", errors="replace"))
         except urllib.error.HTTPError as e:
             return Respuesta(e.code, "", "HTTP %d" % e.code)
         except Exception as e:  # DNS, timeout, SSL...
             return Respuesta(0, "", "%s: %s" % (type(e).__name__, e))
 
 
-def pedir(url: str, cliente, robots) -> str:
-    """Descarga una URL respetando robots.txt. Devuelve el texto o lanza Bloqueo / NoEncontrada / ErrorFuente."""
+def pedir(url: str, cliente, robots, datos: Optional[dict] = None) -> str:
+    """Descarga una URL respetando robots.txt (con `datos`, un POST JSON). Devuelve el texto o lanza
+    Bloqueo / NoEncontrada / ErrorFuente."""
     rechazo = getattr(robots, "bloqueo", lambda _u: "")(url)
     if rechazo:
         raise Bloqueo("robots.txt rechazó la lectura (%s)" % rechazo)
@@ -104,7 +111,7 @@ def pedir(url: str, cliente, robots) -> str:
         raise ErrorFuente("no se pudo leer robots.txt (¿sin internet o el sitio no responde?); no se visitó nada")
     if not robots.permitido(url):
         raise ErrorFuente("robots.txt no permite esta URL")
-    r = cliente.get(url)
+    r = cliente.get(url) if datos is None else cliente.get(url, datos)
     if es_bloqueo(r.status):
         raise Bloqueo(r.error or "HTTP %d" % r.status)
     if r.status == 404:
