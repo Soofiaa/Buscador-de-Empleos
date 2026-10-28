@@ -888,9 +888,16 @@ quedaron fuera del repositorio (en %TEMP%\jt-sondeo).
   traen descripción quedan en `explorar`. El rol freelance que calza con el perfil sigue en Ofertas.
 - Página: barra de progreso propia y pestaña «Explorar remotos», con las mismas acciones que Ofertas. `/api/estado`
   trae `explorar: {buscando, mensaje, error}`. Los mensajes van por hilo (`buscar.salida_del_hilo`).
-- Base: v7, sin migración. **Pendiente:** candidata en 8766; primera exploración real (revisar el ruido de freelance
-  y los 429 de Indeed con las dos búsquedas a la vez); aprobar si al desplegar se reclasifican las ofertas guardadas
-  hacia `explorar`; despliegue.
+- Base: v7, sin migración. **Pendiente:** aprobar si al desplegar se reclasifican las ofertas guardadas hacia
+  `explorar`; despliegue.
+- Ampliado (commits `b1c6a90`, `469c641`): ventana de días propia (desde la última exploración; la primera, 14 días)
+  y búsqueda por texto en Himalayas (`/jobs/api/search?q=&worldwide=true`) y Jobicy (`tag=`) con
+  `TERMINOS_EXPLORAR_EN`. Remote First Jobs no: su robots.txt prohíbe `/api/search-jobs`. Se quitó «trabajo por
+  proyecto» (solo traía ruido).
+- Candidata `jt_revision_explorar` (8766, copia sha256 `f5a4a183…`), 28-10: exploración y búsqueda normal a la vez,
+  sin 429 en ninguna. Exploración en ~2 min: Indeed 31 encontradas / 1 guardada, Himalayas 61 / 9, Jobicy 4 / 0;
+  7 en Explorar. Búsqueda normal: 38 min, 2 relevantes. La mayoría de lo descartado de Himalayas cae por la
+  exclusión «senior» de Ajustes (Himalayas escribe «Nivel senior.» en la descripción): es lo esperado.
 - Límite conocido: con dos corridas a la vez, `corrida_de` puede asignar una oferta a la corrida equivocada (las
   ventanas de tiempo se cruzan).
 - No se hizo: plataformas freelance (Workana y Upwork no tienen API pública). Idea para acelerar la búsqueda normal,
