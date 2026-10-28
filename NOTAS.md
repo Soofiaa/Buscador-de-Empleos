@@ -3,7 +3,23 @@
 ## Estado actual (se actualiza en cada despliegue; leer al empezar cada sesión)
 
 ### Producción y base
-- **Despliegue de Remote First Jobs como fuente remota (24-10-2026; vigente):** commit `efbfa23` (conector
+- **Despliegue de «Explorar remotos» con freelance (28-10-2026; vigente):** commits `1d69625`, `b1c6a90`, `469c641`,
+  `958a558` (ver «Explorar remotos y freelance» al final). Imagen `job-tracker-jobtracker:latest` =
+  `sha256:eac2d8f670bff3d8ecd1b79c32738fe94db00bb3123a386ae1b65ae651096650`, healthy en `127.0.0.1:8765`. Imagen
+  anterior: `job-tracker:pre-explorar-20261028` (= `sha256:c063782…`). Referencia `ofertas_pre_explorar_20261028.db`
+  (volumen y `C:\Users\sofia\Respaldos\job-tracker-referencias\`), sha256
+  `f5a4a183942625517b6ae2bb76c2c4745913104087d89fe4e63499c7c4e094bd`, integrity_check ok; salida al detener 0.
+  - Línea base sin cambios: v7; 6222 ofertas, 63 búsquedas, 385 en historial_estados, 6 ajustes, 27
+    terminos_no_disponibles; 42 postuladas; 6 POR VERIFICAR. Huellas antes, después y tras las comprobaciones: OK.
+  - **Sin reclasificar** las ofertas guardadas (aprobado por Sofia).
+  - Primer despliegue con Playwright/Chromium en la imagen: Laborum queda activo en producción.
+  - HTTP: `/`, `/api/estado`, `/api/ofertas`, `/api/respaldo` 200; Host y Origin ajenos 403 (también en POST
+    `/api/buscar` y `/api/explorar`); JSON inválido y `/api/respaldo` con campos 400; cuerpo grande 413. `error_auto`
+    vacío. Reversión probada en copia (8767). 91 respaldos del host y 28 del volumen con el mismo sha256.
+  - **Despliegue sin registro detectado:** la imagen anterior (`c063782…`, construida el 27-10 a las 11:00) no figuraba
+    en estas notas. Su `/app` se comparó con git: todos los archivos coinciden con commits existentes, nada quedó fuera
+    del repositorio. El último despliegue registrado antes de este era Remote First Jobs (`f36ac2f0…`).
+- **Despliegue de Remote First Jobs como fuente remota (24-10-2026; anterior):** commit `efbfa23` (conector
   `remotefirstjobs.py`). Imagen `job-tracker-jobtracker:latest` = `sha256:f36ac2f0…`, healthy en `127.0.0.1:8765`.
   Imagen anterior: `job-tracker:pre-remotefirstjobs-20261024` (= `sha256:0191a03a…`). Referencia
   `ofertas_pre_remotefirstjobs_20261024.db`, sha256 `721591c0…` (la misma base que el despliegue anterior: sin cambios
@@ -877,7 +893,7 @@ quedaron fuera del repositorio (en %TEMP%\jt-sondeo).
 - Página: sección «🔎 Buscar a mano» bajo el botón Buscar, con enlaces a Computrabajo (6 términos,
   `trabajo-de-<término>`, formato comprobado) y a las convocatorias de Empleos Públicos.
 
-## Explorar remotos y freelance (28-10-2026; commit local, SIN desplegar)
+## Explorar remotos y freelance (28-10-2026; desplegado el mismo día)
 - Botón aparte «🧭 Explorar remotos» (`POST /api/explorar`), que puede correr a la vez que «Buscar empleos». Solo
   consulta Indeed, con lugar `REMOTO` y los términos de `config.TERMINOS_EXPLORAR` (Producto SaaS, automatización sin
   código, IA y datos, documentación técnica, producto/UX, remotos no informáticos y 6 de freelance). No usa LinkedIn.
@@ -888,8 +904,8 @@ quedaron fuera del repositorio (en %TEMP%\jt-sondeo).
   traen descripción quedan en `explorar`. El rol freelance que calza con el perfil sigue en Ofertas.
 - Página: barra de progreso propia y pestaña «Explorar remotos», con las mismas acciones que Ofertas. `/api/estado`
   trae `explorar: {buscando, mensaje, error}`. Los mensajes van por hilo (`buscar.salida_del_hilo`).
-- Base: v7, sin migración. **Pendiente:** aprobar si al desplegar se reclasifican las ofertas guardadas hacia
-  `explorar`; despliegue.
+- Base: v7, sin migración. Desplegado el 28-10 **sin reclasificar** (aprobado por Sofia): la simulación daba solo 4
+  hacia `explorar` (2 eran ruido de «honorarios») y sacaba 7 de Ofertas por exclusiones de Ajustes posteriores.
 - Ampliado (commits `b1c6a90`, `469c641`): ventana de días propia (desde la última exploración; la primera, 14 días)
   y búsqueda por texto en Himalayas (`/jobs/api/search?q=&worldwide=true`) y Jobicy (`tag=`) con
   `TERMINOS_EXPLORAR_EN`. Remote First Jobs no: su robots.txt prohíbe `/api/search-jobs`. Se quitó «trabajo por

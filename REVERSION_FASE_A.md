@@ -685,3 +685,30 @@ métricas), con Seguimiento como pestaña. Las direcciones con #apartado abren O
 `vistaPrefs` sigue sirviendo. Ningún cambio escribe en la base, así que no se pierden ofertas ni estados.
 Reversión probada en copia (volumen temporal, 8767): healthy, GET / 200 con la página anterior y huellas idénticas a
 la referencia.
+
+## Botón «Explorar remotos» con freelance (28-10-2026)
+
+Commits 1d69625 (botón y categoría `explorar`), b1c6a90 (ventana de días propia), 469c641 (Himalayas y Jobicy por
+texto) y 958a558 (notas). Base sin cambios (v7, sin tablas nuevas) y **sin reclasificar** las ofertas guardadas. La
+imagen nueva también lleva Playwright/Chromium (Laborum), que la anterior no tenía.
+Imagen anterior: job-tracker:pre-explorar-20261028 (sha256:c063782698ac037903b65b20e4b43219cd18c82704f5d09c597efbca02c0c85f,
+construida el 27-10 a las 11:00 y desplegada sin registro; su código coincide con commits anteriores, nada fuera de
+git). Imagen desplegada: job-tracker-jobtracker:latest = sha256:eac2d8f670bff3d8ecd1b79c32738fe94db00bb3123a386ae1b65ae651096650.
+Referencia: ofertas_pre_explorar_20261028.db (volumen y C:\Users\sofia\Respaldos\job-tracker-referencias\), sha256
+f5a4a183942625517b6ae2bb76c2c4745913104087d89fe4e63499c7c4e094bd, integrity_check ok. Salida al detener: 0.
+Huellas antes y después: RESULTADO OK (6222 ofertas, 63 búsquedas, 42 postuladas, 6 POR VERIFICAR).
+
+Para volver atrás:
+
+```
+docker compose stop jobtracker
+docker tag job-tracker:pre-explorar-20261028 job-tracker-jobtracker:latest
+docker compose up -d --no-build
+```
+
+**Qué se pierde al volver:** desaparecen el botón y la lista Explorar. Las ofertas que ya entraron como `explorar` se
+quedan en la base pero la página anterior no las muestra. Las búsquedas guardadas con `origen='explorar'` cuentan como
+«última búsqueda» para la imagen anterior, así que la siguiente búsqueda normal puede mirar menos días atrás. No se
+pierden ofertas ni estados. No hace falta restaurar la base.
+Reversión probada en copia (volumen temporal, 8767): healthy, GET / 200 con la página anterior y huellas idénticas a
+la referencia.
