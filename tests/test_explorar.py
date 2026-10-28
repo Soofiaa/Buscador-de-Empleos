@@ -68,6 +68,13 @@ def test_la_ventana_de_la_busqueda_normal_ignora_las_exploraciones(con):
                 "VALUES ('2026-10-27 10:00', '2026-10-27 10:05', 0, '{}', 'explorar')")
     v = buscar.ventanas_efectivas(con, datetime(2026, 10, 28, 9, 0, tzinfo=ZONA))
     assert v["indeed"] == 9                       # desde el 20 (la normal), no desde el 27 (la exploración)
+    assert buscar.ventanas_efectivas(con, datetime(2026, 10, 28, 9, 0, tzinfo=ZONA), explorar=True)["indeed"] == 2
+
+
+def test_la_primera_exploracion_mira_el_maximo_de_dias(con):
+    con.execute("INSERT INTO corridas (inicio, fin, nuevas, detalle) VALUES ('2026-10-28 08:00', '2026-10-28 08:20', 0, '{}')")
+    v = buscar.ventanas_efectivas(con, datetime(2026, 10, 28, 9, 0, tzinfo=ZONA), explorar=True)
+    assert v["indeed"] == buscar.config.DIAS_MAXIMOS
 
 
 def test_explorar_remotos_guarda_en_explorar_y_registra_su_corrida(con, monkeypatch):

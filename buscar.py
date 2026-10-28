@@ -520,13 +520,14 @@ def a_raw(r, fuente="indeed") -> dict:
     }
 
 
-def ventanas_efectivas(con, ahora: datetime) -> dict:
+def ventanas_efectivas(con, ahora: datetime, explorar: bool = False) -> dict:
     """Días de antigüedad por fuente: el configurado, o más si pasaron días sin buscar (días desde el fin de la última
-    búsqueda + 1, en fechas de Chile), con tope DIAS_MAXIMOS. Sin búsquedas previas, el configurado."""
-    hueco = 0
-    # «Explorar remotos» no cuenta: no busca en todas las fuentes, así que no cierra el hueco de la búsqueda normal
-    fila = con.execute("SELECT fin FROM corridas WHERE COALESCE(origen, '') != 'explorar' "
-                       "ORDER BY id DESC LIMIT 1").fetchone()
+    búsqueda + 1, en fechas de Chile), con tope DIAS_MAXIMOS. Sin búsquedas previas, el configurado.
+    Con explorar=True solo cuentan las exploraciones anteriores, y la primera mira DIAS_MAXIMOS."""
+    hueco = config.DIAS_MAXIMOS if explorar else 0
+    # Cada botón lleva su propio hueco: explorar no busca en todas las fuentes, así que no cierra el de la búsqueda
+    fila = con.execute("SELECT fin FROM corridas WHERE (COALESCE(origen, '') = 'explorar') = ? "
+                       "ORDER BY id DESC LIMIT 1", (explorar,)).fetchone()
     if fila and fila["fin"]:
         try:
             fin = datetime.strptime(fila["fin"][:10], "%Y-%m-%d").date()
@@ -893,7 +894,7 @@ def explorar_remotos(con) -> int:
     avisos, total = [], 0
     ahora = ahora_chile()
     inicio = ahora.strftime("%Y-%m-%d %H:%M")
-    dias = config.MAX_ANTIGUEDAD_DIAS.get(sitio, 1)
+    dias = ventanas_efectivas(con, ahora, explorar=True)[sitio]
     for n, termino in enumerate(terminos, start=1):
         if sitio in _VIGIA_429.frenadas:            # ante un 429 no se insiste (ver _Vigia429)
             st["errores"] += 1
