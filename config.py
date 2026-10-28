@@ -57,6 +57,40 @@ TERMINOS_SECUNDARIOS = [
     "analista de requerimientos junior", "analista de requerimientos jr",
     "soporte TI", "help desk",
 ]
+# ---- Explorar remotos (botón aparte): roles fuera de tu perfil TI que podrían calzar, SOLO remotos ----
+# Indeed los busca como "<término> remoto" en Chile. Las fuentes remotas de la búsqueda normal (Himalayas, Jobicy...)
+# también alimentan esta lista: el clasificador reconoce estos roles venga de donde venga la oferta.
+TERMINOS_EXPLORAR = [
+    "especialista de implementación", "onboarding", "customer success",
+    "automatización no code", "zapier", "administrador CRM", "hubspot",
+    "entrenador de IA", "evaluador de IA", "etiquetado de datos", "anotación de datos",
+    "redactor técnico", "documentación técnica", "technical writer",
+    "product analyst", "analista de producto", "UX research", "UX writer",
+    "asistente virtual", "asistente administrativo", "back office", "transcripción", "traductor",
+    "moderador de contenido",
+    "freelance", "freelance python", "freelance QA", "freelance datos", "trabajo por proyecto", "independiente",
+]
+# (etiqueta, patrón en el TÍTULO, prioridad). Solo se miran si ninguna regla de tu perfil reconoce el cargo (o si un
+# rol puente no junta sus señales). Pasan los mismos filtros (estafa, práctica, senior, experiencia, empresas) y
+# además deben ser remotos; si no, se descartan.
+ROLES_EXPLORAR = [
+    ("implementación / onboarding", r"implementa(cion|tion)|onboarding", "Alta"),
+    ("automatización sin código / CRM", r"no[ -]?code|low[ -]?code|zapier|\bn8n\b|hubspot|salesforce|\bcrm\b", "Alta"),
+    ("producto", r"product (analyst|operations|ops)|analista de producto", "Alta"),
+    ("documentación técnica", r"technical (writer|content)|redactor tecnico|documentacion tecnica|documentation", "Alta"),
+    ("IA y datos", r"\bai (trainer|tutor|evaluator|rater|annotator)|(entrenador|evaluador|anotador)a? de (ia|inteligencia artificial)"
+                   r"|data (annotat|label)|(etiquetado|anotacion) de datos|\bai training\b|\brater\b", "Media"),
+    ("customer success", r"customer success|client success|exito (del|de) cliente|product support|technical account", "Media"),
+    ("UX", r"\bux\b|user research|usabilidad", "Media"),
+    ("asistente virtual / administrativo", r"asistente (virtual|administrativ|ejecutiv)|(virtual|administrative|executive) assistant", "Baja"),
+    ("back office / operaciones", r"back ?office|operations (assistant|specialist|analyst)|analista administrativ", "Baja"),
+    ("traducción / transcripción", r"traduct|translat|transcri|locali[sz]a|subtitul", "Baja"),
+    ("moderación de contenido", r"moderador|content moderat|trust (and|&) safety", "Baja"),
+    # cualquier cargo freelance que no reconozca otra regla (un "Desarrollador Python freelance" sigue yendo a Ofertas)
+    ("freelance / por proyecto", r"freelanc|independiente|por proyecto|honorarios", "Baja"),
+]
+EXPLORAR_TIPO = "E: Explorar"
+
 NOMBRE_FUENTE = {"indeed": "Indeed", "google": "Google", "glassdoor": "Glassdoor", "getonboard": "Get on Board",
                  "himalayas": "Himalayas", "jobicy": "Jobicy", "remotefirstjobs": "Remote First Jobs", "bne": "BNE", "trabajando": "Trabajando", "chiletrabajos": "Chiletrabajos", "laborum": "Laborum",
                  "chumi": "Chumi", "linkedin": "LinkedIn", "jooble": "Jooble",
@@ -236,6 +270,8 @@ ROLES_B_MEDIA = [
 B_EXCLUIR_TITULO = [r"\btecnic[oa]", r"mantenimiento", r"operari[oa]", r"bodega", r"call ?center", r"telemarketing", r"\bventas?\b", r"vendedor",
                     r"atencion (al|de) (publico|cliente)", r"digitador", r"digitacion",
                     r"cajer", r"promotor", r"ejecutivo (comercial|de (ventas|cobranza|atencion))"]
+# «Explorar remotos»: las mismas exclusiones salvo "técnico/a" (un "redactor técnico" remoto sí se explora)
+EXPLORAR_EXCLUIR_TITULO = [p for p in B_EXCLUIR_TITULO if "tecnic" not in p]
 B_MIN_SENALES = 3
 SENALES_B = {  # señal -> patrón (se busca en título + descripción)
     "datos": r"\bsql\b|excel (avanzado|intermedio)|tablas dinamicas|reporteria|reportes? (de gestion|gerenciales|ejecutivos)|\bkpis?\b|dashboard|power ?bi|tableau|bases? de datos|analisis de datos",

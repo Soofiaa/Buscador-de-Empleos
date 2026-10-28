@@ -221,7 +221,7 @@ def test_portal_no_abre_detalle_de_ofertas_antiguas(con, monkeypatch):
     cli = Falso({"busqueda": (200, leer("bne_busqueda.json")),
                  "/api/ofertas/publica/": (200, leer("bne_detalle.json"))})
     st = {"encontradas": 0, "relevantes": 0, "sin_chile": 0, "errores": 0, "antiguas": 0}
-    buscar._buscar_portal(con, "bne", st, [], cli, RobotsLibre(), datetime(2026, 1, 1, 12, 0, tzinfo=ZONA), 1)
+    buscar._buscar_portal(con, "bne", st, [], cli, RobotsLibre(), datetime(2026, 12, 31, 12, 0, tzinfo=ZONA), 1)
     assert not [u for u in cli.pedidas if "/api/ofertas/publica/" in u]
     assert con.execute("SELECT COUNT(*) FROM ofertas").fetchone()[0] == 0
 

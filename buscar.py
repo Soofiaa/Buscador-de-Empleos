@@ -14,6 +14,7 @@ import random
 import re
 import sqlite3
 import sys
+import threading
 import time
 import uuid
 from collections import Counter
@@ -45,11 +46,13 @@ from filtros import (ORDEN_MODALIDAD, ORDEN_PRIORIDAD, ZONA, ahora_chile, antigu
                      clasificar, clave_oferta, normalizar, numero, plural, sin_genero, texto)
 
 VERSION_DB = 7
-salida = print   # la página la reemplaza para mostrar el avance de la búsqueda en vivo
+salida = print   # salida por defecto (consola)
+# el servidor pone aquí, en el hilo de cada búsqueda, a quién avisar: así «Buscar» y «Explorar» no se mezclan
+salida_del_hilo = threading.local()
 
 
 def _say(mensaje: str):
-    salida(mensaje)
+    getattr(salida_del_hilo, "fn", salida)(mensaje)
 
 
 PORTALES = {"bne": bne, "trabajando": trabajando, "chiletrabajos": chiletrabajos, "chumi": chumi, "laborum": laborum}
@@ -521,7 +524,9 @@ def ventanas_efectivas(con, ahora: datetime) -> dict:
     """Días de antigüedad por fuente: el configurado, o más si pasaron días sin buscar (días desde el fin de la última
     búsqueda + 1, en fechas de Chile), con tope DIAS_MAXIMOS. Sin búsquedas previas, el configurado."""
     hueco = 0
-    fila = con.execute("SELECT fin FROM corridas ORDER BY id DESC LIMIT 1").fetchone()
+    # «Explorar remotos» no cuenta: no busca en todas las fuentes, así que no cierra el hueco de la búsqueda normal
+    fila = con.execute("SELECT fin FROM corridas WHERE COALESCE(origen, '') != 'explorar' "
+                       "ORDER BY id DESC LIMIT 1").fetchone()
     if fila and fila["fin"]:
         try:
             fin = datetime.strptime(fila["fin"][:10], "%Y-%m-%d").date()
@@ -727,9 +732,11 @@ class _Vigia429(logging.Handler):
 _VIGIA_429 = _Vigia429()
 
 
-def _vigilar_429():
-    """Después de importar jobspy (sus loggers ya tienen el handler de consola, que sigue escribiendo en docker logs)."""
-    _VIGIA_429.frenadas.clear()
+def _vigilar_429(limpiar: bool = True):
+    """Después de importar jobspy (sus loggers ya tienen el handler de consola, que sigue escribiendo en docker logs).
+    «Explorar» no limpia: si la búsqueda normal ya recibió un 429 de Indeed, tampoco insiste."""
+    if limpiar:
+        _VIGIA_429.frenadas.clear()
     for nombre in ("LinkedIn", "Glassdoor", "Indeed"):
         registro = logging.getLogger(f"JobSpy:{nombre}")
         if _VIGIA_429 not in registro.handlers:
@@ -873,6 +880,51 @@ def buscar_ofertas(con) -> int:
     return total
 
 
+def explorar_remotos(con) -> int:
+    """Botón «Explorar remotos»: busca en Indeed los TERMINOS_EXPLORAR como remotos en Chile. Puede correr junto con la
+    búsqueda normal: solo usa Indeed (nada de LinkedIn ni Glassdoor) y no toca la ventana de días de la otra. Devuelve
+    cuántas ofertas nuevas no descartadas guardó (en 'explorar' o, si el cargo resultó ser de tu perfil, en Ofertas)."""
+    from jobspy import scrape_jobs
+    _vigilar_429(limpiar=False)
+    aplicar_exclusiones(con)
+    sitio, terminos = "indeed", config.TERMINOS_EXPLORAR
+    st = {"encontradas": 0, "antiguas": 0, "relevantes": 0, "sin_chile": 0, "errores": 0}
+    tele = telemetria.contador("consulta", [REMOTO])
+    avisos, total = [], 0
+    ahora = ahora_chile()
+    inicio = ahora.strftime("%Y-%m-%d %H:%M")
+    dias = config.MAX_ANTIGUEDAD_DIAS.get(sitio, 1)
+    for n, termino in enumerate(terminos, start=1):
+        if sitio in _VIGIA_429.frenadas:            # ante un 429 no se insiste (ver _Vigia429)
+            st["errores"] += 1
+            avisos.append("⚠ Indeed respondió 429 (demasiadas consultas): se dejó la exploración. No se insiste.")
+            break
+        try:
+            df = scrape_jobs(**consulta(sitio, termino, REMOTO, dias=dias))
+        except Exception as e:
+            st["errores"] += 1
+            telemetria.anotar_excepcion(tele, e, REMOTO)
+            _say(f"  ! [explorar] {termino}: {type(e).__name__}: {e}")
+            continue
+        telemetria.anotar_consulta(tele, 0 if df is None else len(df), REMOTO)
+        df, antiguas = recientes(df if df is not None else pd.DataFrame(), sitio, ahora, dias)
+        filas = procesar(df, f"explorar | {termino} | {REMOTO}", sitio)
+        nuevas = guardar(con, filas)
+        total += nuevas
+        st["encontradas"] += len(df)
+        st["antiguas"] += antiguas
+        st["relevantes"] += nuevas
+        _say(f"  [{n}/{len(terminos)}] {sitio} | {termino}: {plural(len(df), 'encontrada', 'encontradas')}, "
+             f"{plural(nuevas, 'nueva', 'nuevas')}")
+        time.sleep(_pausa_jobspy(sitio))
+    detalle = {"fuentes": [{"fuente": config.NOMBRE_FUENTE[sitio] + " (explorar)", **st, "ventana_dias": dias,
+                            "telemetria": tele}], "ventana_dias": {sitio: dias}, "avisos": avisos}
+    con.execute("INSERT INTO corridas (inicio, fin, nuevas, detalle, origen) VALUES (?, ?, ?, ?, 'explorar')",
+                (inicio, ahora_chile().strftime("%Y-%m-%d %H:%M"), total, json.dumps(detalle, ensure_ascii=False)))
+    con.commit()
+    return total
+
+
 # ------------------------------------------------------------------ datos para la página
 def ofertas_para_pagina(con) -> dict:
     """Lo que muestra la página: ofertas principales (ordenadas), sin descripción, fuera de perfil, sospechosas y
@@ -896,9 +948,12 @@ def ofertas_para_pagina(con) -> dict:
     # "Sin descripción" se trabaja igual que Ofertas (mismos campos y acciones): son ofertas que solo tú puedes revisar
     sin_descripcion = ordenadas([_con_prioridad_mostrada(f) for f in
                                filas(f"SELECT * FROM ofertas WHERE categoria = 'sin_descripcion' AND {otra}")])
+    explorar = ordenadas([_con_prioridad_mostrada(f) for f in
+                          filas(f"SELECT * FROM ofertas WHERE categoria = 'explorar' AND {otra}")])
     datos = {
         "principal": principal,
         "sin_descripcion": sin_descripcion,
+        "explorar": explorar,
         "fuera_perfil": filas(f"SELECT {campos} FROM ofertas WHERE categoria = 'fuera_perfil' AND {otra} "
                               "ORDER BY detectada_en DESC"),
         "sospechosas": filas(f"SELECT {campos} FROM ofertas WHERE categoria = 'sospechosa' AND {otra} "
@@ -919,7 +974,7 @@ def ofertas_para_pagina(con) -> dict:
     historial = {}
     for r in con.execute("SELECT * FROM historial_estados ORDER BY id"):     # por id: nunca por la hora en texto
         historial.setdefault(r["url"], []).append(dict(r))
-    for o in datos["principal"] + datos["sin_descripcion"]:   # las dos se gestionan con estado y fases
+    for o in datos["principal"] + datos["sin_descripcion"] + datos["explorar"]:   # se gestionan con estado y fases
         o["en_fase_desde"] = en_fase_desde(historial.get(o["url"], []), o["estado"], o.get("fase") or "")
     datos["total_descartadas"] = con.execute(
         f"SELECT COUNT(*) FROM ofertas WHERE categoria = 'descartada' AND {otra}").fetchone()[0]

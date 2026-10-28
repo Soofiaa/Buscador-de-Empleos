@@ -876,3 +876,24 @@ quedaron fuera del repositorio (en %TEMP%\jt-sondeo).
   cientos de MB. Va en el próximo despliegue, con su candidata.
 - Página: sección «🔎 Buscar a mano» bajo el botón Buscar, con enlaces a Computrabajo (6 términos,
   `trabajo-de-<término>`, formato comprobado) y a las convocatorias de Empleos Públicos.
+
+## Explorar remotos y freelance (28-10-2026; commit local, SIN desplegar)
+- Botón aparte «🧭 Explorar remotos» (`POST /api/explorar`), que puede correr a la vez que «Buscar empleos». Solo
+  consulta Indeed, con lugar `REMOTO` y los términos de `config.TERMINOS_EXPLORAR` (Producto SaaS, automatización sin
+  código, IA y datos, documentación técnica, producto/UX, remotos no informáticos y 6 de freelance). No usa LinkedIn.
+  La corrida se guarda con `origen='explorar'`, y `ventanas_efectivas` la ignora.
+- Clasificador: categoría nueva `explorar`, tipo `E: Explorar` (`config.ROLES_EXPLORAR`). Solo entran ofertas en
+  Remoto. E es el último recurso: cuando no calza ninguna regla del perfil, o cuando un rol B se descarta por
+  exclusión, plazo fijo o pocas señales. Pasan los filtros de siempre y además `EXPLORAR_EXCLUIR_TITULO`. Las que no
+  traen descripción quedan en `explorar`. El rol freelance que calza con el perfil sigue en Ofertas.
+- Página: barra de progreso propia y pestaña «Explorar remotos», con las mismas acciones que Ofertas. `/api/estado`
+  trae `explorar: {buscando, mensaje, error}`. Los mensajes van por hilo (`buscar.salida_del_hilo`).
+- Base: v7, sin migración. **Pendiente:** candidata en 8766; primera exploración real (revisar el ruido de freelance
+  y los 429 de Indeed con las dos búsquedas a la vez); aprobar si al desplegar se reclasifican las ofertas guardadas
+  hacia `explorar`; despliegue.
+- Límite conocido: con dos corridas a la vez, `corrida_de` puede asignar una oferta a la corrida equivocada (las
+  ventanas de tiempo se cruzan).
+- No se hizo: plataformas freelance (Workana y Upwork no tienen API pública). Idea para acelerar la búsqueda normal,
+  sin aprobar: un hilo por fuente con las mismas pausas por sitio.
+- También: `test_portal_no_abre_detalle_de_ofertas_antiguas` fallaba desde `013a59b` (el fixture nuevo de BNE es de
+  sep-oct 2026 y el «hoy» de la prueba era 01-01-2026). Se movió ese «hoy» al 31-12-2026.
