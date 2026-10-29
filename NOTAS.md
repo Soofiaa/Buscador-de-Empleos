@@ -3,7 +3,13 @@
 ## Estado actual (se actualiza en cada despliegue; leer al empezar cada sesión)
 
 ### Producción y base
-- **Despliegue de «Explorar remotos» con freelance (28-10-2026; vigente):** commits `1d69625`, `b1c6a90`, `469c641`,
+- **Despliegue de «honorarios» y botón no bloqueado (28-10-2026, ~21:00; vigente):** commit `d2d89e2`. Imagen
+  `job-tracker-jobtracker:latest` = `sha256:835dc75da03e424ef56ae539f33442d95bd9d6159875f46988325bfe1f32220c`, healthy
+  en `127.0.0.1:8765`. Imagen anterior: `job-tracker:pre-honorarios-20261028` (= `sha256:eac2d8f6…`, la de Explorar).
+  Referencia `ofertas_pre_honorarios_20261028.db`, sha256 `f5a4a183…` (igual a la de Explorar), integrity_check ok;
+  salida al detener 0. Huellas OK; HTTP igual que en Explorar; reversión probada en copia (8767); respaldos anteriores
+  intactos. Sin candidata (cambio chico) y sin reclasificar.
+- **Despliegue de «Explorar remotos» con freelance (28-10-2026; anterior):** commits `1d69625`, `b1c6a90`, `469c641`,
   `958a558` (ver «Explorar remotos y freelance» al final). Imagen `job-tracker-jobtracker:latest` =
   `sha256:eac2d8f670bff3d8ecd1b79c32738fe94db00bb3123a386ae1b65ae651096650`, healthy en `127.0.0.1:8765`. Imagen
   anterior: `job-tracker:pre-explorar-20261028` (= `sha256:c063782…`). Referencia `ofertas_pre_explorar_20261028.db`

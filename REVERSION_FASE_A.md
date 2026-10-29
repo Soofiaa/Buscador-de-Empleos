@@ -712,3 +712,27 @@ quedan en la base pero la página anterior no las muestra. Las búsquedas guarda
 pierden ofertas ni estados. No hace falta restaurar la base.
 Reversión probada en copia (volumen temporal, 8767): healthy, GET / 200 con la página anterior y huellas idénticas a
 la referencia.
+
+## «Honorarios» solo como forma de contrato y botón que no queda bloqueado (28-10-2026)
+
+Commit d2d89e2: la regla freelance de Explorar ya no toma «Pago de Honorarios» ni «Honorarios Médicos» (sí «a
+honorario(s)»), y en `servidor._correr` la conexión se abre dentro del try, así que si la base no abre el botón no
+queda en «buscando». Sin candidata (cambio chico, aprobado por Sofia). Base sin cambios, sin reclasificar.
+Imagen anterior: job-tracker:pre-honorarios-20261028 (sha256:eac2d8f670bff3d8ecd1b79c32738fe94db00bb3123a386ae1b65ae651096650,
+la de Explorar remotos). Imagen desplegada: job-tracker-jobtracker:latest = sha256:835dc75da03e424ef56ae539f33442d95bd9d6159875f46988325bfe1f32220c.
+Referencia: ofertas_pre_honorarios_20261028.db (volumen y C:\Users\sofia\Respaldos\job-tracker-referencias\), sha256
+f5a4a183942625517b6ae2bb76c2c4745913104087d89fe4e63499c7c4e094bd (igual a la de Explorar: la base no cambió entre
+ambos despliegues), integrity_check ok. Salida al detener: 0. Huellas antes y después: RESULTADO OK.
+
+Para volver atrás:
+
+```
+docker compose stop jobtracker
+docker tag job-tracker:pre-honorarios-20261028 job-tracker-jobtracker:latest
+docker compose up -d --no-build
+```
+
+**Qué se pierde al volver:** «Pago de Honorarios Médicos» y similares vuelven a entrar en Explorar como freelance, y
+vuelve el caso raro del botón bloqueado si la base no abre. No se pierden ofertas ni estados.
+Reversión probada en copia (volumen temporal, 8767): healthy, GET / 200 con la regla anterior y huellas idénticas a
+la referencia.
