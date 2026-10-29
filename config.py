@@ -37,7 +37,21 @@ TERMINOS_B = [  # roles puente (no TI)
 # con la ubicación escrita ("Santiago, Chile"). Es un rodeo: ver probar_fuentes.py.
 # Google está desactivado: JobSpy recibe "Google returned no job data" (probado 2026-10-10).
 # Para reintentarlo, agrégalo a la lista: SITIOS = ["indeed", "glassdoor", "google"]
+# Lista optimizada para LinkedIn: solo los puestos que históricamente traen resultados
+TERMINOS_LINKEDIN = [
+    "analista funcional", "QA", "tester", "analista de sistemas",
+    "desarrollador python", "desarrollador backend", "analista de procesos",
+    "datos maestros", "analista de datos junior", "analista de datos jr",
+    "informático junior", "informático jr",
+    "data engineer junior", "data engineer jr", "analista BI junior", "analista BI jr",
+    "devops junior", "devops jr",
+    "analista de calidad", "analista de mejora",
+    "analista de requerimientos junior", "analista de requerimientos jr",
+    "soporte TI", "help desk", "business analyst", "datos maestros"
+]
+
 SITIOS = ["indeed", "glassdoor", "getonboard", "himalayas", "jobicy", "remotefirstjobs", "bne", "trabajando", "chiletrabajos", "chumi", "laborum", "linkedin", "jooble", "weworkremotely", "arbeitnow"]
+
 # himalayas / jobicy: APIs públicas de empleo remoto (ver himalayas.py y jobicy.py). Traen el listado reciente en una
 # sola solicitud por corrida; el clasificador filtra por rol. Atribución: enlace a la fuente y postulación a la oferta.
 # chumi y laborum: verificados contra el sitio real el 2026-10-20 (ver chumi.py y laborum.py; Laborum usa Playwright).
@@ -56,6 +70,16 @@ TERMINOS_SECUNDARIOS = [
     "analista de calidad", "analista de mejora",
     "analista de requerimientos junior", "analista de requerimientos jr",
     "soporte TI", "help desk",
+]
+
+# Puestos que efectivamente devuelven resultados en LinkedIn, para reducir el tiempo de búsqueda
+TERMINOS_LINKEDIN = [
+    "analista funcional", "QA", "testing", "tester", "analista de sistemas",
+    "desarrollador python", "desarrollador backend", "analista de procesos",
+    "analista de datos junior", "informático junior",
+    "data engineer junior", "analista BI junior",
+    "devops junior",
+    "analista de calidad", "analista de requerimientos junior",
 ]
 # ---- Explorar remotos (botón aparte): roles fuera de tu perfil TI que podrían calzar, SOLO remotos ----
 # Indeed los busca como "<término> remoto" en Chile (Himalayas y Jobicy, con TERMINOS_EXPLORAR_EN). Las fuentes remotas
@@ -152,7 +176,7 @@ RESULTADOS_POR_BUSQUEDA = 30
 PAUSA_ENTRE_BUSQUEDAS = 1.5       # segundos, para no gatillar bloqueos
 # Pausa aleatoria (mínimo, máximo en segundos) entre consultas JobSpy de las fuentes que limitan más: LinkedIn
 # respondió 429 el 19-10 con 1,5 s. Si igual responde 429, esa fuente se deja por el resto de la corrida.
-PAUSA_JOBSPY = {"linkedin": (6.0, 10.0), "glassdoor": (3.0, 5.0)}
+PAUSA_JOBSPY = {"linkedin": (4.0, 6.0), "glassdoor": (3.0, 5.0)}
 # Fuentes que se reparten a lo largo de la corrida, intercaladas con las demás (buscar._intercalar), en vez de
 # pedir todas sus consultas seguidas: LinkedIn respondió 429 en las corridas 55-57.
 DISTANCIAR = ("linkedin",)

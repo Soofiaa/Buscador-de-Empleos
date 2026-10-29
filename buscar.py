@@ -779,8 +779,10 @@ def buscar_ofertas(con) -> int:
 
     lugares = list(config.UBICACIONES) + ([REMOTO] if config.INCLUIR_REMOTO else [])
     terminos_indeed = leer_puestos(con)     # la lista que Sofia editó, o la de config
+    terminos_linkedin = config.TERMINOS_LINKEDIN
     plan = [(s, t, l) for s in config.SITIOS if s not in PORTALES
             for t in (terminos_indeed if s == "indeed"
+                      else terminos_linkedin if s == "linkedin"
                       else [""] if s in APIS_REMOTAS else config.TERMINOS_SECUNDARIOS)
             for l in (["Chile"] if s in APIS_REMOTAS else lugares)]   # las APIs no usan ubicación ni término
     # LinkedIn no va en ráfaga: sus consultas se intercalan con los turnos de las demás fuentes (ver _intercalar)

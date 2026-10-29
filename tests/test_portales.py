@@ -479,7 +479,7 @@ def test_jobspy_pausa_por_fuente_y_se_detiene_ante_429(con, monkeypatch):
     monkeypatch.setattr(buscar, "_say", lambda m: None)
     buscar.buscar_ofertas(con)
     assert llamadas == ["linkedin", "glassdoor", "glassdoor"]        # tras el 429, LinkedIn no se vuelve a consultar
-    assert 6.0 <= pausas[0] <= 10.0 and all(3.0 <= p <= 5.0 for p in pausas[1:])
+    assert 4.0 <= pausas[0] <= 6.0 and all(3.0 <= p <= 5.0 for p in pausas[1:])
     detalle = json.loads(con.execute("SELECT detalle FROM corridas").fetchone()[0])
     assert any("LinkedIn respondió 429" in a for a in detalle["avisos"])
     assert next(f for f in detalle["fuentes"] if f["fuente"] == "LinkedIn")["errores"] == 1
