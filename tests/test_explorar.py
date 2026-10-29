@@ -32,6 +32,8 @@ def oferta(titulo, descripcion=REMOTO, **kw):
     ("Technical Writer", "documentación técnica", "Alta"),
     ("Diseñador de presentaciones freelance", "freelance / por proyecto", "Baja"),
     ("Redactor técnico freelance", "documentación técnica", "Alta"),            # gana el rol, no "freelance"
+    ("Diseñador de presentaciones a honorarios", "freelance / por proyecto", "Baja"),
+    ("Diseñador de presentaciones a honorario", "freelance / por proyecto", "Baja"),
 ])
 def test_rol_remoto_fuera_de_perfil_va_a_explorar(titulo, etiqueta, prioridad):
     c = clasificar(oferta(titulo))
@@ -46,6 +48,9 @@ def test_explorar_exige_remoto_y_pasa_los_mismos_filtros():
     assert clasificar(oferta("Ejecutivo de ventas remoto"))["categoria"] == "descartada"          # no es rol a explorar
     assert clasificar(oferta("Asistente virtual ventas"))["razon"] == "explorar: ventas / call center / atención"
     assert clasificar(oferta("Practicante asistente virtual"))["razon"] == "práctica / estudiante"
+    # "honorarios" como tema del puesto, no como forma de contrato
+    for titulo in ("Ejecutivo Proceso Pago Honorarios Médicos RedSalud", "Analista de Pago de Honorarios"):
+        assert clasificar(oferta(titulo))["categoria"] != "explorar"
 
 
 def test_los_roles_del_perfil_no_cambian():
@@ -138,12 +143,13 @@ def test_buscar_y_explorar_corren_a_la_vez_cada_una_con_su_avance(tmp_path):
             liberar.wait(5)
             return n
         return fn
+    buscar.conectar(str(tmp_path / "t.db")).close()   # base ya creada y en WAL, como la real
     app = servidor.Aplicacion(str(tmp_path / "t.db"), falsa("buscar", 3), explorar_fn=falsa("explorar", 1))
     assert app.iniciar_busqueda("buscar") and app.iniciar_busqueda("explorar")
     assert not app.iniciar_busqueda("explorar") and not app.iniciar_busqueda("buscar")   # cada una, una a la vez
     for _ in range(100):
         e = app.snapshot()
-        if e["mensaje"] and e["explorar"]["mensaje"].startswith("avance"):
+        if e["mensaje"].startswith("avance") and e["explorar"]["mensaje"].startswith("avance"):
             break
         threading.Event().wait(0.02)
     assert e["mensaje"] == "avance de buscar" and e["explorar"]["mensaje"] == "avance de explorar"
@@ -156,6 +162,16 @@ def test_buscar_y_explorar_corren_a_la_vez_cada_una_con_su_avance(tmp_path):
     assert e["mensaje"] == "Búsqueda terminada: 3 ofertas relevantes nuevas."
     assert e["explorar"]["mensaje"] == "Exploración terminada: 1 oferta nueva."
     assert buscar.salida is print
+
+
+def test_si_la_base_no_abre_el_boton_no_queda_bloqueado(tmp_path, monkeypatch):
+    import sqlite3
+    app = servidor.Aplicacion(str(tmp_path / "t.db"), lambda con: 0, explorar_fn=lambda con: 0)
+    monkeypatch.setattr(app, "conexion", lambda: (_ for _ in ()).throw(sqlite3.OperationalError("database is locked")))
+    assert app.iniciar_busqueda("explorar")
+    app.hilo.join(5)
+    e = app.trabajos["explorar"][0]       # snapshot() también abre la base
+    assert not e["buscando"] and e["error"] == "OperationalError: database is locked"
 
 
 def test_la_pagina_tiene_el_boton_y_la_lista_explorar():

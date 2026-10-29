@@ -224,16 +224,18 @@ class Aplicacion:
 
     def _correr(self, tipo: str = "buscar"):
         estado, fn, fin, (uno, varios) = self.trabajos[tipo]
-        con = self.conexion()
         # solo en este hilo: el avance de una búsqueda no pisa el de la otra
         buscar.salida_del_hilo.fn = lambda m: self._set(estado, mensaje=str(m).strip().splitlines()[-1] if str(m).strip() else "")
+        con = None
         try:
+            con = self.conexion()             # dentro del try: si la base no abre, tampoco queda el botón bloqueado
             nuevas = fn(con)
             self._set(estado, buscando=False, error="", mensaje=fin + buscar.plural(nuevas, uno, varios) + ".")
         except Exception as ex:               # un fallo no deja el botón bloqueado
             self._set(estado, buscando=False, error="%s: %s" % (type(ex).__name__, ex))
         finally:
-            con.close()
+            if con is not None:
+                con.close()
 
 
 def crear_servidor(app: Aplicacion, puerto: int = None, host: str = None) -> ThreadingHTTPServer:

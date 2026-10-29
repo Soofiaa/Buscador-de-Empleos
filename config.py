@@ -95,7 +95,7 @@ ROLES_EXPLORAR = [
     ("traducción / transcripción", r"traduct|translat|transcri|locali[sz]a|subtitul", "Baja"),
     ("moderación de contenido", r"moderador|content moderat|trust (and|&) safety", "Baja"),
     # cualquier cargo freelance que no reconozca otra regla (un "Desarrollador Python freelance" sigue yendo a Ofertas)
-    ("freelance / por proyecto", r"freelanc|independiente|por proyecto|honorarios", "Baja"),
+    ("freelance / por proyecto", r"freelanc|independiente|por proyecto|(?<!pago )(?<!pago de )honorarios?(?! medic)", "Baja"),
 ]
 EXPLORAR_TIPO = "E: Explorar"
 
