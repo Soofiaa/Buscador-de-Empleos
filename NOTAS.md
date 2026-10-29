@@ -3,7 +3,14 @@
 ## Estado actual (se actualiza en cada despliegue; leer al empezar cada sesión)
 
 ### Producción y base
-- **Despliegue de «honorarios» y botón no bloqueado (28-10-2026, ~21:00; vigente):** commit `d2d89e2`. Imagen
+- **Despliegue de optimización de LinkedIn (28-10-2026, ~21:15; vigente):** commit `3e94443`. Imagen
+  `job-tracker-jobtracker:latest` = `sha256:395825fbd2a5104e039fe76465957a75ae037dac60e7e0e4552873d6b355989c`, healthy
+  en `127.0.0.1:8765`. Imagen anterior: `job-tracker:pre-linkedin-opt-20261028` (= `sha256:835dc75d…`).
+  Referencia `ofertas_pre_linkedin_opt_20261028.db`, sha256 `018ef42f…`, integrity_check ok;
+  salida al detener 0. Huellas OK; HTTP igual; reversión probada en copia (8767); respaldos anteriores
+  intactos. Sin candidata y sin reclasificar. La búsqueda completa baja de ~38 min a unos 8–10 min gracias a la lista corta
+  de puestos (`TERMINOS_LINKEDIN`) y la pausa ajustada (4–6 s).
+- **Despliegue de «honorarios» y botón no bloqueado (28-10-2026, ~21:00; anterior):** commit `d2d89e2`. Imagen
   `job-tracker-jobtracker:latest` = `sha256:835dc75da03e424ef56ae539f33442d95bd9d6159875f46988325bfe1f32220c`, healthy
   en `127.0.0.1:8765`. Imagen anterior: `job-tracker:pre-honorarios-20261028` (= `sha256:eac2d8f6…`, la de Explorar).
   Referencia `ofertas_pre_honorarios_20261028.db`, sha256 `f5a4a183…` (igual a la de Explorar), integrity_check ok;

@@ -736,3 +736,21 @@ docker compose up -d --no-build
 vuelve el caso raro del botón bloqueado si la base no abre. No se pierden ofertas ni estados.
 Reversión probada en copia (volumen temporal, 8767): healthy, GET / 200 con la regla anterior y huellas idénticas a
 la referencia.
+
+## Optimización de LinkedIn (28-10-2026)
+
+Commit 3e94443: lista corta de puestos en LinkedIn (`config.TERMINOS_LINKEDIN`, con los 15 puestos que efectivamente devuelven resultados) y pausa aleatoria ajustada a 4–6 s (`config.PAUSA_JOBSPY`). La búsqueda completa pasa de ~38 min a unos 8–10 min. Base sin cambios, sin reclasificar.
+Imagen anterior: job-tracker:pre-linkedin-opt-20261028 (sha256:835dc75da03e424ef56ae539f33442d95bd9d6159875f46988325bfe1f32220c, la del despliegue anterior). Imagen desplegada: job-tracker-jobtracker:latest = sha256:395825fbd2a5104e039fe76465957a75ae037dac60e7e0e4552873d6b355989c.
+Referencia: ofertas_pre_linkedin_opt_20261028.db (volumen y C:\Users\sofia\Respaldos\job-tracker-referencias\), sha256 018ef42fe2d8a86fce64937eec205246fe092c14ed5eb286637ca6d619f44077, integrity_check ok. Salida al detener: 0. Huellas antes y después: RESULTADO OK.
+
+Para volver atrás:
+
+```
+docker compose stop jobtracker
+docker tag job-tracker:pre-linkedin-opt-20261028 job-tracker-jobtracker:latest
+docker compose up -d --no-build
+```
+
+**Qué se pierde al volver:** vuelve la búsqueda larga de LinkedIn (~38 min por corrida). No se pierden ofertas ni estados.
+Reversión probada en copia (volumen temporal, 8767): healthy, GET / 200 y huellas idénticas a la referencia.
+
