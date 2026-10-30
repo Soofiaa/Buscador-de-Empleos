@@ -799,3 +799,21 @@ docker compose up -d --no-build
 
 **Qué se pierde al volver:** las ofertas nuevas de LinkedIn vuelven a llegar sin descripción (a «Sin texto»), y el asistente de IA vuelve al modelo anterior. No se pierden ofertas ni estados.
 Reversión probada en copia (volumen temporal, 8767): healthy, GET / 200, huellas idénticas a la referencia y LinkedIn sin `fetch_description`.
+
+## Descripción de las 14 postuladas de LinkedIn (30-10-2026)
+
+Commit 33653be: `rellenar_linkedin.py` (una vez) trajo la descripción de las 14 ofertas de LinkedIn postuladas que estaban en «Sin texto» y la guardó solo en `raw.description`, sin reclasificar: categoría, estado, fase y fechas no cambian. Las 283 descartadas no se tocaron.
+Imagen sin cambios: job-tracker:pre-rellenar-linkedin = job-tracker-jobtracker:latest = sha256:6ed8d23ebf224c057d43d932f09d41e283eae7ffef1a048f69b1f2d36e0daddb (el script se montó solo para esa corrida).
+Referencia: ofertas_pre_rellenar_linkedin_20261030.db (volumen y C:\Users\sofia\Respaldos\job-tracker-referencias\), sha256 b7ed580bb89c23ee4fd69df528a1536495f618ade87663d652bd58932757b355, integrity_check ok. Salida al detener: 0.
+Resultado: hechas 14, fallidas 0. Huellas: solo `ofertas` distinta (89545e93… → b091d8ea4c9ab02e8786d74a34129079598db9e76d38d4b6c0f0db82f61fbecc), esperado; el resto idéntico (v7, 44 postuladas, 6 POR VERIFICAR). Comparación fila a fila: solo cambia `raw.description` en esas 14.
+
+Para volver atrás (restaura la base con la API de backup de SQLite, sin red):
+
+```
+docker compose stop jobtracker
+docker run --rm --network none -v job-tracker_jt_datos:/datos job-tracker-jobtracker:latest python -c "import sqlite3; s=sqlite3.connect('file:/datos/ofertas_pre_rellenar_linkedin_20261030.db?mode=ro', uri=True); d=sqlite3.connect('/datos/ofertas.db'); s.backup(d); print(d.execute('PRAGMA integrity_check').fetchone()[0])"
+docker compose up -d --no-build
+```
+
+**Qué se pierde al volver:** las 14 postuladas vuelven a quedar sin texto, y cualquier cambio hecho en la base después del 30-10-2026 (estados, notas, búsquedas nuevas). Hacerlo solo si no hubo cambios desde entonces.
+Reversión probada en copia (volumen temporal, 8767): healthy, GET / 200, huellas idénticas a la referencia.

@@ -17,6 +17,10 @@ manda lo más reciente y corrige la nota.
   de Groq `qwen/qwen3.8-27b`; se quitó la regla «Sin push». Sin cambios de esquema ni reclasificación.
 - Línea base vigente (30-10-2026): v7; 7125 ofertas, 82 corridas, 460 filas en `historial_estados`, 6 ajustes, 27
   `terminos_no_disponibles`; 44 postuladas; 6 POR VERIFICAR. Salida al detener: `0`.
+- **Cambio de base (30-10-2026, commit `33653be`):** `rellenar_linkedin.py` guardó la descripción en las 14 postuladas
+  de LinkedIn de «Sin texto», solo en `raw.description`, sin reclasificar (siguen en `sin_descripcion`). Huella de
+  `ofertas` ahora `b091d8ea…`; el resto de la línea base igual. Referencia más reciente:
+  `ofertas_pre_rellenar_linkedin_20261030.db` (mismo sha256 que la anterior). Reversión en `REVERSION_FASE_A.md`.
 - Respaldos: cualquier cambio de base se hace con referencia sha256, huellas antes y después, y reversión probada en
   copia (puerto 8767), según el skill `/desplegar`.
 
