@@ -817,3 +817,20 @@ docker compose up -d --no-build
 
 **Qué se pierde al volver:** las 14 postuladas vuelven a quedar sin texto, y cualquier cambio hecho en la base después del 30-10-2026 (estados, notas, búsquedas nuevas). Hacerlo solo si no hubo cambios desde entonces.
 Reversión probada en copia (volumen temporal, 8767): healthy, GET / 200, huellas idénticas a la referencia.
+
+## Textos de «Sin texto» (30-10-2026)
+
+Commit 7042206: la página y TUTORIAL.md ya no dicen que LinkedIn nunca trae descripción (ahora: «a veces pasa con LinkedIn, Glassdoor o Jooble»). Solo textos; base sin cambios, sin reclasificar.
+Imagen anterior: job-tracker:pre-textos-sintexto (sha256:6ed8d23ebf224c057d43d932f09d41e283eae7ffef1a048f69b1f2d36e0daddb). Imagen desplegada: job-tracker-jobtracker:latest = sha256:6d225a2500ce12ec49a064bda0decc682baec8d0a9b1f6634ce4d1039d9e976d.
+Referencia: ofertas_pre_textos_sintexto_20261030.db (volumen y C:\Users\sofia\Respaldos\job-tracker-referencias\), sha256 6b498bdd64ec816f857325a8a0237ada8c8246b858b505777d3b4d21bc6c923c, integrity_check ok. Salida al detener: 0. Huellas antes y después: RESULTADO OK.
+
+Para volver atrás:
+
+```
+docker compose stop jobtracker
+docker tag job-tracker:pre-textos-sintexto job-tracker-jobtracker:latest
+docker compose up -d --no-build
+```
+
+**Qué se pierde al volver:** vuelven los textos que dicen que LinkedIn llega sin descripción. No se pierden ofertas ni estados.
+Reversión probada en copia (volumen temporal, 8767): healthy, GET / 200, texto anterior de vuelta y huellas idénticas a la referencia.

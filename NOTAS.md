@@ -7,20 +7,21 @@ manda lo más reciente y corrige la nota.
 ## Estado actual (se actualiza en cada despliegue; leer al empezar cada sesión)
 
 ### Producción y base
-- **Vigente: descripción de LinkedIn (30-10-2026)**, commits `2492207`, `f348b48` (rama `feat/unificar-ofertas`, con
-  push a GitHub). Imagen `job-tracker-jobtracker:latest` =
-  `sha256:6ed8d23ebf224c057d43d932f09d41e283eae7ffef1a048f69b1f2d36e0daddb`, healthy en `127.0.0.1:8765`.
-- Imagen anterior para volver atrás: `job-tracker:pre-linkedin-desc` (`sha256:387c32ea…`).
-- Referencia: `ofertas_pre_linkedindesc_20261030.db`, sha256 `b7ed580bb89c23ee4fd69df528a1536495f618ade87663d652bd58932757b355`,
+- **Vigente: textos de «Sin texto» (30-10-2026)**, commit `7042206` sobre la descripción de LinkedIn (`2492207`,
+  `f348b48`; rama `feat/unificar-ofertas`, con push). Imagen `job-tracker-jobtracker:latest` =
+  `sha256:6d225a2500ce12ec49a064bda0decc682baec8d0a9b1f6634ce4d1039d9e976d`, healthy en `127.0.0.1:8765`.
+- Imagen anterior para volver atrás: `job-tracker:pre-textos-sintexto` (`sha256:6ed8d23e…`).
+- Referencia: `ofertas_pre_textos_sintexto_20261030.db`, sha256 `6b498bdd64ec816f857325a8a0237ada8c8246b858b505777d3b4d21bc6c923c`,
   integrity_check ok. Procedimiento de reversión en `REVERSION_FASE_A.md`.
 - Cambios: LinkedIn trae la descripción con JobSpy (`fetch_description`, decisión de Sofia pese a robots.txt); modelo
-  de Groq `qwen/qwen3.8-27b`; se quitó la regla «Sin push». Sin cambios de esquema ni reclasificación.
+  de Groq `qwen/qwen3.8-27b`; se quitó la regla «Sin push»; la página y el tutorial ya no dicen que LinkedIn nunca
+  trae descripción. Sin cambios de esquema ni reclasificación.
 - Línea base vigente (30-10-2026): v7; 7125 ofertas, 82 corridas, 460 filas en `historial_estados`, 6 ajustes, 27
   `terminos_no_disponibles`; 44 postuladas; 6 POR VERIFICAR. Salida al detener: `0`.
 - **Cambio de base (30-10-2026, commit `33653be`):** `rellenar_linkedin.py` guardó la descripción en las 14 postuladas
   de LinkedIn de «Sin texto», solo en `raw.description`, sin reclasificar (siguen en `sin_descripcion`). Huella de
-  `ofertas` ahora `b091d8ea…`; el resto de la línea base igual. Referencia más reciente:
-  `ofertas_pre_rellenar_linkedin_20261030.db` (mismo sha256 que la anterior). Reversión en `REVERSION_FASE_A.md`.
+  `ofertas` ahora `b091d8ea…`; el resto de la línea base igual. Referencia de ese cambio:
+  `ofertas_pre_rellenar_linkedin_20261030.db`. Reversión en `REVERSION_FASE_A.md`.
 - Respaldos: cualquier cambio de base se hace con referencia sha256, huellas antes y después, y reversión probada en
   copia (puerto 8767), según el skill `/desplegar`.
 
