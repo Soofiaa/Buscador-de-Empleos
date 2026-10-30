@@ -22,7 +22,8 @@ Aplicación local en Python + SQLite con interfaz web integrada (`web/pagina.htm
 - `buscar.py`, `filtros.py`, `red.py`: Motor central de base de datos, lógica de negocio, clasificación y conexión HTTP con manejo de `robots.txt`.
 - `*.py` (módulos específicos): Conectores para cada fuente (`jooble.py`, `weworkremotely.py`, `arbeitnow.py`, `bne.py`, `trabajando.py`, etc.).
 - `tests/`: Suite completa de pruebas unitarias y de integración (más de 850 pruebas).
-- `NOTAS.md`: decisiones, hallazgos y estado de producción. Leer al empezar cada sesión.
+- `NOTAS.md`: estado de producción, línea base y pendientes. Leer al empezar cada sesión.
+- `NOTAS_HISTORIAL.md`: historial completo de despliegues, decisiones y hallazgos.
 - `TUTORIAL.md`: guía de uso de la aplicación.
 - `.claude/skills/desplegar/SKILL.md`: procedimiento estándar para desplegar a producción.
 
