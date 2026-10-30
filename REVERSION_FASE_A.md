@@ -1,3 +1,31 @@
+# Reversión de mejoras de sesión (NOTAS, avisos, ruta base)
+
+Despliegue del 29-10-2026, commits `b723f1f`, `cdf5c0c`, `72ca06a` (rama `feat/unificar-ofertas`). No cambia el esquema ni reclasifica ofertas guardadas. Solo cambia: NOTAS.md compacto, avisos de fuentes sin clave o en 0 en la página, y ruta por defecto de base local fuera de OneDrive.
+
+| Pieza | Valor |
+|---|---|
+| Imagen desplegada | `job-tracker-jobtracker:latest`, `sha256:1f7f7e89d394c120b926b17e93014ff4c4c85405efa5f47dfc2e420862ec7ce7` |
+| Imagen anterior | `job-tracker:pre-fase4-20261029`, `sha256:14c69db1c68944dc2b50854df931ffd70bf2fe7cfc1918832edd15ed37302237` |
+| Base de referencia | `ofertas_pre_fase4_20261029.db`, en el volumen y en `C:\Users\sofia\Respaldos\job-tracker-referencias\` |
+| SHA-256 de la referencia | `a8bddcf343d6479a3a19762602598990d32fe13fe89e5991511ecdbfb09c54ef` en ambas copias; `integrity_check=ok` |
+| Línea base | SQLite v7; 6770 ofertas, 75 corridas, 421 filas en `historial_estados`, 44 postuladas y 6 POR VERIFICAR |
+| Salida al detener | `0` |
+
+## Procedimiento
+
+No restaurar la base: este despliegue no la modificó. Para volver a la imagen anterior:
+
+```powershell
+docker compose stop jobtracker
+docker tag job-tracker:pre-fase4-20261029 job-tracker-jobtracker:latest
+docker compose up -d --no-build
+docker inspect jobtracker --format "{{.State.Health.Status}}"
+```
+
+Comprobar GET `/api/estado` y comparar las huellas de `/datos/ofertas.db` con la referencia de la tabla. La base v7 debe conservar todos sus datos, estados, notas y postulaciones. Se pierde: NOTAS_HISTORIAL.md, los avisos nuevos en la página, y la ruta local fuera de OneDrive (vuelve a `ofertas.db` relativo). Docker no cambia (`JT_DB` fijado).
+
+---
+
 # Reversión del filtro LinkedIn Senior/Experto (volver a Mid-Senior)
 
 Despliegue del 16-10-2026, commit local `eb3a33e`. No cambia el esquema ni reclasifica ofertas guardadas.

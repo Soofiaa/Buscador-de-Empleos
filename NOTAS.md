@@ -7,16 +7,16 @@ manda lo más reciente y corrige la nota.
 ## Estado actual (se actualiza en cada despliegue; leer al empezar cada sesión)
 
 ### Producción y base
-- **Vigente: despliegue de optimización de LinkedIn (28-10-2026, ~21:15)**, commit `3e94443`. Imagen
-  `job-tracker-jobtracker:latest` = `sha256:395825fbd2a5104e039fe76465957a75ae037dac60e7e0e4552873d6b355989c`, healthy
-  en `127.0.0.1:8765`.
-- Imagen anterior para volver atrás: `job-tracker:pre-linkedin-opt-20261028` (`sha256:835dc75d…`).
-- Referencia: `ofertas_pre_linkedin_opt_20261028.db`, sha256 `018ef42f…`, integrity_check ok. Procedimiento de
-  reversión en `REVERSION_FASE_A.md`.
-- Cambio: la lista corta de puestos (`TERMINOS_LINKEDIN`) y la pausa de 4–6 s bajan la búsqueda completa de ~38 min a
-  unos 8–10 min. Sin reclasificar las ofertas guardadas.
-- Última línea base medida (28-10-2026, despliegue de «Explorar remotos»): v7; 6222 ofertas, 63 búsquedas, 385 filas
-  en `historial_estados`, 6 ajustes, 27 `terminos_no_disponibles`; 42 postuladas; 6 POR VERIFICAR.
+- **Vigente: despliegue de mejoras de sesión (29-10-2026)**, commits `b723f1f`, `cdf5c0c`, `72ca06a` (rama
+  `feat/unificar-ofertas`). Imagen `job-tracker-jobtracker:latest` =
+  `sha256:1f7f7e89d394c120b926b17e93014ff4c4c85405efa5f47dfc2e420862ec7ce7`, healthy en `127.0.0.1:8765`.
+- Imagen anterior para volver atrás: `job-tracker:pre-fase4-20261029` (`sha256:14c69db1…`).
+- Referencia: `ofertas_pre_fase4_20261029.db`, sha256 `a8bddcf343d6479a3a19762602598990d32fe13fe89e5991511ecdbfb09c54ef`,
+  integrity_check ok. Procedimiento de reversión en `REVERSION_FASE_A.md`.
+- Cambios: NOTAS.md compacto (historial en NOTAS_HISTORIAL.md); avisos de Jooble sin clave y fuentes en 0 llegan a la
+  página; base local por defecto fuera de OneDrive. Sin cambios de esquema ni reclasificación.
+- Línea base vigente (29-10-2026): v7; 6770 ofertas, 75 corridas, 421 filas en `historial_estados`, 6 ajustes, 27
+  `terminos_no_disponibles`; 44 postuladas; 6 POR VERIFICAR. Salida al detener: `0`.
 - Respaldos: cualquier cambio de base se hace con referencia sha256, huellas antes y después, y reversión probada en
   copia (puerto 8767), según el skill `/desplegar`.
 
