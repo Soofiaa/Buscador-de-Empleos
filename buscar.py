@@ -801,6 +801,11 @@ def buscar_ofertas(con) -> int:
     if ampliadas:
         avisos.append(f"Pasaron días sin buscar: ventana ampliada a {plural(max(ventanas.values()), 'día', 'días')} "
                       f"({', '.join(ampliadas)}) para no perder ofertas de ese hueco.")
+    # una API sin clave (Jooble sin JOOBLE_KEY) no se consulta: se dice por qué, no que «no hubo resultados»
+    sin_clave = {s for s in APIS_REMOTAS if hasattr(APIS_REMOTAS[s], "disponible") and not APIS_REMOTAS[s].disponible()}
+    for s in sorted(sin_clave & set(config.SITIOS)):
+        avisos.append(f"{config.NOMBRE_FUENTE[s]} no se consultó: falta la clave ({s.upper()}_KEY) en el entorno.")
+    plan = [p for p in plan if p[0] not in sin_clave]
     frenadas = set()
     for n, (sitio, termino, lugar) in enumerate(plan, start=1):
         etiqueta = f"{termino} | {lugar}"
@@ -861,11 +866,14 @@ def buscar_ofertas(con) -> int:
 
     _say("\nPor fuente (encontradas / relevantes nuevas / descartadas por no ser Chile / errores / antiguas omitidas):")
     for sitio, st in stats.items():
+        if sitio in sin_clave:
+            continue
         aviso = ""
         if st["encontradas"] and st["sin_chile"] == st["encontradas"]:
             aviso = "   <- ninguna reconocida como Chile: esta fuente no resuelve bien la ubicación"
         elif st["encontradas"] == 0 and st["errores"] == 0:
             aviso = "   <- sin resultados (¿bloqueo?)"
+            avisos.append(f"{config.NOMBRE_FUENTE[sitio]}: sin resultados en esta corrida (¿bloqueo o términos sin oferta?).")
         _say(f"  {config.NOMBRE_FUENTE[sitio]}: {st['encontradas']} / {st['relevantes']} / "
               f"{st['sin_chile']} / {st['errores']} / {st['antiguas']}{aviso}")
     for a in avisos:

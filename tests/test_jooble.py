@@ -57,6 +57,26 @@ def test_sin_clave_no_consulta_y_devuelve_vacio(monkeypatch):
     assert jooble.disponible() is False
 
 
+def test_corrida_sin_clave_avisa_y_no_la_cuenta_como_bloqueo(tmp_path, monkeypatch):
+    import sys
+    import types
+    monkeypatch.delenv("JOOBLE_KEY", raising=False)
+    llamado = []
+    monkeypatch.setattr(jooble.requests, "post", lambda *a, **k: llamado.append(1))
+    monkeypatch.setitem(sys.modules, "jobspy", types.SimpleNamespace(scrape_jobs=lambda **kw: None))
+    for k, v in {"SITIOS": ["jooble"], "TERMINOS_A": [], "TERMINOS_B": [], "UBICACIONES": ["Santiago, Chile"],
+                 "INCLUIR_REMOTO": False, "PAUSA_ENTRE_BUSQUEDAS": 0}.items():
+        monkeypatch.setattr(config, k, v)
+    monkeypatch.setattr(buscar, "ahora_chile", lambda: __import__("test_filtros").AHORA)
+    c = buscar.conectar(str(tmp_path / "j.db"))
+    buscar.buscar_ofertas(c)
+    detalle = buscar.ultima_corrida(c)["detalle"]
+    assert not llamado
+    avisos = " | ".join(detalle["avisos"])
+    assert "JOOBLE_KEY" in avisos and "sin resultados" not in avisos
+    assert detalle["fuentes"][0]["errores"] == 0
+
+
 def test_a_fila_mapea_y_descarta_lo_incompleto():
     f = jooble.a_fila(aviso(1))
     assert f["job_url"] == "https://cl.jooble.org/desc/1" and f["title"] == "Analista QA 1"

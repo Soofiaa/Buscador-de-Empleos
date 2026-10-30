@@ -202,6 +202,18 @@ def test_jobspy_cuenta_consultas_vacias_y_errores_y_escribe_resumen(tmp_path, mo
     assert "terminoSecreto" not in err and "privada" not in err
 
 
+def test_fuente_en_cero_sin_errores_se_anota_en_avisos_de_la_pagina(tmp_path, monkeypatch):
+    c, _, detalle = corrida_jobspy(tmp_path, monkeypatch, {"vacio": pd.DataFrame()})
+    assert detalle["fuentes"][0]["encontradas"] == 0 and detalle["fuentes"][0]["errores"] == 0
+    assert any("Indeed: sin resultados" in a for a in detalle["avisos"])
+
+
+def test_fuente_en_cero_con_errores_no_se_anota_como_sin_resultados(tmp_path, monkeypatch):
+    c, _, detalle = corrida_jobspy(tmp_path, monkeypatch, {"vacio": RuntimeError("HTTP 500 caído")})
+    assert detalle["fuentes"][0]["errores"] == 1
+    assert not any("sin resultados" in a for a in detalle["avisos"])
+
+
 # ---- pasiva: mismo comportamiento con y sin telemetría
 def test_el_comportamiento_no_cambia_con_y_sin_telemetria(tmp_path, monkeypatch):
     ahora = datetime(2026, 10, 5, 12, 0, tzinfo=ZONA)
