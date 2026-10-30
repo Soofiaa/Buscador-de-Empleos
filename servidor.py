@@ -157,6 +157,7 @@ class Aplicacion:
         en_curso = self._lock_respaldo.locked()
         est["respaldo"] = {**respaldo.estado(self.carpeta_respaldos), "error_auto": self.error_respaldo_auto,
                            "en_curso": en_curso}
+        est["nombres_fuentes"] = config.NOMBRE_FUENTE
         if en_curso and "incompletos" in est["respaldo"]:
             est["respaldo"]["incompletos"] = None
         return est

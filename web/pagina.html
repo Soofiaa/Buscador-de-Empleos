@@ -726,12 +726,11 @@ function tituloSeleccion(sel, corridas) {
   if (sel.tipo === "antes") return "Antes del historial";
   return "Todas las ofertas";
 }
-const NOMBRE_FUENTE = { indeed: "Indeed", google: "Google", glassdoor: "Glassdoor", getonboard: "Get on Board",
-  himalayas: "Himalayas", jobicy: "Jobicy", remotefirstjobs: "Remote First Jobs", bne: "BNE", trabajando: "Trabajando", chiletrabajos: "Chiletrabajos", chumi: "Chumi", laborum: "Laborum", linkedin: "LinkedIn", manual: "✍️ Manual" };
-const nombreFuente = f => NOMBRE_FUENTE[f] || f || "sin fuente";
-function textoProgreso(mensaje) {                // "[3/40] indeed | qa tester | …" -> "Buscando en Indeed · qa tester · 3 de 40"
+function textoProgreso(mensaje, nombre) {   // "[3/40] indeed | qa tester | …" -> "Buscando en Indeed · qa tester · 3 de 40"
+  // solo acepta una función de nombres: con .map(textoProgreso) el segundo argumento sería el índice
+  const nom = typeof nombre === "function" ? nombre : f => f;
   const m = /^\s*\[(\d+)\/(\d+)\]\s*([^|\[\]]+?)\s*\|\s*([^|:]+?)\s*(?:[|:]|$)/.exec(mensaje || "");
-  return m ? "Buscando en " + nombreFuente(m[3]) + " · " + m[4] + " · " + m[1] + " de " + m[2] : (mensaje || "");
+  return m ? "Buscando en " + nom(m[3]) + " · " + m[4] + " · " + m[1] + " de " + m[2] : (mensaje || "");
 }
 const norm = s => (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 function coincideTexto(o, texto) {             // cada palabra buscada debe estar en título, empresa, lugar, motivo o notas
@@ -1038,6 +1037,11 @@ function apartadoDeHash(hash) {
 }
 // </puras>
 
+// los nombres de fuente los manda el servidor (config.NOMBRE_FUENTE, en /api/estado -> S.nombresFuentes): una fuente nueva
+// en config.py no necesita tocar esta página. "manual" no viene de una búsqueda: queda fijo aquí.
+const NOMBRE_FUENTE_RESPALDO = { manual: "✍️ Manual" };
+const nombreFuente = f => (S.nombresFuentes || {})[f] || NOMBRE_FUENTE_RESPALDO[f] || f || "sin fuente";
+
 const ESTADOS = ["nueva", "revisada", "postulada", "entrevista", "descartada"];
 const ETIQUETAS_ESTADO = { nueva: "🌱 Nueva", revisada: "🔍 Revisada", postulada: "✉️ Postulada", entrevista: "🎯 En Entrevista", descartada: "❌ Descartada" };
 const PESTANAS = [
@@ -1247,7 +1251,7 @@ let sondeo = null;
 function mostrarProgreso(e, sufijo = "", boton = "buscar") {
   const p = $("progreso" + sufijo), barra = $("barra" + sufijo);
   p.className = "progreso" + (e.error ? " error" : "");
-  p.textContent = e.error ? "Error en la búsqueda: " + e.error : e.buscando ? textoProgreso(e.mensaje) : (e.mensaje || "");
+  p.textContent = e.error ? "Error en la búsqueda: " + e.error : e.buscando ? textoProgreso(e.mensaje, nombreFuente) : (e.mensaje || "");
   const pr = e.buscando && !e.error ? progresoDe(e.mensaje) : null;
   barra.hidden = !pr;
   if (pr) {
@@ -1263,6 +1267,7 @@ async function estado() {
   if (!r.ok) { pintarEstadoDb(null); return; }
   const e = r.json;
   pintarEstadoDb(e);
+  S.nombresFuentes = e.nombres_fuentes;
   pintarRespaldo(e.respaldo);
   mostrarProgreso(e);
   S.ultima = e.corrida || null;
