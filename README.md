@@ -14,6 +14,7 @@ Aplicación local en Python + SQLite con interfaz web integrada (`web/pagina.htm
 3. **Sección «Sin texto»**: Ofertas cuyo listado no incluye descripción completa (ej. LinkedIn), permitiendo al usuario pegar el texto desde el navegador para su reclasificación posterior.
 4. **Seguimiento y Métricas**: Tablero Kanban (Por postular, CV enviado, Entrevistas, Ofertas/Cierre), notas, fechas de postulación, sueldos manuales/calculados y estadísticas de conversión.
 5. **Respaldo Automático**: Respaldos diarios de la base de datos con verificación SHA-256 y control de retención.
+6. **IA integrada**: Asistente opcional para analizar la compatibilidad de una oferta laboral (requiere clave API de Groq).
 
 ## Estructura del Repositorio
 

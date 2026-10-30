@@ -170,7 +170,15 @@ venv\Scripts\python.exe -m pytest -q
 
 > Los valores actuales son de un perfil de TI junior en Chile. Si los dejas tal cual, tendrás resultados de ese perfil, no del tuyo.
 
-## 11. Preguntas frecuentes
+## 11. Análisis con IA
+
+La aplicación incluye un asistente de IA para ayudarte a evaluar si una oferta encaja con tu perfil.
+
+- **Requisito:** necesitas una clave API de **Groq**. Consíguela gratis en [groq.com](https://groq.com/).
+- **Configuración:** guarda tu clave en la variable de entorno `GROQ_API_KEY` (puedes añadirla a tu archivo `.env`).
+- **Uso:** en el detalle de una oferta, la app puede analizar la descripción y darte una puntuación de compatibilidad y puntos fuertes.
+
+## 12. Preguntas frecuentes
 
 **¿La app manda mis datos a algún servidor?**
 No. La base vive en tu equipo. Solo se consultan los portales de empleo, para buscar las ofertas.

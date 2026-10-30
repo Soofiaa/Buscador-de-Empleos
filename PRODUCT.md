@@ -23,6 +23,7 @@ Se usa en una página local (`127.0.0.1:8765`) dentro de Docker. La búsqueda co
 - Computrabajo y Empleos Públicos rechazan el acceso: solo enlaces «Buscar a mano».
 - Ofertas sin texto completo (LinkedIn, Glassdoor, Jooble) van a la pestaña «Sin texto» para revisión manual.
 - Base de datos SQLite; cambios de esquema y de datos reales requieren aprobación explícita.
+- **Análisis con IA**: Herramienta de apoyo opcional para evaluar la compatibilidad de ofertas (requiere `GROQ_API_KEY`).
 - Terminología: «postulada», «entrevista», «POR VERIFICAR», «soporte TI», «Sin texto».
 - Sin decisión aún: si la página se comparte con otras personas, qué se muestra y cómo se controla el acceso.
 
