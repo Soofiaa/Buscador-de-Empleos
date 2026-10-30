@@ -127,6 +127,20 @@ def test_jobicy_buscar_usa_la_api_y_filtra(monkeypatch):
     assert llamadas == [{"count": 10}]
 
 
+def test_con_termino_himalayas_y_jobicy_buscan_por_texto(monkeypatch):
+    class Resp:
+        status_code = 200
+        def raise_for_status(self): pass
+        def json(self): return {"jobs": []}
+    llamadas = []
+    for m in (himalayas, jobicy):
+        monkeypatch.setattr(m.requests, "get", lambda url, **k: (llamadas.append((url, k["params"])), Resp())[1])
+    himalayas.buscar("technical writer", 10)
+    jobicy.buscar("technical writer", 10)
+    assert llamadas == [(himalayas.BASE + "/search", {"limit": 10, "q": "technical writer", "worldwide": "true"}),
+                        (jobicy.BASE, {"count": 10, "tag": "technical writer"})]
+
+
 # ---- Conexión con la app
 
 def _rfj(**k):

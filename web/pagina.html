@@ -24,9 +24,9 @@
     --borde: #F5D3E2;
     --tinta: #381E2B;
     --suave: #8F5972;
-    --accion: #E04D7D;
+    --accion: #CA4570;
     --accion-tinta: #FFFFFF;
-    --accion-texto: #DA2A64;   /* texto sobre fondo claro (contraste); el botón sigue en --accion */
+    --accion-texto: #D62962;   /* texto sobre fondo claro (contraste); el botón sigue en --accion */
     --sel: rgba(224, 77, 125, 0.12);
     --alta: #C73866;
     --alta-fondo: rgba(224, 77, 125, 0.14);
@@ -34,7 +34,7 @@
     --media-fondo: rgba(142, 68, 173, 0.12);
     --baja: #96697C;
     --baja-fondo: rgba(150, 105, 124, 0.12);
-    --nueva: #D81B60;
+    --nueva: #C91959;
     --nueva-fondo: rgba(216, 27, 96, 0.14);
     --aviso: #D97706;
     --aviso-fondo: rgba(217, 119, 6, 0.12);
@@ -51,7 +51,7 @@
     --borde: #462940;
     --tinta: #FDE8F3;
     --suave: #C492B1;
-    --accion: #F43F5E;
+    --accion: #D73753;
     --accion-tinta: #FFFFFF;
     --accion-texto: #F4395A;
     --sel: rgba(244, 63, 94, 0.18);
@@ -82,13 +82,13 @@
     --accion-tinta: #FFFFFF;
     --accion-texto: #1D4ED8;
     --sel: rgba(29, 78, 216, 0.12);
-    --alta: #0284C7;
+    --alta: #0275B1;
     --alta-fondo: rgba(2, 132, 199, 0.12);
     --media: #4F46E5;
     --media-fondo: rgba(79, 70, 229, 0.10);
     --baja: #64748B;
     --baja-fondo: rgba(100, 116, 139, 0.12);
-    --nueva: #2563EB;
+    --nueva: #225BD8;
     --nueva-fondo: rgba(37, 99, 235, 0.14);
     --aviso: #D97706;
     --aviso-fondo: rgba(217, 119, 6, 0.12);
@@ -105,7 +105,7 @@
     --borde: #2D3D54;
     --tinta: #F1F5F9;
     --suave: #94A3B8;
-    --accion: #3B82F6;
+    --accion: #3472D8;
     --accion-tinta: #FFFFFF;
     --accion-texto: #4085F6;
     --sel: rgba(59, 130, 246, 0.18);
@@ -132,9 +132,9 @@
     --borde: #E2E8F0;
     --tinta: #0F172A;
     --suave: #64748B;
-    --accion: #0EA5E9;
+    --accion: #0B7DB1;
     --accion-tinta: #FFFFFF;
-    --accion-texto: #0B7CAF;
+    --accion-texto: #0B7BAD;
     --sel: rgba(14, 165, 233, 0.12);
     --alta: #B45309;
     --alta-fondo: rgba(245, 158, 11, 0.12);
@@ -142,7 +142,7 @@
     --media-fondo: rgba(99, 102, 241, 0.10);
     --baja: #64748B;
     --baja-fondo: rgba(100, 116, 139, 0.10);
-    --nueva: #0284C7;
+    --nueva: #0270A9;
     --nueva-fondo: rgba(14, 165, 233, 0.12);
     --aviso: #B45309;
     --aviso-fondo: rgba(245, 158, 11, 0.12);
@@ -159,7 +159,7 @@
     --borde: #303644;
     --tinta: #F3F4F6;
     --suave: #9CA3AF;
-    --accion: #8B5CF6;
+    --accion: #8558EC;
     --accion-tinta: #FFFFFF;
     --accion-texto: #996FF7;
     --sel: rgba(139, 92, 246, 0.16);
@@ -184,6 +184,10 @@
   h1, h2, h3 { font-family:var(--display); font-weight:700; letter-spacing:-0.025em; }
   button, select, input { font:inherit; color:inherit; }
   :focus-visible { outline:2px solid var(--accion); outline-offset:2px; border-radius:6px; }
+  /* quien pide menos movimiento en el sistema no ve transiciones ni la animación de los avisos */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; scroll-behavior:auto !important; }
+  }
   .sub { color:var(--suave); font-size:.86rem; }
 
   /* ---------- dos columnas */
@@ -373,9 +377,9 @@
   .acciones-tablero { display:flex; flex-direction:column; gap:6px; }
   .acciones-tablero .btn-descartar { font-size:.8rem; padding:6px 10px; }
   .selector-vista { margin-bottom:12px; }
-  @media (max-width:620px) {                     /* angosto: el tablero se desliza de lado, la página no se desborda */
-    .kanban-board { grid-template-columns:repeat(4, min(82vw, 300px)); scroll-snap-type:x mandatory; }
-    .kanban-col { scroll-snap-align:start; }
+  @media (max-width:620px) {                     /* angosto: las columnas se apilan; «Mover a…» y el destino quedan a la vista sin deslizar */
+    .kanban-board { grid-template-columns:minmax(0, 1fr); overflow-x:visible; }
+    .kanban-col { min-height:0; }
   }
   .kanban-vacio { font-size:.82rem; color:var(--suave); text-align:center; padding:28px 8px; font-style:italic; border:1px dashed var(--borde); border-radius:10px; }
   .btn-exportar { font-size:.82rem; padding:6px 12px; white-space:nowrap; border-radius:10px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; height:100%; }
@@ -482,7 +486,7 @@
   /* ---------- corrección de contraste WCAG AA: activa con data-contraste="aa" en <html> (interruptor «Contraste reforzado») */
   :root[data-contraste="aa"][data-tema="girly-claro"] { --accion:#DA2A64; --alta:#BB3560; --baja:#875E70; --nueva:#C11856; --aviso:#A25904; --rojo:#CF1B42; }
   :root[data-contraste="aa"][data-tema="girly-oscuro"] { --accion:#E80D33; --media:#DD59F1; --baja:#B2819F; --rojo:#F65C76; }
-  :root[data-contraste="aa"][data-tema="hombre-claro"] { --alta:#0270A9; --baja:#5B6A7F; --nueva:#1759EA; --aviso:#A25904; --rojo:#CD2121; }
+  :root[data-contraste="aa"][data-tema="hombre-claro"] { --alta:#0270A9; --baja:#5B6A7F; --nueva:#1A4FCF; --aviso:#A25904; --rojo:#CD2121; }
   :root[data-contraste="aa"][data-tema="hombre-oscuro"] { --accion:#196CF4; --media:#8690F8; }
   :root[data-contraste="aa"][data-tema="neutro-claro"] { --accion:#0B7CAF; --alta:#AF5109; --baja:#5E6D82; --nueva:#0270A9; --aviso:#AF5109; }
   :root[data-contraste="aa"][data-tema="neutro-oscuro"] { --accion:#8452F5; }
@@ -507,6 +511,10 @@
       <p class="nota">Búsqueda completa (~15 a 20 min) en Indeed, LinkedIn, Chiletrabajos, BNE, etc.</p>
       <div class="progreso" id="progreso" role="status" aria-live="polite"></div>
       <div class="barra" id="barra" role="progressbar" aria-label="Avance de la búsqueda" aria-valuemin="0" hidden><div class="barra-relleno" id="barra-relleno"></div></div>
+      <button class="boton sec ancho" id="explorar" type="button" style="margin-top:10px;">🧭 Explorar remotos</button>
+      <p class="nota">Otros roles remotos que podrían calzarte (implementación, CRM, IA, documentación, UX, asistente virtual, freelance…). En Indeed, Himalayas y Jobicy; puede correr junto con la búsqueda.</p>
+      <div class="progreso" id="progreso-explorar" role="status" aria-live="polite"></div>
+      <div class="barra" id="barra-explorar" role="progressbar" aria-label="Avance de la exploración" aria-valuemin="0" hidden><div class="barra-relleno" id="barra-relleno-explorar"></div></div>
       <details class="busquedas-manuales" id="busquedas-manuales" style="margin-top:8px; font-size:.8rem;">
         <summary title="Estos sitios no aceptan búsquedas automáticas: se abren en tu navegador">🔎 Buscar a mano</summary>
       </details>
@@ -684,19 +692,19 @@ function filtrarSeleccion(lista, pestana, sel, corridas) {
   const ids = idsSeleccion(sel, corridas);
   return ids ? lista.filter(o => ids.has(o.corrida_id === undefined ? null : o.corrida_id)) : lista;
 }
-// Ofertas y Sin descripción son las dos listas que se gestionan con estado y fases: tus decisiones salen de ambas
-const gestionadas = datos => [...(datos.principal || []), ...(datos.sin_descripcion || [])];
+// Ofertas, Sin descripción y Explorar son las listas que se gestionan con estado y fases: tus decisiones salen de ellas
+const gestionadas = datos => [...(datos.principal || []), ...(datos.sin_descripcion || []), ...(datos.explorar || [])];
 // una oferta por URL en cualquier lista: la del aviso de duplicada puede estar descartada, no solo en Ofertas
 function ofertaPorUrl(datos, url) {
   if (!datos || !url) return null;
-  for (const clave of ["principal", "sin_descripcion", "fuera_perfil", "sospechosas", "descartadas"])
+  for (const clave of ["principal", "sin_descripcion", "explorar", "fuera_perfil", "sospechosas", "descartadas"])
     for (const o of datos[clave] || []) if (o.url === url) return o;
   return null;
 }
 function listaDe(datos, pestana, sel) {
   if (!datos) return [];
   const base = pestana === "ofertas" ? datos.principal.filter(o => !CERRADOS.has(o.estado))
-    : pestana === "sin_descripcion" ? (datos.sin_descripcion || []).filter(o => !CERRADOS.has(o.estado))
+    : pestana === "sin_descripcion" || pestana === "explorar" ? (datos[pestana] || []).filter(o => !CERRADOS.has(o.estado))
     : pestana === "seguimiento" ? gestionadas(datos).filter(o => o.estado === "revisada" || o.estado === "postulada" || o.estado === "entrevista")
     : pestana === "descartadas_usuario" ? gestionadas(datos).filter(o => o.estado === "descartada")
     : (datos[pestana] || []);
@@ -718,12 +726,11 @@ function tituloSeleccion(sel, corridas) {
   if (sel.tipo === "antes") return "Antes del historial";
   return "Todas las ofertas";
 }
-const NOMBRE_FUENTE = { indeed: "Indeed", google: "Google", glassdoor: "Glassdoor", getonboard: "Get on Board",
-  himalayas: "Himalayas", jobicy: "Jobicy", remotefirstjobs: "Remote First Jobs", bne: "BNE", trabajando: "Trabajando", chiletrabajos: "Chiletrabajos", chumi: "Chumi", laborum: "Laborum", linkedin: "LinkedIn", manual: "✍️ Manual" };
-const nombreFuente = f => NOMBRE_FUENTE[f] || f || "sin fuente";
-function textoProgreso(mensaje) {                // "[3/40] indeed | qa tester | …" -> "Buscando en Indeed · qa tester · 3 de 40"
+function textoProgreso(mensaje, nombre) {   // "[3/40] indeed | qa tester | …" -> "Buscando en Indeed · qa tester · 3 de 40"
+  // solo acepta una función de nombres: con .map(textoProgreso) el segundo argumento sería el índice
+  const nom = typeof nombre === "function" ? nombre : f => f;
   const m = /^\s*\[(\d+)\/(\d+)\]\s*([^|\[\]]+?)\s*\|\s*([^|:]+?)\s*(?:[|:]|$)/.exec(mensaje || "");
-  return m ? "Buscando en " + nombreFuente(m[3]) + " · " + m[4] + " · " + m[1] + " de " + m[2] : (mensaje || "");
+  return m ? "Buscando en " + nom(m[3]) + " · " + m[4] + " · " + m[1] + " de " + m[2] : (mensaje || "");
 }
 const norm = s => (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 function coincideTexto(o, texto) {             // cada palabra buscada debe estar en título, empresa, lugar, motivo o notas
@@ -1030,10 +1037,15 @@ function apartadoDeHash(hash) {
 }
 // </puras>
 
+// los nombres de fuente los manda el servidor (config.NOMBRE_FUENTE, en /api/estado -> S.nombresFuentes): una fuente nueva
+// en config.py no necesita tocar esta página. "manual" no viene de una búsqueda: queda fijo aquí.
+const NOMBRE_FUENTE_RESPALDO = { manual: "✍️ Manual" };
+const nombreFuente = f => (S.nombresFuentes || {})[f] || NOMBRE_FUENTE_RESPALDO[f] || f || "sin fuente";
+
 const ESTADOS = ["nueva", "revisada", "postulada", "entrevista", "descartada"];
 const ETIQUETAS_ESTADO = { nueva: "🌱 Nueva", revisada: "🔍 Revisada", postulada: "✉️ Postulada", entrevista: "🎯 En Entrevista", descartada: "❌ Descartada" };
 const PESTANAS = [
-  ["ofertas", "Ofertas"], ["fuera_perfil", "Fuera de perfil"],
+  ["ofertas", "Ofertas"], ["explorar", "Explorar remotos"], ["fuera_perfil", "Fuera de perfil"],
   ["sospechosas", "Sospechosas"], ["descartadas_usuario", "Descartadas"], ["descartadas", "Descartadas por filtros"]
 ];
 const FILTROS_VACIOS = () => ({ texto: "", estado: "activas", prioridad: "", modalidad: "", fuente: "", tipo: "" });
@@ -1236,36 +1248,44 @@ async function cargar() {
 }
 
 let sondeo = null;
-function mostrarProgreso(e) {
-  const p = $("progreso"), barra = $("barra");
+function mostrarProgreso(e, sufijo = "", boton = "buscar") {
+  const p = $("progreso" + sufijo), barra = $("barra" + sufijo);
   p.className = "progreso" + (e.error ? " error" : "");
-  p.textContent = e.error ? "Error en la búsqueda: " + e.error : e.buscando ? textoProgreso(e.mensaje) : (e.mensaje || "");
+  p.textContent = e.error ? "Error en la búsqueda: " + e.error : e.buscando ? textoProgreso(e.mensaje, nombreFuente) : (e.mensaje || "");
   const pr = e.buscando && !e.error ? progresoDe(e.mensaje) : null;
   barra.hidden = !pr;
   if (pr) {
-    $("barra-relleno").style.width = pr.pct + "%";
+    $("barra-relleno" + sufijo).style.width = pr.pct + "%";
     barra.setAttribute("aria-valuemax", pr.total); barra.setAttribute("aria-valuenow", pr.n);
   }
-  $("buscar").disabled = !!e.buscando;
+  $(boton).disabled = !!e.buscando;
+  if (e.explorar) mostrarProgreso(e.explorar, "-explorar", "explorar");   // «Explorar remotos» tiene su propio avance
 }
+const algunaEnCurso = e => !!(e.buscando || (e.explorar && e.explorar.buscando));
 async function estado() {
   const r = await api("/api/estado");
   if (!r.ok) { pintarEstadoDb(null); return; }
   const e = r.json;
   pintarEstadoDb(e);
+  S.nombresFuentes = e.nombres_fuentes;
   pintarRespaldo(e.respaldo);
   mostrarProgreso(e);
   S.ultima = e.corrida || null;
   pintarUltima();
   pintarEncabezado();
   if (!e.buscando) revisarAvisos(S.ultima);
-  if (e.buscando && !sondeo) {
+  if (algunaEnCurso(e) && !sondeo) {
+    let antes = e;
     sondeo = setInterval(async () => {
       const x = await api("/api/estado");
       if (!x.ok) { pintarEstadoDb(null); return; }
       pintarEstadoDb(x.json);
       mostrarProgreso(x.json);
-      if (!x.json.buscando) { clearInterval(sondeo); sondeo = null; cargar(); }
+      // si una de las dos terminó mientras la otra sigue, se recargan las ofertas igual
+      const termino = (antes.buscando && !x.json.buscando) || (antes.explorar && antes.explorar.buscando && !(x.json.explorar || {}).buscando);
+      antes = x.json;
+      if (!algunaEnCurso(x.json)) { clearInterval(sondeo); sondeo = null; cargar(); }
+      else if (termino) cargar();
     }, 2500);
   }
 }
@@ -1328,6 +1348,11 @@ function pintarAvisos() {
 $("buscar").addEventListener("click", async () => {
   const r = await api("/api/buscar", {});
   if (r.status === 409) { alert("Ya hay una búsqueda en curso."); }
+  await estado();
+});
+$("explorar").addEventListener("click", async () => {
+  const r = await api("/api/explorar", {});
+  if (r.status === 409) { alert("Ya hay una exploración en curso."); }
   await estado();
 });
 
@@ -1398,7 +1423,7 @@ function pintarHistorial() {
     }
     if (!corridas().length) partes.push(h("p", { class: "sub", style: "margin:8px 10px" }, "Aún no hay búsquedas registradas."));
     const d = S.datos;
-    const sinCorrida = d ? ["principal", "fuera_perfil", "sospechosas", "descartadas"].some(k => (d[k] || []).some(o => o.corrida_id === null)) : false;
+    const sinCorrida = d ? ["principal", "explorar", "fuera_perfil", "sospechosas", "descartadas"].some(k => (d[k] || []).some(o => o.corrida_id === null)) : false;
     if (sinCorrida) {
       const n = listaDe(d, "ofertas", { tipo: "antes" }).length;
       partes.push(botonSel({ tipo: "antes" }, "antes", "Antes del historial: " + TXT.activas(n),
@@ -1495,7 +1520,7 @@ function selector(clave, etiqueta, opciones, extra, nombre) {
 
 const PESTANAS_PRINCIPAL = new Set(["ofertas", "seguimiento", "descartadas_usuario"]);
 // "Sin descripción" trae su propia lista, pero se ve y se trabaja como Ofertas: tarjeta completa y los mismos filtros
-const PESTANAS_COMPLETAS = new Set([...PESTANAS_PRINCIPAL, "sin_descripcion"]);
+const PESTANAS_COMPLETAS = new Set([...PESTANAS_PRINCIPAL, "sin_descripcion", "explorar"]);
 function pintarFiltros() {
   const base = PESTANAS_PRINCIPAL.has(vista()) ? gestionadas(S.datos) : (S.datos[vista()] || []);
   const unicos = campo => [...new Set(base.map(o => o[campo]).filter(Boolean))].sort();
@@ -1768,6 +1793,7 @@ const AYUDA_PESTANA = {
   metricas: { titulo: "Métricas", texto: "Indicadores sobre todas tus ofertas relevantes: cuántas postulaciones, cuántas respuestas, el embudo por etapa y los días promedio. Abajo hay desgloses por fuente, modalidad y tipo, y la actividad de las últimas semanas. Es solo lectura: para cambiar algo, ve a Ofertas o a Seguimiento." },
   ajustes: { titulo: "Ajustes", texto: "Tres secciones. Qué busco: los puestos que se piden a las fuentes y las exclusiones (lo que nunca debe aparecer); los cambios se usan en la próxima búsqueda. Datos: CSV de Ofertas, CSV de Seguimiento, respaldo JSON y «Respaldar ahora». Apariencia y avisos: tema, contraste reforzado y avisos del navegador. Lo que eliges se recuerda en este navegador." },
   sin_descripcion: { titulo: "Descripción desconocida", texto: "Ofertas que llegaron sin descripción (hoy, LinkedIn): la app no puede revisar su experiencia ni su nivel. Abre el aviso con ↗, copia la descripción completa y pégala en su tarjeta con «Guardar descripción». Si cumple, pasa a Ofertas; si no, queda descartada." },
+  explorar: { titulo: "Explorar remotos", texto: "Roles remotos fuera de tu perfil TI que podrían calzarte: implementación u onboarding, CRM y automatización sin código, IA y datos, documentación técnica, producto y UX, asistente virtual, traducción, trabajos freelance o por proyecto, y otros. Llegan con el botón «🧭 Explorar remotos» y también desde las fuentes remotas de la búsqueda normal. Pasan los mismos filtros (nivel, experiencia, práctica, estafas) y solo entran si son remotos. Se gestionan igual que Ofertas: si cambias su estado, pasan a Seguimiento o a Descartadas." },
   fuera_perfil: { titulo: "Fuera de perfil", texto: "Ofertas que la app apartó por no encajar con tu perfil, por ejemplo soporte o mesa de ayuda. Revísalas por si alguna te sirve; la razón de cada una aparece en su tarjeta. El interruptor «Incluir soporte TI» decide si se ven también en Ofertas." },
   sospechosas: { titulo: "Sospechosas", texto: "Ofertas con señales de posible estafa: piden un pago, datos bancarios o contacto solo por WhatsApp. No postules a ninguna sin verificar la empresa por otro medio." },
   descartadas_usuario: { titulo: "Descartadas", texto: "Ofertas que tú descartaste. Para recuperar una, abre su tarjeta y cambia su estado a otro (Nueva, Revisada, etc.)." },
@@ -2061,6 +2087,7 @@ function pintarLista() {
     const msj = S.sel.tipo !== "todas" && !SIN_FILTRO_HISTORIAL.has(vista()) ? "No hay ofertas de esta selección en esta pestaña."
       : vista() === "ofertas" ? "No hay ofertas con estos filtros. Prueba «Buscar empleos» o relaja los filtros."
       : vista() === "descartadas_usuario" ? "No tienes ofertas descartadas manualmente."
+      : vista() === "explorar" ? "Nada por explorar todavía. Prueba «🧭 Explorar remotos»."
       : vista() === "sin_descripcion" ? "Nada pendiente. Aquí llegan las ofertas cuyo texto la app no recibe (LinkedIn), para que las abras tú."
       : "Nada que mostrar aquí.";
     cont.replaceChildren(...cabecera, h("div", { class: "vacio" }, msj)); return;

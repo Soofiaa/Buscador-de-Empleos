@@ -1,13 +1,16 @@
 """Servidor local de la página de ofertas (reemplaza al Excel).
 
   GET  /                  la página
-  GET  /api/ofertas       {principal, sin_descripcion, fuera_perfil, sospechosas, descartadas, total_descartadas,
+  GET  /api/ofertas       {principal, sin_descripcion, explorar, fuera_perfil, sospechosas, descartadas, total_descartadas,
                           corridas}   (sin_descripcion: llegaron sin descripción; las revisa Sofia, ver filtros.py)
                           corridas = [{id, inicio, fin, nuevas, fuentes}], la más reciente primero; cada oferta
                           lleva corrida_id (la corrida cuyo inicio <= detectada_en <= fin, o null)
   GET  /fuentes/<archivo> las tipografías (solo las de la lista FUENTES; la CSP permite font-src 'self')
-  GET  /api/estado        {buscando, mensaje, error, corrida, total_ofertas}   (corrida = resumen de la última búsqueda)
+  GET  /api/estado        {buscando, mensaje, error, explorar: {buscando, mensaje, error}, corrida, total_ofertas}
+                          (corrida = resumen de la última búsqueda)
   POST /api/buscar        inicia una búsqueda en segundo plano (409 si ya hay una en curso)
+  POST /api/explorar      «Explorar remotos» en segundo plano (409 si ya hay una exploración en curso); puede correr
+                          a la vez que /api/buscar. Sus ofertas llegan en /api/ofertas -> explorar
   POST /api/marcar        {"url", "estado", "fase" (opcional), "origen": tablero|lista|modal} -> {ok, anterior, actual}
                           con estado, fase y fecha_postulacion, escritos en UNA transacción y registrados en
                           historial_estados (la fecha se pone sola al pasar a postulada/entrevista si estaba vacía).
@@ -118,11 +121,17 @@ def _host_local(valor: str) -> bool:
 
 
 class Aplicacion:
-    def __init__(self, ruta_db=None, buscar_fn=None, carpeta_respaldos=None, reloj=None):
+    def __init__(self, ruta_db=None, buscar_fn=None, carpeta_respaldos=None, reloj=None, explorar_fn=None):
         self.ruta_db = ruta_db or config.DB_PATH
         self.buscar_fn = buscar_fn or buscar.buscar_ofertas
         self._lock = threading.Lock()
         self.estado = {"buscando": False, "mensaje": "", "error": ""}
+        # «Explorar remotos» corre aparte, con su propio estado: puede ir al mismo tiempo que «Buscar empleos»
+        self.estado_explorar = {"buscando": False, "mensaje": "", "error": ""}
+        self.trabajos = {"buscar": (self.estado, lambda con: self.buscar_fn(con), "Búsqueda terminada: ",
+                                    ("oferta relevante nueva", "ofertas relevantes nuevas")),
+                         "explorar": (self.estado_explorar, explorar_fn or buscar.explorar_remotos,
+                                      "Exploración terminada: ", ("oferta nueva", "ofertas nuevas"))}
         self.hilo = None
         self.carpeta_respaldos = config.RESPALDOS_DIR if carpeta_respaldos is None else carpeta_respaldos
         self.reloj = reloj or buscar.ahora_chile         # inyectable: las pruebas usan un reloj simulado
@@ -136,6 +145,7 @@ class Aplicacion:
     def snapshot(self) -> dict:
         with self._lock:
             est = dict(self.estado)
+            est["explorar"] = dict(self.estado_explorar)
         con = self.conexion()
         try:
             est["corrida"] = buscar.ultima_corrida(con)
@@ -147,6 +157,7 @@ class Aplicacion:
         en_curso = self._lock_respaldo.locked()
         est["respaldo"] = {**respaldo.estado(self.carpeta_respaldos), "error_auto": self.error_respaldo_auto,
                            "en_curso": en_curso}
+        est["nombres_fuentes"] = config.NOMBRE_FUENTE
         if en_curso and "incompletos" in est["respaldo"]:
             est["respaldo"]["incompletos"] = None
         return est
@@ -197,32 +208,35 @@ class Aplicacion:
                  "(queda como temporal, nunca como respaldo válido)")
         return cerrar_base(self.ruta_db, limite_checkpoint_s)
 
-    def _set(self, **kw):
+    def _set(self, estado=None, **kw):
         with self._lock:
-            self.estado.update(kw)
+            (self.estado if estado is None else estado).update(kw)
 
-    def iniciar_busqueda(self) -> bool:
+    def iniciar_busqueda(self, tipo: str = "buscar") -> bool:
+        """tipo: 'buscar' o 'explorar'. Cada uno, como mucho una vez a la vez; los dos pueden ir juntos."""
+        estado = self.trabajos[tipo][0]
         with self._lock:
-            if self.estado["buscando"]:
+            if estado["buscando"]:
                 return False
-            self.estado.update(buscando=True, mensaje="Iniciando la búsqueda...", error="")
-        self.hilo = threading.Thread(target=self._correr, daemon=True)
+            estado.update(buscando=True, mensaje="Iniciando la búsqueda...", error="")
+        self.hilo = threading.Thread(target=self._correr, args=(tipo,), daemon=True)
         self.hilo.start()
         return True
 
-    def _correr(self):
-        con = self.conexion()
-        anterior = buscar.salida
-        buscar.salida = lambda m: self._set(mensaje=str(m).strip().splitlines()[-1] if str(m).strip() else "")
+    def _correr(self, tipo: str = "buscar"):
+        estado, fn, fin, (uno, varios) = self.trabajos[tipo]
+        # solo en este hilo: el avance de una búsqueda no pisa el de la otra
+        buscar.salida_del_hilo.fn = lambda m: self._set(estado, mensaje=str(m).strip().splitlines()[-1] if str(m).strip() else "")
+        con = None
         try:
-            nuevas = self.buscar_fn(con)
-            self._set(buscando=False, error="", mensaje="Búsqueda terminada: "
-                      + buscar.plural(nuevas, "oferta relevante nueva", "ofertas relevantes nuevas") + ".")
+            con = self.conexion()             # dentro del try: si la base no abre, tampoco queda el botón bloqueado
+            nuevas = fn(con)
+            self._set(estado, buscando=False, error="", mensaje=fin + buscar.plural(nuevas, uno, varios) + ".")
         except Exception as ex:               # un fallo no deja el botón bloqueado
-            self._set(buscando=False, error="%s: %s" % (type(ex).__name__, ex))
+            self._set(estado, buscando=False, error="%s: %s" % (type(ex).__name__, ex))
         finally:
-            buscar.salida = anterior
-            con.close()
+            if con is not None:
+                con.close()
 
 
 def crear_servidor(app: Aplicacion, puerto: int = None, host: str = None) -> ThreadingHTTPServer:
@@ -339,8 +353,8 @@ def crear_servidor(app: Aplicacion, puerto: int = None, host: str = None) -> Thr
                     return self._json(500, {"error": str(ex)})
                 except Exception as ex:                     # el servidor sigue; la página muestra el motivo
                     return self._json(500, {"error": f"el respaldo falló: {type(ex).__name__}: {ex}"})
-            if ruta == "/api/buscar":
-                if app.iniciar_busqueda():
+            if ruta in ("/api/buscar", "/api/explorar"):
+                if app.iniciar_busqueda("buscar" if ruta == "/api/buscar" else "explorar"):
                     return self._json(202, {"ok": True})
                 return self._json(409, {"error": "ya hay una búsqueda en curso"})
             escrituras = {

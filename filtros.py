@@ -369,11 +369,21 @@ def _detectar_rol(t: str, d: str):
     return None
 
 
+def _rol_explorar(t: str):
+    """Un rol de config.ROLES_EXPLORAR (fuera del perfil TI, solo remoto), o None. Gana el de mayor prioridad."""
+    candidatos = [(ORDEN_PRIORIDAD[prio], prio, et) for et, p, prio in config.ROLES_EXPLORAR if re.search(p, t)]
+    if not candidatos:
+        return None
+    _, prio, et = min(candidatos)
+    return {"tipo": "E", "prioridad": prio, "etiqueta": et, "contexto": []}
+
+
 # ------------------------------------------------------------------ clasificación principal
 def clasificar(o: dict) -> dict:
     """Recibe los campos crudos de una oferta y devuelve su clasificación.
 
-    categoria: principal | sin_descripcion | fuera_perfil | sospechosa | descartada (con 'razon').
+    categoria: principal | sin_descripcion | explorar | fuera_perfil | sospechosa | descartada (con 'razon').
+    'explorar' = rol remoto fuera del perfil TI (config.ROLES_EXPLORAR); sin descripción también va ahí, con el aviso.
     'sin_descripcion' es lo que pasó todo lo que se puede revisar sin descripción (ver config.FUENTES_SIN_TEXTO).
     """
     titulo, empresa, ubic = texto(o.get("title")), texto(o.get("company")), texto(o.get("location"))
@@ -395,6 +405,9 @@ def clasificar(o: dict) -> dict:
         return fin("descartada", "trainee sin mención de titulados")
 
     rol = _detectar_rol(t, d)               # el soporte es un cargo más (tipo S): sigue por los filtros de abajo
+    explorar = _rol_explorar(t)             # respaldo: un rol remoto fuera del perfil (lista «Explorar»)
+    if rol is None:
+        rol = explorar
     if rol is None:
         return fin("descartada", "sin rol objetivo")
     # el título puede calzar un rol TI y aun así describir otro oficio: la descripción manda sobre ese título
@@ -445,17 +458,24 @@ def clasificar(o: dict) -> dict:
     # condiciones del tipo B
     senales = []
     if rol["tipo"] == "B":
-        if _hay(config.B_EXCLUIR_TITULO, t):
-            return fin("descartada", "rol puente excluido (ventas / call center / atención)")
-        if contrato.startswith("Plazo"):
-            return fin("descartada", "rol puente a plazo fijo / temporal")
         senales = [k for k, p in config.SENALES_B.items() if re.search(p, f"{t} {d}")]
-        if len(senales) < config.B_MIN_SENALES:
-            return fin("descartada", f"rol puente con {len(senales)}/5 señales")
-        if contrato == "No especificado":
-            contrato = "Contrato no especificado"
-        if mensual and mensual >= config.SUELDO_ALERTA:
-            sueldo += f"  ⚠ revisar: supera ${_miles(config.SUELDO_ALERTA)}"
+        motivo_b = ("rol puente excluido (ventas / call center / atención)" if _hay(config.B_EXCLUIR_TITULO, t)
+                    else "rol puente a plazo fijo / temporal" if contrato.startswith("Plazo")
+                    else f"rol puente con {len(senales)}/5 señales" if len(senales) < config.B_MIN_SENALES else "")
+        if motivo_b and explorar and modalidad == "Remoto":
+            rol, senales = explorar, []     # p. ej. "Onboarding Specialist" o un freelance remoto: no es puente, se explora
+        elif motivo_b:
+            return fin("descartada", motivo_b)
+        else:
+            if contrato == "No especificado":
+                contrato = "Contrato no especificado"
+            if mensual and mensual >= config.SUELDO_ALERTA:
+                sueldo += f"  ⚠ revisar: supera ${_miles(config.SUELDO_ALERTA)}"
+    if rol["tipo"] == "E":
+        if _hay(config.EXPLORAR_EXCLUIR_TITULO, t):
+            return fin("descartada", "explorar: ventas / call center / atención")
+        if modalidad != "Remoto":
+            return fin("descartada", "explorar: no es remoto")
 
     prioridad = rol["prioridad"]
 
@@ -486,8 +506,9 @@ def clasificar(o: dict) -> dict:
     if ev_contrato:
         partes.append(f"contrato: plazo fijo por {ev_contrato}")
 
-    tipos = {"A": "A: TI", "B": "B: Puente", "S": config.SOPORTE_TIPO}
-    res.update(categoria="sin_descripcion" if sin_texto else "principal", tipo=tipos[rol["tipo"]],
+    tipos = {"A": "A: TI", "B": "B: Puente", "S": config.SOPORTE_TIPO, "E": config.EXPLORAR_TIPO}
+    categoria = "explorar" if rol["tipo"] == "E" else "sin_descripcion" if sin_texto else "principal"
+    res.update(categoria=categoria, tipo=tipos[rol["tipo"]],
                prioridad=prioridad, modalidad=modalidad, contrato=contrato, sueldo=sueldo,
                experiencia=config.EXPERIENCIA_SIN_VERIFICAR if sin_texto else exp_txt,
                motivo=" | ".join(partes))

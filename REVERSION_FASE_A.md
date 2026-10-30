@@ -1,3 +1,31 @@
+# Reversión de mejoras de sesión (NOTAS, avisos, ruta base)
+
+Despliegue del 29-10-2026, commits `b723f1f`, `cdf5c0c`, `72ca06a` (rama `feat/unificar-ofertas`). No cambia el esquema ni reclasifica ofertas guardadas. Solo cambia: NOTAS.md compacto, avisos de fuentes sin clave o en 0 en la página, y ruta por defecto de base local fuera de OneDrive.
+
+| Pieza | Valor |
+|---|---|
+| Imagen desplegada | `job-tracker-jobtracker:latest`, `sha256:1f7f7e89d394c120b926b17e93014ff4c4c85405efa5f47dfc2e420862ec7ce7` |
+| Imagen anterior | `job-tracker:pre-fase4-20261029`, `sha256:14c69db1c68944dc2b50854df931ffd70bf2fe7cfc1918832edd15ed37302237` |
+| Base de referencia | `ofertas_pre_fase4_20261029.db`, en el volumen y en `C:\Users\sofia\Respaldos\job-tracker-referencias\` |
+| SHA-256 de la referencia | `a8bddcf343d6479a3a19762602598990d32fe13fe89e5991511ecdbfb09c54ef` en ambas copias; `integrity_check=ok` |
+| Línea base | SQLite v7; 6770 ofertas, 75 corridas, 421 filas en `historial_estados`, 44 postuladas y 6 POR VERIFICAR |
+| Salida al detener | `0` |
+
+## Procedimiento
+
+No restaurar la base: este despliegue no la modificó. Para volver a la imagen anterior:
+
+```powershell
+docker compose stop jobtracker
+docker tag job-tracker:pre-fase4-20261029 job-tracker-jobtracker:latest
+docker compose up -d --no-build
+docker inspect jobtracker --format "{{.State.Health.Status}}"
+```
+
+Comprobar GET `/api/estado` y comparar las huellas de `/datos/ofertas.db` con la referencia de la tabla. La base v7 debe conservar todos sus datos, estados, notas y postulaciones. Se pierde: NOTAS_HISTORIAL.md, los avisos nuevos en la página, y la ruta local fuera de OneDrive (vuelve a `ofertas.db` relativo). Docker no cambia (`JT_DB` fijado).
+
+---
+
 # Reversión del filtro LinkedIn Senior/Experto (volver a Mid-Senior)
 
 Despliegue del 16-10-2026, commit local `eb3a33e`. No cambia el esquema ni reclasifica ofertas guardadas.
@@ -685,3 +713,72 @@ métricas), con Seguimiento como pestaña. Las direcciones con #apartado abren O
 `vistaPrefs` sigue sirviendo. Ningún cambio escribe en la base, así que no se pierden ofertas ni estados.
 Reversión probada en copia (volumen temporal, 8767): healthy, GET / 200 con la página anterior y huellas idénticas a
 la referencia.
+
+## Botón «Explorar remotos» con freelance (28-10-2026)
+
+Commits 1d69625 (botón y categoría `explorar`), b1c6a90 (ventana de días propia), 469c641 (Himalayas y Jobicy por
+texto) y 958a558 (notas). Base sin cambios (v7, sin tablas nuevas) y **sin reclasificar** las ofertas guardadas. La
+imagen nueva también lleva Playwright/Chromium (Laborum), que la anterior no tenía.
+Imagen anterior: job-tracker:pre-explorar-20261028 (sha256:c063782698ac037903b65b20e4b43219cd18c82704f5d09c597efbca02c0c85f,
+construida el 27-10 a las 11:00 y desplegada sin registro; su código coincide con commits anteriores, nada fuera de
+git). Imagen desplegada: job-tracker-jobtracker:latest = sha256:eac2d8f670bff3d8ecd1b79c32738fe94db00bb3123a386ae1b65ae651096650.
+Referencia: ofertas_pre_explorar_20261028.db (volumen y C:\Users\sofia\Respaldos\job-tracker-referencias\), sha256
+f5a4a183942625517b6ae2bb76c2c4745913104087d89fe4e63499c7c4e094bd, integrity_check ok. Salida al detener: 0.
+Huellas antes y después: RESULTADO OK (6222 ofertas, 63 búsquedas, 42 postuladas, 6 POR VERIFICAR).
+
+Para volver atrás:
+
+```
+docker compose stop jobtracker
+docker tag job-tracker:pre-explorar-20261028 job-tracker-jobtracker:latest
+docker compose up -d --no-build
+```
+
+**Qué se pierde al volver:** desaparecen el botón y la lista Explorar. Las ofertas que ya entraron como `explorar` se
+quedan en la base pero la página anterior no las muestra. Las búsquedas guardadas con `origen='explorar'` cuentan como
+«última búsqueda» para la imagen anterior, así que la siguiente búsqueda normal puede mirar menos días atrás. No se
+pierden ofertas ni estados. No hace falta restaurar la base.
+Reversión probada en copia (volumen temporal, 8767): healthy, GET / 200 con la página anterior y huellas idénticas a
+la referencia.
+
+## «Honorarios» solo como forma de contrato y botón que no queda bloqueado (28-10-2026)
+
+Commit d2d89e2: la regla freelance de Explorar ya no toma «Pago de Honorarios» ni «Honorarios Médicos» (sí «a
+honorario(s)»), y en `servidor._correr` la conexión se abre dentro del try, así que si la base no abre el botón no
+queda en «buscando». Sin candidata (cambio chico, aprobado por Sofia). Base sin cambios, sin reclasificar.
+Imagen anterior: job-tracker:pre-honorarios-20261028 (sha256:eac2d8f670bff3d8ecd1b79c32738fe94db00bb3123a386ae1b65ae651096650,
+la de Explorar remotos). Imagen desplegada: job-tracker-jobtracker:latest = sha256:835dc75da03e424ef56ae539f33442d95bd9d6159875f46988325bfe1f32220c.
+Referencia: ofertas_pre_honorarios_20261028.db (volumen y C:\Users\sofia\Respaldos\job-tracker-referencias\), sha256
+f5a4a183942625517b6ae2bb76c2c4745913104087d89fe4e63499c7c4e094bd (igual a la de Explorar: la base no cambió entre
+ambos despliegues), integrity_check ok. Salida al detener: 0. Huellas antes y después: RESULTADO OK.
+
+Para volver atrás:
+
+```
+docker compose stop jobtracker
+docker tag job-tracker:pre-honorarios-20261028 job-tracker-jobtracker:latest
+docker compose up -d --no-build
+```
+
+**Qué se pierde al volver:** «Pago de Honorarios Médicos» y similares vuelven a entrar en Explorar como freelance, y
+vuelve el caso raro del botón bloqueado si la base no abre. No se pierden ofertas ni estados.
+Reversión probada en copia (volumen temporal, 8767): healthy, GET / 200 con la regla anterior y huellas idénticas a
+la referencia.
+
+## Optimización de LinkedIn (28-10-2026)
+
+Commit 3e94443: lista corta de puestos en LinkedIn (`config.TERMINOS_LINKEDIN`, con los 15 puestos que efectivamente devuelven resultados) y pausa aleatoria ajustada a 4–6 s (`config.PAUSA_JOBSPY`). La búsqueda completa pasa de ~38 min a unos 8–10 min. Base sin cambios, sin reclasificar.
+Imagen anterior: job-tracker:pre-linkedin-opt-20261028 (sha256:835dc75da03e424ef56ae539f33442d95bd9d6159875f46988325bfe1f32220c, la del despliegue anterior). Imagen desplegada: job-tracker-jobtracker:latest = sha256:395825fbd2a5104e039fe76465957a75ae037dac60e7e0e4552873d6b355989c.
+Referencia: ofertas_pre_linkedin_opt_20261028.db (volumen y C:\Users\sofia\Respaldos\job-tracker-referencias\), sha256 018ef42fe2d8a86fce64937eec205246fe092c14ed5eb286637ca6d619f44077, integrity_check ok. Salida al detener: 0. Huellas antes y después: RESULTADO OK.
+
+Para volver atrás:
+
+```
+docker compose stop jobtracker
+docker tag job-tracker:pre-linkedin-opt-20261028 job-tracker-jobtracker:latest
+docker compose up -d --no-build
+```
+
+**Qué se pierde al volver:** vuelve la búsqueda larga de LinkedIn (~38 min por corrida). No se pierden ofertas ni estados.
+Reversión probada en copia (volumen temporal, 8767): healthy, GET / 200 y huellas idénticas a la referencia.
+

@@ -33,8 +33,8 @@ en producción, lo aprobado y lo pendiente.
 - Computrabajo y Empleos Públicos rechazan a la app (403 incluso con navegador real): solo enlaces «Buscar a mano» en la
   página. Nunca se usa un User-Agent de navegador para pasar un bloqueo.
 - `tests/`: pytest (incluye funciones puras de la página corridas con Node).
-- Notas: `NOTAS.md` (estado actual, decisiones y hallazgos), `REVERSION_FASE_A.md` (cómo volver atrás de cada
-  despliegue). Skill de despliegue: `.claude/skills/desplegar/`.
+- Notas: `NOTAS.md` (estado actual y pendientes), `NOTAS_HISTORIAL.md` (historial completo de despliegues,
+  decisiones y hallazgos), `REVERSION_FASE_A.md` (cómo volver atrás de cada despliegue). Skill de despliegue: `.claude/skills/desplegar/`.
 - Scripts sueltos no desplegados: `diagnostico*.py`, `probar_*.py`, `prueba.py`.
 
 ## Pruebas

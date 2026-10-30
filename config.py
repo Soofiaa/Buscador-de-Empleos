@@ -37,7 +37,21 @@ TERMINOS_B = [  # roles puente (no TI)
 # con la ubicación escrita ("Santiago, Chile"). Es un rodeo: ver probar_fuentes.py.
 # Google está desactivado: JobSpy recibe "Google returned no job data" (probado 2026-10-10).
 # Para reintentarlo, agrégalo a la lista: SITIOS = ["indeed", "glassdoor", "google"]
+# Lista optimizada para LinkedIn: solo los puestos que históricamente traen resultados
+TERMINOS_LINKEDIN = [
+    "analista funcional", "QA", "tester", "analista de sistemas",
+    "desarrollador python", "desarrollador backend", "analista de procesos",
+    "datos maestros", "analista de datos junior", "analista de datos jr",
+    "informático junior", "informático jr",
+    "data engineer junior", "data engineer jr", "analista BI junior", "analista BI jr",
+    "devops junior", "devops jr",
+    "analista de calidad", "analista de mejora",
+    "analista de requerimientos junior", "analista de requerimientos jr",
+    "soporte TI", "help desk", "business analyst", "datos maestros"
+]
+
 SITIOS = ["indeed", "glassdoor", "getonboard", "himalayas", "jobicy", "remotefirstjobs", "bne", "trabajando", "chiletrabajos", "chumi", "laborum", "linkedin", "jooble", "weworkremotely", "arbeitnow"]
+
 # himalayas / jobicy: APIs públicas de empleo remoto (ver himalayas.py y jobicy.py). Traen el listado reciente en una
 # sola solicitud por corrida; el clasificador filtra por rol. Atribución: enlace a la fuente y postulación a la oferta.
 # chumi y laborum: verificados contra el sitio real el 2026-10-20 (ver chumi.py y laborum.py; Laborum usa Playwright).
@@ -57,6 +71,58 @@ TERMINOS_SECUNDARIOS = [
     "analista de requerimientos junior", "analista de requerimientos jr",
     "soporte TI", "help desk",
 ]
+
+# Puestos que efectivamente devuelven resultados en LinkedIn, para reducir el tiempo de búsqueda
+TERMINOS_LINKEDIN = [
+    "analista funcional", "QA", "testing", "tester", "analista de sistemas",
+    "desarrollador python", "desarrollador backend", "analista de procesos",
+    "analista de datos junior", "informático junior",
+    "data engineer junior", "analista BI junior",
+    "devops junior",
+    "analista de calidad", "analista de requerimientos junior",
+]
+# ---- Explorar remotos (botón aparte): roles fuera de tu perfil TI que podrían calzar, SOLO remotos ----
+# Indeed los busca como "<término> remoto" en Chile (Himalayas y Jobicy, con TERMINOS_EXPLORAR_EN). Las fuentes remotas
+# de la búsqueda normal también alimentan esta lista: el clasificador reconoce estos roles venga de donde venga la oferta.
+TERMINOS_EXPLORAR = [
+    "especialista de implementación", "onboarding", "customer success",
+    "automatización no code", "zapier", "administrador CRM", "hubspot",
+    "entrenador de IA", "evaluador de IA", "etiquetado de datos", "anotación de datos",
+    "redactor técnico", "documentación técnica", "technical writer",
+    "product analyst", "analista de producto", "UX research", "UX writer",
+    "asistente virtual", "asistente administrativo", "back office", "transcripción", "traductor",
+    "moderador de contenido",
+    "freelance", "freelance python", "freelance QA", "freelance datos", "independiente",
+]
+# Las mismas familias en inglés, para las APIs remotas que buscan por texto (Himalayas y Jobicy; sus robots.txt lo
+# permiten). Remote First Jobs no: su robots.txt prohíbe /api/search-jobs.
+EXPLORAR_APIS = ("himalayas", "jobicy")
+TERMINOS_EXPLORAR_EN = [
+    "customer success", "implementation specialist", "onboarding specialist", "no-code", "hubspot",
+    "ai trainer", "data annotation", "technical writer", "product analyst", "ux research", "virtual assistant",
+    "freelance",
+]
+# (etiqueta, patrón en el TÍTULO, prioridad). Solo se miran si ninguna regla de tu perfil reconoce el cargo (o si un
+# rol puente no junta sus señales). Pasan los mismos filtros (estafa, práctica, senior, experiencia, empresas) y
+# además deben ser remotos; si no, se descartan.
+ROLES_EXPLORAR = [
+    ("implementación / onboarding", r"implementa(cion|tion)|onboarding", "Alta"),
+    ("automatización sin código / CRM", r"no[ -]?code|low[ -]?code|zapier|\bn8n\b|hubspot|salesforce|\bcrm\b", "Alta"),
+    ("producto", r"product (analyst|operations|ops)|analista de producto", "Alta"),
+    ("documentación técnica", r"technical (writer|content)|redactor tecnico|documentacion tecnica|documentation", "Alta"),
+    ("IA y datos", r"\bai (trainer|tutor|evaluator|rater|annotator)|(entrenador|evaluador|anotador)a? de (ia|inteligencia artificial)"
+                   r"|data (annotat|label)|(etiquetado|anotacion) de datos|\bai training\b|\brater\b", "Media"),
+    ("customer success", r"customer success|client success|exito (del|de) cliente|product support|technical account", "Media"),
+    ("UX", r"\bux\b|user research|usabilidad", "Media"),
+    ("asistente virtual / administrativo", r"asistente (virtual|administrativ|ejecutiv)|(virtual|administrative|executive) assistant", "Baja"),
+    ("back office / operaciones", r"back ?office|operations (assistant|specialist|analyst)|analista administrativ", "Baja"),
+    ("traducción / transcripción", r"traduct|translat|transcri|locali[sz]a|subtitul", "Baja"),
+    ("moderación de contenido", r"moderador|content moderat|trust (and|&) safety", "Baja"),
+    # cualquier cargo freelance que no reconozca otra regla (un "Desarrollador Python freelance" sigue yendo a Ofertas)
+    ("freelance / por proyecto", r"freelanc|independiente|por proyecto|(?<!pago )(?<!pago de )honorarios?(?! medic)", "Baja"),
+]
+EXPLORAR_TIPO = "E: Explorar"
+
 NOMBRE_FUENTE = {"indeed": "Indeed", "google": "Google", "glassdoor": "Glassdoor", "getonboard": "Get on Board",
                  "himalayas": "Himalayas", "jobicy": "Jobicy", "remotefirstjobs": "Remote First Jobs", "bne": "BNE", "trabajando": "Trabajando", "chiletrabajos": "Chiletrabajos", "laborum": "Laborum",
                  "chumi": "Chumi", "linkedin": "LinkedIn", "jooble": "Jooble",
@@ -110,7 +176,7 @@ RESULTADOS_POR_BUSQUEDA = 30
 PAUSA_ENTRE_BUSQUEDAS = 1.5       # segundos, para no gatillar bloqueos
 # Pausa aleatoria (mínimo, máximo en segundos) entre consultas JobSpy de las fuentes que limitan más: LinkedIn
 # respondió 429 el 19-10 con 1,5 s. Si igual responde 429, esa fuente se deja por el resto de la corrida.
-PAUSA_JOBSPY = {"linkedin": (6.0, 10.0), "glassdoor": (3.0, 5.0)}
+PAUSA_JOBSPY = {"linkedin": (4.0, 6.0), "glassdoor": (3.0, 5.0)}
 # Fuentes que se reparten a lo largo de la corrida, intercaladas con las demás (buscar._intercalar), en vez de
 # pedir todas sus consultas seguidas: LinkedIn respondió 429 en las corridas 55-57.
 DISTANCIAR = ("linkedin",)
@@ -126,7 +192,9 @@ ZONA_HORARIA = "America/Santiago"   # "hoy" se calcula en hora de Chile, no con 
 MARGEN_HORAS_SIN_ZONA = {"trabajando": 4}
 
 import os
-DB_PATH = os.environ.get("JT_DB", "ofertas.db")      # en Docker: /datos/ofertas.db (volumen)
+# fuera de OneDrive: la nube sincroniza el .db y puede corromper un SQLite abierto. En Docker: /datos/ofertas.db (volumen)
+DB_PATH = os.environ.get("JT_DB") or os.path.join(os.environ.get("LOCALAPPDATA") or os.path.expanduser("~"), "job-tracker", "ofertas.db")
+os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
 # carpeta de respaldos (en Docker: /respaldos, montada desde el equipo; "" = respaldo desactivado)
 RESPALDOS_DIR = os.environ.get("JT_RESPALDOS", "")
 PUERTO = int(os.environ.get("JT_PUERTO", "8765"))
@@ -236,6 +304,8 @@ ROLES_B_MEDIA = [
 B_EXCLUIR_TITULO = [r"\btecnic[oa]", r"mantenimiento", r"operari[oa]", r"bodega", r"call ?center", r"telemarketing", r"\bventas?\b", r"vendedor",
                     r"atencion (al|de) (publico|cliente)", r"digitador", r"digitacion",
                     r"cajer", r"promotor", r"ejecutivo (comercial|de (ventas|cobranza|atencion))"]
+# «Explorar remotos»: las mismas exclusiones salvo "técnico/a" (un "redactor técnico" remoto sí se explora)
+EXPLORAR_EXCLUIR_TITULO = [p for p in B_EXCLUIR_TITULO if "tecnic" not in p]
 B_MIN_SENALES = 3
 SENALES_B = {  # señal -> patrón (se busca en título + descripción)
     "datos": r"\bsql\b|excel (avanzado|intermedio)|tablas dinamicas|reporteria|reportes? (de gestion|gerenciales|ejecutivos)|\bkpis?\b|dashboard|power ?bi|tableau|bases? de datos|analisis de datos",

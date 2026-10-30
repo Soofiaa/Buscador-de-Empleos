@@ -154,7 +154,7 @@ def test_la_correccion_de_contraste_tiene_interruptor_y_viene_encendida():
     assert PAGINA.count(':root[data-contraste="aa"][data-tema="') == 6
     assert 'id="contraste-aa"' in PAGINA                                       # el interruptor «Contraste reforzado»
     assert 'aplicarContraste(contrasteGuardado !== "normal")' in PAGINA         # encendido salvo que el usuario lo apague
-    assert "--accion: #E04D7D;" in PAGINA                                      # colores originales del tema Girly Claro
+    assert "--accion: #CA4570;" in PAGINA                                      # tema Girly Claro: acción con contraste base AA
 
 
 def test_cambiar_estado_se_guarda(srv):

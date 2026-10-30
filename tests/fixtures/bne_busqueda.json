@@ -1,790 +1,717 @@
 {
- "paginaOfertas": {
-  "numPaginaActual": 1,
-  "numPaginasTotal": 54,
-  "mostrarMensajeNoResultados": false,
-  "numResultadosPorPagina": 10,
-  "numResultadosTotal": 532,
-  "resultados": [
-   {
-    "id": 1588540,
-    "codigo": "2026-118836",
-    "fecha": "05/10/26",
-    "titulo": "Analista Contable",
-    "descripcion": "Importante Empresa requiere contratar un Asistente Analista Contable proactivo y organizado para unirse a nuestro equipo.\n\nTus principales Funciones seran:\n- Mantener los datos maestros de proveedores y otros acreedores al d&iacute;a\n- Gestionar la aprobaci&oacute;n de facturas y el proceso de &oacute;rdenes de compra\n- Revisar, registrar y controlar facturas de proveedores nacionales e internacionales, as&iacute; como de otros acreedores \n- Analizar, conciliar y mantener actualizadas las cuentas contables asignadas de proveedores\n- Controlar el proceso de pago proveedores, de acuerdo a los protocolos internos instruidos\n- Verificar la actualizaci&oacute;n contratos de la Sociedad.\n- Otros relacionados con las tareas del &aacute;rea.\n\nRequisitos:\n\n- Titulado como Contador General  / Contador Auditor.\n- 3 a&ntilde;os de experiencia en el &aacute;rea de Contabilidad en cargos similares\n- Experiencia en ERP (idealmente SAP modulo FI y MM)\n- Excel Nivel Intermedio-Avanzado\n\nEsta oferta laboral se enmarca en la Ley N&deg; 21.015, que incentiva la inclusi&oacute;n de personas con discapacidad en el mundo laboral.",
-    "empresa": "Gestion Vial",
-    "region": "Metropolitana",
-    "comuna": "Independencia",
-    "idEmpresa": 124199,
-    "tipoOferta": null,
-    "mostrarEmpresa": true,
-    "lod": null,
-    "discapacidadPension": false,
-    "origen": "Feria",
-    "fechaAntofagasta": null,
-    "aceptarDiscapacidad": null
-   },
-   {
-    "id": 1588642,
-    "codigo": "2026-118973",
-    "fecha": "05/10/26",
-    "titulo": "SUPERVISOR DE MANTENCION",
-    "descripcion": "Empresa del rubro de construcci&oacute;n y mantenimiento de v&iacute;as p&uacute;blicas busca incorporar Supervisor/a de Mantenci&oacute;n para coordinar y supervisar equipos de trabajo en terreno. Principales funciones: Supervisar y coordinar equipos de mantenci&oacute;n en terreno, seg&uacute;n proyecto asignado. Planificar rutas y realizar seguimiento de las tareas programadas. Verificar la correcta ejecuci&oacute;n de los trabajos y el cumplimiento de normas de seguridad. Coordinar con ITO las observaciones y mejoras detectadas en terreno. Controlar materiales, veh&iacute;culos, equipos y checklist diarios. Coordinar con Analistas de Proyecto la asignaci&oacute;n y liberaci&oacute;n diaria de tareas. Apoyar la entrega de informaci&oacute;n de terreno para estados de pago. Atender requerimientos de equipos y contratistas en jornadas diurnas y nocturnas, seg&uacute;n turnos rotativos. Informar oportunamente el estado de avance de proyectos y equipos a cargo. Requisitos: Experiencia en supervisi&oacute;n de equipos y trabajo en terreno. Deseable experiencia en mantenci&oacute;n, construcci&oacute;n o infraestructura. Licencia de conducir Clase B. Manejo de PC a nivel usuario",
-    "empresa": "SERCOM",
-    "region": "Metropolitana",
-    "comuna": "Conchalí",
-    "idEmpresa": 215460,
-    "tipoOferta": null,
-    "mostrarEmpresa": true,
-    "lod": null,
-    "discapacidadPension": false,
-    "origen": "Feria",
-    "fechaAntofagasta": null,
-    "aceptarDiscapacidad": null
-   },
-   {
-    "id": 1588707,
-    "codigo": "2026-119183",
-    "fecha": "05/10/26",
-    "titulo": "ANALISTA DE INCENTIVOS COMERCIALES",
-    "descripcion": "&iexcl;Buscamos analista de Incentivos Comerciales!\n\nBuscamos a un/a Analista de Incentivos Comerciales apasionado/a por transformar datos en decisiones estrat&eacute;gicas y oportunidades reales de negocio.\n\n? Anal&iacute;tica comercial y segmentaci&oacute;n: Analizar&aacute;s el comportamiento de la fuerza de ventas y clientes para identificar patrones y oportunidades.\n? Modelos predictivos y miner&iacute;a de datos: Dise&ntilde;ar&aacute;s modelos para anticipar tendencias y optimizar la estructura de comisiones e incentivos.\n? Dashboards y storytelling: Construir&aacute;s indicadores claros que cuenten la historia detr&aacute;s de los n&uacute;meros para la toma de decisiones directiva.\n? ROI y performance: Evaluar&aacute;s el impacto financiero de las campa&ntilde;as de incentivos para asegurar su eficiencia.\n\n\nRequisitos\n? Ingenier&iacute;a Comercial, Ingenier&iacute;a Civil Industrial, Ingenier&iacute;a en Inform&aacute;tica\n? 2 a 3 a&ntilde;os en anal&iacute;tica comercial, business intelligence o anal&iacute;tica de datos aplicada al negocio.\n? Herramientas: Dominio avanzado de SQL, Excel y herramientas de BI",
-    "empresa": "AUTOFIN S.A.",
-    "region": "Metropolitana",
-    "comuna": "Las Condes",
-    "idEmpresa": 138068,
-    "tipoOferta": null,
-    "mostrarEmpresa": true,
-    "lod": null,
-    "discapacidadPension": false,
-    "origen": "Feria",
-    "fechaAntofagasta": null,
-    "aceptarDiscapacidad": null
-   },
-   {
-    "id": 1588790,
-    "codigo": "2026-119320",
-    "fecha": "05/10/26",
-    "titulo": "Analista de Junior de UX",
-    "descripcion": "Responsable de apoyar en la investigaci&oacute;n, dise&ntilde;o y evaluaci&oacute;n de la experiencia de usuario de productos y servicios digitales, analizando los problemas y las oportunidades del producto para contribuir en el desarrollo de interfaces intuitivas, que satisfagan las necesidades y expectativas de los usuarios.",
-    "empresa": "SALCOBRAND S.A",
-    "region": "Metropolitana",
-    "comuna": "Santiago",
-    "idEmpresa": 135141,
-    "tipoOferta": null,
-    "mostrarEmpresa": true,
-    "lod": null,
-    "discapacidadPension": false,
-    "origen": "Feria",
-    "fechaAntofagasta": null,
-    "aceptarDiscapacidad": null
-   },
-   {
-    "id": 1589032,
-    "codigo": "2026-119597",
-    "fecha": "05/10/26",
-    "titulo": "Product Owner",
-    "descripcion": "Tus Desaf&iacute;os Diarios:\r\nGestionar y priorizar el portafolio de casos de uso de IA industrial, traduciendo necesidades operacionales en iniciativas con hip&oacute;tesis de valor, criterios de aceptaci&oacute;n y aptitud de datos definida, administrando el backlog y roadmap en coordinaci&oacute;n con las &aacute;reas operacionales y t&eacute;cnicas.\r\nGestionar la ejecuci&oacute;n de las iniciativas y proveedores tecnol&oacute;gicos, controlando alcance, plazos, SLA y consumo de horas-hombre, apoyando procesos de licitaci&oacute;n y asegurando interoperabilidad, documentaci&oacute;n y transferencia efectiva de conocimiento.\r\nAsegurar la gobernanza y cumplimiento de las soluciones de IA, gestionando los gates definidos por la compa&ntilde;&iacute;a y coordinando las validaciones de datos, ciberseguridad, confidencialidad, Legal y Compliance seg&uacute;n el nivel de riesgo de cada iniciativa.\r\nAsegurar la adopci&oacute;n y captura de valor de las soluciones implementadas, coordinando stakeholders y referentes operacionales, gestionando el go-live y uso posterior, monitoreando indicadores y validando junto a Operaciones y Control de Gesti&oacute;n los beneficios obtenidos respecto de la l&iacute;nea base comprometida.\r\n\r\n&iquest;Eres nuestro(a) candidato(a) ideal? Descubre si cumples con estos requisitos:\r\nT&iacute;tulo profesional en Ingenier&iacute;a Civil Industrial, de Procesos, Inform&aacute;tica, Sistemas o carrera af&iacute;n.\r\n Experiencia al menos 3 a&ntilde;os en roles de Product Owner, Product Manager o analista funcional senior.\r\n Residencia en Santiago.\r\n\r\nTe proponemos:\r\n Tipo de contrato: Plazo Indefinido\r\n Jornada laboral: Lunes a Viernes.\r\nLugar de trabajo: Edificio corporativo, Las Condes.\r\nLa oportunidad de pertenecer y desarrollarte en un entorno laboral din&aacute;mico y de aprendizaje continuo",
-    "empresa": "Novandino Litio",
-    "region": "Metropolitana",
-    "comuna": "Las Condes",
-    "idEmpresa": 243362,
-    "tipoOferta": null,
-    "mostrarEmpresa": true,
-    "lod": null,
-    "discapacidadPension": false,
-    "origen": "WEB",
-    "fechaAntofagasta": null,
-    "aceptarDiscapacidad": true
-   },
-   {
-    "id": 1588706,
-    "codigo": "2026-119182",
-    "fecha": "05/10/26",
-    "titulo": "ANALISTA DE COMPRAS",
-    "descripcion": "Responsabilidades Principales:\n\n- Gesti&oacute;n del Ciclo de Compras: responsable de procesos de alta, selecci&oacute;n y contrataci&oacute;n de los proveedores, dando cumplimiento a las pol&iacute;ticas y procesos interno.\n- Sourcing y Selecci&oacute;n: Identificar, evaluar y homologar proveedores que cumplan con los est&aacute;ndares de seguridad y solvencia exigidos por la instituci&oacute;n financiera.\n- Contratos: Negociar contratos, acuerdos de nivel de servicio (SLA) y condiciones de pago para maximizar el ahorro sin comprometer la calidad.\n- Reportes: Reportes y control de proveedores con contrato , alertas de vencimientos y renovaciones\n- Gesti&oacute;n de Categor&iacute;as IT: Manejar la compra de licencias de software, hardware y servicios de consultor&iacute;a tecnol&oacute;gica (cr&iacute;tico en el sector fintech/banca).\n- Proceso de Alta de proveedor: Asegurar que todos los proveedores pasen los filtros de prevenci&oacute;n de lavado de activos y cumplan con las normativas de protecci&oacute;n de datos.\n- Control del gasto: Monitorear el gasto frente al presupuesto asignado a cada &aacute;rea para evitar desviaciones financieras.\n\nRequisitos:\n- T&iacute;tulo profesional en Ingenier&iacute;a Comercial, Administraci&oacute;n de Empresas, Ingenier&iacute;a Industrial, Contador auditor o carrera af&iacute;n.\n- Experiencia M&iacute;nimo de 2 a 3 a&ntilde;os en cargos similares.\n- Experiencia previa en banca, seguros o empresas de servicios financieros (no excluyente)\n- Dominio avanzado de Excel (an&aacute;lisis de datos y presupuestos)",
-    "empresa": "AUTOFIN S.A.",
-    "region": "Metropolitana",
-    "comuna": "Las Condes",
-    "idEmpresa": 138068,
-    "tipoOferta": null,
-    "mostrarEmpresa": true,
-    "lod": null,
-    "discapacidadPension": false,
-    "origen": "Feria",
-    "fechaAntofagasta": null,
-    "aceptarDiscapacidad": null
-   },
-   {
-    "id": 1588787,
-    "codigo": "2026-119317",
-    "fecha": "05/10/26",
-    "titulo": "Analista de Control de Gesti&oacute;n Transporte",
-    "descripcion": "Garantizar la correcta validaci&oacute;n y liquidaci&oacute;n de los servicios de transporte mediante el an&aacute;lisis riguroso de datos operacionales y contratos, detectando desviaciones y proponiendo oportunidades de ahorro en la operaci&oacute;n log&iacute;stica.",
-    "empresa": "SALCOBRAND S.A",
-    "region": "Metropolitana",
-    "comuna": "San Bernardo",
-    "idEmpresa": 135141,
-    "tipoOferta": null,
-    "mostrarEmpresa": true,
-    "lod": null,
-    "discapacidadPension": false,
-    "origen": "Feria",
-    "fechaAntofagasta": null,
-    "aceptarDiscapacidad": null
-   },
-   {
-    "id": 1589227,
-    "codigo": "2026-119863",
-    "fecha": "05/10/26",
-    "titulo": "Practicante &aacute;rea RR.HH",
-    "descripcion": "Si te interesa realizar tu pr&aacute;ctica profesional en el &aacute;rea de Gesti&oacute;n de Personas, &iexcl;postula con nosotros!\r\n\r\nBuscamos alumnos(as) de las carreras de Ingenier&iacute;a en Administraci&oacute;n de Empresas, Recursos Humanos o carreras afines, para apoyar al &aacute;rea de Gesti&oacute;n de Personas en modalidad de pr&aacute;ctica profesional.\r\n\r\nRequerimientos:\r\n-Ser estudiante y encontrarse habilitado(a) para realizar su pr&aacute;ctica profesional.\r\n-Disponibilidad para realizar la pr&aacute;ctica en modalidad presencial en Casino Marina del Sol, Talcahuano.\r\n-Deseable manejo de Microsoft Office.\r\n\r\nBeneficios:\r\n-Servicio de alimentaci&oacute;n.\r\n-Asignaci&oacute;n econ&oacute;mica de pr&aacute;ctica.\r\n\r\n&iexcl;Inicia tu pr&aacute;ctica profesional en Administraci&oacute;n de Empresas, Recursos Humanos o carreras afines y postula con nosotros!",
-    "empresa": "MARINA DEL SOL S.A.",
-    "region": "Bío Bío",
-    "comuna": "Talcahuano",
-    "idEmpresa": 124462,
-    "tipoOferta": null,
-    "mostrarEmpresa": true,
-    "lod": null,
-    "discapacidadPension": false,
-    "origen": "WEB",
-    "fechaAntofagasta": null,
-    "aceptarDiscapacidad": true
-   },
-   {
-    "id": 1588789,
-    "codigo": "2026-119319",
-    "fecha": "05/10/26",
-    "titulo": "Analista Gesti&oacute;n del Cambio (Proyecto 6 meses)",
-    "descripcion": "Asegurar la adopci&oacute;n efectiva de proyectos de transformaci&oacute;n tecnol&oacute;gica y cultural en la organizaci&oacute;n, acompa&ntilde;ando a los equipos y l&iacute;deres a trav&eacute;s de metodolog&iacute;as estructuradas de gesti&oacute;n del cambio para maximizar el compromiso y el valor del negocio.",
-    "empresa": "SALCOBRAND S.A",
-    "region": "Metropolitana",
-    "comuna": "Santiago",
-    "idEmpresa": 135141,
-    "tipoOferta": null,
-    "mostrarEmpresa": true,
-    "lod": null,
-    "discapacidadPension": false,
-    "origen": "Feria",
-    "fechaAntofagasta": null,
-    "aceptarDiscapacidad": null
-   },
-   {
-    "id": 1589053,
-    "codigo": "2026-119633",
-    "fecha": "05/10/26",
-    "titulo": "Analista de Estrategia Comercial",
-    "descripcion": "En Penta Vida Compa&ntilde;&iacute;a de Seguros de Vida nos mueve la innovaci&oacute;n, la excelencia y el crecimiento sostenible. Estamos en la b&uacute;squeda de un(a) Analista de Estrategia Comercial apasionado(a) por los datos, la modelaci&oacute;n financiera y la creaci&oacute;n de soluciones eficientes que transformen la experiencia de nuestros clientes.\n&iquest;Cu&aacute;l ser&aacute; tu principal misi&oacute;n?\nLiderar la captaci&oacute;n de nuevos negocios y el desarrollo de estrategias comerciales innovadoras, organizando y motivando a los equipos para maximizar la rentabilidad, el crecimiento y la competitividad de la compa&ntilde;&iacute;a en el mercado.\nTus principales funciones ser&aacute;n:\nIdentificaci&oacute;n de Oportunidades:\nEvaluar y abrir nuevos nichos de mercado y alianzas estrat&eacute;gicas, dise&ntilde;ando flujos eficientes para que los cr&eacute;ditos o negocios se cursen de forma aut&oacute;noma por los clientes.\nInnovaci&oacute;n Comercial:\nDise&ntilde;ar e implementar proyectos comerciales y soluciones transaccionales que diversifiquen nuestra oferta actual y maximicen la autogesti&oacute;n del usuario.\nA",
-    "empresa": "PENTA VIDA COMPANIA DE SEGUROS VIDA S A",
-    "region": "Metropolitana",
-    "comuna": "Las Condes",
-    "idEmpresa": 154263,
-    "tipoOferta": null,
-    "mostrarEmpresa": true,
-    "lod": false,
-    "discapacidadPension": false,
-    "origen": "API",
-    "fechaAntofagasta": null,
-    "aceptarDiscapacidad": null
-   }
-  ],
-  "textoLibre": null
- },
- "clasificacionOfertas": {
-  "ofertasPorOcupacion": [
-   {
-    "id": 7543,
-    "descripcion": "Otras ocupaciones",
-    "numero": 252
-   },
-   {
-    "id": 7643,
-    "descripcion": "Desarrolladores y analistas de sistemas informáticos",
-    "numero": 24
-   },
-   {
-    "id": 7767,
-    "descripcion": "Trabajadores (as)/ Agentes area Contabilidad y Auditoria / Contadores (as)",
-    "numero": 20
-   },
-   {
-    "id": 7629,
-    "descripcion": "Analistas de gestión, organización y afines",
-    "numero": 19
-   },
-   {
-    "id": 7628,
-    "descripcion": "Analistas financieros",
-    "numero": 13
-   },
-   {
-    "id": 8036,
-    "descripcion": "Contadores",
-    "numero": 12
-   },
-   {
-    "id": 8073,
-    "descripcion": "Profesionales de nivel medio de servicios administrativos y afines",
-    "numero": 11
-   },
-   {
-    "id": 8101,
-    "descripcion": "Trabajadores (as) area RRHH / Remuneraciones y Compensaciones",
-    "numero": 10
-   },
-   {
-    "id": 8037,
-    "descripcion": "Creadores y analistas de sistemas informáticos",
-    "numero": 10
-   },
-   {
-    "id": 7770,
-    "descripcion": "Trabajadores (as) Control de abastecimiento y/o inventarios / Etiquetador",
-    "numero": 8
-   },
-   {
-    "id": 7644,
-    "descripcion": "Analistas de Redes o Administradores (as) de redes (TI)",
-    "numero": 8
-   },
-   {
-    "id": 7626,
-    "descripcion": "Contadores y contadoras",
-    "numero": 8
-   },
-   {
-    "id": 7729,
-    "descripcion": "Trabajadores (as)/ Agentes area Finanzas / Banca e inversiones",
-    "numero": 7
-   },
-   {
-    "id": 8078,
-    "descripcion": "Trabajadores (as) / Ejecutivos del area de ventas y comercialización",
-    "numero": 7
-   },
-   {
-    "id": 7607,
-    "descripcion": "Quimicos (as) farmaceuticos (as) / Quimicos (as)",
-    "numero": 6
-   },
-   {
-    "id": 7551,
-    "descripcion": "Trabajadores (as) area Control y gestion de procesos",
-    "numero": 5
-   },
-   {
-    "id": 7640,
-    "descripcion": "Programadores(as) / Desarrollares (as) informaticos (TI)",
-    "numero": 5
-   },
-   {
-    "id": 7987,
-    "descripcion": "Profesionales de tecnologia de la informacion ",
-    "numero": 5
-   },
-   {
-    "id": 7721,
-    "descripcion": "Trabajadores (as) area RRHH / Reclutamiento y Seleccion",
-    "numero": 5
-   },
-   {
-    "id": 7984,
-    "descripcion": "Profesionales de las ciencias y de la ingenieria",
-    "numero": 4
-   },
-   {
-    "id": 8082,
-    "descripcion": "Tecnicos en programacion informatica",
-    "numero": 4
-   },
-   {
-    "id": 8106,
-    "descripcion": "Analistas/ area seguridad",
-    "numero": 3
-   },
-   {
-    "id": 8043,
-    "descripcion": "Especialistas en organización y administración de empresas y afines, no clasificados bajo otros epígrafes",
-    "numero": 3
-   },
-   {
-    "id": 8003,
-    "descripcion": "Desarrolladores y analistas de software y multimedia",
-    "numero": 3
-   },
-   {
-    "id": 7799,
-    "descripcion": "Compradores de servicios y bienes mayorista o minorista",
-    "numero": 3
-   },
-   {
-    "id": 7654,
-    "descripcion": "Psicologos (as)",
-    "numero": 3
-   },
-   {
-    "id": 7550,
-    "descripcion": "Directores de recursos humanos",
-    "numero": 3
-   },
-   {
-    "id": 7637,
-    "descripcion": "Analistas de sistemas",
-    "numero": 3
-   },
-   {
-    "id": 8215,
-    "descripcion": "Laboratorista",
-    "numero": 3
-   },
-   {
-    "id": 8051,
-    "descripcion": "Inspectores (as) de seguridad y/o calidad",
-    "numero": 2
-   },
-   {
-    "id": 7638,
-    "descripcion": "Desarrolladores de software",
-    "numero": 2
-   },
-   {
-    "id": 7633,
-    "descripcion": "Profesionales de la publicidad y la comercialización",
-    "numero": 2
-   },
-   {
-    "id": 7611,
-    "descripcion": "Nutricionistas (as) y/o Nutriologos (as)",
-    "numero": 2
-   },
-   {
-    "id": 7583,
-    "descripcion": "Ingenieros industriales y de producción",
-    "numero": 2
-   },
-   {
-    "id": 7716,
-    "descripcion": "Representantes comerciales",
-    "numero": 2
-   },
-   {
-    "id": 7645,
-    "descripcion": "Especialistas en bases de datos y en redes de computadores no clasificados bajo otros epígrafes",
-    "numero": 2
-   },
-   {
-    "id": 7668,
-    "descripcion": "Tecnicos en ingenieria civil",
-    "numero": 2
-   },
-   {
-    "id": 7998,
-    "descripcion": "Ingenieros (excluyendo electrotecnólogos)",
-    "numero": 2
-   },
-   {
-    "id": 7834,
-    "descripcion": "Trabajadores agrícolas de subsistencia",
-    "numero": 2
-   },
-   {
-    "id": 7888,
-    "descripcion": "Quimicos y quimicas",
-    "numero": 2
-   },
-   {
-    "id": 8092,
-    "descripcion": "Analistas/ area salud",
-    "numero": 2
-   },
-   {
-    "id": 8099,
-    "descripcion": "Administrativos (as)",
-    "numero": 2
-   },
-   {
-    "id": 8100,
-    "descripcion": "Trabajadores (as) area RRHH / Clima organizacional",
-    "numero": 2
-   },
-   {
-    "id": 8110,
-    "descripcion": "Trabajadores (as) de Seguridad / Operadores (as) CCTV",
-    "numero": 1
-   },
-   {
-    "id": 8145,
-    "descripcion": "Encargado(a) de adquisiciones",
-    "numero": 1
-   },
-   {
-    "id": 8160,
-    "descripcion": "Maestro(a) eléctrico(a)",
-    "numero": 1
-   },
-   {
-    "id": 8007,
-    "descripcion": "Técnicos en control de procesos",
-    "numero": 1
-   },
-   {
-    "id": 8012,
-    "descripcion": "Empleados encargados del registro de materiales y de transportes",
-    "numero": 1
-   },
-   {
-    "id": 8029,
-    "descripcion": "Arquitectos, ingenieros y afines, no clasificados bajo otros epígrafes",
-    "numero": 1
-   },
-   {
-    "id": 8046,
-    "descripcion": "Gerentes de comercios mayoristas y minoristas",
-    "numero": 1
-   },
-   {
-    "id": 8041,
-    "descripcion": "Embaladores (as) y empaquetadores (as)",
-    "numero": 1
-   },
-   {
-    "id": 7973,
-    "descripcion": "Personas que realizan trabajos varios",
-    "numero": 1
-   },
-   {
-    "id": 7769,
-    "descripcion": "Empleados encargados de las nóminas",
-    "numero": 1
-   },
-   {
-    "id": 7986,
-    "descripcion": "Especialistas en organización de la administración publica y de empresas",
-    "numero": 1
-   },
-   {
-    "id": 7800,
-    "descripcion": "Trabajadores (as) de tiendas y almacenes",
-    "numero": 1
-   },
-   {
-    "id": 7816,
-    "descripcion": "Policias",
-    "numero": 1
-   },
-   {
-    "id": 7819,
-    "descripcion": "Trabajadores (as) de Seguridad / Guardia con curso OS10",
-    "numero": 1
-   },
-   {
-    "id": 7745,
-    "descripcion": "Técnicos en operaciones de tecnología de la información y las comunicaciones",
-    "numero": 1
-   },
-   {
-    "id": 7747,
-    "descripcion": "Técnicos en redes y sistemas de computadores",
-    "numero": 1
-   },
-   {
-    "id": 7766,
-    "descripcion": "Trabajadores (as) Personal / Ejecutivos (as) Servicio al Cliente y/o Informaciones",
-    "numero": 1
-   },
-   {
-    "id": 7670,
-    "descripcion": "Tecnicos electronicos",
-    "numero": 1
-   },
-   {
-    "id": 7678,
-    "descripcion": "Maestros (as) Construccion / Supervisores (as)",
-    "numero": 1
-   },
-   {
-    "id": 7683,
-    "descripcion": "Controladores (as) / Controller Procesos",
-    "numero": 1
-   },
-   {
-    "id": 7695,
-    "descripcion": "Técnicos y asistentes farmacéuticos",
-    "numero": 1
-   },
-   {
-    "id": 7702,
-    "descripcion": "Técnicos en documentación sanitaria",
-    "numero": 1
-   },
-   {
-    "id": 7707,
-    "descripcion": "Prevencionistas de Riesgo",
-    "numero": 1
-   },
-   {
-    "id": 7715,
-    "descripcion": "Trabajadores (as)/ Agentes/ Corredores (as) area Seguros",
-    "numero": 1
-   },
-   {
-    "id": 7642,
-    "descripcion": "Diseñadores y administradores de bases de datos",
-    "numero": 1
-   },
-   {
-    "id": 7655,
-    "descripcion": "Profesionales del trabajo social",
-    "numero": 1
-   },
-   {
-    "id": 7658,
-    "descripcion": "Periodistas",
-    "numero": 1
-   },
-   {
-    "id": 7586,
-    "descripcion": "Ingenieros e ingenieras mecanicas",
-    "numero": 1
-   },
-   {
-    "id": 7587,
-    "descripcion": "Ingenieros quimicos",
-    "numero": 1
-   },
-   {
-    "id": 7588,
-    "descripcion": "Ingenieros de minas, metalúrgicos y afines",
-    "numero": 1
-   },
-   {
-    "id": 7593,
-    "descripcion": "Arquitectos (as)/ Urbanistas/ ingenieros( as) de transito/ Alarifes",
-    "numero": 1
-   },
-   {
-    "id": 7598,
-    "descripcion": "Diseñadores (as) Grafico y/o Multimedia",
-    "numero": 1
-   },
-   {
-    "id": 7553,
-    "descripcion": "Directores de ventas y comercialización",
-    "numero": 1
-   },
-   {
-    "id": 7549,
-    "descripcion": "Asistentes administrativos de registros financieros, de costos y salarios",
-    "numero": 1
-   },
-   {
-    "id": 7636,
-    "descripcion": "Profesionales de ventas de tecnología de la información y las comunicaciones",
-    "numero": 1
-   },
-   {
-    "id": 8058,
-    "descripcion": "Trabajadores (as) Mecanicos de maquinarias industrial",
-    "numero": 1
-   },
-   {
-    "id": 8228,
-    "descripcion": "Topógrafo(a)",
-    "numero": 1
-   }
-  ],
-  "ofertasPorRegion": [
-   {
+ "content": [
+  {
+   "id": 1580461,
+   "codigoOferta": "2026-107008",
+   "empresario": {
+    "idEmpresario": 121565,
+    "nombreComercial": "Confidencial",
+    "logotipo": null
+   },
+   "nombrePuesto": "Consultor Funcional SAP (MM, EWM), Huechuraba",
+   "region": {
     "id": 378,
-    "descripcion": "Metropolitana",
-    "numero": 414
+    "nombre": "Metropolitana"
    },
-   {
-    "id": 375,
-    "descripcion": "Valparaíso",
-    "numero": 20
+   "comuna": {
+    "id": 1136,
+    "nombre": "Huechuraba"
    },
-   {
-    "id": 377,
-    "descripcion": "O'Higgins",
-    "numero": 17
+   "rangoSalarial": {
+    "id": 13,
+    "nombre": "$2.110.001 - $2.260.000"
    },
-   {
+   "jornadaLaboral": {
+    "id": 9,
+    "nombre": "Jornada Completa"
+   },
+   "fechaPublicacion": "2026-09-09",
+   "descripcion": "En TeamWork nos encontramos en búsqueda de Consultor SAP Supply Chain para importante cliente del rubro de minería.",
+   "esEnadi": false
+  },
+  {
+   "id": 1582465,
+   "codigoOferta": "2026-109866",
+   "empresario": {
+    "idEmpresario": 281331,
+    "nombreComercial": "Confidencial",
+    "logotipo": null
+   },
+   "nombrePuesto": "Especialista SAP Business One",
+   "region": {
+    "id": 378,
+    "nombre": "Metropolitana"
+   },
+   "comuna": {
+    "id": 1157,
+    "nombre": "Renca"
+   },
+   "rangoSalarial": {
+    "id": 9,
+    "nombre": "$1.510.001 - $1.660.000"
+   },
+   "jornadaLaboral": {
+    "id": 9,
+    "nombre": "Jornada Completa"
+   },
+   "fechaPublicacion": "2026-09-16",
+   "descripcion": "Asegurar el funcionamiento estable de SAP Business One y convertir el sistema en una herramienta efectiva para Finanzas, Comercial, Compras, Inventario, Producción, Supply Chain, Calidad y Dirección. La persona deberá resolver incidencias, mejorar procesos, desarrollar reportes, administrar configuraciones y coordinar a proveedores externos cuando corresponda.",
+   "esEnadi": false
+  },
+  {
+   "id": 1582528,
+   "codigoOferta": "2026-109940",
+   "empresario": {
+    "idEmpresario": 153917,
+    "nombreComercial": "Bice Vida Compania De Seguros S A",
+    "logotipo": null
+   },
+   "nombrePuesto": "Práctica Analista de Negocio TI, Ing Informática o Afín",
+   "region": {
+    "id": 378,
+    "nombre": "Metropolitana"
+   },
+   "comuna": {
+    "id": 1143,
+    "nombre": "Las Condes"
+   },
+   "rangoSalarial": {
+    "id": 1,
+    "nombre": "Menor a $539.000"
+   },
+   "jornadaLaboral": {
+    "id": 9,
+    "nombre": "Jornada Completa"
+   },
+   "fechaPublicacion": "2026-09-16",
+   "descripcion": "Estamos en búsqueda de un estudiante en práctica de Ingeniería Civil Industrial o carreras afín, que esté interesado en interiorizarse dentro del área de ventas. En este rol participarás activamente y serás de gran apoyo en el desarrollo y soporte de plataformas utilizadas por la fuerza de ventas y medios de pago. Además, apoyarás el levantamiento, análisis y seguimiento de requerimientos, colaborando con equipos de negocio y tecnología para contribuir a la mejora continua de los procesos y soluciones digitales.\r\n\r\nPrincipales funciones\r\n-Apoyar en el levantamiento y documentación de requerimientos funcionales.\r\n-Participar en reuniones con usuarios de negocio y equipos de desarrollo para comprender necesidades y procesos.\r\n-Elaborar documentación funcional, flujos de procesos y casos de uso.\r\n-Apoyar la gestión y seguimiento de tareas mediante herramientas ágiles.\r\n-Realizar análisis de datos básicos para apoyar la toma de decisiones y seguimiento de indicadores.\r\n-Participar en pruebas funcionales (QA/UX) y validación de soluciones antes de su implementación.\r\n-Ejecutar pruebas funcionales básicas y registrar hallazgos para su análisis.\r\n-Generar minutas, presentaciones e informes de avances.",
+   "esEnadi": false
+  },
+  {
+   "id": 1583637,
+   "codigoOferta": "2026-111630",
+   "empresario": {
+    "idEmpresario": 149905,
+    "nombreComercial": "DTS Spa",
+    "logotipo": null
+   },
+   "nombrePuesto": "SUBGERENTE DESARROLLO Y MODERNIZACIÓN DE SISTEMAS",
+   "region": {
+    "id": 378,
+    "nombre": "Metropolitana"
+   },
+   "comuna": {
+    "id": 1147,
+    "nombre": "Macúl"
+   },
+   "rangoSalarial": {
+    "id": 14,
+    "nombre": "$2.260.001 o más"
+   },
+   "jornadaLaboral": {
+    "id": 9,
+    "nombre": "Jornada Completa"
+   },
+   "fechaPublicacion": "2026-09-21",
+   "descripcion": "Buscamos un/a profesional para liderar la gestión del área de Desarrollo y Modernización de Sistemas. Gestionar y asegurar la sostenibilidad del área mediante la ejecución de servicios de modernización y el desarrollo de productos innovadores, administrando los recursos y conocimientos disponibles, velando por el cumplimiento de los objetivos estratégicos, presupuesto asignado y satisfacción de los clientes. Responsabilidades: Planificar, gestionar y controlar la ejecución de los servicios y resultados esperados del área, de acuerdo con los objetivos, metas y plazos establecidos. Gestionar y controlar el presupuesto del área, asegurando su correcta utilización y sostenibilidad. Analizar los datos e información asociados a la operación del área para identificar oportunidades de mejora. Planificar y coordinar el trabajo multidisciplinario para la ejecución de proyectos, asegurando el cumplimiento de tiempos, costos y alcance. Proporcionar los recursos y medios necesarios para el correcto desarrollo de las actividades de Calidad y Testing. Establecer, implementar y mantener los procesos necesarios para la operación del área de negocios. Participar en la identificación de oportunidades de negocio e innovación, desarrollando soluciones rentables en conjunto con otras áreas. Colaborar con el departamento de I+D+i en el desarrollo de innovaciones, proyectos y nuevos productos o servicios. Requisitos: Título profesional de Ingeniero/a Civil, Tecnologías de la Información, Ingeniería, Gestión de Proyectos y carreras afines. Magister en gestión de tecnologías de la información, Magister en Business Administración, Metodologías ágiles, entre otros afines al cargo. Experiencia en cargos de jefatura de al menos 5 años. Experiencia en gestión de proyectos, operaciones o áreas relacionadas. Deseable experiencia en áreas de Defensa, Software, Electrónica, Aeronáutica o afines. Deseable conocimiento de Oracle.           ",
+   "esEnadi": false
+  },
+  {
+   "id": 1585875,
+   "codigoOferta": "2026-114734",
+   "empresario": {
+    "idEmpresario": 348497,
+    "nombreComercial": "THEMIS CHILE SPA",
+    "logotipo": null
+   },
+   "nombrePuesto": "DevOps Engineer Senior",
+   "region": {
+    "id": 378,
+    "nombre": "Metropolitana"
+   },
+   "comuna": {
+    "id": 1152,
+    "nombre": "Providencia"
+   },
+   "rangoSalarial": {
+    "id": 14,
+    "nombre": "$2.260.001 o más"
+   },
+   "jornadaLaboral": {
+    "id": 9,
+    "nombre": "Jornada Completa"
+   },
+   "fechaPublicacion": "2026-09-28",
+   "descripcion": "Como Ingeniero DevOps Senior en Checkr, tu función principal no será solo administrar nuestra infraestructura, sino también actuar como un puente, consolidando relaciones sólidas en todos los equipos de ingeniería. Tu rol distintivo implicará fomentar una cultura de responsabilidad compartida, promoviendo prácticas de Ingeniería de Plataformas (Platform Engineering) e impulsando la adopción de la plataforma en todos los equipos. Permitirás que todos los equipos asuman la propiedad colectiva de la confiabilidad, escalabilidad y rendimiento de su software. También guiarás a otros equipos para perfeccionar sus servicios, lo que resultará en una mayor solidez y eficiencia, asegurando que cada equipo pueda concentrarse en crear un software superior, respaldado por una infraestructura confiable, escalable y eficiente.\r\n\r\nLo que aportarás:\r\n&#9679; Inglés avanzado (Reportarás a un gerente en EE. UU. y todas las entrevistas técnicas serán realizadas por nuestro equipo de ingeniería estadounidense).\r\n&#9679; Disponibilidad para trabajar en modalidad híbrida en Santiago, Chile (3 días a la semana, oficinas ubicadas en la Gran Torre Costanera).\r\n&#9679; 5+ años de experiencia como ingeniero DevOps o experiencia relacionada.\r\n&#9679; Experiencia impulsando la adopción de plataformas con varios equipos de ingeniería de producto, guiado por un enfoque de autoservicio (self-service) y priorizando el producto (product-first).\r\n&#9679; Experiencia en el diseño de arquitectura técnica y creación de una hoja de ruta (roadmap) estratégica para materializar una visión técnica.\r\n&#9679; Experiencia con AWS, Kubernetes, contenedores, CI, CD, IaC, Terraform, Linux y arquitectura de microservicios.\r\n&#9679; Conocimientos avanzados de TCP/IP, seguridad de aplicaciones web y HTTP/HTTPS.\r\n&#9679; Experiencia con Istio u otras tecnologías de malla de servicios (service mesh).\r\n&#9679; Tus planes de reversión (rollback) son tan meticulosos como tus planes de despliegue (rollout).",
+   "esEnadi": false
+  },
+  {
+   "id": 1587955,
+   "codigoOferta": "2026-117921",
+   "empresario": {
+    "idEmpresario": 302023,
+    "nombreComercial": "EY CONSULTORES LIMITADA",
+    "logotipo": null
+   },
+   "nombrePuesto": "AI Lead Specialist",
+   "region": {
+    "id": 378,
+    "nombre": "Metropolitana"
+   },
+   "comuna": {
+    "id": 1143,
+    "nombre": "Las Condes"
+   },
+   "rangoSalarial": {
+    "id": 2,
+    "nombre": "$539.000 - $610.000"
+   },
+   "jornadaLaboral": {
+    "id": 9,
+    "nombre": "Jornada Completa"
+   },
+   "fechaPublicacion": "2026-10-01",
+   "descripcion": "En EY, tendrás la oportunidad de desarrollar una carrera tan única como tú, con una visión global, el apoyo, la cultura inclusiva y la tecnología para convertirte en la mejor versión de ti. Contamos con tu voz y perspectiva únicas para ayudar a que EY también sea aún mejor. Súmate a nosotros y construye una experiencia excepcional para ti y un mejor mundo de negocio para todos.\r\n\r\nPara ser exitoso/a en el puesto es necesario:\r\n \r\n- Título universitario en ingeniería informática, civil informática, computación o carreras afínes.\r\n- Situación laboral regular en Chile / permiso de trabajo vigente.\r\n- Experiencia comprobable en al menos dos modelos llevados a producción (no solo POC o proyectos académicos)\r\n- Inglés técnico de lectura y conversación (mínimo B2)\r\n- Disponibilidad para modalidad híbrida y eventuales visitas a faena/cliente\r\n- 5+ años en roles de Machine Learning Engineer, Data Scientist o similar, con al menos 3 años trabajando con modelos en producción.\r\n- Proveniente de consultoras de datos/tecnología, empresas de producto tech, o equipos internos de analítica avanzada en industrias data-intensivas (minería, energía, retail, banca, telco, utilities). \r\n- Experiencia previa en consultoría o en roles con exposición directa a cliente es un diferenciador fuerte.\r\n- Python avanzado (pandas, NumPy, scikit-learn, PyTorch o TensorFlow) y SQL avanzado.\r\n- Procesamiento distribuido con Spark / Databricks.\r\n- MLOps: MLflow, versionado de modelos y datos, CI/CD (Git, GitHub Actions o Azure DevOps), contenedores (Docker).\r\n- Nube: Azure ML, Databricks, GCP Vertex AI o AWS SageMaker. \r\n- Orquestación (Airflow, Databricks Workflows) y modelamiento de datos (Delta Lake, lakehouse). \r\n- Deseable: GenAI y LLMs aplicados (RAG, embeddings, vector stores, frameworks tipo LangChain), series de tiempo, optimización, y visualización (Power BI / Streamlit).",
+   "esEnadi": false
+  },
+  {
+   "id": 1587959,
+   "codigoOferta": "2026-117927",
+   "empresario": {
+    "idEmpresario": 302023,
+    "nombreComercial": "EY CONSULTORES LIMITADA",
+    "logotipo": null
+   },
+   "nombrePuesto": "Manager - Medios de Pago",
+   "region": {
+    "id": 378,
+    "nombre": "Metropolitana"
+   },
+   "comuna": {
+    "id": 1143,
+    "nombre": "Las Condes"
+   },
+   "rangoSalarial": {
+    "id": 2,
+    "nombre": "$539.000 - $610.000"
+   },
+   "jornadaLaboral": {
+    "id": 9,
+    "nombre": "Jornada Completa"
+   },
+   "fechaPublicacion": "2026-10-01",
+   "descripcion": "En EY, tendrás la oportunidad de desarrollar una carrera tan única como tú, con una visión global, el apoyo, la cultura inclusiva y la tecnología para convertirte en la mejor versión de ti. Contamos con tu voz y perspectiva únicas para ayudar a que EY también sea aún mejor. Súmate a nosotros y construye una experiencia excepcional para ti y un mejor mundo de negocio para todos.\r\n\r\nPara ser exitoso/a en el puesto es necesario:\r\n\r\n- Titulo profesional en Ingeniería Informática, Ingeniería Civil Industrial, Ingeniería comercial o carrera afín.\r\n- 9 o más años de experiencia en Consultoría o industria financiera.\r\n- Conocimientos en medios de pagos: Esquemas de Tarjetas (Débito/ Crédito/ Prepago) - Modelo de 4 partes, ISO8583, - - Mundo Emisor, Adquirente, PSP.\r\n- Conocimiento en Plataformas de Procesamiento de Tarjetas y procesamiento de Pagos\r\n- E-wallets/SuperApps.\r\n- Tokenización.\r\n- Esquemas de Pagos Bajo Valor: ISO20022, ACH (Cámaras de Compensación) - Pagos y transferencias internacionales.\r\n- Esquemas de Pagos Alto Valor: Swift, LBTR.\r\n- Infraestructura financiera: Comban/Comder/CCLV/DCV.\r\n\r\nOtros:\r\n- Blockchain, Criptoactivos, Stable Coins.\r\n- Arquitecturas de integración.\r\n- Cloud.\r\n- AI.\r\n\r\nEY cree en la igualdad de oportunidades y no discrimina por motivos de género, edad, estado civil, credo, identidad de género, orientación sexual, origen étnico u origen nacional, discapacidad o características físicas. Todas nuestras oportunidades de trabajo están abiertas a personas con discapacidad.\r\n\r\n#TechEYChile",
+   "esEnadi": false
+  },
+  {
+   "id": 1587961,
+   "codigoOferta": "2026-117935",
+   "empresario": {
+    "idEmpresario": 302023,
+    "nombreComercial": "EY CONSULTORES LIMITADA",
+    "logotipo": null
+   },
+   "nombrePuesto": "AI&Cloud Senior / Cybersecurity",
+   "region": {
+    "id": 378,
+    "nombre": "Metropolitana"
+   },
+   "comuna": {
+    "id": 1143,
+    "nombre": "Las Condes"
+   },
+   "rangoSalarial": {
+    "id": 2,
+    "nombre": "$539.000 - $610.000"
+   },
+   "jornadaLaboral": {
+    "id": 9,
+    "nombre": "Jornada Completa"
+   },
+   "fechaPublicacion": "2026-10-01",
+   "descripcion": "En EY, tendrás la oportunidad de desarrollar una carrera tan única como tú, con una visión global, el apoyo, la cultura inclusiva y la tecnología para convertirte en la mejor versión de ti. Contamos con tu voz y perspectiva únicas para ayudar a que EY también sea aún mejor. Súmate a nosotros y construye una experiencia excepcional para ti y un mejor mundo de negocio para todos.\r\n\r\nTus responsabilidades clave\r\n\r\n- Desarrollo e Implementación de Políticas de Seguridad: Crear y mantener políticas, procedimientos y estándares de seguridad cibernética.\r\n- Gestión de Riesgos: Identificar, evaluar y mitigar riesgos de seguridad cibernética.\r\n- Realizar evaluaciones de vulnerabilidad y pruebas de penetración para identificar posibles amenazas.\r\n- Monitoreo y Respuesta a Incidentes: Supervisar continuamente los sistemas de seguridad para detectar actividades sospechosas o no autorizadas.\r\n- Formación y Concienciación: Desarrollar y llevar a cabo programas de formación y concienciación en ciberseguridad para empleados.\r\n- Promover una cultura de seguridad dentro de la organización.\r\n- Gestión de Herramientas y Tecnologías de Seguridad: Implementar y gestionar herramientas y tecnologías de seguridad, como firewalls, sistemas de detección de intrusos, y software antivirus.\r\n- Cumplimiento y Auditorías: Asegurar el cumplimiento de las normativas y estándares de seguridad cibernética aplicables.\r\n- Gestión de Proyectos de Seguridad: Planificar y gestionar proyectos de seguridad cibernética, asegurando que se completen a tiempo y dentro del presupuesto.\r\n- Análisis y Reportes: Analizar datos de seguridad y generar informes para la alta dirección. Proporcionar recomendaciones para mejorar la postura de seguridad de la organización.\r\n- Actualización Continua: Mantenerse actualizado con las últimas tendencias y amenazas en ciberseguridad. \r\n- Participar en conferencias, seminarios y cursos de formación continua.",
+   "esEnadi": false
+  },
+  {
+   "id": 1587968,
+   "codigoOferta": "2026-117940",
+   "empresario": {
+    "idEmpresario": 302023,
+    "nombreComercial": "EY CONSULTORES LIMITADA",
+    "logotipo": null
+   },
+   "nombrePuesto": "Desarrollador Full-Stack Senior",
+   "region": {
+    "id": 378,
+    "nombre": "Metropolitana"
+   },
+   "comuna": {
+    "id": 1143,
+    "nombre": "Las Condes"
+   },
+   "rangoSalarial": {
+    "id": 2,
+    "nombre": "$539.000 - $610.000"
+   },
+   "jornadaLaboral": {
+    "id": 9,
+    "nombre": "Jornada Completa"
+   },
+   "fechaPublicacion": "2026-10-01",
+   "descripcion": "En EY, tendrás la oportunidad de desarrollar una carrera tan única como tú, con una visión global, el apoyo, la cultura inclusiva y la tecnología para convertirte en la mejor versión de ti. Contamos con tu voz y perspectiva únicas para ayudar a que EY también sea aún mejor. Súmate a nosotros y construye una experiencia excepcional para ti y un mejor mundo de negocio para todos.\r\n\r\nPara ser exitoso/a en el puesto es necesario\r\n\r\n- Título universitario en ingeniería informática, civil informática, computación o carreras afínes.\r\n- Certificación en alguna nube pública.\r\n- Manejo de Python.\r\n- Tecnologías de Backend y front end.\r\n- Tecnologías de base de datos.\r\n- AI&LLM Tooling.\r\n- Experiencia previa en consultoría o en roles con exposición directa a cliente es un diferenciador fuerte.\r\n- Inglés avanzado (DESEABLE)\r\n- 5 a 6 años de experiencia desarrollando soluciones y productos de software.\r\n\r\nNuestro propósito es&#8239;construir un mundo mejor de negocios&#8239;para nuestra gente, para nuestros clientes y para nuestras comunidades. Trabajamos continuamente para mejorar la calidad de nuestros servicios, invirtiendo en nuestra gente y en innovación. Las oportunidades de crecer, tener éxito y desarrollarse en EY son ilimitadas.&#8239;\r\n\r\nEY cree en la igualdad de oportunidades. Independientemente del género, edad, raza, color, credo, orientación sexual y discapacidad, todos los candidatos calificados serán considerados en nuestros procesos.",
+   "esEnadi": false
+  },
+  {
+   "id": 1587969,
+   "codigoOferta": "2026-117944",
+   "empresario": {
+    "idEmpresario": 302023,
+    "nombreComercial": "EY CONSULTORES LIMITADA",
+    "logotipo": null
+   },
+   "nombrePuesto": "Consultor/a en Tecnología para Industria Financiera",
+   "region": {
+    "id": 378,
+    "nombre": "Metropolitana"
+   },
+   "comuna": {
+    "id": 1143,
+    "nombre": "Las Condes"
+   },
+   "rangoSalarial": {
+    "id": 2,
+    "nombre": "$539.000 - $610.000"
+   },
+   "jornadaLaboral": {
+    "id": 9,
+    "nombre": "Jornada Completa"
+   },
+   "fechaPublicacion": "2026-10-01",
+   "descripcion": "En EY, tendrás la oportunidad de desarrollar una carrera tan única como tú, con una visión global, el apoyo, la cultura inclusiva y la tecnología para convertirte en la mejor versión de ti. Contamos con tu voz y perspectiva únicas para ayudar a que EY también sea aún mejor. Súmate a nosotros y construye una experiencia excepcional para ti y un mejor mundo de negocio para todos.\r\n\r\nHabilidades y atributos para lograr el éxito\r\n\r\n- Capacidad para trabajar en equipo y en entornos dinámicos.\r\n- Orientación al cliente\r\n- Adecuadas relaciones interpersonales\r\n- Flexibilidad para aprender y adaptarse constantemente en un entorno dinámico\r\n- Capacidad analítica y resolución de problemas.\r\n- Excelente comunicación oral y escrita. \r\n- Organización y gestión de múltiples actividades simultáneas.\r\n- Proactividad\r\n \r\nPara ser exitoso/a en el puesto es necesario\r\n\r\n- Título profesional de Ingeniería Civil Industrial, Ingeniería en Computación, Ingeniería Informática, Ingeniería en Información y Control de Gestión o carrera afín.\r\n- Nivel de inglés intermedio-avanzado (lectura y conversación).\r\n- Entre 0 y 3 años de experiencia laboral (también pueden considerarse recién titulados con prácticas relevantes)\r\n\r\nEY cree en la igualdad de oportunidades y no discrimina por motivos de género, edad, estado civil, credo, identidad de género, orientación sexual, origen étnico u origen nacional, discapacidad o características físicas. Todas nuestras oportunidades de trabajo están abiertas a personas con discapacidad.",
+   "esEnadi": false
+  },
+  {
+   "id": 1589694,
+   "codigoOferta": "2026-120454",
+   "empresario": {
+    "idEmpresario": 119616,
+    "nombreComercial": "Axity",
+    "logotipo": null
+   },
+   "nombrePuesto": "Analista de Calidad/ Tester junior ",
+   "region": {
+    "id": 378,
+    "nombre": "Metropolitana"
+   },
+   "comuna": {
+    "id": 1143,
+    "nombre": "Las Condes"
+   },
+   "rangoSalarial": {
+    "id": 6,
+    "nombre": "$1.060.001 - $1.210.000"
+   },
+   "jornadaLaboral": {
+    "id": 9,
+    "nombre": "Jornada Completa"
+   },
+   "fechaPublicacion": "2026-10-06",
+   "descripcion": "Axity, Somos una compañía con más de 35 años de trayectoria nuestro portafolio de servicios es uno de los más grandes en la industria: Estrategia Digital, Desarrollo de Software, Bussiness Intelligence, Big Data, Analítica Avanzada, Seguridad, IOT\r\n\r\nBuscamos un/a Analista de Calidad/ Tester junior \r\n\r\nLa persona participará en las distintas etapas del proyecto, apoyando el análisis de requerimientos, la identificación y ejecución de escenarios de prueba, el registro de evidencias e incidentes y el seguimiento del estado de las pruebas junto con los equipos involucrados.\r\nSe espera que pueda trabajar de manera colaborativa, siguiendo metodologías, procedimientos y lineamientos definidos por el equipo de QA, con orientación al detalle y disposición para aprender y desarrollarse en el área de aseguramiento de calidad.\r\n\r\nRequisitos: \r\nExperiencia de .0 a 2 años en aseguramiento de calidad, testing o ejecución de pruebas.\r\nFormación técnica o profesional en Informática, Computación, Sistemas, Ingeniería o carreras afines.\r\nConocimientos en análisis de requerimientos funcionales y no funcionales.\r\nCapacidad para identificar escenarios, condiciones y datos de prueba.\r\nConocimientos en la elaboración y ejecución de casos de prueba.\r\nExperiencia o conocimientos en pruebas funcionales.\r\nDeseable conocimiento básico de pruebas no funcionales.\r\n\r\nOfrecemos: \r\nModalidad híbrida 3x2 en Las Condes. Contrato plazo fijo 2 meses y posteriormente indefinido según desempeño. Horario oficina.\r\nEn Axity fomentamos un entorno inclusivo donde las diferencias son celebradas y donde todos/as tienen la oportunidad de crecer y destacar. Nuestro compromiso es claro: ?crear un espacio laboral donde cada talento encuentre el apoyo y respeto necesario para desarrollarse plenamente y contribuir con su mejor versión?.\r\n\r\n",
+   "esEnadi": false
+  },
+  {
+   "id": 1589960,
+   "codigoOferta": "2026-120780",
+   "empresario": {
+    "idEmpresario": 153305,
+    "nombreComercial": "INGENIERÍA CIVIL VICENTE S.A ",
+    "logotipo": null
+   },
+   "nombrePuesto": "Analista Infraestructura TI- II Región",
+   "region": {
     "id": 387,
-    "descripcion": "Antofagasta",
-    "numero": 14
+    "nombre": "Antofagasta"
    },
-   {
-    "id": 379,
-    "descripcion": "Maule",
-    "numero": 14
+   "comuna": {
+    "id": 1356,
+    "nombre": "Calama"
    },
-   {
-    "id": 384,
-    "descripcion": "Bío Bío",
-    "numero": 13
+   "rangoSalarial": {
+    "id": 13,
+    "nombre": "$2.110.001 - $2.260.000"
    },
-   {
-    "id": 388,
-    "descripcion": "Arica y Parinacota",
-    "numero": 9
-   },
-   {
-    "id": 381,
-    "descripcion": "Los Lagos",
-    "numero": 9
-   },
-   {
-    "id": 382,
-    "descripcion": "La Araucanía",
-    "numero": 6
-   },
-   {
-    "id": 389,
-    "descripcion": "Los Ríos",
-    "numero": 5
-   },
-   {
-    "id": 386,
-    "descripcion": "Atacama",
-    "numero": 5
-   },
-   {
-    "id": 376,
-    "descripcion": "Tarapacá",
-    "numero": 3
-   },
-   {
-    "id": 383,
-    "descripcion": "Coquimbo",
-    "numero": 2
-   },
-   {
-    "id": 391,
-    "descripcion": "Ñuble",
-    "numero": 1
-   }
-  ],
-  "ofertasPorJornada": [
-   {
+   "jornadaLaboral": {
     "id": 9,
-    "descripcion": "Jornada Completa",
-    "numero": 419
+    "nombre": "Jornada Completa"
    },
-   {
+   "fechaPublicacion": "2026-10-06",
+   "descripcion": "ICV está reclutando Analista de Infraestructura TI quien será responsable de garantizar la continuidad operativa de los sistemas tecnológicos de la compañía mediante la implementación, administración y mejora de soluciones de infraestructura. Esto incluye ejecutar proyectos de seguridad electrónica, asegurar la protección de datos y procesos críticos, y brindar soporte técnico especializado a los usuarios, contribuyendo al cumplimiento de los estándares corporativos y normativas vigentes en la industria minera.\r\nEn ICV fomentamos la inclusión y deseamos trabajar con los mejores talentos. Es por esto que este cargo se publica en el marco de la Ley de Inclusión Laboral N° 21.015, que incentiva la inclusión de personas en situación de discapacidad al mundo laboral.",
+   "esEnadi": false
+  },
+  {
+   "id": 1591306,
+   "codigoOferta": "2026-122727",
+   "empresario": {
+    "idEmpresario": 276164,
+    "nombreComercial": "Globant",
+    "logotipo": null
+   },
+   "nombrePuesto": "Data Scientist",
+   "region": {
+    "id": 378,
+    "nombre": "Metropolitana"
+   },
+   "comuna": {
+    "id": 1152,
+    "nombre": "Providencia"
+   },
+   "rangoSalarial": {
+    "id": 7,
+    "nombre": "$1.210.001 - $1.360.000"
+   },
+   "jornadaLaboral": {
+    "id": 9,
+    "nombre": "Jornada Completa"
+   },
+   "fechaPublicacion": "2026-10-09",
+   "descripcion": "Buscamos un/a Científico/a de Datos Senior con experiencia en el desarrollo e implementación de soluciones de Machine Learning e Inteligencia Artificial para proyectos de gran escala. Se requiere inglés intermedio avanzado, al menos 5 años de experiencia desarrollando software y algoritmos en lenguajes como Python o Scala, experiencia con frameworks como TensorFlow o PyTorch y al menos 4 años implementando modelos en ambientes productivos. Es importante contar con experiencia en tecnologías como AWS, Docker, Airflow, Databricks, Spark y S3, además de conocimientos en estadística, plataformas cloud (AWS, Azure o Google Cloud) y herramientas de contenedores como Docker y Kubernetes. Buscamos personas analíticas, con capacidad para resolver problemas, trabajar en equipo y comunicar resultados tanto a perfiles técnicos como de negocio.",
+   "esEnadi": false
+  },
+  {
+   "id": 1591312,
+   "codigoOferta": "2026-122729",
+   "empresario": {
+    "idEmpresario": 276164,
+    "nombreComercial": "Globant",
+    "logotipo": null
+   },
+   "nombrePuesto": "Data Engineer con GCP",
+   "region": {
+    "id": 378,
+    "nombre": "Metropolitana"
+   },
+   "comuna": {
+    "id": 1152,
+    "nombre": "Providencia"
+   },
+   "rangoSalarial": {
+    "id": 7,
+    "nombre": "$1.210.001 - $1.360.000"
+   },
+   "jornadaLaboral": {
+    "id": 9,
+    "nombre": "Jornada Completa"
+   },
+   "fechaPublicacion": "2026-10-09",
+   "descripcion": "Buscamos un/a Ingeniero/a de Datos con experiencia en el desarrollo e implementación de soluciones de procesamiento e integración de datos. Se requiere inglés intermedio o avanzado, manejo de SQL, procedimientos almacenados (stored procedures) y triggers, además de conocimientos en al menos uno de los siguientes lenguajes: Python, Java o Scala. Se valorará experiencia en procesos ETL, herramientas como Pentaho, Control-M, Nifi, Airflow, Cloud Composer, Glue, Lambda, Spark, DataProc o DataFlow, así como conocimientos básicos en estadística y Machine Learning. Buscamos personas analíticas, orientadas a la resolución de problemas y con capacidad para trabajar en equipos colaborativos.",
+   "esEnadi": false
+  },
+  {
+   "id": 1591314,
+   "codigoOferta": "2026-122745",
+   "empresario": {
+    "idEmpresario": 276164,
+    "nombreComercial": "Globant",
+    "logotipo": null
+   },
+   "nombrePuesto": "Python Developer",
+   "region": {
+    "id": 378,
+    "nombre": "Metropolitana"
+   },
+   "comuna": {
+    "id": 1152,
+    "nombre": "Providencia"
+   },
+   "rangoSalarial": {
+    "id": 7,
+    "nombre": "$1.210.001 - $1.360.000"
+   },
+   "jornadaLaboral": {
+    "id": 9,
+    "nombre": "Jornada Completa"
+   },
+   "fechaPublicacion": "2026-10-09",
+   "descripcion": "Buscamos un desarrollador Python de nivel senior que comparta nuestra pasión por la innovación y el cambio. Este puesto es clave para ayudar a nuestros socios comerciales a evolucionar y adaptarse a las expectativas personalizadas de los consumidores en esta nueva era tecnológica. Este cargo requiere experiencia con IA, GCP o AWS o Azure (excluyente). Lo que te ayudará a tener éxito: Inglés fluido (B2 - Intermedio alto) Django o Flask CI/CD Nube (Cloud) IA Conocimientos de FastAPI (no excluyente).",
+   "esEnadi": false
+  },
+  {
+   "id": 1591501,
+   "codigoOferta": "2026-123051",
+   "empresario": {
+    "idEmpresario": 302023,
+    "nombreComercial": "EY CONSULTORES LIMITADA",
+    "logotipo": null
+   },
+   "nombrePuesto": "Desarrollador Azure con Experiencia",
+   "region": {
+    "id": 378,
+    "nombre": "Metropolitana"
+   },
+   "comuna": {
+    "id": 1143,
+    "nombre": "Las Condes"
+   },
+   "rangoSalarial": {
+    "id": 7,
+    "nombre": "$1.210.001 - $1.360.000"
+   },
+   "jornadaLaboral": {
+    "id": 9,
+    "nombre": "Jornada Completa"
+   },
+   "fechaPublicacion": "2026-10-09",
+   "descripcion": "Como parte del equipo de Consultoría Tecnológica Tributaria, tendrás la oportunidad de asesorar a nuestros clientes  con el fin de garantizar el buen funcionamiento de su negocio, acorde a la normativa vigente.\r\n\r\n \r\n\r\nTus responsabilidades clave:\r\n\r\n \r\n\r\nDesarrollo de aplicaciones empresariales, analisis de requerimientos, prueba de funcionalidades, reuniones con usuarios expertos, pruebas de integración.\r\n \r\n\r\nLo que buscamos:\r\n\r\n \r\n\r\nTener una mentalidad ágil y orientada al crecimiento. Lo que sabes importa. Pero la mentalidad correcta es igualmente importante para determinar el éxito. Buscamos personas innovadoras, que puedan trabajar de manera ágil y seguir el ritmo de un mundo que cambia rápidamente.\r\nSer curioso/a y tener un propósito. Buscamos personas que vean oportunidades en lugar de desafíos, que hagan mejores preguntas para buscar mejores respuestas que creen un mejor mundo laboral.\r\nSer inclusivo/a. Buscamos personas que busquen y adopten perspectivas diversas, que valoren las diferencias y trabajen en equipo de manera inclusiva para generar seguridad y confianza.\r\n \r\n\r\nRequisitos:\r\n\r\n \r\n\r\nProgramador, analista informatico o carreras afines.\r\nCertificaciones Azure.\r\nExperiencia de al menos 2 años en desarrollo de aplicaciones utilizando tecnologias azure para empresas.\r\nAlto nivel de proactividad e innovación.\r\nConocimientos de CosmoDB, Synapse, Orientacion a Objetos, BD no relacionales, DevOps",
+   "esEnadi": false
+  },
+  {
+   "id": 1591840,
+   "codigoOferta": "2026-123501",
+   "empresario": {
+    "idEmpresario": 135208,
+    "nombreComercial": "Empresas SB",
+    "logotipo": null
+   },
+   "nombrePuesto": "Ingeniero/a de Software",
+   "region": {
+    "id": 378,
+    "nombre": "Metropolitana"
+   },
+   "comuna": {
+    "id": 1161,
+    "nombre": "Santiago"
+   },
+   "rangoSalarial": {
+    "id": 14,
+    "nombre": "$2.260.001 o más"
+   },
+   "jornadaLaboral": {
+    "id": 9,
+    "nombre": "Jornada Completa"
+   },
+   "fechaPublicacion": "2026-10-13",
+   "descripcion": "Si te gustan los desafíos, eres una persona proactiva, autónoma, con altos niveles de organización, trabajas colaborativamente y sientes que eres capaz de promover un excelente clima laboral con los más altos estándares de calidad y excelencia, ¡Empresas SB es el lugar indicado para ti!\r\n\r\n\r\nDescripción del puesto\r\nNos encontramos en búsqueda de profesional para el cargo de Ingeniero/a de Software IA.\r\n\r\n¿Cuál será tu desafío en este cargo?\r\n\r\nOrquestar e implementar capacidades agénticas para el desarrollo de soluciones, interactuando de manera continua con los agentes de IA para validar los resultados del código generado dentro de los flujos de trabajo automatizados.\r\n\r\nTus principales funciones:\r\n\r\nConstruir y documentar herramientas (APIs, funciones) para los agentes.\r\nDiseñar Instrucciones y Prompts en el flujo de trabajo. Escribir, optimizar y versionar las instrucciones (prompts) de los agentes.\r\nAuditar cadena de razonamiento de los agentes.\r\nDiseñar e implementar estrategias basadas en especificaciones.\r\nInvestigar, explorar y adoptar nuevas herramientas.\r\n¿Qué necesitamos de ti?\r\n\r\nTítulo universitario de Ing. en Informatica o carrera afín, con especialidad en nube pública (OCI, GCP, AWS, Azure) e IA (deseable).\r\nManejo de \"prompt engineering\".\r\nDominio de plataformas de observabilidad agéntica e interpretación de context graphs.\r\nEn Empresas SB nos caracterizamos por ser una empresa que fomenta e impulsa el valor de equipos de trabajos diversos, aceptando el sello propio de cada persona, facilitando así ambientes laborales inclusivos, según la Ley 21.015, ¡Súmate y sé parte de nuestra organización!",
+   "esEnadi": false
+  },
+  {
+   "id": 1591857,
+   "codigoOferta": "2026-123534",
+   "empresario": {
+    "idEmpresario": 135208,
+    "nombreComercial": "Empresas SB",
+    "logotipo": null
+   },
+   "nombrePuesto": "Líder Tecnología e Integración de Proyectos Digitales",
+   "region": {
+    "id": 378,
+    "nombre": "Metropolitana"
+   },
+   "comuna": {
+    "id": 1161,
+    "nombre": "Santiago"
+   },
+   "rangoSalarial": {
+    "id": 14,
+    "nombre": "$2.260.001 o más"
+   },
+   "jornadaLaboral": {
+    "id": 9,
+    "nombre": "Jornada Completa"
+   },
+   "fechaPublicacion": "2026-10-13",
+   "descripcion": "Si te gustan los desafíos, eres una persona proactiva, autónoma, con altos niveles de organización, trabajas colaborativamente y sientes que eres capaz de promover un excelente clima laboral con los más altos estándares de calidad y excelencia, ¡Empresas SB es el lugar indicado para ti!\r\n\r\nNos encontramos en búsqueda de profesional para el cargo de Líder Tecnología e Integración de Proyectos Digitales.\r\n\r\n¿Cuál será tu desafío en este cargo?\r\n\r\nLiderar el diseño y evolución de integraciones tecnológicas para proyectos de digitalización, articulando negocio, arquitectura, desarrollo y proveedores. Impulsar soluciones API-first, microservicios e IA agéntica, asegurando escalabilidad, seguridad e interoperabilidad.\r\n\r\nTus principales funciones:\r\n\r\nLiderar la arquitectura y diseño técnico de integraciones entre GEOPOS Cloud y los sistemas corporativos.\r\nDiseñar, desarrollar y gobernar APIs y servicios mediante un enfoque API-first, empleando patrones síncronos y asíncronos, microservicios, eventos y middleware.\r\nLiderar técnicamente las integraciones estratégicas con el ERP, ITL/DTE/SII, Transbank, SSO/SAML, fidelización, promociones, inventario, e-commerce y el ecosistema farmacia/salud.\r\nEvaluar especificaciones y mecanismos de integración de GEOCOM y terceros, incluyendo REST/JSON, JWT, Web Services.\r\n¿Qué necesitamos de ti?\r\n\r\nTítulo de Ing. en Informática o carrera afín.\r\nDesde 4 años de experiencia en desarrollo, arquitectura o liderazgo técnico de proyectos e integraciones en empresas de retail y/o consumo masivo.\r\nManejo de APIs REST/JSON, arquitecturas API-first, microservicios, middleware/ESB e integración orientada a eventos.\r\nExperiencia en IA Generativa y Agéntica, integración de agentes con APIs, MCP, function/tool calling y automatización de procesos.\r\n",
+   "esEnadi": false
+  },
+  {
+   "id": 1591940,
+   "codigoOferta": "2026-123680",
+   "empresario": {
+    "idEmpresario": 278997,
+    "nombreComercial": "FUND TIERRA DE ESPERANZA",
+    "logotipo": null
+   },
+   "nombrePuesto": "Apoyo Tec. para la Adm. y analisis de Informacion LAE AN ANTOFAGASTA",
+   "region": {
+    "id": 387,
+    "nombre": "Antofagasta"
+   },
+   "comuna": {
+    "id": 1359,
+    "nombre": "Antofagasta"
+   },
+   "rangoSalarial": {
+    "id": 3,
+    "nombre": "$610.001 - $760.000"
+   },
+   "jornadaLaboral": {
+    "id": 9,
+    "nombre": "Jornada Completa"
+   },
+   "fechaPublicacion": "2026-10-13",
+   "descripcion": "Fundación Tierra de Esperanza en la ciudad de ANTOFAGASTA requiere incorporar para proyecto LAE:\r\n\r\nApoyo Técnico para Administración y Análisis de Información 40 HORAS $749.133.- (turnos rotativos)\r\nLa oferta se rige en el marco de la Ley No 21.015 que incentiva la inclusión de personas con discapacidad al mundo laboral.\r\nFunciones del cargo:\r\n? Generar control de la gestión y seguimiento de los compromisos establecidos por el centro, revisando y analizando sus datos e indicadores estableciendo alertas al equipo directivo cuando sea necesario.\r\n? Apoyar el desarrollo e implementación de indicadores claves de gestión del centro\r\n? Organizar información que permita analizar y monitorear su funcionamiento general en sus diferentes áreas de trabajo.\r\nRequisitos de postulación:\r\n? Egresado/a de una carrera técnica superior, del área social, educativa, jurídica o salud, en el área de la administración, control de gestión y/o informática.\r\n? Cumplir con los requerimientos específicos exigidos para el cargo\r\ndesde organismo público.\r\n? Capacidad de planificación, organización y coordinación\r\n? Capacidad de supervisión y control\r\n? Habilidades para la resolución de conflictos\r\n? Habilidades comunicacionales\r\n? Capacidad de trabajo en equipo\r\n? Alta especialización técnica\r\n? Manejo de tecnologías informáticas a nivel usuario\r\n? Coherencia con el marco técnico y ético institucional\r\n? Compromiso institucional\r\n? Experiencia mínima 2 años de experiencia laboral.\r\n",
+   "esEnadi": false
+  },
+  {
+   "id": 1593567,
+   "codigoOferta": "2026-126075",
+   "empresario": {
+    "idEmpresario": 322715,
+    "nombreComercial": "MEGAMEDIA",
+    "logotipo": null
+   },
+   "nombrePuesto": "Data Scientist",
+   "region": {
+    "id": 378,
+    "nombre": "Metropolitana"
+   },
+   "comuna": {
+    "id": 1149,
+    "nombre": "Ñuñoa"
+   },
+   "rangoSalarial": {
+    "id": 13,
+    "nombre": "$2.110.001 - $2.260.000"
+   },
+   "jornadaLaboral": {
+    "id": 9,
+    "nombre": "Jornada Completa"
+   },
+   "fechaPublicacion": "2026-10-16",
+   "descripcion": "¡En Megamedia te estamos buscando! Buscamos a nuestro/a próximo/a  Data Scientist para Megamedia Data, quien será responsable de desarrollar modelos de segmentación de audiencias, propensión, abandono y predicción de comportamientos, utilizando datos de televisión, streaming, sitios web y aplicaciones para impulsar decisiones estratégicas comerciales, de contenidos y digitales. Para postular, debes contar con título profesional en Ingeniería Civil Industrial, Informática, Matemática, Estadística, Ciencias de la Computación, Economía con orientación cuantitativa o carrera afín; entre 3 y 5 años de experiencia en ciencia de datos, machine learning o analítica avanzada; experiencia llevando al menos un modelo a producción o uso recurrente en el negocio; y dominio de Python, SQL, machine learning, estadística aplicada y Git. Se valorará experiencia en Snowflake, Power BI, MLOps e industrialización de modelos. Ofrecemos beneficios como servicio de alimentación, seguro complementario de salud y/o bienestar, bonos, aguinaldos, becas de estudio, formación continua, gimnasio corporativo, medio día libre en tu cumpleaños y acceso gratuito a Mega Go, entre otros. Ubicación: Santiago, Chile. Jornada: Completa.",
+   "esEnadi": false
+  },
+  {
+   "id": 1593571,
+   "codigoOferta": "2026-126078",
+   "empresario": {
+    "idEmpresario": 322715,
+    "nombreComercial": "MEGAMEDIA",
+    "logotipo": null
+   },
+   "nombrePuesto": "AI & Data Product Engineer",
+   "region": {
+    "id": 378,
+    "nombre": "Metropolitana"
+   },
+   "comuna": {
+    "id": 1149,
+    "nombre": "Ñuñoa"
+   },
+   "rangoSalarial": {
     "id": 11,
-    "descripcion": "Sin limitación horaria",
-    "numero": 100
+    "nombre": "$1.810.001 - $1.960.000"
    },
-   {
-    "id": 10,
-    "descripcion": "Jornada Parcial/part time",
-    "numero": 11
-   }
-  ],
-  "ofertasPorTipoContrato": [
-   {
-    "id": 6,
-    "descripcion": "No sabe / No responde",
-    "numero": 239
-   },
-   {
-    "id": 2,
-    "descripcion": "Contrato a plazo Fijo",
-    "numero": 138
-   },
-   {
-    "id": 3,
-    "descripcion": "Contrato indefinido",
-    "numero": 129
-   },
-   {
-    "id": 1,
-    "descripcion": "Contrato por obra o faena",
-    "numero": 11
-   },
-   {
-    "id": 5,
-    "descripcion": "Honorarios",
-    "numero": 4
-   },
-   {
-    "id": 7,
-    "descripcion": "Indiferente",
-    "numero": 3
-   },
-   {
-    "id": 8,
-    "descripcion": "Acuerdo de práctica",
-    "numero": 3
-   },
-   {
+   "jornadaLaboral": {
     "id": 9,
-    "descripcion": "Contrato de aprendizaje",
-    "numero": 1
+    "nombre": "Jornada Completa"
    },
-   {
-    "id": 10,
-    "descripcion": "Sin Contrato",
-    "numero": 1
-   }
-  ],
-  "ofertasPorNivelEducacional": [
-   {
-    "id": 7,
-    "descripcion": "Educación superior Completa",
-    "numero": 121
+   "fechaPublicacion": "2026-10-16",
+   "descripcion": "¡En Megamedia te estamos buscando! Buscamos a nuestro/a próximo/a AI & Data Product Engineer para Megamedia Data, quien desarrollará productos de datos, APIs y soluciones de inteligencia artificial generativa, incluyendo asistentes y agentes inteligentes que respondan a necesidades reales del negocio. Para postular, debes contar con título profesional en Ingeniería Civil en Informática o Computación, Ingeniería en Informática, Ingeniería en Ciencia de Datos o carrera afín; entre 1 y 3 años de experiencia en ingeniería de datos, desarrollo backend o inteligencia artificial aplicada; conocimientos sólidos de Python y SQL; experiencia con bases de datos analíticas o data warehouses; y proyectos demostrables utilizando APIs de modelos de lenguaje (LLM), idealmente con RAG o integración de herramientas. Además, debes manejar Git y contar con conocimientos básicos de Docker, seguridad y protección de datos personales. Se valorará experiencia con Airflow, dbt, FastAPI, Snowflake Cortex, MCP y servicios cloud. Ofrecemos beneficios como servicio de alimentación, seguro complementario de salud y/o bienestar, bonos, aguinaldos, becas de estudio, formación continua, gimnasio corporativo, medio día libre en tu cumpleaños y acceso gratuito a Mega Go, entre otros. Ubicación: Santiago, Chile. Jornada: Completa.",
+   "esEnadi": false
+  },
+  {
+   "id": 1596203,
+   "codigoOferta": "2026-131465",
+   "empresario": {
+    "idEmpresario": 120658,
+    "nombreComercial": "3IT SPA",
+    "logotipo": null
    },
-   {
-    "id": 5,
-    "descripcion": "Educación media completa",
-    "numero": 5
+   "nombrePuesto": "Líder Técnico Golang",
+   "region": {
+    "id": 378,
+    "nombre": "Metropolitana"
    },
-   {
-    "id": 6,
-    "descripcion": "Educación superior Incompleta",
-    "numero": 4
+   "comuna": {
+    "id": 1152,
+    "nombre": "Providencia"
    },
-   {
-    "id": 8,
-    "descripcion": "Magíster",
-    "numero": 1
-   }
-  ],
-  "ofertasPorGrupoEmpleo": [
-   {
-    "id": 5,
-    "descripcion": "Jóvenes",
-    "numero": 17
+   "rangoSalarial": {
+    "id": 14,
+    "nombre": "$2.260.001 o más"
    },
-   {
-    "id": 8,
-    "descripcion": "Mujer",
-    "numero": 17
+   "jornadaLaboral": {
+    "id": 9,
+    "nombre": "Jornada Completa"
    },
-   {
-    "id": 2,
-    "descripcion": "Migrantes",
-    "numero": 16
+   "fechaPublicacion": "2026-10-22",
+   "descripcion": "Experiencia con Golang y Node.js para desarrollar servicios, APIs e integraciones, Dominio de MongoDB y bases de datos NoSQL orientadas a documentos, Pericia guiando equipos de desarrollo, orientando decisiones de diseño, revisando código y promoviendo buenas prácticas.",
+   "esEnadi": false
+  },
+  {
+   "id": 1596907,
+   "codigoOferta": "2026-132432",
+   "empresario": {
+    "idEmpresario": 290652,
+    "nombreComercial": "TRANSPORTES TRANSMAT LIMITADA",
+    "logotipo": null
    },
-   {
-    "id": 1,
-    "descripcion": "Indígenas",
-    "numero": 15
+   "nombrePuesto": "Analista de Datos, BI y Desarrollo de Automatizaciones (Con uso de IA) IQUIQUE ",
+   "region": {
+    "id": 376,
+    "nombre": "Tarapacá"
    },
-   {
-    "id": 7,
-    "descripcion": "Personas con pensión de invalidez",
-    "numero": 12
+   "comuna": {
+    "id": 1073,
+    "nombre": "Iquique"
    },
-   {
+   "rangoSalarial": {
     "id": 3,
-    "descripcion": "Adultos mayores",
-    "numero": 6
-   }
-  ],
-  "ofertasPorOrigenOferta": [],
-  "ofertasPorComuna": []
+    "nombre": "$610.001 - $760.000"
+   },
+   "jornadaLaboral": {
+    "id": 9,
+    "nombre": "Jornada Completa"
+   },
+   "fechaPublicacion": "2026-10-26",
+   "descripcion": "Buscamos un Analista de Datos y Desarrollador/a con mentalidad analítica y orientación al negocio. Tu objetivo será liderar y escalar nuestro Sistema de Gestión Interno, conectando datos de distintas áreas (ERP, ventas, producción, finanzas) para transformarlos en automatizaciones operativas y reportes estratégicos de toma de decisiones.\r\nPRINCIPALES RESPONSABILIDADES:\r\n? Análisis de Datos y Reportes de Gestión (BI): Diseñar, alimentar y mantener paneles (dashboards) e informes ejecutivos de ventas (análisis geográfico, clientes, productos), producción, eficiencia operativa y métricas clave de cada departamento.\r\n? Continuidad del Sistema Interno: Mantener, mejorar y desarrollar nuevas funcionalidades sobre la plataforma de gestión interna de la empresa.\r\n? Integración y Flujo de Datos: Crear y supervisar conexiones de datos (APIs, SQL, scripts) entre nuestro ERP, sistemas externos y la plataforma interna.\r\n? Automatización de Procesos (RPA): Identificar tareas manuales y repetitivas en los departamentos para crear flujos automáticos que optimicen tiempo y eliminen errores humanos.\r\n? Desarrollo Asistido por Inteligencia Artificial: Utilizar herramientas de IA Generativa (Claude AI, Cursor, Copilot o similares) como acelerador para la programación, análisis de datos y creación rápida de scripts.\r\nREQUISITOS DEL PERFIL:\r\n? Formación: Analista Programador, Ingeniero/Técnico en Informática, Analista de Datos/BI, o profesional afín con experiencia en desarrollo.\r\n? Análisis de Datos y BI: Dominio de SQL y procesamiento de datos para generación de reportes e indicadores clave de negocio (ventas, cobertura geográfica, costos, producción).\r\n? Desarrollo Web (Full Stack): Manejo de lenguajes de programación web/scripts (Backend/Frontend como Python, JavaScript/Node.js, PHP o similares) y gestión de bases de datos.\r\n? Integraciones: Experiencia trabajando con consumo de APIs REST, webhooks e integración de datos con sistemas ERP.\r\n? Uso Activo de IA (Indispensable)",
+   "esEnadi": false
+  },
+  {
+   "id": 1597458,
+   "codigoOferta": "2026-133200",
+   "empresario": {
+    "idEmpresario": 192272,
+    "nombreComercial": "AFP Cuprum",
+    "logotipo": null
+   },
+   "nombrePuesto": "Senior Engineer",
+   "region": {
+    "id": 378,
+    "nombre": "Metropolitana"
+   },
+   "comuna": {
+    "id": 1143,
+    "nombre": "Las Condes"
+   },
+   "rangoSalarial": {
+    "id": 10,
+    "nombre": "$1.660.001 - $1.810.000"
+   },
+   "jornadaLaboral": {
+    "id": 9,
+    "nombre": "Jornada Completa"
+   },
+   "fechaPublicacion": "2026-10-27",
+   "descripcion": "En este rol, serás responsable de diseñar, desarrollar, implementar y mantener soluciones tecnológicas de alta complejidad, asegurando el cumplimiento de estándares de arquitectura, calidad, seguridad, rendimiento y mantenibilidad. Actúa como referente técnico dentro del equipo, aportando experiencia especializada para la resolución de problemas complejos, la evolución tecnológica de las plataformas y la adopción de buenas prácticas de ingeniería.\r\n\r\n\r\n\r\n\r\nFunciones Principales: \r\n\r\nTrabajar en el equipo de modernización digital.\r\nModernizar tecnología, desarrollando e ideando como hacer el flujo de esta modernización.\r\nArmar documentación de la modernización.\r\nMantenimiento de soluciones tecnológicas diseñadas.\r\nToma de decisiones técnicas y resolución de problemas complejos dentro del proceso de evolución tecnológica.",
+   "esEnadi": false
+  }
+ ],
+ "pageable": {
+  "pageNumber": 0,
+  "pageSize": 25,
+  "sort": [],
+  "offset": 0,
+  "paged": true,
+  "unpaged": false
  },
- "totalOfertasActivas": 8911,
- "textoLibre": "analista"
+ "totalElements": 24,
+ "totalPages": 1,
+ "last": true,
+ "size": 25,
+ "number": 0,
+ "sort": [],
+ "numberOfElements": 24,
+ "first": true,
+ "empty": false
 }

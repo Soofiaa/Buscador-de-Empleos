@@ -75,10 +75,13 @@ def _avisar(al_responder, status):
 
 
 def buscar(termino: str = "", resultados: int = MAX_POR_PEDIDO, al_responder=None) -> pd.DataFrame:
-    """Trae el listado reciente de Jobicy. 'termino' se ignora (la API no busca por texto).
-    Lanza excepción si la API falla. al_responder: telemetría pasiva, recibe el status de la solicitud."""
+    """Trae el listado reciente de Jobicy, o con 'termino' su búsqueda por palabra clave (tag=; la usa «Explorar
+    remotos»). Lanza excepción si la API falla. al_responder: telemetría pasiva, recibe el status de la solicitud."""
+    params = {"count": min(resultados, MAX_POR_PEDIDO)}
+    if termino:
+        params["tag"] = termino
     try:
-        r = requests.get(BASE, headers=HEADERS, timeout=20, params={"count": min(resultados, MAX_POR_PEDIDO)})
+        r = requests.get(BASE, headers=HEADERS, timeout=20, params=params)
     except requests.RequestException:
         _avisar(al_responder, 0)
         raise

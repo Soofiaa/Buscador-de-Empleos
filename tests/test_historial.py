@@ -212,12 +212,14 @@ def test_el_buscador_de_la_pagina_acepta_fragmentos_de_palabra():
 
 
 def test_texto_de_progreso():
-    r = correr_js("""return [
+    r = correr_js("""const NOMBRE_FUENTE = {indeed: "Indeed", getonboard: "Get on Board"};
+        const nombre = f => NOMBRE_FUENTE[f] || f;
+        return [
         "  [3/40] indeed | qa tester | Santiago: 25 encontradas, 2 nuevas relevantes",
         "[12/40] getonboard | analista de datos | Chile: 4 encontradas, 0 nuevas relevantes",
         "  [bne 2/5] tester: 3 encontradas",
         "  ! [indeed] qa | Santiago: HTTPError: 429",
-        "Iniciando la búsqueda...", ""].map(textoProgreso);""")
+        "Iniciando la búsqueda...", ""].map(m => textoProgreso(m, nombre));""")
     assert r == ["Buscando en Indeed · qa tester · 3 de 40",
                  "Buscando en Get on Board · analista de datos · 12 de 40",
                  "  [bne 2/5] tester: 3 encontradas",              # no calza: texto original
