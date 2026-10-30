@@ -373,9 +373,9 @@
   .acciones-tablero { display:flex; flex-direction:column; gap:6px; }
   .acciones-tablero .btn-descartar { font-size:.8rem; padding:6px 10px; }
   .selector-vista { margin-bottom:12px; }
-  @media (max-width:620px) {                     /* angosto: el tablero se desliza de lado, la página no se desborda */
-    .kanban-board { grid-template-columns:repeat(4, min(82vw, 300px)); scroll-snap-type:x mandatory; }
-    .kanban-col { scroll-snap-align:start; }
+  @media (max-width:620px) {                     /* angosto: las columnas se apilan; «Mover a…» y el destino quedan a la vista sin deslizar */
+    .kanban-board { grid-template-columns:minmax(0, 1fr); overflow-x:visible; }
+    .kanban-col { min-height:0; }
   }
   .kanban-vacio { font-size:.82rem; color:var(--suave); text-align:center; padding:28px 8px; font-style:italic; border:1px dashed var(--borde); border-radius:10px; }
   .btn-exportar { font-size:.82rem; padding:6px 12px; white-space:nowrap; border-radius:10px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; height:100%; }
