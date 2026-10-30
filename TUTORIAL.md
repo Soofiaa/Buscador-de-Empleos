@@ -101,7 +101,7 @@ Las ofertas de **Ofertas** son las que la app considera relevantes. Si una te in
 
 ### Sin texto
 
-Algunas fuentes (hoy, LinkedIn) no entregan la descripción del aviso. La app no puede revisar su experiencia ni su nivel, así que las marca como **Sin texto** y las muestra al final de Ofertas.
+A veces una oferta llega sin la descripción del aviso (puede pasar con LinkedIn, Glassdoor o Jooble). La app no puede revisar su experiencia ni su nivel, así que las marca como **Sin texto** y las muestra al final de Ofertas.
 
 Para decidirlas:
 1. Abre el aviso con ↗.

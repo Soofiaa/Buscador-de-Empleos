@@ -1788,11 +1788,11 @@ $("btn-manual").addEventListener("click", e => abrirManual(e.currentTarget));
 
 // ---------- ayuda por pantalla: cambia según la pestaña activa (mismo diálogo que los demás: Esc cierra, el foco no sale)
 const AYUDA_PESTANA = {
-  ofertas: { titulo: "Ofertas", texto: "Las ofertas que la app considera relevantes y que aún no decidiste. Revisa cada una: abre el aviso con el título o con ↗, y cambia su estado desde la tarjeta. Si no te interesa, márcala como Descartada: sale de esta lista y queda en Descartadas. Si postulaste a una que la búsqueda no trajo, usa «➕ Agregar postulación manual» (arriba): si ya la tienes, la app te muestra la existente y te deja guardarla igual. Al final aparecen las «Sin texto»: ofertas cuya descripción no llegó (hoy, LinkedIn). Pega la descripción en su tarjeta y la app la revisa." },
+  ofertas: { titulo: "Ofertas", texto: "Las ofertas que la app considera relevantes y que aún no decidiste. Revisa cada una: abre el aviso con el título o con ↗, y cambia su estado desde la tarjeta. Si no te interesa, márcala como Descartada: sale de esta lista y queda en Descartadas. Si postulaste a una que la búsqueda no trajo, usa «➕ Agregar postulación manual» (arriba): si ya la tienes, la app te muestra la existente y te deja guardarla igual. Al final aparecen las «Sin texto»: ofertas cuya descripción no llegó (a veces pasa con LinkedIn, Glassdoor o Jooble). Pega la descripción en su tarjeta y la app la revisa." },
   seguimiento: { titulo: "Seguimiento", texto: "Las ofertas en proceso (revisadas, postuladas o en entrevista). Arriba eliges cómo verlas: Tablero, Tarjetas o Compacta. En Tablero, arrastra cada tarjeta a su etapa, o usa «Mover a…». Cada movimiento tiene «Deshacer». Con «⚡ Gestionar proceso» anotas la fecha de postulación, la fase, las notas y el sueldo. Para agregar una postulación que no trajo la búsqueda, usa «➕ Agregar postulación manual»; si ya existe una con el mismo cargo y empresa, te ofrece verla o guardarla de todas formas." },
   metricas: { titulo: "Métricas", texto: "Indicadores sobre todas tus ofertas relevantes: cuántas postulaciones, cuántas respuestas, el embudo por etapa y los días promedio. Abajo hay desgloses por fuente, modalidad y tipo, y la actividad de las últimas semanas. Es solo lectura: para cambiar algo, ve a Ofertas o a Seguimiento." },
   ajustes: { titulo: "Ajustes", texto: "Tres secciones. Qué busco: los puestos que se piden a las fuentes y las exclusiones (lo que nunca debe aparecer); los cambios se usan en la próxima búsqueda. Datos: CSV de Ofertas, CSV de Seguimiento, respaldo JSON y «Respaldar ahora». Apariencia y avisos: tema, contraste reforzado y avisos del navegador. Lo que eliges se recuerda en este navegador." },
-  sin_descripcion: { titulo: "Descripción desconocida", texto: "Ofertas que llegaron sin descripción (hoy, LinkedIn): la app no puede revisar su experiencia ni su nivel. Abre el aviso con ↗, copia la descripción completa y pégala en su tarjeta con «Guardar descripción». Si cumple, pasa a Ofertas; si no, queda descartada." },
+  sin_descripcion: { titulo: "Descripción desconocida", texto: "Ofertas que llegaron sin descripción (a veces pasa con LinkedIn, Glassdoor o Jooble): la app no puede revisar su experiencia ni su nivel. Abre el aviso con ↗, copia la descripción completa y pégala en su tarjeta con «Guardar descripción». Si cumple, pasa a Ofertas; si no, queda descartada." },
   explorar: { titulo: "Explorar remotos", texto: "Roles remotos fuera de tu perfil TI que podrían calzarte: implementación u onboarding, CRM y automatización sin código, IA y datos, documentación técnica, producto y UX, asistente virtual, traducción, trabajos freelance o por proyecto, y otros. Llegan con el botón «🧭 Explorar remotos» y también desde las fuentes remotas de la búsqueda normal. Pasan los mismos filtros (nivel, experiencia, práctica, estafas) y solo entran si son remotos. Se gestionan igual que Ofertas: si cambias su estado, pasan a Seguimiento o a Descartadas." },
   fuera_perfil: { titulo: "Fuera de perfil", texto: "Ofertas que la app apartó por no encajar con tu perfil, por ejemplo soporte o mesa de ayuda. Revísalas por si alguna te sirve; la razón de cada una aparece en su tarjeta. El interruptor «Incluir soporte TI» decide si se ven también en Ofertas." },
   sospechosas: { titulo: "Sospechosas", texto: "Ofertas con señales de posible estafa: piden un pago, datos bancarios o contacto solo por WhatsApp. No postules a ninguna sin verificar la empresa por otro medio." },
@@ -2119,7 +2119,7 @@ function pintarLista() {
       : vista() === "ofertas" ? "No hay ofertas con estos filtros. Prueba «Buscar empleos» o relaja los filtros."
       : vista() === "descartadas_usuario" ? "No tienes ofertas descartadas manualmente."
       : vista() === "explorar" ? "Nada por explorar todavía. Prueba «🧭 Explorar remotos»."
-      : vista() === "sin_descripcion" ? "Nada pendiente. Aquí llegan las ofertas cuyo texto la app no recibe (LinkedIn), para que las abras tú."
+      : vista() === "sin_descripcion" ? "Nada pendiente. Aquí llegan las ofertas cuyo texto no llegó, para que las abras tú."
       : "Nada que mostrar aquí.";
     cont.replaceChildren(...cabecera, h("div", { class: "vacio" }, msj)); return;
   }
@@ -2141,7 +2141,7 @@ function pintarLista() {
     
     if (sinTextoFilas.length > 0) {
         elementos.push(h("h3", { class: "grupo" }, "Sin texto", h("span", { class: "cuenta" }, sinTextoFilas.length)));
-        elementos.push(h("p", { class: "sub" }, "El aviso sí tiene descripción en LinkedIn, pero LinkedIn no se la entrega a la app: "
+        elementos.push(h("p", { class: "sub" }, "El aviso sí tiene descripción, pero no le llegó a la app: "
           + "por eso aquí nadie pudo revisar experiencia ni nivel y los filtros solo alcanzaron al título. "
           + "Ábrelo con ↗ y márcalo; «❌ Descartada» no vuelve a aparecer."));
         elementos.push(...pintarItems(sinTextoFilas));
