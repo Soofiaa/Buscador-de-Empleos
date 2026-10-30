@@ -4,7 +4,8 @@ import json
 import requests
 
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
-MODELO = "llama-3.3-70b-versatile"
+# Modelo estándar y compatible en el tier gratuito de Groq
+MODELO = "llama-3.1-8b-instant"
 
 def obtener_api_key():
     return os.environ.get("GROQ_API_KEY") or os.environ.get("JT_GROQ_API_KEY")
@@ -13,7 +14,7 @@ def analizar_oferta(titulo: str, empresa: str, descripcion: str) -> dict:
     api_key = obtener_api_key()
     if not api_key:
         return {
-            "error": "No hay API Key de Groq configurada."
+            "error": "No hay API Key de Groq configurada en las variables de entorno."
         }
     
     if not descripcion or len(descripcion.strip()) < 20:
