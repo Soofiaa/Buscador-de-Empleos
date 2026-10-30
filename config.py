@@ -192,7 +192,9 @@ ZONA_HORARIA = "America/Santiago"   # "hoy" se calcula en hora de Chile, no con 
 MARGEN_HORAS_SIN_ZONA = {"trabajando": 4}
 
 import os
-DB_PATH = os.environ.get("JT_DB", "ofertas.db")      # en Docker: /datos/ofertas.db (volumen)
+# fuera de OneDrive: la nube sincroniza el .db y puede corromper un SQLite abierto. En Docker: /datos/ofertas.db (volumen)
+DB_PATH = os.environ.get("JT_DB") or os.path.join(os.environ.get("LOCALAPPDATA") or os.path.expanduser("~"), "job-tracker", "ofertas.db")
+os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
 # carpeta de respaldos (en Docker: /respaldos, montada desde el equipo; "" = respaldo desactivado)
 RESPALDOS_DIR = os.environ.get("JT_RESPALDOS", "")
 PUERTO = int(os.environ.get("JT_PUERTO", "8765"))
