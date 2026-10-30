@@ -60,6 +60,7 @@ from pathlib import Path
 
 import buscar
 import config
+import ia
 import respaldo
 from informe import PAGINA
 
@@ -357,6 +358,28 @@ def crear_servidor(app: Aplicacion, puerto: int = None, host: str = None) -> Thr
                 if app.iniciar_busqueda("buscar" if ruta == "/api/buscar" else "explorar"):
                     return self._json(202, {"ok": True})
                 return self._json(409, {"error": "ya hay una búsqueda en curso"})
+            if ruta == "/api/ia":
+                url_oferta = datos.get("url")
+                titulo = datos.get("titulo", "")
+                empresa = datos.get("empresa", "")
+                descripcion = datos.get("descripcion", "")
+                if url_oferta and not descripcion:
+                    con = app.conexion()
+                    try:
+                        row = con.execute("SELECT titulo, empresa, raw FROM ofertas WHERE url = ?", (url_oferta,)).fetchone()
+                        if row:
+                            titulo = titulo or row[0]
+                            empresa = empresa or row[1]
+                            if row[2]:
+                                try:
+                                    raw_obj = json.loads(row[2])
+                                    descripcion = descripcion or raw_obj.get("description", "")
+                                except Exception:
+                                    pass
+                    finally:
+                        con.close()
+                resultado_ia = ia.analizar_oferta(titulo, empresa, descripcion)
+                return self._json(200, {"ok": True, "analisis": resultado_ia})
             escrituras = {
                 "/api/marcar": lambda con, d: buscar.marcar(con, d.get("url"), d.get("estado"), d.get("restaurar"),
                                                             d.get("fase"), d.get("origen")),

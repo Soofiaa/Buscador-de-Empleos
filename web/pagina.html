@@ -1850,6 +1850,35 @@ function selectorEstado(o, etiqueta) {
 const inicialDe = o => ((o.empresa || "?").trim().charAt(0) || "?").toUpperCase();
 const clasePrio = o => "prio-" + (o.prioridad || "Media").toLowerCase();
 
+async function analizarIA(o, btn) {
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "⌛ Analizando...";
+  try {
+    const r = await api("/api/ia", { url: o.url, titulo: o.titulo, empresa: o.empresa });
+    if (!r.ok) { mostrarAviso("Error de IA: " + (r.json?.error || r.status)); return; }
+    const a = r.json.analisis;
+    if (a.error) { mostrarAviso(a.error); return; }
+    const tarjeta = h("div", { class: "modal-tarjeta", role: "dialog", "aria-modal": "true", "aria-labelledby": "ia-titulo" },
+      h("div", { class: "modal-cabecera" },
+        h("h2", { id: "ia-titulo" }, "Análisis IA: " + (o.titulo || "Oferta")),
+        h("button", { type: "button", class: "btn-cerrar", "aria-label": "Cerrar", onclick: cerrarDetalle }, "✕")),
+      h("div", { class: "embudo-card", style: "margin-bottom:16px; border-color:var(--accion);" },
+        h("span", { class: "etiqueta" }, "Compatibilidad"),
+        h("span", { class: "valor" }, a.compatibilidad + "%")),
+      h("p", { style: "font-weight:600; margin-bottom:4px;" }, "Resumen ejecutivo:"),
+      h("p", { class: "sub", style: "color:var(--tinta); margin-bottom:12px;" }, a.resumen),
+      h("p", { style: "font-weight:600; margin-bottom:4px;" }, "Puntos fuertes:"),
+      h("ul", { class: "guia-lista", style: "margin-bottom:12px;" }, (a.puntos_fuertes || []).map(p => h("li", {}, p))),
+      h("p", { style: "font-weight:600; margin-bottom:4px;" }, "Alertas / Requisitos:"),
+      h("ul", { class: "guia-lista", style: "color:var(--rojo);" }, (a.alertas || []).map(p => h("li", {}, p))),
+      h("div", { class: "modal-acciones", style: "margin-top:20px;" },
+        h("button", { type: "button", class: "boton", onclick: cerrarDetalle }, "Entendido")));
+    montarDialogo(tarjeta, btn, tarjeta.querySelector(".btn-cerrar"));
+  } catch (e) { mostrarAviso("Error de conexión."); }
+  finally { btn.disabled = false; btn.textContent = original; }
+}
+
 function tarjeta(o, completa) {
   const url = urlSegura(o.url);
   const metaPartes = [o.empresa, o.ubicacion, o.modalidad, o.publicada ? "publicada " + fechaCL(o.publicada) : "", nombreFuente(o.fuente)].filter(Boolean);
@@ -1891,7 +1920,9 @@ function tarjeta(o, completa) {
     h("div", { style: "display:flex; flex-direction:column; gap:6px; margin-top:6px;" },
       selectorEstado(o, "Estado de seguimiento de " + (o.titulo || "la oferta")),
       completa ? h("button", { type: "button", class: "btn-gestionar-oferta", "aria-haspopup": "dialog",
-        onclick: e => abrirDetalle(o, e.currentTarget) }, "⚡ Gestionar proceso & Fases" + (o.notas ? " (con notas)" : "")) : null));
+        onclick: e => abrirDetalle(o, e.currentTarget) }, "⚡ Gestionar proceso & Fases" + (o.notas ? " (con notas)" : "")) : null,
+      completa ? h("button", { type: "button", class: "btn-gestionar-oferta", style: "background:var(--accion); color:var(--accion-tinta);",
+        onclick: e => analizarIA(o, e.currentTarget) }, "🧠 Analizar con IA") : null));
 }
 
 // «Sin texto»: pegar la descripción que copiaste del aviso. El servidor la reclasifica solo a esta oferta.
