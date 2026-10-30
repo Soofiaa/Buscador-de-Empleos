@@ -184,6 +184,10 @@
   h1, h2, h3 { font-family:var(--display); font-weight:700; letter-spacing:-0.025em; }
   button, select, input { font:inherit; color:inherit; }
   :focus-visible { outline:2px solid var(--accion); outline-offset:2px; border-radius:6px; }
+  /* quien pide menos movimiento en el sistema no ve transiciones ni la animación de los avisos */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; scroll-behavior:auto !important; }
+  }
   .sub { color:var(--suave); font-size:.86rem; }
 
   /* ---------- dos columnas */
