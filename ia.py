@@ -1,11 +1,11 @@
-"""Asistente de IA gratuito usando Groq API (modelo Llama 3)."""
+"""Asistente de IA gratuito usando Groq API."""
 import os
 import json
 import requests
 
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
-# Modelo estándar y compatible en el tier gratuito de Groq
-MODELO = "llama-3.1-8b-instant"
+# Modelo disponible devuelto por la API en esta cuenta
+MODELO = "qwen/qwen3.8-27b"
 
 def obtener_api_key():
     return os.environ.get("GROQ_API_KEY") or os.environ.get("JT_GROQ_API_KEY")
