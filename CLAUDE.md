@@ -10,7 +10,7 @@ en producción, lo aprobado y lo pendiente.
   contenedor, configuración (~/.claude, settings.json), instalar algo. Una aprobación vale para ESE cambio.
 - No leer correos. No ingresar credenciales. Solo herramientas gratuitas.
 - Code no postula, no escribe cartas ni contacta empresas por Sofía; la app solo registra lo que ella hace.
-- Sin push. El repositorio de GitHub es privado; aun así se trabaja por reglas, nunca por listas de URLs.
+- El repositorio de GitHub es privado; aun así se trabaja por reglas, nunca por listas de URLs.
 - Commits locales con autor 82609823+Soofiaa@users.noreply.github.com y la línea Co-Authored-By.
 - Nunca tocar la base real ni el contenedor real fuera del procedimiento de despliegue (skill `/desplegar`).
 - Sofia usa la página mientras se trabaja: detenerse si algo antes ≠ después o si cambia el estado de una oferta.
@@ -21,8 +21,9 @@ en producción, lo aprobado y lo pendiente.
 - `telemetria.py`: telemetría pasiva de corridas, solo contadores por fuente en `corridas.detalle` (sin URLs ni
   términos; JobSpy se mide como consultas).
 - `filtros.py`: clasificar (tipos A/B/S/M, SAP/ERP, soporte), sin_genero, plural, ahora_chile. Categorías:
-  principal | sin_descripcion | fuera_perfil | sospechosa | descartada. `sin_descripcion` = fuente sin texto
-  (LinkedIn: su robots.txt prohíbe pedir el detalle), así que experiencia y nivel los revisa Sofia en la página.
+  principal | sin_descripcion | fuera_perfil | sospechosa | descartada. `sin_descripcion` = oferta de una fuente sin
+  texto (Glassdoor/Jooble/LinkedIn) que llegó vacía; experiencia y nivel los revisa Sofia en la página. LinkedIn pide
+  el detalle con JobSpy (`fetch_description`) por decisión de Sofia (30-10-2026), aunque su robots.txt lo prohíbe.
 - `config.py`: perfil, reglas de clasificación, rutas (`JT_DB`, `JT_RESPALDOS`).
 - `servidor.py`: HTTP (ThreadingHTTPServer), rutas /api/*, Host/Origin locales, límites de cuerpo por ruta.
 - `web/pagina.html`: la página (informe.PAGINA la lee). Funciones puras entre `// <puras>` y `// </puras>`.

@@ -585,8 +585,10 @@ def consulta(sitio: str, termino: str, lugar: str, resultados: int | None = None
         kw["country_indeed"] = "usa"   # JobSpy no tiene dominio Glassdoor para Chile: rodeo vía glassdoor.com
         # sin esto el listado llega SIN descripción y no se puede revisar experiencia ni nivel (ver NOTAS.md, 21-10).
         # En Glassdoor el detalle va por el mismo endpoint /graph del listado y pide uno por cada 25 ofertas.
-        # LinkedIn NO lleva este parámetro: ahí sería una solicitud por oferta a /jobs-guest/, que su robots.txt
-        # prohíbe ("Disallow: /" para todos). Sus ofertas quedan en 'sin_descripcion'.
+        kw["fetch_description"] = True
+    elif sitio == "linkedin":
+        # Decisión de Sofia (30-10-2026): se pide el detalle aunque robots.txt diga "Disallow: /". Es una solicitud por
+        # oferta; si falla, la oferta llega sin texto y queda en 'sin_descripcion' como antes.
         kw["fetch_description"] = True
     return kw
 

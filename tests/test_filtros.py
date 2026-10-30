@@ -685,11 +685,11 @@ def test_sin_descripcion_postulada_pasa_a_seguimiento_sin_repetirse(tmp_path):
     assert [f["url"] for f in d["principal"]] == ["http://li"] and d["sin_descripcion"] == []
 
 
-def test_glassdoor_pide_la_descripcion_y_linkedin_no():
-    """Glassdoor trae el detalle por el mismo endpoint del listado; LinkedIn no se le pide (robots: Disallow /)."""
-    assert buscar.consulta("glassdoor", "qa", "Santiago, Chile")["fetch_description"] is True
-    for sitio in ("linkedin", "indeed"):
-        assert "fetch_description" not in buscar.consulta(sitio, "qa", "Santiago, Chile")
+def test_glassdoor_y_linkedin_piden_la_descripcion():
+    """Glassdoor trae el detalle por el mismo endpoint del listado; LinkedIn por su propio parámetro de JobSpy."""
+    for sitio in ("glassdoor", "linkedin"):
+        assert buscar.consulta(sitio, "qa", "Santiago, Chile")["fetch_description"] is True
+    assert "fetch_description" not in buscar.consulta("indeed", "qa", "Santiago, Chile")
 
 
 def test_descartada_por_la_usuaria_no_se_cuela_en_principal(tmp_path):

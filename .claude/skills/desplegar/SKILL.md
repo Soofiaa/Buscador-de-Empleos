@@ -15,7 +15,7 @@ Script de huellas: `.claude/skills/desplegar/huellas.py` (solo lectura, solo bib
 ## 0. Precondiciones (si una falla, detenerse)
 - Candidata revisada y aprobada por Sofia.
 - `venv/Scripts/python.exe -m pytest -q` en verde (mostrar solo el resumen y los fallos).
-- Commit hecho (sin push) y `git status` sin cambios del despliegue.
+- Commit hecho y `git status` sin cambios del despliegue.
 - sha256 de TODOS los respaldos anteriores (`C:/Users/sofia/Respaldos/job-tracker-referencias`, volumen y
   `C:/Users/sofia/Respaldos/job-tracker`), guardado para compararlo al final.
 
@@ -64,7 +64,7 @@ no declarada, o cambian versión, integrity_check, postuladas o POR VERIFICAR): 
   su sha256 completo y qué se pierde al volver.
 - Probar la reversión tal como quedó escrita, sobre una copia en un volumen temporal; luego borrarlo.
 - Confirmar que los respaldos anteriores siguen intactos (mismos sha256 del paso 0).
-- Actualizar "Estado actual" en `NOTAS.md`. Commit local (sin push).
+- Actualizar "Estado actual" en `NOTAS.md`. Commit y push.
 
 ## 9. Limpieza
 Borrar el contenedor y el volumen de la candidata y las copias temporales; listar para confirmar que no quedan.
