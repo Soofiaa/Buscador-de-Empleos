@@ -782,3 +782,20 @@ docker compose up -d --no-build
 **Qué se pierde al volver:** vuelve la búsqueda larga de LinkedIn (~38 min por corrida). No se pierden ofertas ni estados.
 Reversión probada en copia (volumen temporal, 8767): healthy, GET / 200 y huellas idénticas a la referencia.
 
+
+## Descripción de LinkedIn (30-10-2026)
+
+Commits 2492207 y f348b48 (rama feat/unificar-ofertas, con push): LinkedIn pide el detalle de cada oferta con JobSpy (`fetch_description`), por decisión de Sofia aunque su robots.txt lo prohíbe; modelo de Groq `qwen/qwen3.8-27b` y `GROQ_API_KEY` en compose. Base sin cambios, sin reclasificar: las ofertas ya guardadas en «Sin texto» siguen ahí.
+Imagen anterior: job-tracker:pre-linkedin-desc (sha256:387c32eaa008e04dda9b5d823b9cc72fdcd238ab1e36f3a5da5b2729bf5c4fb9). Imagen desplegada: job-tracker-jobtracker:latest = sha256:6ed8d23ebf224c057d43d932f09d41e283eae7ffef1a048f69b1f2d36e0daddb.
+Referencia: ofertas_pre_linkedindesc_20261030.db (volumen y C:\Users\sofia\Respaldos\job-tracker-referencias\), sha256 b7ed580bb89c23ee4fd69df528a1536495f618ade87663d652bd58932757b355, integrity_check ok. Salida al detener: 0. Huellas antes y después: RESULTADO OK.
+
+Para volver atrás:
+
+```
+docker compose stop jobtracker
+docker tag job-tracker:pre-linkedin-desc job-tracker-jobtracker:latest
+docker compose up -d --no-build
+```
+
+**Qué se pierde al volver:** las ofertas nuevas de LinkedIn vuelven a llegar sin descripción (a «Sin texto»), y el asistente de IA vuelve al modelo anterior. No se pierden ofertas ni estados.
+Reversión probada en copia (volumen temporal, 8767): healthy, GET / 200, huellas idénticas a la referencia y LinkedIn sin `fetch_description`.

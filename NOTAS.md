@@ -7,21 +7,23 @@ manda lo más reciente y corrige la nota.
 ## Estado actual (se actualiza en cada despliegue; leer al empezar cada sesión)
 
 ### Producción y base
-- **Vigente: despliegue de mejoras de sesión (29-10-2026)**, commits `b723f1f`, `cdf5c0c`, `72ca06a` (rama
-  `feat/unificar-ofertas`). Imagen `job-tracker-jobtracker:latest` =
-  `sha256:1f7f7e89d394c120b926b17e93014ff4c4c85405efa5f47dfc2e420862ec7ce7`, healthy en `127.0.0.1:8765`.
-- Imagen anterior para volver atrás: `job-tracker:pre-fase4-20261029` (`sha256:14c69db1…`).
-- Referencia: `ofertas_pre_fase4_20261029.db`, sha256 `a8bddcf343d6479a3a19762602598990d32fe13fe89e5991511ecdbfb09c54ef`,
+- **Vigente: descripción de LinkedIn (30-10-2026)**, commits `2492207`, `f348b48` (rama `feat/unificar-ofertas`, con
+  push a GitHub). Imagen `job-tracker-jobtracker:latest` =
+  `sha256:6ed8d23ebf224c057d43d932f09d41e283eae7ffef1a048f69b1f2d36e0daddb`, healthy en `127.0.0.1:8765`.
+- Imagen anterior para volver atrás: `job-tracker:pre-linkedin-desc` (`sha256:387c32ea…`).
+- Referencia: `ofertas_pre_linkedindesc_20261030.db`, sha256 `b7ed580bb89c23ee4fd69df528a1536495f618ade87663d652bd58932757b355`,
   integrity_check ok. Procedimiento de reversión en `REVERSION_FASE_A.md`.
-- Cambios: NOTAS.md compacto (historial en NOTAS_HISTORIAL.md); avisos de Jooble sin clave y fuentes en 0 llegan a la
-  página; base local por defecto fuera de OneDrive. Sin cambios de esquema ni reclasificación.
-- Línea base vigente (29-10-2026): v7; 6770 ofertas, 75 corridas, 421 filas en `historial_estados`, 6 ajustes, 27
+- Cambios: LinkedIn trae la descripción con JobSpy (`fetch_description`, decisión de Sofia pese a robots.txt); modelo
+  de Groq `qwen/qwen3.8-27b`; se quitó la regla «Sin push». Sin cambios de esquema ni reclasificación.
+- Línea base vigente (30-10-2026): v7; 7125 ofertas, 82 corridas, 460 filas en `historial_estados`, 6 ajustes, 27
   `terminos_no_disponibles`; 44 postuladas; 6 POR VERIFICAR. Salida al detener: `0`.
 - Respaldos: cualquier cambio de base se hace con referencia sha256, huellas antes y después, y reversión probada en
   copia (puerto 8767), según el skill `/desplegar`.
 
 ### Sin desplegar
-- Ninguno. El último commit (`682cc6a`) es la nota del despliegue vigente y el árbol de trabajo está limpio.
+- Ninguno.
+- **A vigilar:** si LinkedIn empieza a responder 429 seguido (una petición extra por oferta), bajar
+  `RESULTADOS_POR_BUSQUEDA` o `TERMINOS_LINKEDIN`.
 
 ## Pendientes
 
