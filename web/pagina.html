@@ -574,6 +574,12 @@
           <div id="puestos-panel"><p class="nota">Cargando…</p></div>
         </div>
         <div class="ajustes-bloque">
+          <h4>Ubicaciones</h4>
+          <div id="ubicaciones-panel"><p class="nota">Cargando…</p></div>
+        </div>
+      </div>
+      <div class="ajustes-columnas">
+        <div class="ajustes-bloque">
           <h4>Exclusiones</h4>
           <div id="exclusiones-panel"><p class="nota">Cargando…</p></div>
         </div>
@@ -1170,6 +1176,55 @@ async function cargarPuestos() {
   const r = await api("/api/ajustes/puestos");
   if (r.ok) pintarPuestos(r.json.lista);
   else $("puestos-panel").replaceChildren(h("p", { class: "nota" }, "No se pudieron cargar los puestos."));
+}
+
+// ---------- ubicaciones (lista + checkbox remoto)
+const UBICACIONES_MAX = 10;
+function pintarUbicaciones(datos) {
+  const panel = $("ubicaciones-panel");
+  const borrador = { lista: [...(datos.lista || [])], remoto: !!datos.remoto };
+  const campo = h("input", { type: "text", maxlength: "60", placeholder: "Ej: Santiago, Chile", "aria-label": "Nueva ubicación", autocomplete: "off" });
+  const errores = h("div", { class: "sub", role: "alert", style: "color:var(--rojo); font-size:.78rem; margin-top:4px;" });
+  const listaUl = h("ul", { style: "list-style:none; padding:0; margin:6px 0; max-height:150px; overflow:auto;" });
+  const checkRemoto = h("label", { style: "display:flex; align-items:center; gap:6px; margin-top:8px; font-size:.9rem;" },
+    h("input", { type: "checkbox", checked: borrador.remoto, onchange: (e) => { borrador.remoto = e.target.checked; } }),
+    "Incluir ofertas remoto");
+  const guardar = h("button", { class: "boton sec ancho", type: "button", style: "font-size:.8rem; padding:7px 8px; justify-content:center; margin-top:8px;" }, "💾 Guardar ubicaciones");
+  const pintarItems = () => listaUl.replaceChildren(...borrador.lista.map((u, i) =>
+    h("li", { style: "display:flex; align-items:center; justify-content:space-between; gap:6px; padding:3px 0; font-size:.85rem;" },
+      h("span", {}, u),
+      h("button", { type: "button", class: "btn-manual-header", "aria-label": "Quitar " + u, style: "padding:0 6px;",
+        onclick: () => { borrador.lista.splice(i, 1); pintarItems(); errores.textContent = ""; } }, "✕"))));
+  const agregar = () => {
+    const u = campo.value.replace(/\s+/g, " ").trim();
+    if (!u) return;
+    if (borrador.lista.length >= UBICACIONES_MAX) { errores.textContent = `Como máximo ${UBICACIONES_MAX} ubicaciones.`; return; }
+    if (u.length > 60 || !u.split("").every(c => c.charCodeAt(0) <= 127 || /[\p{L}]/u.test(c))) {
+      errores.textContent = `«${u}»: máximo 60 caracteres.`; return;
+    }
+    if (borrador.lista.includes(u)) { errores.textContent = `«${u}»: ya está en la lista.`; return; }
+    borrador.lista.push(u); campo.value = ""; errores.textContent = ""; pintarItems(); campo.focus();
+  };
+  campo.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); agregar(); } });
+  guardar.onclick = async () => {
+    errores.textContent = "";
+    guardar.disabled = true;
+    const r = await api("/api/ajustes/ubicaciones", { lista: borrador.lista, remoto: borrador.remoto });
+    guardar.disabled = false;
+    if (!r.ok) { errores.textContent = mensajeError(r.status, r.json); return; }
+    mostrarAviso("Ubicaciones guardadas: se usan en la próxima búsqueda");
+    pintarUbicaciones(r.json);
+  };
+  pintarItems();
+  panel.replaceChildren(
+    h("p", { class: "nota" }, "Dónde buscar. Los cambios se usan en la próxima búsqueda."),
+    h("div", { style: "display:flex; gap:6px;" }, campo, h("button", { type: "button", class: "boton sec", onclick: agregar }, "Agregar")),
+    errores, listaUl, checkRemoto, guardar);
+}
+async function cargarUbicaciones() {
+  const r = await api("/api/ajustes/ubicaciones");
+  if (r.ok) pintarUbicaciones(r.json);
+  else $("ubicaciones-panel").replaceChildren(h("p", { class: "nota" }, "No se pudieron cargar las ubicaciones."));
 }
 
 // ---------- exclusiones (tres listas: empresas, títulos y descripciones; el servidor valida los patrones)
@@ -1791,7 +1846,7 @@ const AYUDA_PESTANA = {
   ofertas: { titulo: "Ofertas", texto: "Las ofertas que la app considera relevantes y que aún no decidiste. Revisa cada una: abre el aviso con el título o con ↗, y cambia su estado desde la tarjeta. Si no te interesa, márcala como Descartada: sale de esta lista y queda en Descartadas. Si postulaste a una que la búsqueda no trajo, usa «➕ Agregar postulación manual» (arriba): si ya la tienes, la app te muestra la existente y te deja guardarla igual. Al final aparecen las «Sin texto»: ofertas cuya descripción no llegó (a veces pasa con LinkedIn, Glassdoor o Jooble). Pega la descripción en su tarjeta y la app la revisa." },
   seguimiento: { titulo: "Seguimiento", texto: "Las ofertas en proceso (revisadas, postuladas o en entrevista). Arriba eliges cómo verlas: Tablero, Tarjetas o Compacta. En Tablero, arrastra cada tarjeta a su etapa, o usa «Mover a…». Cada movimiento tiene «Deshacer». Con «⚡ Gestionar proceso» anotas la fecha de postulación, la fase, las notas y el sueldo. Para agregar una postulación que no trajo la búsqueda, usa «➕ Agregar postulación manual»; si ya existe una con el mismo cargo y empresa, te ofrece verla o guardarla de todas formas." },
   metricas: { titulo: "Métricas", texto: "Indicadores sobre todas tus ofertas relevantes: cuántas postulaciones, cuántas respuestas, el embudo por etapa y los días promedio. Abajo hay desgloses por fuente, modalidad y tipo, y la actividad de las últimas semanas. Es solo lectura: para cambiar algo, ve a Ofertas o a Seguimiento." },
-  ajustes: { titulo: "Ajustes", texto: "Tres secciones. Qué busco: los puestos que se piden a las fuentes y las exclusiones (lo que nunca debe aparecer); los cambios se usan en la próxima búsqueda. Datos: CSV de Ofertas, CSV de Seguimiento, respaldo JSON y «Respaldar ahora». Apariencia y avisos: tema, contraste reforzado y avisos del navegador. Lo que eliges se recuerda en este navegador." },
+  ajustes: { titulo: "Ajustes", texto: "Tres secciones. Qué busco: los puestos y las ubicaciones que se piden a las fuentes, y las exclusiones (lo que nunca debe aparecer); los cambios se usan en la próxima búsqueda. Datos: CSV de Ofertas, CSV de Seguimiento, respaldo JSON y «Respaldar ahora». Apariencia y avisos: tema, contraste reforzado y avisos del navegador. Lo que eliges se recuerda en este navegador." },
   sin_descripcion: { titulo: "Descripción desconocida", texto: "Ofertas que llegaron sin descripción (a veces pasa con LinkedIn, Glassdoor o Jooble): la app no puede revisar su experiencia ni su nivel. Abre el aviso con ↗, copia la descripción completa y pégala en su tarjeta con «Guardar descripción». Si cumple, pasa a Ofertas; si no, queda descartada." },
   explorar: { titulo: "Explorar remotos", texto: "Roles remotos fuera de tu perfil TI que podrían calzarte: implementación u onboarding, CRM y automatización sin código, IA y datos, documentación técnica, producto y UX, asistente virtual, traducción, trabajos freelance o por proyecto, y otros. Llegan con el botón «🧭 Explorar remotos» y también desde las fuentes remotas de la búsqueda normal. Pasan los mismos filtros (nivel, experiencia, práctica, estafas) y solo entran si son remotos. Se gestionan igual que Ofertas: si cambias su estado, pasan a Seguimiento o a Descartadas." },
   fuera_perfil: { titulo: "Fuera de perfil", texto: "Ofertas que la app apartó por no encajar con tu perfil, por ejemplo soporte o mesa de ayuda. Revísalas por si alguna te sirve; la razón de cada una aparece en su tarjeta. El interruptor «Incluir soporte TI» decide si se ven también en Ofertas." },
@@ -2209,6 +2264,7 @@ aplicarApartado();
 pintarMenu();
 cargar();
 cargarPuestos();
+cargarUbicaciones();
 cargarExclusiones();
 pintarAvisos();
 setInterval(() => { if (!sondeo) estado(); }, 60000);   // revisa cada minuto si entró una búsqueda nueva

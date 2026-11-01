@@ -216,6 +216,38 @@ def guardar_puestos(con, datos) -> dict:
     return {"lista": lista}
 
 
+def leer_ubicaciones(con) -> dict:
+    """Ubicaciones guardadas, o fallback a config (UBICACIONES + INCLUIR_REMOTO).
+    Retorna: {"lista": [...], "remoto": bool}"""
+    fila = con.execute("SELECT valor FROM ajustes WHERE clave = 'ubicaciones'").fetchone()
+    if fila:
+        try:
+            datos = json.loads(fila[0])
+            lista = datos.get("lista", [])
+            remoto = datos.get("remoto", False)
+            if lista or remoto:
+                return {"lista": lista, "remoto": remoto}
+        except (ValueError, AttributeError):
+            pass
+    return {"lista": list(config.UBICACIONES), "remoto": config.INCLUIR_REMOTO}
+
+
+def guardar_ubicaciones(con, datos) -> dict:
+    """POST /api/ajustes/ubicaciones: {"lista": [...], "remoto": bool}."""
+    if not isinstance(datos, dict):
+        raise ErrorDatos(400, 'se espera {"lista": [...], "remoto": true|false}')
+    lista = [str(u).strip() for u in datos.get("lista", []) if str(u).strip()]
+    if len(lista) > 10 or any(len(u) > 60 or not u.isprintable() for u in lista):
+        raise ErrorDatos(400, "hasta 10 ubicaciones, de máximo 60 caracteres cada una")
+    remoto = bool(datos.get("remoto", False))
+    if not lista and not remoto:
+        raise ErrorDatos(400, "necesitas al menos una ubicación o habilitar 'remoto'")
+    with transaccion(con):
+        con.execute("INSERT OR REPLACE INTO ajustes (clave, valor) VALUES ('ubicaciones', ?)",
+                    (json.dumps({"lista": lista, "remoto": remoto}, ensure_ascii=False),))
+    return {"lista": lista, "remoto": remoto}
+
+
 class BaseOcupada(Exception):
     """Otra escritura tuvo la base tomada más de BUSY_TIMEOUT_MS: no se escribió nada."""
 
@@ -779,8 +811,9 @@ def buscar_ofertas(con) -> int:
     _vigilar_429()
     aplicar_exclusiones(con)   # las exclusiones que Sofia guardó, antes de clasificar lo que llegue
 
-    lugares = list(config.UBICACIONES) + ([REMOTO] if config.INCLUIR_REMOTO else [])
-    terminos_indeed = leer_puestos(con)     # la lista que Sofia editó, o la de config
+    ubic = leer_ubicaciones(con)
+    lugares = list(ubic["lista"]) + ([REMOTO] if ubic["remoto"] else [])
+    terminos_indeed = leer_puestos(con)     # la lista libre que el usuario edita, o la de config
     terminos_linkedin = config.TERMINOS_LINKEDIN
     plan = [(s, t, l) for s in config.SITIOS if s not in PORTALES
             for t in (terminos_indeed if s == "indeed"
