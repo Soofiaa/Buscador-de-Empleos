@@ -7,7 +7,19 @@ manda lo más reciente y corrige la nota.
 ## Estado actual (se actualiza en cada despliegue; leer al empezar cada sesión)
 
 ### Producción y base
-- **Vigente: textos de «Sin texto» (30-10-2026)**, commit `7042206` sobre la descripción de LinkedIn (`2492207`,
+- **Vigente: ubicaciones editables (31-10-2026)**, commit `aeaae27` (rama `feat/unificar-ofertas`, con push).
+  Imagen `job-tracker-jobtracker:latest` = `sha256:729b662fffb18afb81c79ffe3b64eadc740fa8c7694c018741c3b9849ac4f64f`,
+  healthy en `127.0.0.1:8765`. Imagen anterior para volver atrás: `job-tracker:pre-ubicaciones-20261031` (`sha256:6d225a25…`).
+- Referencia: `ofertas_pre_ubicaciones_20261031.db` en `C:\Users\sofia\Respaldos\job-tracker-referencias\`, integrity_check ok.
+  Huellas ANTES y DESPUÉS: OK, base sin cambios (v7, 7406 ofertas, 95 corridas, 471 en historial, 44 postuladas, 6 POR VERIFICAR).
+  Salida al detener: 0. Sin cambios de esquema ni reclasificación.
+- Anterior: textos de «Sin texto» (30-10-2026).
+  Imagen `job-tracker-jobtracker:latest` = `sha256:6d225a25…` **sin cambio de imagen respecto a la anterior en el
+  registro: la reconstrucción dio el mismo id**; healthy en `127.0.0.1:8765`. Imagen anterior para volver atrás:`n  `job-tracker:pre-ubicaciones-20261031` (`6d225a2500ce`).
+- Referencia: `ofertas_pre_ubicaciones_20261031.db` (copia también en el volumen, borrada tras la prueba), integrity_check ok.
+  Huellas ANTES y DESPUÉS: OK, base sin cambios (v7, 7406 ofertas, 95 corridas, 471 historial, 44 postuladas, 6 POR VERIFICAR).
+  Salida al detener: 0. Sin cambios de esquema ni reclasificación.
+- Despliegue previo: textos de «Sin texto» (30-10-2026), commit `7042206` sobre la descripción de LinkedIn (`2492207`,
   `f348b48`; rama `feat/unificar-ofertas`, con push). Imagen `job-tracker-jobtracker:latest` =
   `sha256:6d225a2500ce12ec49a064bda0decc682baec8d0a9b1f6634ce4d1039d9e976d`, healthy en `127.0.0.1:8765`.
 - Imagen anterior para volver atrás: `job-tracker:pre-textos-sintexto` (`sha256:6ed8d23e…`).
@@ -42,3 +54,6 @@ manda lo más reciente y corrige la nota.
 - **Pregunta abierta:** «Ofertas 0» con «2 relevantes nuevas» en la página (ya pasaba antes del despliegue de avisos).
 - **Papelera de OneDrive:** los originales borrados el 14-10 siguen en la nube hasta que Sofia la vacíe a mano.
 - **Base local en OneDrive:** `ofertas.db` en la carpeta del proyecto está dentro de OneDrive. Sin decisión aún.
+
+
+
