@@ -30,6 +30,9 @@
   POST /api/ajustes/ubicaciones {"lista": [...], "remoto": bool} -> {ok, lista, remoto}
   GET  /api/ajustes/exclusiones  {empresas, titulo, descripcion}: lo guardado o los valores de config
   POST /api/ajustes/exclusiones  {empresas, titulo, descripcion} (nada más) -> {ok, ...}; validación en exclusiones.py
+  POST /api/aviso          {"url"} (http/https) -> {ok, aviso: {titulo, empresa, ubicacion, modalidad, sueldo,
+                          descripcion}}. Lee el JobPosting de la página (robots.txt). Si el sitio no lo publica o
+                          rechaza la lectura -> 502 {error}; URL inválida -> 400. No guarda nada.
   POST /api/oferta/manual  {titulo, empresa (obligatorios), url (http/https), ubicacion, modalidad, estado,
                           fecha_postulacion, notas, fase, sueldo_manual, prioridad_manual} -> 201 {ok, oferta};
                           si la URL o la misma oferta (cargo+empresa+ciudad) ya existe y estaba DESCARTADA, la revive
@@ -63,7 +66,10 @@ from pathlib import Path
 import buscar
 import config
 import ia
+import rellenar_aviso
 import respaldo
+from red import Bloqueo, ClienteHTTP, ErrorFuente, NoEncontrada
+from robots import GestorRobots
 from informe import PAGINA
 
 LOCALES = ("127.0.0.1", "localhost", "[::1]")
@@ -366,6 +372,17 @@ def crear_servidor(app: Aplicacion, puerto: int = None, host: str = None) -> Thr
                 if app.iniciar_busqueda("buscar" if ruta == "/api/buscar" else "explorar"):
                     return self._json(202, {"ok": True})
                 return self._json(409, {"error": "ya hay una búsqueda en curso"})
+            if ruta == "/api/aviso":
+                url = datos.get("url") if isinstance(datos, dict) else None
+                if not isinstance(url, str) or not buscar._url_valida(url.strip()):
+                    return self._json(400, {"error": "la URL debe empezar con http:// o https://"})
+                try:
+                    aviso = rellenar_aviso.desde_url(url.strip(), ClienteHTTP(), GestorRobots(buscar.USER_AGENT_HTTP))
+                except (Bloqueo, NoEncontrada, ErrorFuente) as ex:
+                    return self._json(502, {"error": rellenar_aviso.mensaje_error(ex)})
+                except Exception as ex:
+                    return self._json(502, {"error": f"no se pudo leer el aviso: {type(ex).__name__}"})
+                return self._json(200, {"ok": True, "aviso": aviso})
             if ruta == "/api/ia":
                 url_oferta = datos.get("url")
                 titulo = datos.get("titulo", "")

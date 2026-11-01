@@ -1788,6 +1788,26 @@ function abrirManual(origen) {
   const titulo = h("input", { type: "text", id: "manual-titulo", maxlength: "200", autocomplete: "off", placeholder: "Ej: Analista QA" });
   const empresa = h("input", { type: "text", id: "manual-empresa", maxlength: "200", autocomplete: "off" });
   const url = h("input", { type: "url", id: "manual-url", maxlength: "2000", placeholder: "https://… (opcional)" });
+  const btnCompletar = h("button", { type: "button", class: "boton sec", style: "flex-shrink:0; padding:4px 10px; font-size:.85rem;",
+    onclick: async () => {
+      error.hidden = true;
+      const u = url.value.trim();
+      if (!u) { error.textContent = "Ingresa un enlace para autocompletar."; error.hidden = false; return; }
+      btnCompletar.disabled = true; btnCompletar.textContent = "⌛ Leyendo...";
+      const r = await api("/api/aviso", { url: u });
+      btnCompletar.disabled = false; btnCompletar.textContent = "Autocompletar";
+      if (!r.ok) { error.textContent = r.json?.error || "Error al leer el aviso."; error.hidden = false; return; }
+      const av = r.json.aviso;
+      if (av.titulo) titulo.value = av.titulo;
+      if (av.empresa) empresa.value = av.empresa;
+      if (av.ubicacion) ubicacion.value = av.ubicacion;
+      if (av.modalidad) {
+        // Asegurar que la modalidad coincida con las opciones o dejar la primera por defecto
+        modalidad.value = ["Remoto", "Híbrido", "Presencial"].includes(av.modalidad) ? av.modalidad : "";
+      }
+      if (av.sueldo) sueldo.value = av.sueldo;
+      mostrarAviso("Datos autocompletados ✓");
+    } }, "Autocompletar");
   const ubicacion = h("input", { type: "text", id: "manual-ubicacion", maxlength: "200", placeholder: "Ej: Santiago" });
   const modalidad = h("select", { id: "manual-modalidad" }, ["", "Remoto", "Híbrido", "Presencial"].map(v => h("option", { value: v }, v || "Sin indicar")));
   const estado = h("select", { id: "manual-estado" }, ESTADOS.map(v => h("option", { value: v }, ETIQUETAS_ESTADO[v])));
@@ -1822,7 +1842,9 @@ function abrirManual(origen) {
       await enviar(false);
     } },
     h("div", { class: "form-fila" }, grupo("Cargo *", titulo), grupo("Empresa *", empresa)),
-    h("div", { class: "form-fila" }, grupo("Enlace del aviso", url), grupo("Ubicación", ubicacion)),
+    h("div", { class: "form-fila" }, 
+      h("div", { class: "form-grupo" }, h("label", { for: "manual-url" }, "Enlace del aviso"), h("div", { style: "display:flex; gap:6px;" }, url, btnCompletar)),
+      grupo("Ubicación", ubicacion)),
     h("div", { class: "form-fila" }, grupo("Estado", estado), grupo("Fecha de postulación", fecha)),
     h("div", { class: "form-fila" }, grupo("Modalidad", modalidad), grupo("Prioridad", prioridad)),
     h("div", { class: "form-fila" }, grupo("Sueldo", sueldo), grupo("Fase", fase)),
