@@ -76,7 +76,8 @@ LOCALES = ("127.0.0.1", "localhost", "[::1]")
 LIMITE_CUERPO = 10_000
 # rutas con textos largos: 5000 caracteres con tildes o emojis ocupan más de 10 KB en UTF-8
 LIMITES_POR_RUTA = {"/api/nota": 64_000, "/api/oferta/manual": 64_000, "/api/descripcion": 64_000,
-                    "/api/aviso/ia": 20_000}   # 5000 caracteres x 12 bytes si el cliente los escapa como \uXXXX
+                    # 10.000 caracteres x hasta 4 bytes UTF-8 (emojis) + el JSON: 48 KB; por encima, 413 antes de leer
+                    "/api/aviso/ia": 48_000}   # 5000 caracteres x 12 bytes si el cliente los escapa como \uXXXX
 MAXIMO_A_DESCARTAR = 1_000_000      # un cuerpo demasiado grande se lee (hasta aquí) y se descarta antes del 413
 CSP = ("default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; font-src 'self'; "
        "connect-src 'self'; form-action 'none'; base-uri 'none'")
@@ -422,8 +423,13 @@ def crear_servidor(app: Aplicacion, puerto: int = None, host: str = None) -> Thr
                 return self._json(200, {"ok": True, "aviso": aviso})
             if ruta == "/api/aviso/ia":               # texto pegado por ti: la IA lo ordena; no visita ningún sitio
                 texto = datos.get("texto") if isinstance(datos, dict) else None
-                if not isinstance(texto, str) or len(texto.strip()) < 30:
-                    return self._json(400, {"error": "pega el texto completo del aviso"})
+                if not isinstance(texto, str):
+                    return self._json(400, {"error": "falta el texto del aviso"})
+                if len(texto.strip()) < ia.MIN_TEXTO_AVISO:
+                    return self._json(400, {"error": "el texto parece demasiado corto para contener una descripción "
+                                                     f"de empleo completa (mínimo {ia.MIN_TEXTO_AVISO} caracteres)"})
+                if len(texto) > ia.MAX_TEXTO_AVISO:
+                    return self._json(400, {"error": f"el texto supera los {ia.MAX_TEXTO_AVISO} caracteres"})
                 aviso = ia.extraer_aviso(texto)
                 if "error" in aviso:
                     return self._json(502, {"error": aviso["error"]})

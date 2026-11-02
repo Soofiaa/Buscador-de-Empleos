@@ -1,6 +1,10 @@
 """Asistente de IA gratuito usando Groq API."""
-import os
+import hashlib
 import json
+import os
+import threading
+import time
+
 import requests
 
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
@@ -10,8 +14,39 @@ MODELO = "qwen/qwen3.8-27b"
 def obtener_api_key():
     return os.environ.get("GROQ_API_KEY") or os.environ.get("JT_GROQ_API_KEY")
 
+MIN_TEXTO_AVISO = 150          # menos que esto no es una descripción de empleo completa
+MAX_TEXTO_AVISO = 10_000
+CACHE_SEGUNDOS = 15 * 60       # el mismo texto dentro de este plazo no vuelve a consumir Groq
+CACHE_MAX = 50
+_cache = {}                    # clave (sha256 del texto normalizado) -> (vence, resultado)
+_cache_lock = threading.Lock()  # ThreadingHTTPServer atiende pedidos en hilos distintos
+
+
+def _clave_texto(texto: str) -> str:
+    # los espacios y saltos de línea no cambian el aviso: dos pegados iguales salvo espacios son el mismo
+    return hashlib.sha256(" ".join(texto.split()).encode("utf-8")).hexdigest()
+
+
 def extraer_aviso(texto: str) -> dict:
-    """Saca cargo, empresa, ubicación, modalidad y sueldo de un texto pegado por el usuario. No visita ningún sitio."""
+    """Saca cargo, empresa, ubicación, modalidad y sueldo de un texto pegado por el usuario. No visita ningún sitio.
+    Un resultado correcto se guarda CACHE_SEGUNDOS: un reenvío del mismo texto no llama a Groq otra vez.
+    Los errores no se guardan (así se puede reintentar)."""
+    clave, ahora = _clave_texto(texto), time.monotonic()
+    with _cache_lock:
+        for k in [k for k, (vence, _) in _cache.items() if vence <= ahora]:
+            del _cache[k]
+        if clave in _cache:
+            return dict(_cache[clave][1])
+    resultado = _extraer_aviso_api(texto)
+    if "error" not in resultado:
+        with _cache_lock:
+            if len(_cache) >= CACHE_MAX:             # fuera el más viejo
+                del _cache[min(_cache, key=lambda k: _cache[k][0])]
+            _cache[clave] = (ahora + CACHE_SEGUNDOS, dict(resultado))
+    return resultado
+
+
+def _extraer_aviso_api(texto: str) -> dict:
     api_key = obtener_api_key()
     if not api_key:
         return {"error": "No hay API Key de Groq configurada en las variables de entorno."}

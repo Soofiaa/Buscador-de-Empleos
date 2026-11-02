@@ -224,6 +224,9 @@
   .progreso.error { color:var(--rojo); }
   .barra { height:6px; background:var(--panel2); border-radius:99px; overflow:hidden; margin:4px 2px 12px; position:relative; }
   .barra-tiempo { position:absolute; right:0; top:-18px; font-size:.75rem; font-weight:600; opacity:.75; }
+  .spinner-ia { display:inline-block; width:12px; height:12px; margin-right:8px; vertical-align:-2px; border:2px solid currentColor; border-right-color:transparent; border-radius:50%; animation:girar-ia .8s linear infinite; }
+  @keyframes girar-ia { to { transform:rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .spinner-ia { animation-duration:3s; } }
   .barra-relleno { height:100%; width:0; background:var(--accion); border-radius:99px; transition:width .4s ease; }
 
   .historial { margin-top:14px; border-top:1px solid var(--borde); padding-top:12px; }
@@ -1838,18 +1841,58 @@ function abrirManual(origen) {
       }
       rellenar(r.json.aviso);
     } }, "Autocompletar");
-  const textoIA = h("textarea", { id: "manual-texto-ia", rows: "5", maxlength: "10000", placeholder: "Pega aquí el texto del aviso (cargo, empresa, ubicación, sueldo…)" });
-  const btnIA = h("button", { type: "button", class: "boton sec", onclick: async () => {
-      error.hidden = true;
-      if (textoIA.value.trim().length < 30) { error.textContent = "Pega el texto completo del aviso."; error.hidden = false; return; }
-      btnIA.disabled = true; btnIA.textContent = "⌛ La IA está leyendo...";
-      const r = await api("/api/aviso/ia", { texto: textoIA.value });
-      btnIA.disabled = false; btnIA.textContent = "✨ Completar con IA";
-      if (!r.ok) { error.textContent = r.json?.error || "La IA no pudo leer el texto."; error.hidden = false; return; }
-      rellenar(r.json.aviso);
-    } }, "✨ Completar con IA");
+  // Pegar el aviso: se conserva el texto plano (saltos de línea y tabulaciones); el formato enriquecido de Indeed o
+  // LinkedIn se descarta al pegar, que es lo que se quiere para la IA.
+  const MIN_TEXTO_IA = 150, MAX_TEXTO_IA = 10000;
+  let enCurso = false;
+  const textoIA = h("textarea", { id: "manual-texto-ia", rows: "6", maxlength: String(MAX_TEXTO_IA), spellcheck: "false",
+    "aria-describedby": "manual-texto-ia-aviso", placeholder: "Pega aquí el texto del aviso (cargo, empresa, ubicación, sueldo…)" });
+  const contadorIA = h("div", { class: "sub", style: "font-size:.75rem; margin-top:2px;" });
+  const avisoIA = h("div", { id: "manual-texto-ia-aviso", class: "sub", role: "status", "aria-live": "polite",
+    style: "color:var(--rojo); margin-top:4px;" });
+  const spinner = h("span", { class: "spinner-ia", "aria-hidden": "true", hidden: true });
+  const textoBoton = h("span", {}, "✨ Completar con IA");
+  const validarTextoIA = () => {
+    const n = textoIA.value.trim().length;
+    contadorIA.textContent = n + " / " + MAX_TEXTO_IA + " caracteres";
+    avisoIA.textContent = n > 0 && n < MIN_TEXTO_IA
+      ? "El texto parece demasiado corto para contener una descripción de empleo completa."
+      : "";
+    btnIA.disabled = enCurso || n < MIN_TEXTO_IA;      // el botón se habilita recién con el texto suficiente
+  };
+  const procesarTextoIA = async () => {
+    error.hidden = true;
+    const texto = textoIA.value.trim();
+    if (texto.length < MIN_TEXTO_IA) { validarTextoIA(); return; }
+    enCurso = true; spinner.hidden = false; textoBoton.textContent = "Procesando aviso con Groq...";
+    textoIA.setAttribute("aria-busy", "true"); validarTextoIA();
+    const r = await api("/api/aviso/ia", { texto });
+    enCurso = false; spinner.hidden = true; textoBoton.textContent = "✨ Completar con IA";
+    textoIA.removeAttribute("aria-busy"); validarTextoIA();
+    if (!r.ok) {
+      error.textContent = r.json?.error || (r.status === 0 ? "Sin conexión con el servidor." : "La IA no pudo leer el texto.");
+      error.hidden = false; return;
+    }
+    rellenar(r.json.aviso);
+  };
+  const btnIA = h("button", { type: "button", class: "boton sec", disabled: true, onclick: procesarTextoIA }, spinner, textoBoton);
+  textoIA.addEventListener("input", validarTextoIA);
+  textoIA.addEventListener("paste", e => {
+    const plano = (e.clipboardData || window.clipboardData).getData("text/plain");
+    if (!plano) return;                                   // sin texto plano, el navegador pega lo que haya
+    e.preventDefault();
+    const limpio = plano.replace(/\r\n?/g, "\n").replace(/\u00a0/g, " ").replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n");
+    const ini = textoIA.selectionStart, fin = textoIA.selectionEnd, v = textoIA.value;
+    const nuevo = (v.slice(0, ini) + limpio + v.slice(fin)).slice(0, MAX_TEXTO_IA);
+    textoIA.value = nuevo;
+    const pos = Math.min(ini + limpio.length, nuevo.length);
+    textoIA.setSelectionRange(pos, pos);
+    validarTextoIA();
+  });
   const cajaIA = h("div", { class: "form-grupo", hidden: true },
-    h("label", { for: "manual-texto-ia" }, "Texto del aviso"), textoIA, h("div", { style: "margin-top:6px;" }, btnIA));
+    h("label", { for: "manual-texto-ia" }, "Texto del aviso"), textoIA, contadorIA, avisoIA,
+    h("div", { style: "margin-top:6px;" }, btnIA));
+  validarTextoIA();
   const rellenar = av => {
       if (av.titulo) titulo.value = av.titulo;
       if (av.empresa) empresa.value = av.empresa;
