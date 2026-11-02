@@ -36,6 +36,21 @@ def test_sin_jobposting_no_inventa_datos():
     raise AssertionError("debió lanzar ErrorFuente")
 
 
+def test_desde_base_devuelve_lo_guardado_sin_red(tmp_path):
+    import buscar
+    import pandas as pd
+    con = buscar.conectar(str(tmp_path / "t.db"))
+    df = pd.DataFrame([{"job_url": "https://cl.indeed.com/viewjob?jk=1", "title": "Analista QA", "company": "Acme",
+                        "location": "Santiago, Chile", "description": "Modalidad híbrida. Buscamos QA con SQL.",
+                        "date_posted": "", "is_remote": False, "min_amount": None, "max_amount": None,
+                        "currency": "", "interval": ""}])
+    buscar.guardar(con, buscar.procesar(df, "t", "indeed"))
+    r = rellenar_aviso.desde_base(con, "https://cl.indeed.com/viewjob?jk=1")
+    assert r["titulo"] == "Analista QA" and r["empresa"] == "Acme" and r["modalidad"] == "Híbrido"
+    assert r["sueldo"] == ""                     # "No indicado" no se copia como sueldo
+    assert rellenar_aviso.desde_base(con, "https://cl.indeed.com/viewjob?jk=999") is None
+
+
 def test_texto_visible_no_incluye_scripts():
     html = "<html><script>var x='secreto';</script><body><h1>Analista QA</h1><p>Santiago</p></body></html>"
     t = rellenar_aviso.texto_visible(html)

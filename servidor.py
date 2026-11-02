@@ -406,6 +406,13 @@ def crear_servidor(app: Aplicacion, puerto: int = None, host: str = None) -> Thr
                 url = datos.get("url") if isinstance(datos, dict) else None
                 if not isinstance(url, str) or not buscar._url_valida(url.strip()):
                     return self._json(400, {"error": "la URL debe empezar con http:// o https://"})
+                con = app.conexion()                  # primero lo que ya tienes guardado: no visita ningún sitio
+                try:
+                    guardado = rellenar_aviso.desde_base(con, url.strip())
+                finally:
+                    con.close()
+                if guardado:
+                    return self._json(200, {"ok": True, "aviso": guardado, "origen": "base"})
                 try:
                     aviso = rellenar_aviso.desde_url(url.strip(), ClienteHTTP(), GestorRobots(buscar.USER_AGENT_HTTP))
                 except (Bloqueo, NoEncontrada, ErrorFuente) as ex:

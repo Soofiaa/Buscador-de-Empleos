@@ -109,6 +109,23 @@ def texto_visible(html: str) -> str:
     return "\n".join(_limpio(l) for l in soup.get_text("\n").splitlines() if l.strip())[:8000]
 
 
+MODALIDADES_DB = ("Remoto", "Híbrido", "Presencial")
+
+
+def desde_base(con, url: str):
+    """Si la oferta ya está en tu base (la trajo la búsqueda), sus datos guardados. No visita ningún sitio:
+    sirve para Indeed, que no permite leer sus avisos. None si la URL no está guardada."""
+    fila = con.execute("SELECT titulo, empresa, ubicacion, modalidad, sueldo FROM ofertas WHERE url = ?", (url,)).fetchone()
+    if fila is None:
+        return None
+    titulo, empresa, ubicacion, modalidad, sueldo = (fila[k] or "" for k in range(5))
+    return {
+        "titulo": titulo, "empresa": empresa, "ubicacion": ubicacion,
+        "modalidad": modalidad if modalidad in MODALIDADES_DB else "",
+        "sueldo": "" if sueldo in ("", "No indicado") else sueldo,
+    }
+
+
 def html_con_navegador(url: str) -> str:
     """Abre el aviso en un Chromium sin ventana y devuelve el HTML ya renderizado. Solo se llama DESPUÉS de que
     pedir() confirmó que robots.txt permite la URL. Solo carga recursos del mismo sitio."""
