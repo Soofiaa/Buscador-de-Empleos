@@ -10,7 +10,8 @@ import re
 from bs4 import BeautifulSoup
 
 import filtros
-from red import Bloqueo, ErrorFuente, NoEncontrada
+import ia
+from red import Bloqueo, ErrorFuente, NoEncontrada, pedir
 
 LIMITE_HTML = 1_500_000
 MODALIDADES = ("Remoto", "Híbrido", "Presencial")
@@ -97,10 +98,25 @@ def parsear_aviso(html: str) -> dict:
     }
 
 
+def texto_visible(html: str) -> str:
+    """El texto que una persona vería en la página (sin scripts ni estilos), recortado para la IA."""
+    soup = BeautifulSoup((html or "")[:LIMITE_HTML], "html.parser")
+    for t in soup(["script", "style", "noscript", "svg"]):
+        t.decompose()
+    return "\n".join(_limpio(l) for l in soup.get_text("\n").splitlines() if l.strip())[:8000]
+
+
 def desde_url(url: str, cliente, robots) -> dict:
-    """Descarga el aviso (robots.txt + pausa) y lo parsea. Propaga Bloqueo, NoEncontrada y ErrorFuente."""
-    from red import pedir
-    return parsear_aviso(pedir(url, cliente, robots))
+    """Pide la página (robots.txt + pausa) y saca los datos. Si no trae datos estructurados (JSON-LD), la IA lee
+    el texto visible de ESA página. Propaga Bloqueo, NoEncontrada y ErrorFuente."""
+    html = pedir(url, cliente, robots)
+    try:
+        return parsear_aviso(html)
+    except ErrorFuente:
+        datos = ia.extraer_aviso(texto_visible(html))
+        if "error" in datos:
+            raise ErrorFuente(datos["error"])
+        return datos
 
 
 def mensaje_error(ex: Exception) -> str:
