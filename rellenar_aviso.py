@@ -11,9 +11,12 @@ from bs4 import BeautifulSoup
 
 import filtros
 import ia
-from red import Bloqueo, ErrorFuente, NoEncontrada, pedir
+from red import Bloqueo, ErrorFuente, NoEncontrada, USER_AGENT_HTTP, parece_bloqueo, pedir
+from urllib.parse import urlsplit
 
 LIMITE_HTML = 1_500_000
+MINIMO_TEXTO = 300          # menos que esto: la página llegó vacía y el contenido lo pinta JavaScript
+TIEMPO_NAVEGADOR_MS = 20_000
 MODALIDADES = ("Remoto", "Híbrido", "Presencial")
 
 
@@ -106,17 +109,59 @@ def texto_visible(html: str) -> str:
     return "\n".join(_limpio(l) for l in soup.get_text("\n").splitlines() if l.strip())[:8000]
 
 
+def html_con_navegador(url: str) -> str:
+    """Abre el aviso en un Chromium sin ventana y devuelve el HTML ya renderizado. Solo se llama DESPUÉS de que
+    pedir() confirmó que robots.txt permite la URL. Solo carga recursos del mismo sitio."""
+    try:
+        from playwright.sync_api import sync_playwright
+    except ImportError:
+        raise ErrorFuente("falta Playwright en este equipo; completa a mano o pega el texto del aviso")
+    partes = urlsplit(url)
+    origen = f"{partes.scheme}://{partes.netloc}"
+    with sync_playwright() as p:
+        nav = p.chromium.launch()
+        try:
+            ctx = nav.new_context(user_agent=USER_AGENT_HTTP, locale="es-CL")
+            ctx.route("**/*", lambda r: r.abort() if not r.request.url.startswith(origen)
+                      or r.request.resource_type in ("image", "font", "media") else r.continue_())
+            page = ctx.new_page()
+            try:
+                page.goto(url, wait_until="domcontentloaded", timeout=TIEMPO_NAVEGADOR_MS)
+                page.wait_for_timeout(2500)          # tiempo para que el JavaScript pinte el aviso
+            except Exception as e:
+                raise ErrorFuente(f"el navegador no pudo abrir el aviso ({type(e).__name__})")
+            contenido = page.content()
+            marca = parece_bloqueo(contenido)
+            if marca:
+                raise Bloqueo("página de verificación (%s)" % marca)
+            return contenido
+        finally:
+            nav.close()
+
+
 def desde_url(url: str, cliente, robots) -> dict:
-    """Pide la página (robots.txt + pausa) y saca los datos. Si no trae datos estructurados (JSON-LD), la IA lee
-    el texto visible de ESA página. Propaga Bloqueo, NoEncontrada y ErrorFuente."""
-    html = pedir(url, cliente, robots)
+    """Saca los datos del aviso, en este orden:
+      1. HTML normal (pedir: robots.txt + pausa). Si trae JSON-LD, listo.
+      2. Si la página llega vacía (JavaScript), un navegador la renderiza; después se prueba el JSON-LD otra vez.
+      3. Lo que quede de texto visible se le pasa a la IA.
+    Propaga Bloqueo, NoEncontrada y ErrorFuente."""
+    html = pedir(url, cliente, robots)           # aquí se revisa robots.txt; sin permiso no se llega a ningún paso
     try:
         return parsear_aviso(html)
     except ErrorFuente:
-        datos = ia.extraer_aviso(texto_visible(html))
-        if "error" in datos:
-            raise ErrorFuente(datos["error"])
-        return datos
+        pass
+    texto = texto_visible(html)
+    if len(texto) < MINIMO_TEXTO:
+        html = html_con_navegador(url)
+        try:
+            return parsear_aviso(html)
+        except ErrorFuente:
+            pass
+        texto = texto_visible(html)
+    datos = ia.extraer_aviso(texto)
+    if "error" in datos:
+        raise ErrorFuente(datos["error"])
+    return datos
 
 
 def mensaje_error(ex: Exception) -> str:

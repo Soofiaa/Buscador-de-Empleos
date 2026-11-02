@@ -4,6 +4,8 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+import pytest
+
 import rellenar_aviso
 from red import ErrorFuente
 
@@ -41,7 +43,9 @@ def test_texto_visible_no_incluye_scripts():
 
 
 def test_sin_jobposting_la_ia_lee_la_pagina_que_se_pidio(monkeypatch):
-    monkeypatch.setattr(rellenar_aviso, "pedir", lambda url, c, r: "<body><h1>Analista QA</h1><p>Santiago</p></body>")
+    texto_largo = "<body><h1>Analista QA</h1><p>Santiago</p>" + "<p>detalle del cargo</p>" * 30 + "</body>"
+    monkeypatch.setattr(rellenar_aviso, "pedir", lambda url, c, r: texto_largo)
+    monkeypatch.setattr(rellenar_aviso, "html_con_navegador", lambda u: pytest.fail("no debía abrir navegador"))
     visto = {}
     def falsa_ia(texto):
         visto["texto"] = texto
