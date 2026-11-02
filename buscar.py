@@ -806,16 +806,17 @@ def _intercalar(plan: list, sitio: str) -> list:
     return salida + pendientes
 
 
-def buscar_ofertas(con) -> int:
+def buscar_ofertas(con, fuentes=None) -> int:
     from jobspy import scrape_jobs  # import aquí: los tests no lo necesitan
     _vigilar_429()
     aplicar_exclusiones(con)   # las exclusiones que Sofia guardó, antes de clasificar lo que llegue
+    sitios = list(config.SITIOS) if fuentes is None else [s for s in config.SITIOS if s in fuentes]   # las marcadas
 
     ubic = leer_ubicaciones(con)
     lugares = list(ubic["lista"]) + ([REMOTO] if ubic["remoto"] else [])
     terminos_indeed = leer_puestos(con)     # la lista libre que el usuario edita, o la de config
     terminos_linkedin = config.TERMINOS_LINKEDIN
-    plan = [(s, t, l) for s in config.SITIOS if s not in PORTALES
+    plan = [(s, t, l) for s in sitios if s not in PORTALES
             for t in (terminos_indeed if s == "indeed"
                       else terminos_linkedin if s == "linkedin"
                       else [""] if s in APIS_REMOTAS else config.TERMINOS_SECUNDARIOS)
@@ -823,22 +824,22 @@ def buscar_ofertas(con) -> int:
     # LinkedIn no va en ráfaga: sus consultas se intercalan con los turnos de las demás fuentes (ver _intercalar)
     for sitio in config.DISTANCIAR:
         plan = _intercalar(plan, sitio)
-    stats = {s: {"encontradas": 0, "antiguas": 0, "relevantes": 0, "sin_chile": 0, "errores": 0} for s in config.SITIOS}
+    stats = {s: {"encontradas": 0, "antiguas": 0, "relevantes": 0, "sin_chile": 0, "errores": 0} for s in sitios}
     # telemetría pasiva (solo contadores): JobSpy no expone sus solicitudes, se cuentan sus llamadas, también por ubicación
     tele = {s: (telemetria.contador("http") if s in PORTALES or s in APIS_REMOTAS
-                else telemetria.contador("consulta", lugares)) for s in config.SITIOS}
+                else telemetria.contador("consulta", lugares)) for s in sitios}
     total = 0
     avisos = []
     ahora = ahora_chile()
     inicio = ahora.strftime("%Y-%m-%d %H:%M")
     ventanas = ventanas_efectivas(con, ahora)
-    ampliadas = [config.NOMBRE_FUENTE[s] for s in config.SITIOS if ventanas[s] > config.MAX_ANTIGUEDAD_DIAS.get(s, 1)]
+    ampliadas = [config.NOMBRE_FUENTE[s] for s in sitios if ventanas[s] > config.MAX_ANTIGUEDAD_DIAS.get(s, 1)]
     if ampliadas:
         avisos.append(f"Pasaron días sin buscar: ventana ampliada a {plural(max(ventanas.values()), 'día', 'días')} "
                       f"({', '.join(ampliadas)}) para no perder ofertas de ese hueco.")
     # una API sin clave (Jooble sin JOOBLE_KEY) no se consulta: se dice por qué, no que «no hubo resultados»
     sin_clave = {s for s in APIS_REMOTAS if hasattr(APIS_REMOTAS[s], "disponible") and not APIS_REMOTAS[s].disponible()}
-    for s in sorted(sin_clave & set(config.SITIOS)):
+    for s in sorted(sin_clave & set(sitios)):
         avisos.append(f"{config.NOMBRE_FUENTE[s]} no se consultó: falta la clave ({s.upper()}_KEY) en el entorno.")
     plan = [p for p in plan if p[0] not in sin_clave]
     frenadas = set()
@@ -885,7 +886,7 @@ def buscar_ofertas(con) -> int:
              + (f", {plural(antiguas, 'antigua omitida', 'antiguas omitidas')}" if antiguas else ""))
         time.sleep(_pausa_jobspy(sitio))
 
-    activos = [s for s in config.SITIOS if s in PORTALES]
+    activos = [s for s in sitios if s in PORTALES]
     if activos:
         cliente, robots = ClienteHTTP(), GestorRobots(USER_AGENT_HTTP)
         for sitio in activos:
@@ -926,7 +927,7 @@ def buscar_ofertas(con) -> int:
     return total
 
 
-def explorar_remotos(con) -> int:
+def explorar_remotos(con, fuentes=None) -> int:
     """Botón «Explorar remotos»: busca los TERMINOS_EXPLORAR en Indeed (remotos en Chile) y los TERMINOS_EXPLORAR_EN en
     las APIs remotas que buscan por texto (EXPLORAR_APIS). Puede correr junto con la búsqueda normal: nada de LinkedIn
     ni Glassdoor, y no toca la ventana de días de la otra. Devuelve cuántas ofertas nuevas no descartadas guardó (en
@@ -936,6 +937,8 @@ def explorar_remotos(con) -> int:
     aplicar_exclusiones(con)
     plan = ([("indeed", t) for t in config.TERMINOS_EXPLORAR]
             + [(s, t) for s in config.EXPLORAR_APIS for t in config.TERMINOS_EXPLORAR_EN])
+    if fuentes is not None:                                 # solo las plataformas marcadas en la corrida
+        plan = [p for p in plan if p[0] in fuentes]
     sitios = list(dict.fromkeys(s for s, _ in plan))
     stats = {s: {"encontradas": 0, "antiguas": 0, "relevantes": 0, "sin_chile": 0, "errores": 0} for s in sitios}
     tele = {s: telemetria.contador("http") if s in APIS_REMOTAS else telemetria.contador("consulta", [REMOTO])

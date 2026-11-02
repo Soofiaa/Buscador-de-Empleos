@@ -226,7 +226,7 @@ def test_mensaje_de_fin_de_busqueda_en_singular_y_plural(tmp_path, n, texto):
     app = servidor.Aplicacion(str(tmp_path / "t.db"), lambda con: n)
     assert app.iniciar_busqueda()
     app.hilo.join(5)
-    assert app.estado["mensaje"] == "Búsqueda terminada: " + texto + "."
+    assert app.estado["mensaje"].startswith("Búsqueda terminada: " + texto + ".")
 
 
 def test_la_pagina_ya_no_tiene_el_interruptor_de_soporte():

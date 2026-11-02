@@ -75,7 +75,8 @@ from informe import PAGINA
 LOCALES = ("127.0.0.1", "localhost", "[::1]")
 LIMITE_CUERPO = 10_000
 # rutas con textos largos: 5000 caracteres con tildes o emojis ocupan más de 10 KB en UTF-8
-LIMITES_POR_RUTA = {"/api/nota": 64_000, "/api/oferta/manual": 64_000, "/api/descripcion": 64_000}   # 5000 caracteres x 12 bytes si el cliente los escapa como \uXXXX
+LIMITES_POR_RUTA = {"/api/nota": 64_000, "/api/oferta/manual": 64_000, "/api/descripcion": 64_000,
+                    "/api/aviso/ia": 20_000}   # 5000 caracteres x 12 bytes si el cliente los escapa como \uXXXX
 MAXIMO_A_DESCARTAR = 1_000_000      # un cuerpo demasiado grande se lee (hasta aquí) y se descarta antes del 413
 CSP = ("default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; font-src 'self'; "
        "connect-src 'self'; form-action 'none'; base-uri 'none'")
@@ -83,6 +84,12 @@ CSP = ("default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline
 # respaldo en curso y se consolida el -wal, cada cosa con su límite (5 + 3 s, con margen antes del SIGKILL).
 ESPERA_RESPALDO_S = 5
 LIMITE_CHECKPOINT_S = 3
+
+
+def _tiempo_texto(segundos: float) -> str:
+    """'45 s' o '12 min 4 s': lo que muestra el cronómetro al terminar una corrida."""
+    s = int(round(segundos))
+    return f"{s // 60} min {s % 60} s" if s >= 60 else f"{s} s"
 
 
 def _log(mensaje: str) -> None:              # a stderr: queda en `docker logs`
@@ -137,7 +144,7 @@ class Aplicacion:
         self.estado = {"buscando": False, "mensaje": "", "error": ""}
         # «Explorar remotos» corre aparte, con su propio estado: puede ir al mismo tiempo que «Buscar empleos»
         self.estado_explorar = {"buscando": False, "mensaje": "", "error": ""}
-        self.trabajos = {"buscar": (self.estado, lambda con: self.buscar_fn(con), "Búsqueda terminada: ",
+        self.trabajos = {"buscar": (self.estado, self.buscar_fn, "Búsqueda terminada: ",
                                     ("oferta relevante nueva", "ofertas relevantes nuevas")),
                          "explorar": (self.estado_explorar, explorar_fn or buscar.explorar_remotos,
                                       "Exploración terminada: ", ("oferta nueva", "ofertas nuevas"))}
@@ -167,6 +174,7 @@ class Aplicacion:
         est["respaldo"] = {**respaldo.estado(self.carpeta_respaldos), "error_auto": self.error_respaldo_auto,
                            "en_curso": en_curso}
         est["nombres_fuentes"] = config.NOMBRE_FUENTE
+        est["fuentes"] = list(config.SITIOS)            # las plataformas que la página deja elegir por corrida
         if en_curso and "incompletos" in est["respaldo"]:
             est["respaldo"]["incompletos"] = None
         return est
@@ -221,26 +229,39 @@ class Aplicacion:
         with self._lock:
             (self.estado if estado is None else estado).update(kw)
 
-    def iniciar_busqueda(self, tipo: str = "buscar") -> bool:
-        """tipo: 'buscar' o 'explorar'. Cada uno, como mucho una vez a la vez; los dos pueden ir juntos."""
+    def iniciar_busqueda(self, tipo: str = "buscar", fuentes=None) -> bool:
+        """tipo: 'buscar' o 'explorar'. Cada uno, como mucho una vez a la vez; los dos pueden ir juntos.
+        fuentes: las plataformas marcadas en la página (None = todas)."""
         estado = self.trabajos[tipo][0]
         with self._lock:
             if estado["buscando"]:
                 return False
-            estado.update(buscando=True, mensaje="Iniciando la búsqueda...", error="")
-        self.hilo = threading.Thread(target=self._correr, args=(tipo,), daemon=True)
+            estado.update(buscando=True, mensaje="Iniciando la búsqueda...", error="", inicio=time.time())
+        self.hilo = threading.Thread(target=self._correr, args=(tipo, fuentes), daemon=True)
         self.hilo.start()
         return True
 
-    def _correr(self, tipo: str = "buscar"):
+    def iniciar_corrida(self, fuentes=None) -> bool:
+        """«Buscar empleos» unificado: la búsqueda normal y la exploración de remotos, en hilos a la vez, con las
+        plataformas marcadas. False si alguna de las dos ya está en curso."""
+        with self._lock:
+            if self.estado["buscando"] or self.estado_explorar["buscando"]:
+                return False
+        normal = self.iniciar_busqueda("buscar", fuentes)
+        explorar = self.iniciar_busqueda("explorar", fuentes)
+        return normal or explorar
+
+    def _correr(self, tipo: str = "buscar", fuentes=None):
         estado, fn, fin, (uno, varios) = self.trabajos[tipo]
         # solo en este hilo: el avance de una búsqueda no pisa el de la otra
         buscar.salida_del_hilo.fn = lambda m: self._set(estado, mensaje=str(m).strip().splitlines()[-1] if str(m).strip() else "")
         con = None
+        t0 = time.monotonic()
         try:
             con = self.conexion()             # dentro del try: si la base no abre, tampoco queda el botón bloqueado
-            nuevas = fn(con)
-            self._set(estado, buscando=False, error="", mensaje=fin + buscar.plural(nuevas, uno, varios) + ".")
+            nuevas = fn(con) if fuentes is None else fn(con, fuentes)
+            tardo = _tiempo_texto(time.monotonic() - t0)
+            self._set(estado, buscando=False, error="", mensaje=fin + buscar.plural(nuevas, uno, varios) + f". Tardó {tardo}.")
         except Exception as ex:               # un fallo no deja el botón bloqueado
             self._set(estado, buscando=False, error="%s: %s" % (type(ex).__name__, ex))
         finally:
@@ -368,8 +389,17 @@ def crear_servidor(app: Aplicacion, puerto: int = None, host: str = None) -> Thr
                     return self._json(500, {"error": str(ex)})
                 except Exception as ex:                     # el servidor sigue; la página muestra el motivo
                     return self._json(500, {"error": f"el respaldo falló: {type(ex).__name__}: {ex}"})
-            if ruta in ("/api/buscar", "/api/explorar"):
-                if app.iniciar_busqueda("buscar" if ruta == "/api/buscar" else "explorar"):
+            if ruta == "/api/buscar":                 # búsqueda normal + exploración de remotos, con las plataformas marcadas
+                fuentes = datos.get("fuentes") if isinstance(datos, dict) else None
+                if fuentes is not None:
+                    if not isinstance(fuentes, list) or not fuentes or any(f not in config.SITIOS for f in fuentes):
+                        return self._json(400, {"error": "elige al menos una plataforma válida"})
+                    fuentes = list(dict.fromkeys(fuentes))
+                if app.iniciar_corrida(fuentes):
+                    return self._json(202, {"ok": True})
+                return self._json(409, {"error": "ya hay una búsqueda en curso"})
+            if ruta == "/api/explorar":
+                if app.iniciar_busqueda("explorar"):
                     return self._json(202, {"ok": True})
                 return self._json(409, {"error": "ya hay una búsqueda en curso"})
             if ruta == "/api/aviso":
@@ -382,6 +412,14 @@ def crear_servidor(app: Aplicacion, puerto: int = None, host: str = None) -> Thr
                     return self._json(502, {"error": rellenar_aviso.mensaje_error(ex)})
                 except Exception as ex:
                     return self._json(502, {"error": f"no se pudo leer el aviso: {type(ex).__name__}"})
+                return self._json(200, {"ok": True, "aviso": aviso})
+            if ruta == "/api/aviso/ia":               # texto pegado por ti: la IA lo ordena; no visita ningún sitio
+                texto = datos.get("texto") if isinstance(datos, dict) else None
+                if not isinstance(texto, str) or len(texto.strip()) < 30:
+                    return self._json(400, {"error": "pega el texto completo del aviso"})
+                aviso = ia.extraer_aviso(texto)
+                if "error" in aviso:
+                    return self._json(502, {"error": aviso["error"]})
                 return self._json(200, {"ok": True, "aviso": aviso})
             if ruta == "/api/ia":
                 url_oferta = datos.get("url")

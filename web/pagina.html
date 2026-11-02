@@ -222,7 +222,8 @@
   .nota { color:var(--suave); font-size:.8rem; margin:6px 2px 10px; }
   .progreso { font-size:.84rem; color:var(--suave); min-height:1.2em; margin:0 2px 4px; overflow-wrap:anywhere; }
   .progreso.error { color:var(--rojo); }
-  .barra { height:6px; background:var(--panel2); border-radius:99px; overflow:hidden; margin:4px 2px 12px; }
+  .barra { height:6px; background:var(--panel2); border-radius:99px; overflow:hidden; margin:4px 2px 12px; position:relative; }
+  .barra-tiempo { position:absolute; right:0; top:-18px; font-size:.75rem; font-weight:600; opacity:.75; }
   .barra-relleno { height:100%; width:0; background:var(--accion); border-radius:99px; transition:width .4s ease; }
 
   .historial { margin-top:14px; border-top:1px solid var(--borde); padding-top:12px; }
@@ -508,13 +509,11 @@
 
     <div class="seccion-lateral">
       <button class="boton ancho" id="buscar" type="button">Buscar empleos</button>
-      <p class="nota">Búsqueda completa (~15 a 20 min) en Indeed, LinkedIn, Chiletrabajos, BNE, etc.</p>
+      <p class="nota">Búsqueda completa + exploración de remotos. Las plataformas se eligen en Ajustes.</p>
       <div class="progreso" id="progreso" role="status" aria-live="polite"></div>
-      <div class="barra" id="barra" role="progressbar" aria-label="Avance de la búsqueda" aria-valuemin="0" hidden><div class="barra-relleno" id="barra-relleno"></div></div>
-      <button class="boton sec ancho" id="explorar" type="button" style="margin-top:10px;">🧭 Explorar remotos</button>
-      <p class="nota">Otros roles remotos que podrían calzarte (implementación, CRM, IA, documentación, UX, asistente virtual, freelance…). En Indeed, Himalayas y Jobicy; puede correr junto con la búsqueda.</p>
+      <div class="barra" id="barra" role="progressbar" aria-label="Avance de la búsqueda" aria-valuemin="0" hidden><div class="barra-relleno" id="barra-relleno"></div><span class="barra-tiempo" id="barra-tiempo"></span></div>
       <div class="progreso" id="progreso-explorar" role="status" aria-live="polite"></div>
-      <div class="barra" id="barra-explorar" role="progressbar" aria-label="Avance de la exploración" aria-valuemin="0" hidden><div class="barra-relleno" id="barra-relleno-explorar"></div></div>
+      <div class="barra" id="barra-explorar" role="progressbar" aria-label="Avance de la exploración" aria-valuemin="0" hidden><div class="barra-relleno" id="barra-relleno-explorar"></div><span class="barra-tiempo" id="barra-tiempo-explorar"></span></div>
       <details class="busquedas-manuales" id="busquedas-manuales" style="margin-top:8px; font-size:.8rem;">
         <summary title="Estos sitios no aceptan búsquedas automáticas: se abren en tu navegador">🔎 Buscar a mano</summary>
       </details>
@@ -579,6 +578,11 @@
         </div>
       </div>
       <div class="ajustes-columnas">
+        <div class="ajustes-bloque">
+          <h4>Plataformas</h4>
+          <p class="nota">Dónde buscar en cada corrida. Por defecto, todas.</p>
+          <div id="fuentes-panel"><p class="nota">Cargando…</p></div>
+        </div>
         <div class="ajustes-bloque">
           <h4>Exclusiones</h4>
           <div id="exclusiones-panel"><p class="nota">Cargando…</p></div>
@@ -1055,7 +1059,7 @@ const PESTANAS = [
   ["sospechosas", "Sospechosas"], ["descartadas_usuario", "Descartadas"], ["descartadas", "Descartadas por filtros"]
 ];
 const FILTROS_VACIOS = () => ({ texto: "", estado: "activas", prioridad: "", modalidad: "", fuente: "", tipo: "" });
-const S = { datos: null, pestana: "ofertas", sel: { tipo: "todas" }, ultima: null, f: FILTROS_VACIOS(), agrupar: "prioridad", densidad: "detallada", masFiltros: false };
+const S = { datos: null, pestana: "ofertas", sel: { tipo: "todas" }, ultima: null, f: FILTROS_VACIOS(), agrupar: "prioridad", densidad: "detallada", masFiltros: false, fuentes: [], cronoInicio: {} };
 try { if (localStorage.getItem("densidad") === "compacta") S.densidad = "compacta"; } catch (e) {}
 S.apartado = apartadoDeHash(location.hash);
 S.vistaSeg = "tablero";                           // la primera vez, Tablero; después, lo que se guardó
@@ -1176,6 +1180,31 @@ async function cargarPuestos() {
   const r = await api("/api/ajustes/puestos");
   if (r.ok) pintarPuestos(r.json.lista);
   else $("puestos-panel").replaceChildren(h("p", { class: "nota" }, "No se pudieron cargar los puestos."));
+}
+
+// ---------- plataformas de la corrida (se recuerda en este navegador; por defecto, todas marcadas)
+const CLAVE_FUENTES_OFF = "fuentesDesmarcadas";
+function fuentesDesmarcadas() {
+  try { return JSON.parse(localStorage.getItem(CLAVE_FUENTES_OFF) || "[]"); } catch (e) { return []; }
+}
+function leerFuentesMarcadas() {
+  const off = fuentesDesmarcadas();
+  return S.fuentes.filter(f => !off.includes(f));
+}
+function pintarFuentes() {
+  const panel = $("fuentes-panel");
+  if (!S.fuentes.length) return;
+  const off = new Set(fuentesDesmarcadas());
+  const guardar = () => { try { localStorage.setItem(CLAVE_FUENTES_OFF, JSON.stringify([...off])); } catch (e) {} };
+  const cajas = S.fuentes.map(f => h("label", { style: "display:flex; align-items:center; gap:6px; font-size:.85rem; padding:2px 0;" },
+    h("input", { type: "checkbox", checked: !off.has(f), onchange: e => { e.target.checked ? off.delete(f) : off.add(f); guardar(); } }),
+    nombreFuente(f)));
+  const todas = marcar => () => { S.fuentes.forEach(f => marcar ? off.delete(f) : off.add(f)); guardar(); pintarFuentes(); };
+  panel.replaceChildren(
+    h("div", { style: "display:flex; gap:6px; margin-bottom:6px;" },
+      h("button", { type: "button", class: "boton sec", onclick: todas(true) }, "Marcar todas"),
+      h("button", { type: "button", class: "boton sec", onclick: todas(false) }, "Desmarcar todas")),
+    h("div", { style: "display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:2px 10px;" }, cajas));
 }
 
 // ---------- ubicaciones (lista + checkbox remoto)
@@ -1302,9 +1331,10 @@ async function cargar() {
   await estado();
 }
 
-let sondeo = null;
-function mostrarProgreso(e, sufijo = "", boton = "buscar") {
-  const p = $("progreso" + sufijo), barra = $("barra" + sufijo);
+let sondeo = null, cronoActivo = null;
+function tiempoTexto(s) { return s >= 60 ? `${Math.floor(s / 60)} min ${s % 60} s` : `${s} s`; }
+function mostrarProgreso(e, sufijo = "", boton = "buscar", tipo = "buscar") {
+  const p = $("progreso" + sufijo), barra = $("barra" + sufijo), tiempo = $("barra-tiempo" + sufijo);
   p.className = "progreso" + (e.error ? " error" : "");
   p.textContent = e.error ? "Error en la búsqueda: " + e.error : e.buscando ? textoProgreso(e.mensaje, nombreFuente) : (e.mensaje || "");
   const pr = e.buscando && !e.error ? progresoDe(e.mensaje) : null;
@@ -1313,8 +1343,16 @@ function mostrarProgreso(e, sufijo = "", boton = "buscar") {
     $("barra-relleno" + sufijo).style.width = pr.pct + "%";
     barra.setAttribute("aria-valuemax", pr.total); barra.setAttribute("aria-valuenow", pr.n);
   }
+  if (e.buscando && !e.error && e.inicio) {
+    if (!S.cronoInicio[tipo]) S.cronoInicio[tipo] = e.inicio;
+    const trans = Math.floor(Date.now() / 1000 - S.cronoInicio[tipo]);
+    tiempo.textContent = tiempoTexto(trans);
+  } else {
+    S.cronoInicio[tipo] = null;
+    tiempo.textContent = "";
+  }
   $(boton).disabled = !!e.buscando;
-  if (e.explorar) mostrarProgreso(e.explorar, "-explorar", "explorar");   // «Explorar remotos» tiene su propio avance
+  if (e.explorar) mostrarProgreso(e.explorar, "-explorar", "buscar", "explorar");
 }
 const algunaEnCurso = e => !!(e.buscando || (e.explorar && e.explorar.buscando));
 async function estado() {
@@ -1323,6 +1361,7 @@ async function estado() {
   const e = r.json;
   pintarEstadoDb(e);
   S.nombresFuentes = e.nombres_fuentes;
+  if (e.fuentes && !S.fuentes.length) { S.fuentes = e.fuentes; pintarFuentes(); }
   pintarRespaldo(e.respaldo);
   mostrarProgreso(e);
   S.ultima = e.corrida || null;
@@ -1401,13 +1440,10 @@ function pintarAvisos() {
 }
 
 $("buscar").addEventListener("click", async () => {
-  const r = await api("/api/buscar", {});
+  const fuentes = leerFuentesMarcadas();
+  if (!fuentes.length) { alert("Marca al menos una plataforma en Ajustes > Plataformas."); return; }
+  const r = await api("/api/buscar", { fuentes });
   if (r.status === 409) { alert("Ya hay una búsqueda en curso."); }
-  await estado();
-});
-$("explorar").addEventListener("click", async () => {
-  const r = await api("/api/explorar", {});
-  if (r.status === 409) { alert("Ya hay una exploración en curso."); }
   await estado();
 });
 
@@ -1796,8 +1832,25 @@ function abrirManual(origen) {
       btnCompletar.disabled = true; btnCompletar.textContent = "⌛ Leyendo...";
       const r = await api("/api/aviso", { url: u });
       btnCompletar.disabled = false; btnCompletar.textContent = "Autocompletar";
-      if (!r.ok) { error.textContent = r.json?.error || "Error al leer el aviso."; error.hidden = false; return; }
-      const av = r.json.aviso;
+      if (!r.ok) {
+        error.textContent = (r.json?.error || "Error al leer el aviso.") + " Abre el aviso, copia su texto y pégalo abajo para que lo complete la IA.";
+        error.hidden = false; cajaIA.hidden = false; textoIA.focus(); return;
+      }
+      rellenar(r.json.aviso);
+    } }, "Autocompletar");
+  const textoIA = h("textarea", { id: "manual-texto-ia", rows: "5", maxlength: "10000", placeholder: "Pega aquí el texto del aviso (cargo, empresa, ubicación, sueldo…)" });
+  const btnIA = h("button", { type: "button", class: "boton sec", onclick: async () => {
+      error.hidden = true;
+      if (textoIA.value.trim().length < 30) { error.textContent = "Pega el texto completo del aviso."; error.hidden = false; return; }
+      btnIA.disabled = true; btnIA.textContent = "⌛ La IA está leyendo...";
+      const r = await api("/api/aviso/ia", { texto: textoIA.value });
+      btnIA.disabled = false; btnIA.textContent = "✨ Completar con IA";
+      if (!r.ok) { error.textContent = r.json?.error || "La IA no pudo leer el texto."; error.hidden = false; return; }
+      rellenar(r.json.aviso);
+    } }, "✨ Completar con IA");
+  const cajaIA = h("div", { class: "form-grupo", hidden: true },
+    h("label", { for: "manual-texto-ia" }, "Texto del aviso"), textoIA, h("div", { style: "margin-top:6px;" }, btnIA));
+  const rellenar = av => {
       if (av.titulo) titulo.value = av.titulo;
       if (av.empresa) empresa.value = av.empresa;
       if (av.ubicacion) ubicacion.value = av.ubicacion;
@@ -1806,8 +1859,8 @@ function abrirManual(origen) {
         modalidad.value = ["Remoto", "Híbrido", "Presencial"].includes(av.modalidad) ? av.modalidad : "";
       }
       if (av.sueldo) sueldo.value = av.sueldo;
-      mostrarAviso("Datos autocompletados ✓");
-    } }, "Autocompletar");
+      mostrarAviso("Datos autocompletados ✓ Revísalos antes de guardar");
+  };
   const ubicacion = h("input", { type: "text", id: "manual-ubicacion", maxlength: "200", placeholder: "Ej: Santiago" });
   const modalidad = h("select", { id: "manual-modalidad" }, ["", "Remoto", "Híbrido", "Presencial"].map(v => h("option", { value: v }, v || "Sin indicar")));
   const estado = h("select", { id: "manual-estado" }, ESTADOS.map(v => h("option", { value: v }, ETIQUETAS_ESTADO[v])));
@@ -1845,6 +1898,7 @@ function abrirManual(origen) {
     h("div", { class: "form-fila" }, 
       h("div", { class: "form-grupo" }, h("label", { for: "manual-url" }, "Enlace del aviso"), h("div", { style: "display:flex; gap:6px;" }, url, btnCompletar)),
       grupo("Ubicación", ubicacion)),
+    cajaIA,
     h("div", { class: "form-fila" }, grupo("Estado", estado), grupo("Fecha de postulación", fecha)),
     h("div", { class: "form-fila" }, grupo("Modalidad", modalidad), grupo("Prioridad", prioridad)),
     h("div", { class: "form-fila" }, grupo("Sueldo", sueldo), grupo("Fase", fase)),

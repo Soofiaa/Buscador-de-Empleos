@@ -10,6 +10,37 @@ MODELO = "qwen/qwen3.8-27b"
 def obtener_api_key():
     return os.environ.get("GROQ_API_KEY") or os.environ.get("JT_GROQ_API_KEY")
 
+def extraer_aviso(texto: str) -> dict:
+    """Saca cargo, empresa, ubicación, modalidad y sueldo de un texto pegado por el usuario. No visita ningún sitio."""
+    api_key = obtener_api_key()
+    if not api_key:
+        return {"error": "No hay API Key de Groq configurada en las variables de entorno."}
+    prompt = ("Del siguiente aviso de empleo, extrae los datos. Devuelve JSON con las claves: titulo, empresa, ubicacion, "
+              "modalidad (Remoto, Híbrido, Presencial o vacío), sueldo (texto tal como aparece o vacío). "
+              "Si un dato no aparece, usa cadena vacía. No inventes datos.\n\n" + texto[:8000])
+    payload = {
+        "model": MODELO,
+        "messages": [
+            {"role": "system", "content": "Respondes exclusivamente en JSON válido."},
+            {"role": "user", "content": prompt}
+        ],
+        "response_format": {"type": "json_object"},
+        "temperature": 0,
+        "max_tokens": 300
+    }
+    try:
+        resp = requests.post(GROQ_API_URL, headers={"Authorization": f"Bearer {api_key}"}, json=payload, timeout=20)
+        if resp.status_code != 200:
+            return {"error": f"Error de API Groq ({resp.status_code})"}
+        datos = json.loads(resp.json()["choices"][0]["message"]["content"])
+    except Exception as ex:
+        return {"error": f"Error al conectar con IA: {type(ex).__name__}"}
+    campos = {k: str(datos.get(k) or "").strip()[:200] for k in ("titulo", "empresa", "ubicacion", "modalidad", "sueldo")}
+    if campos["modalidad"] not in ("Remoto", "Híbrido", "Presencial"):
+        campos["modalidad"] = ""
+    return campos
+
+
 def analizar_oferta(titulo: str, empresa: str, descripcion: str) -> dict:
     api_key = obtener_api_key()
     if not api_key:

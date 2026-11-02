@@ -159,8 +159,8 @@ def test_buscar_y_explorar_corren_a_la_vez_cada_una_con_su_avance(tmp_path):
         if not e["buscando"] and not e["explorar"]["buscando"]:
             break
         threading.Event().wait(0.02)
-    assert e["mensaje"] == "Búsqueda terminada: 3 ofertas relevantes nuevas."
-    assert e["explorar"]["mensaje"] == "Exploración terminada: 1 oferta nueva."
+    assert e["mensaje"].startswith("Búsqueda terminada: 3 ofertas relevantes nuevas.")
+    assert e["explorar"]["mensaje"].startswith("Exploración terminada: 1 oferta nueva.")
     assert buscar.salida is print
 
 
@@ -174,6 +174,8 @@ def test_si_la_base_no_abre_el_boton_no_queda_bloqueado(tmp_path, monkeypatch):
     assert not e["buscando"] and e["error"] == "OperationalError: database is locked"
 
 
-def test_la_pagina_tiene_el_boton_y_la_lista_explorar():
-    assert 'id="explorar"' in PAGINA and '"/api/explorar"' in PAGINA
+def test_la_pagina_tiene_la_lista_explorar():
+    # «Buscar empleos» ya hace también la exploración de remotos: un solo botón, su propia barra de progreso con cronómetro
+    assert 'id="buscar"' in PAGINA and '"/api/buscar"' in PAGINA
+    assert 'id="progreso-explorar"' in PAGINA and 'id="barra-tiempo"' in PAGINA
     assert '["explorar", "Explorar remotos"]' in PAGINA and "datos.explorar" in PAGINA
