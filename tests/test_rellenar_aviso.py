@@ -51,6 +51,20 @@ def test_desde_base_devuelve_lo_guardado_sin_red(tmp_path):
     assert rellenar_aviso.desde_base(con, "https://cl.indeed.com/viewjob?jk=999") is None
 
 
+def test_desde_base_reconoce_indeed_por_jk_aunque_el_link_cambie(tmp_path):
+    import buscar
+    import pandas as pd
+    con = buscar.conectar(str(tmp_path / "t.db"))
+    df = pd.DataFrame([{"job_url": "https://cl.indeed.com/viewjob?jk=abc123", "title": "Analista QA", "company": "Acme",
+                        "location": "Santiago, Chile", "description": "", "date_posted": "", "is_remote": False,
+                        "min_amount": None, "max_amount": None, "currency": "", "interval": ""}])
+    buscar.guardar(con, buscar.procesar(df, "t", "indeed"))
+    con_seguimiento = "https://cl.indeed.com/viewjob?jk=abc123&from=serp&vjk=abc123"
+    assert rellenar_aviso.desde_base(con, con_seguimiento)["empresa"] == "Acme"
+    assert rellenar_aviso.desde_base(con, "https://cl.indeed.com/viewjob?jk=otro") is None
+    assert rellenar_aviso._jk_indeed("https://www.linkedin.com/jobs/view/1?jk=abc") is None
+
+
 def test_texto_visible_no_incluye_scripts():
     html = "<html><script>var x='secreto';</script><body><h1>Analista QA</h1><p>Santiago</p></body></html>"
     t = rellenar_aviso.texto_visible(html)

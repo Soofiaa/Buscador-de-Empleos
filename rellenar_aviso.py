@@ -12,7 +12,7 @@ from bs4 import BeautifulSoup
 import filtros
 import ia
 from red import Bloqueo, ErrorFuente, NoEncontrada, USER_AGENT_HTTP, parece_bloqueo, pedir
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 
 LIMITE_HTML = 1_500_000
 MINIMO_TEXTO = 300          # menos que esto: la página llegó vacía y el contenido lo pinta JavaScript
@@ -112,10 +112,27 @@ def texto_visible(html: str) -> str:
 MODALIDADES_DB = ("Remoto", "Híbrido", "Presencial")
 
 
+def _jk_indeed(url: str):
+    """El identificador del aviso de Indeed (parámetro jk o vjk), o None si la URL no es de Indeed."""
+    partes = urlsplit(url)
+    if "indeed." not in partes.netloc:
+        return None
+    valores = parse_qs(partes.query)
+    return (valores.get("jk") or valores.get("vjk") or [None])[0]
+
+
 def desde_base(con, url: str):
     """Si la oferta ya está en tu base (la trajo la búsqueda), sus datos guardados. No visita ningún sitio:
-    sirve para Indeed, que no permite leer sus avisos. None si la URL no está guardada."""
+    sirve para Indeed, que no permite leer sus avisos. None si la URL no está guardada.
+    En Indeed se busca también por el identificador (jk), así un link con otros parámetros igual se reconoce."""
     fila = con.execute("SELECT titulo, empresa, ubicacion, modalidad, sueldo FROM ofertas WHERE url = ?", (url,)).fetchone()
+    jk = _jk_indeed(url)
+    if fila is None and jk:
+        for cand in con.execute("SELECT titulo, empresa, ubicacion, modalidad, sueldo, url FROM ofertas "
+                                "WHERE url LIKE '%indeed.%' AND url LIKE ?", (f"%jk={jk}%",)).fetchall():
+            if _jk_indeed(cand[5]) == jk:               # el LIKE puede acertar de más: se compara el valor exacto
+                fila = cand[:5]
+                break
     if fila is None:
         return None
     titulo, empresa, ubicacion, modalidad, sueldo = (fila[k] or "" for k in range(5))
