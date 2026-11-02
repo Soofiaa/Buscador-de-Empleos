@@ -55,6 +55,17 @@ def test_sin_jobposting_la_ia_lee_la_pagina_que_se_pidio(monkeypatch):
     assert r["empresa"] == "Acme" and "Santiago" in visto["texto"]
 
 
+def test_si_la_ia_no_encuentra_cargo_ni_empresa_es_error(monkeypatch):
+    monkeypatch.setattr(rellenar_aviso, "pedir", lambda u, c, r: "<body>" + "<p>texto suficiente</p>" * 40 + "</body>")
+    monkeypatch.setattr(rellenar_aviso.ia, "extraer_aviso",
+                        lambda t: {"titulo": "", "empresa": "", "ubicacion": "", "modalidad": "", "sueldo": ""})
+    try:
+        rellenar_aviso.desde_url("https://x.cl/1", None, None)
+    except ErrorFuente:
+        return
+    raise AssertionError("una respuesta vacía no puede pasar como éxito")
+
+
 def test_si_la_ia_falla_el_error_llega_al_usuario(monkeypatch):
     monkeypatch.setattr(rellenar_aviso, "pedir", lambda url, c, r: "<body>texto</body>")
     monkeypatch.setattr(rellenar_aviso.ia, "extraer_aviso", lambda t: {"error": "sin API Key"})

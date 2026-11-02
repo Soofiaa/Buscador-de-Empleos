@@ -161,6 +161,8 @@ def desde_url(url: str, cliente, robots) -> dict:
     datos = ia.extraer_aviso(texto)
     if "error" in datos:
         raise ErrorFuente(datos["error"])
+    if not datos.get("titulo") and not datos.get("empresa"):      # la IA no encontró nada: no es un éxito
+        raise ErrorFuente("no encontré cargo ni empresa en la página; complétalo a mano")
     return datos
 
 
